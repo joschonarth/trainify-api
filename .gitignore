@@ -1,3 +1,4 @@
+# Dependencies
 node_modules
 
 # Environment variables
@@ -5,3 +6,6 @@ node_modules
 
 # Database
 dev.db
+
+# Tests
+coverage
