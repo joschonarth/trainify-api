@@ -10,7 +10,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "test:ui": "vitest --ui"
+    "test:ui": "vitest --ui",
+    "seed": "node prisma/seed.js"
   },
   "keywords": [],
   "author": "João Otávio Schonarth",
