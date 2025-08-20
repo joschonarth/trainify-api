@@ -5,11 +5,11 @@ import { ExercisesRepository } from '@/repositories/exercises.repository'
 interface CreateExerciseUseCaseRequest {
   userId: string
   name: string
-  category?: string | undefined
-  type?: string | undefined
-  sets?: number | undefined
-  reps?: number | undefined
-  weight?: number | undefined
+  category: string | null
+  type: string | null
+  sets: number | null
+  reps: number | null
+  weight: number | null
 }
 
 interface CreateExerciseUseCaseResponse {
@@ -30,12 +30,12 @@ export class CreateExerciseUseCase {
   }: CreateExerciseUseCaseRequest): Promise<CreateExerciseUseCaseResponse> {
     const exercise = await this.exercisesRepository.create({
       name,
-      category: category ?? null,
-      type: type ?? null,
+      category,
+      type,
       isCustom: true,
-      sets: sets ?? null,
-      reps: reps ?? null,
-      weight: weight ?? null,
+      sets,
+      reps,
+      weight,
       createdAt: new Date(),
       user: { connect: { id: userId } },
     })
