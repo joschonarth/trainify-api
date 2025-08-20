@@ -9,11 +9,11 @@ export async function createExercise(
 ) {
   const createExerciseBodySchema = z.object({
     name: z.string(),
-    category: z.string().optional(),
-    type: z.string().optional(),
-    sets: z.number().optional(),
-    reps: z.number().optional(),
-    weight: z.number().optional(),
+    category: z.string().nullable(),
+    type: z.string().nullable(),
+    sets: z.number().nullable(),
+    reps: z.number().nullable(),
+    weight: z.number().nullable(),
   })
 
   const { name, category, type, sets, reps, weight } =
