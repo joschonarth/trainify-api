@@ -23,11 +23,11 @@ export class GetExerciseDetailsUseCase {
     const exercise = await this.exercisesRepository.findById(exerciseId)
 
     if (!exercise) {
-      throw new ResourceNotFoundError()
+      throw new ResourceNotFoundError('Exercise not found.')
     }
 
     if (exercise.isCustom && exercise.userId !== userId) {
-      throw new NotAllowedError()
+      throw new NotAllowedError('You do not have access to this exercise.')
     }
 
     return { exercise }

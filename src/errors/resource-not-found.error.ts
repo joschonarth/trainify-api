@@ -1,5 +1,6 @@
 export class ResourceNotFoundError extends Error {
-  constructor() {
-    super('Resource not found.')
+  constructor(message = 'Resource not found.') {
+    super(message)
+    this.name = 'ResourceNotFoundError'
   }
 }
