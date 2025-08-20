@@ -9,6 +9,12 @@ export class PrismaExercisesRepository implements ExercisesRepository {
     return prisma.exercise.create({ data })
   }
 
+  async findById(id: string): Promise<Exercise | null> {
+    return prisma.exercise.findUnique({
+      where: { id },
+    })
+  }
+
   async findAllGlobals(
     query: string,
     category: string,
