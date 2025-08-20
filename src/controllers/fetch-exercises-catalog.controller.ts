@@ -1,4 +1,5 @@
 import { FastifyReply, FastifyRequest } from 'fastify'
+import z from 'zod'
 
 import { makeFetchExercisesCatalogUseCase } from '@/use-cases/factories/make-fetch-exercises-catalog-use-case'
 
@@ -6,9 +7,19 @@ export async function fetchExercisesCatalog(
   request: FastifyRequest,
   reply: FastifyReply,
 ) {
+  const fetchExercisesCatalogSchema = z.object({
+    query: z.string().optional().default(''),
+    page: z.coerce.number().min(1).default(1),
+  })
+
+  const { query, page } = fetchExercisesCatalogSchema.parse(request.query)
+
   const fetchExercisesCatalogUseCase = makeFetchExercisesCatalogUseCase()
 
-  const { exercises } = await fetchExercisesCatalogUseCase.execute()
+  const { exercises } = await fetchExercisesCatalogUseCase.execute({
+    query,
+    page,
+  })
 
   return reply.status(200).send({ exercises })
 }
