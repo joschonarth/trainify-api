@@ -4,6 +4,7 @@ import { ExercisesRepository } from '@/repositories/exercises.repository'
 
 interface FetchExercisesCatalogUseCaseRequest {
   query: string
+  category: string
   page: number
 }
 
@@ -16,9 +17,14 @@ export class FetchExercisesCatalogUseCase {
 
   async execute({
     query,
+    category,
     page,
   }: FetchExercisesCatalogUseCaseRequest): Promise<FetchExercisesCatalogUseCaseResponse> {
-    const exercises = await this.exercisesRepository.findAllGlobals(query, page)
+    const exercises = await this.exercisesRepository.findAllGlobals(
+      query,
+      category,
+      page,
+    )
 
     return { exercises }
   }

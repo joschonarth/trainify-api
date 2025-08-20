@@ -9,18 +9,32 @@ export class PrismaExercisesRepository implements ExercisesRepository {
     return prisma.exercise.create({ data })
   }
 
-  async findAllGlobals(query: string, page: number): Promise<Exercise[]> {
+  async findAllGlobals(
+    query: string,
+    category: string,
+    page: number = 1,
+  ): Promise<Exercise[]> {
     const ITEMS_PER_PAGE = 10
 
     const exercises = await prisma.exercise.findMany({
       where: {
         isCustom: false,
-        name: {
-          contains: query,
-        },
+        ...(query && {
+          name: {
+            contains: query,
+            // TODO: add mode: 'insensitive' when migrating DB
+          },
+        }),
+        ...(category && {
+          category: {
+            equals: category,
+            // TODO: add mode: 'insensitive' when migrating DB
+          },
+        }),
       },
       take: ITEMS_PER_PAGE,
       skip: (page - 1) * ITEMS_PER_PAGE,
+      orderBy: { name: 'asc' },
     })
 
     return exercises

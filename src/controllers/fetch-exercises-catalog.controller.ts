@@ -9,15 +9,19 @@ export async function fetchExercisesCatalog(
 ) {
   const fetchExercisesCatalogSchema = z.object({
     query: z.string().optional().default(''),
+    category: z.string().optional().default(''),
     page: z.coerce.number().min(1).default(1),
   })
 
-  const { query, page } = fetchExercisesCatalogSchema.parse(request.query)
+  const { query, category, page } = fetchExercisesCatalogSchema.parse(
+    request.query,
+  )
 
   const fetchExercisesCatalogUseCase = makeFetchExercisesCatalogUseCase()
 
   const { exercises } = await fetchExercisesCatalogUseCase.execute({
     query,
+    category,
     page,
   })
 
