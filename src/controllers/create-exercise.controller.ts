@@ -3,7 +3,7 @@ import { z } from 'zod'
 
 import { makeCreateExerciseUseCase } from '@/use-cases/factories/make-create-exercise-use-case'
 
-export async function createExercise(
+export async function createExerciseController(
   request: FastifyRequest,
   reply: FastifyReply,
 ) {

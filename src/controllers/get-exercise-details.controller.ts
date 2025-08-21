@@ -5,7 +5,7 @@ import { NotAllowedError } from '@/errors/not-allowed.error'
 import { ResourceNotFoundError } from '@/errors/resource-not-found.error'
 import { makeGetExerciseDetailsUseCase } from '@/use-cases/factories/make-get-exercise-details-use-case'
 
-export async function getExerciseDetails(
+export async function getExerciseDetailsController(
   request: FastifyRequest,
   reply: FastifyReply,
 ) {

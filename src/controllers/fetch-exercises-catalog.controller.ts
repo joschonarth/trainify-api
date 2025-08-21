@@ -3,7 +3,7 @@ import z from 'zod'
 
 import { makeFetchExercisesCatalogUseCase } from '@/use-cases/factories/make-fetch-exercises-catalog-use-case'
 
-export async function fetchExercisesCatalog(
+export async function fetchExercisesCatalogController(
   request: FastifyRequest,
   reply: FastifyReply,
 ) {
