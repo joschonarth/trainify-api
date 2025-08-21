@@ -1,5 +1,6 @@
 import { FastifyInstance } from 'fastify'
 
+import { addExerciseFromCatalog } from '@/controllers/add-exercise-from-catalog.controller'
 import { createExercise } from '@/controllers/create-exercise.controller'
 import { fetchExercisesCatalog } from '@/controllers/fetch-exercises-catalog.controller'
 import { getExerciseDetails } from '@/controllers/get-exercise-details.controller'
@@ -11,4 +12,9 @@ export async function exercisesRoutes(app: FastifyInstance) {
   app.post('/exercises/my', createExercise)
   app.get('/exercises/:id', getExerciseDetails)
   app.get('/exercises/catalog', fetchExercisesCatalog)
+  app.post(
+    '/exercises/catalog/:id/add',
+    { onRequest: [verifyJwt] },
+    addExerciseFromCatalog,
+  )
 }
