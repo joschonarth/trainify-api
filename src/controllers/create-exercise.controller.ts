@@ -1,6 +1,7 @@
 import { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
+import { ResourceAlreadyExistsError } from '@/errors/resource-already-exists.error'
 import { makeCreateExerciseUseCase } from '@/use-cases/factories/make-create-exercise-use-case'
 
 export async function createExerciseController(
@@ -16,22 +17,28 @@ export async function createExerciseController(
     weight: z.number().nullable(),
   })
 
-  const { name, category, type, sets, reps, weight } =
-    createExerciseBodySchema.parse(request.body)
+  try {
+    const { name, category, type, sets, reps, weight } =
+      createExerciseBodySchema.parse(request.body)
 
-  const userId = request.user.sub
+    const userId = request.user.sub
 
-  const createExerciseUseCase = makeCreateExerciseUseCase()
+    const createExerciseUseCase = makeCreateExerciseUseCase()
 
-  const { exercise } = await createExerciseUseCase.execute({
-    userId,
-    name,
-    category,
-    type,
-    sets,
-    reps,
-    weight,
-  })
+    const { exercise, myExercise } = await createExerciseUseCase.execute({
+      userId,
+      name,
+      category,
+      type,
+      sets,
+      reps,
+      weight,
+    })
 
-  return reply.status(201).send({ exercise })
+    return reply.status(201).send({ exercise, myExercise })
+  } catch (error) {
+    if (error instanceof ResourceAlreadyExistsError) {
+      return reply.status(409).send({ message: error.message })
+    }
+  }
 }

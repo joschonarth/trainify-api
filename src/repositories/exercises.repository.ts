@@ -8,4 +8,5 @@ export interface ExercisesRepository {
     category: string,
     page: number,
   ): Promise<Exercise[]>
+  findByNameAndUser(name: string, userId: string): Promise<Exercise | null>
 }

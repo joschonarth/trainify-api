@@ -1,10 +1,15 @@
 import { PrismaExercisesRepository } from '@/repositories/prisma/prisma-exercises.repository'
+import { PrismaMyExercisesRepository } from '@/repositories/prisma/prisma-my-exercises.repository'
 
 import { CreateExerciseUseCase } from '../create-exercise'
 
 export function makeCreateExerciseUseCase() {
   const exercisesRepository = new PrismaExercisesRepository()
-  const useCase = new CreateExerciseUseCase(exercisesRepository)
+  const myExercisesRepository = new PrismaMyExercisesRepository()
+  const useCase = new CreateExerciseUseCase(
+    exercisesRepository,
+    myExercisesRepository,
+  )
 
   return useCase
 }

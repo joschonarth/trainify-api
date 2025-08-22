@@ -45,4 +45,17 @@ export class PrismaExercisesRepository implements ExercisesRepository {
 
     return exercises
   }
+
+  async findByNameAndUser(
+    name: string,
+    userId: string,
+  ): Promise<Exercise | null> {
+    return prisma.exercise.findFirst({
+      where: {
+        name,
+        userId,
+        isCustom: true,
+      },
+    })
+  }
 }
