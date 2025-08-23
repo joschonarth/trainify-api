@@ -1,6 +1,7 @@
 import { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
+import { ResourceAlreadyExistsError } from '@/errors/resource-already-exists.error'
 import { ResourceNotFoundError } from '@/errors/resource-not-found.error'
 import { makeAddExerciseFromCatalog } from '@/use-cases/factories/make-add-exercise-from-catalog-use-case'
 
@@ -26,6 +27,10 @@ export async function addExerciseFromCatalogController(
   } catch (error) {
     if (error instanceof ResourceNotFoundError) {
       return reply.status(404).send({ message: error.message })
+    }
+
+    if (error instanceof ResourceAlreadyExistsError) {
+      return reply.status(409).send({ message: error.message })
     }
 
     throw error
