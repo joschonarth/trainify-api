@@ -6,4 +6,5 @@ export interface MyExercisesRepository {
     userId: string,
     exerciseId: string,
   ): Promise<MyExercise | null>
+  findAllByUser(userId: string): Promise<MyExercise[]>
 }
