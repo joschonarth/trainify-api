@@ -1,6 +1,6 @@
 import { PrismaExercisesRepository } from '@/repositories/prisma/prisma-exercises.repository'
 
-import { GetExerciseDetailsUseCase } from '../get-exercise-details'
+import { GetExerciseDetailsUseCase } from '../get-exercise-details.use-case'
 
 export function makeGetExerciseDetailsUseCase() {
   const exercisesRepository = new PrismaExercisesRepository()
