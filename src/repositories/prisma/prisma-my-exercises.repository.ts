@@ -31,4 +31,11 @@ export class PrismaMyExercisesRepository implements MyExercisesRepository {
 
     return myExercise
   }
+
+  async findAllByUser(userId: string): Promise<MyExercise[]> {
+    return prisma.myExercise.findMany({
+      where: { userId },
+      include: { exercise: true },
+    })
+  }
 }
