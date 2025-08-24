@@ -38,4 +38,17 @@ export class PrismaMyExercisesRepository implements MyExercisesRepository {
       include: { exercise: true },
     })
   }
+
+  async findById(id: string): Promise<MyExercise | null> {
+    return prisma.myExercise.findUnique({
+      where: { id },
+      include: { exercise: true },
+    })
+  }
+
+  async deleteById(id: string): Promise<void> {
+    await prisma.myExercise.delete({
+      where: { id },
+    })
+  }
 }

@@ -6,6 +6,7 @@ import { deleteCustomExerciseController } from '@/controllers/delete-custom-exer
 import { fetchExercisesCatalogController } from '@/controllers/fetch-exercises-catalog.controller'
 import { fetchMyExercisesController } from '@/controllers/fetch-my-exercises.controller'
 import { getExerciseDetailsController } from '@/controllers/get-exercise-details.controller'
+import { removeCatalogExerciseController } from '@/controllers/remove-catalog-exercise.controller'
 import { updateExerciseController } from '@/controllers/update-exercise.controller'
 import { verifyJwt } from '@/middlewares/verify-jwt'
 
@@ -14,13 +15,17 @@ export async function exercisesRoutes(app: FastifyInstance) {
 
   app.get('/exercises/:id', getExerciseDetailsController)
   app.get('/exercises/my', fetchMyExercisesController)
-  app.post('/exercises/my', createExerciseController)
-  app.put('/exercises/my/:id', updateExerciseController)
-  app.delete('/exercises/my/custom/:exerciseId', deleteCustomExerciseController)
   app.get('/exercises/catalog', fetchExercisesCatalogController)
+
+  app.post('/exercises/my', createExerciseController)
   app.post(
     '/exercises/catalog/:id/add',
     { onRequest: [verifyJwt] },
     addExerciseFromCatalogController,
   )
+
+  app.put('/exercises/my/:id', updateExerciseController)
+
+  app.delete('/exercises/my/custom/:exerciseId', deleteCustomExerciseController)
+  app.delete('/exercises/my/catalog/:id', removeCatalogExerciseController)
 }
