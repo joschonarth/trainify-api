@@ -14,6 +14,13 @@ interface ExerciseDTO {
   userId: string | null
 }
 
+interface FetchMyExercisesUseCaseRequest {
+  userId: string
+  query: string
+  category: string
+  page: number
+}
+
 interface FetchMyExercisesUseCaseResponse {
   myExercises: ExerciseDTO[]
 }
@@ -21,8 +28,18 @@ interface FetchMyExercisesUseCaseResponse {
 export class FetchMyExercisesUseCase {
   constructor(private myExercisesRepository: MyExercisesRepository) {}
 
-  async execute(userId: string): Promise<FetchMyExercisesUseCaseResponse> {
-    const myExercises = await this.myExercisesRepository.findAllByUser(userId)
+  async execute({
+    userId,
+    query,
+    category,
+    page,
+  }: FetchMyExercisesUseCaseRequest): Promise<FetchMyExercisesUseCaseResponse> {
+    const myExercises = await this.myExercisesRepository.findAllByUser(
+      userId,
+      query,
+      category,
+      page,
+    )
 
     const exercises = myExercises.map(({ id: myExerciseId, exercise }) => ({
       myExerciseId,

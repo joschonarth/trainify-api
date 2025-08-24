@@ -34,11 +34,41 @@ export class PrismaMyExercisesRepository implements MyExercisesRepository {
 
   async findAllByUser(
     userId: string,
+    query?: string,
+    category?: string,
+    page: number = 1,
   ): Promise<(MyExercise & { exercise: Exercise })[]> {
-    return prisma.myExercise.findMany({
-      where: { userId },
+    const ITEMS_PER_PAGE = 10
+
+    const myExercises = await prisma.myExercise.findMany({
+      where: {
+        userId,
+        exercise: {
+          ...(query && {
+            name: {
+              contains: query,
+              // TODO: add mode: 'insensitive' when migrating DB
+            },
+          }),
+          ...(category && {
+            category: {
+              equals: category,
+              // TODO: add mode: 'insensitive' when migrating DB
+            },
+          }),
+        },
+      },
       include: { exercise: true },
+      take: ITEMS_PER_PAGE,
+      skip: (page - 1) * ITEMS_PER_PAGE,
+      orderBy: {
+        exercise: {
+          name: 'asc',
+        },
+      },
     })
+
+    return myExercises
   }
 
   async findById(id: string): Promise<MyExercise | null> {
