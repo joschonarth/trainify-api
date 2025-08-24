@@ -58,4 +58,30 @@ export class PrismaExercisesRepository implements ExercisesRepository {
       },
     })
   }
+
+  async update(
+    exerciseId: string,
+    data: {
+      name?: string
+      category?: string | null
+      type?: string | null
+      sets?: number | null
+      reps?: number | null
+      weight?: number | null
+    },
+  ): Promise<Exercise> {
+    const prismaData: Prisma.ExerciseUpdateInput = {}
+
+    if (data.name !== undefined) prismaData.name = data.name
+    if (data.category !== undefined) prismaData.category = data.category
+    if (data.type !== undefined) prismaData.type = data.type
+    if (data.sets !== undefined) prismaData.sets = data.sets
+    if (data.reps !== undefined) prismaData.reps = data.reps
+    if (data.weight !== undefined) prismaData.weight = data.weight
+
+    return prisma.exercise.update({
+      where: { id: exerciseId },
+      data: prismaData,
+    })
+  }
 }
