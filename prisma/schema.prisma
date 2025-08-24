@@ -8,13 +8,14 @@ datasource db {
 }
 
 model User {
-  id         String       @id @default(uuid())
-  name       String
-  email      String       @unique
-  password   String
-  createdAt  DateTime     @default(now()) @map("created_at")
-  Exercise   Exercise[]
-  myExercise MyExercise[]
+  id          String        @id @default(uuid())
+  name        String
+  email       String        @unique
+  password    String
+  createdAt   DateTime      @default(now()) @map("created_at")
+  Exercise    Exercise[]
+  myExercise  MyExercise[]
+  ExerciseLog ExerciseLog[]
 
   @@map("users")
 }
@@ -30,9 +31,10 @@ model Exercise {
   isCustom  Boolean  @default(false) @map("is_custom")
   createdAt DateTime @default(now()) @map("created_at")
 
-  userId     String?      @map("user_id")
-  user       User?        @relation(fields: [userId], references: [id])
-  myExercise MyExercise[]
+  userId      String?       @map("user_id")
+  user        User?         @relation(fields: [userId], references: [id])
+  myExercise  MyExercise[]
+  ExerciseLog ExerciseLog[]
 
   @@map("exercises")
 }
@@ -49,4 +51,22 @@ model MyExercise {
 
   @@unique([userId, exerciseId])
   @@map("my_exercises")
+}
+
+model ExerciseLog {
+  id          String   @id @default(cuid())
+  sets        Int
+  reps        Int
+  weight      Float?
+  date        DateTime @default(now())
+  description String?
+
+  userId     String
+  exerciseId String
+  workoutId  String?
+
+  user     User     @relation(fields: [userId], references: [id])
+  exercise Exercise @relation(fields: [exerciseId], references: [id])
+
+  @@map("exercise_logs")
 }
