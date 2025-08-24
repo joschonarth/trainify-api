@@ -1,4 +1,4 @@
-import { MyExercise } from '@prisma/client'
+import { Exercise, MyExercise } from '@prisma/client'
 
 import { prisma } from '@/lib/prisma'
 
@@ -32,7 +32,9 @@ export class PrismaMyExercisesRepository implements MyExercisesRepository {
     return myExercise
   }
 
-  async findAllByUser(userId: string): Promise<MyExercise[]> {
+  async findAllByUser(
+    userId: string,
+  ): Promise<(MyExercise & { exercise: Exercise })[]> {
     return prisma.myExercise.findMany({
       where: { userId },
       include: { exercise: true },

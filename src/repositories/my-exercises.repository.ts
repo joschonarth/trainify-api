@@ -1,4 +1,4 @@
-import { MyExercise } from '@prisma/client'
+import { Exercise, MyExercise } from '@prisma/client'
 
 export interface MyExercisesRepository {
   addExercise(userId: string, exerciseId: string): Promise<MyExercise>
@@ -6,7 +6,9 @@ export interface MyExercisesRepository {
     userId: string,
     exerciseId: string,
   ): Promise<MyExercise | null>
-  findAllByUser(userId: string): Promise<MyExercise[]>
+  findAllByUser(
+    userId: string,
+  ): Promise<(MyExercise & { exercise: Exercise })[]>
   findById(id: string): Promise<MyExercise | null>
   deleteById(id: string): Promise<void>
 }
