@@ -20,4 +20,5 @@ export interface ExercisesRepository {
       weight?: number | null
     }>,
   ): Promise<Exercise>
+  delete(exerciseId: string): Promise<void>
 }
