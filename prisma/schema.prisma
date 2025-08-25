@@ -63,7 +63,7 @@ model ExerciseLog {
 
   userId     String
   exerciseId String
-  workoutId  String?
+  // workoutId  String?
 
   user     User     @relation(fields: [userId], references: [id])
   exercise Exercise @relation(fields: [exerciseId], references: [id])
