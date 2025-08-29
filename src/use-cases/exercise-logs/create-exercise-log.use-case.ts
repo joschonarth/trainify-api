@@ -1,5 +1,7 @@
 import { ExerciseLog } from '@prisma/client'
+import dayjs from 'dayjs'
 
+import { ResourceAlreadyExistsError } from '@/errors/resource-already-exists.error'
 import { ExerciseLogsRepository } from '@/repositories/exercise-logs.repository'
 
 interface CreateExerciseLogUseCaseRequest {
@@ -9,10 +11,11 @@ interface CreateExerciseLogUseCaseRequest {
   reps: number
   weight?: number | null
   description?: string | null
+  date?: Date | null
 }
 
 interface CreateExerciseLogUseCaseResponse {
-  log: ExerciseLog
+  exerciseLog: ExerciseLog
 }
 
 export class CreateExerciseLogUseCase {
@@ -25,8 +28,26 @@ export class CreateExerciseLogUseCase {
     reps,
     weight,
     description,
+    date = new Date(),
   }: CreateExerciseLogUseCaseRequest): Promise<CreateExerciseLogUseCaseResponse> {
-    const log = await this.exerciseLogsRepository.create({
+    const startOfDay = dayjs(date).startOf('day').toDate()
+    const endOfDay = dayjs(date).endOf('day').toDate()
+
+    const existingLog =
+      await this.exerciseLogsRepository.findByUserAndExerciseBetweenDates(
+        userId,
+        exerciseId,
+        startOfDay,
+        endOfDay,
+      )
+
+    if (existingLog) {
+      throw new ResourceAlreadyExistsError(
+        'Exercise log for this exercise already exists today.',
+      )
+    }
+
+    const exerciseLog = await this.exerciseLogsRepository.create({
       sets,
       reps,
       weight: weight ?? null,
@@ -36,6 +57,6 @@ export class CreateExerciseLogUseCase {
       exercise: { connect: { id: exerciseId } },
     })
 
-    return { log }
+    return { exerciseLog }
   }
 }
