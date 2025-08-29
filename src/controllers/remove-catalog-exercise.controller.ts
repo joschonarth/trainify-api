@@ -2,7 +2,7 @@ import { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
 import { ResourceNotFoundError } from '@/errors/resource-not-found.error'
-import { makeRemoveCatalogExerciseUseCase } from '@/use-cases/factories/make-remove-catalog-exercise-use-case'
+import { makeRemoveCatalogExerciseUseCase } from '@/use-cases/exercises/factories/make-remove-catalog-exercise-use-case'
 
 export async function removeCatalogExerciseController(
   request: FastifyRequest,

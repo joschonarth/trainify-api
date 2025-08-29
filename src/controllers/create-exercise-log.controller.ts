@@ -1,7 +1,7 @@
 import { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
-import { makeCreateExerciseLogUseCase } from '@/use-cases/factories/make-create-exercise-log-use-case'
+import { makeCreateExerciseLogUseCase } from '@/use-cases/exercise-logs/factories/make-create-exercise-log-use-case'
 
 export async function createExerciseLogController(
   request: FastifyRequest,

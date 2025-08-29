@@ -2,7 +2,7 @@ import { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
 import { ResourceAlreadyExistsError } from '@/errors/resource-already-exists.error'
-import { makeCreateExerciseUseCase } from '@/use-cases/factories/make-create-exercise-use-case'
+import { makeCreateExerciseUseCase } from '@/use-cases/exercises/factories/make-create-exercise-use-case'
 
 export async function createExerciseController(
   request: FastifyRequest,

@@ -3,7 +3,7 @@ import { z } from 'zod'
 
 import { NotAllowedError } from '@/errors/not-allowed.error'
 import { ResourceNotFoundError } from '@/errors/resource-not-found.error'
-import { makeGetExerciseDetailsUseCase } from '@/use-cases/factories/make-get-exercise-details-use-case'
+import { makeGetExerciseDetailsUseCase } from '@/use-cases/exercises/factories/make-get-exercise-details-use-case'
 
 export async function getExerciseDetailsController(
   request: FastifyRequest,

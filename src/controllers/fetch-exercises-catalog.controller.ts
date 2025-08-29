@@ -1,7 +1,7 @@
 import { FastifyReply, FastifyRequest } from 'fastify'
 import z from 'zod'
 
-import { makeFetchExercisesCatalogUseCase } from '@/use-cases/factories/make-fetch-exercises-catalog-use-case'
+import { makeFetchExercisesCatalogUseCase } from '@/use-cases/exercises/factories/make-fetch-exercises-catalog-use-case'
 
 export async function fetchExercisesCatalogController(
   request: FastifyRequest,

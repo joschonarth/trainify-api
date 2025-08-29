@@ -1,7 +1,7 @@
 import { FastifyReply, FastifyRequest } from 'fastify'
 import z from 'zod'
 
-import { makeFetchMyExercisesUseCase } from '@/use-cases/factories/make-fetch-my-exercises-use-case'
+import { makeFetchMyExercisesUseCase } from '@/use-cases/exercises/factories/make-fetch-my-exercises-use-case'
 
 export async function fetchMyExercisesController(
   request: FastifyRequest,

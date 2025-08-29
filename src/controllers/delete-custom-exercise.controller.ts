@@ -3,7 +3,7 @@ import { z } from 'zod'
 
 import { NotAllowedError } from '@/errors/not-allowed.error'
 import { ResourceNotFoundError } from '@/errors/resource-not-found.error'
-import { makeDeleteCustomExerciseUseCase } from '@/use-cases/factories/make-delete-custom-exercise-use-case'
+import { makeDeleteCustomExerciseUseCase } from '@/use-cases/exercises/factories/make-delete-custom-exercise-use-case'
 
 export async function deleteCustomExerciseController(
   request: FastifyRequest,

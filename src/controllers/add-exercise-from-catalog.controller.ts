@@ -3,7 +3,7 @@ import { z } from 'zod'
 
 import { ResourceAlreadyExistsError } from '@/errors/resource-already-exists.error'
 import { ResourceNotFoundError } from '@/errors/resource-not-found.error'
-import { makeAddExerciseFromCatalog } from '@/use-cases/factories/make-add-exercise-from-catalog-use-case'
+import { makeAddExerciseFromCatalog } from '@/use-cases/exercises/factories/make-add-exercise-from-catalog-use-case'
 
 export async function addExerciseFromCatalogController(
   request: FastifyRequest,
