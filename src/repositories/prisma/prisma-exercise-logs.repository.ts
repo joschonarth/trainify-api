@@ -9,6 +9,34 @@ export class PrismaExerciseLogsRepository implements ExerciseLogsRepository {
     return prisma.exerciseLog.create({ data })
   }
 
+  async findAllByUser(userId: string): Promise<
+    (ExerciseLog & {
+      exercise: {
+        id: string
+        name: string
+        category: string | null
+        type: string | null
+      }
+    })[]
+  > {
+    return prisma.exerciseLog.findMany({
+      where: { userId },
+      include: {
+        exercise: {
+          select: {
+            id: true,
+            name: true,
+            category: true,
+            type: true,
+          },
+        },
+      },
+      orderBy: {
+        date: 'desc',
+      },
+    })
+  }
+
   async findByUserAndExerciseBetweenDates(
     userId: string,
     exerciseId: string,
