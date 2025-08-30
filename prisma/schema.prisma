@@ -13,9 +13,10 @@ model User {
   email       String        @unique
   password    String
   createdAt   DateTime      @default(now()) @map("created_at")
-  Exercise    Exercise[]
+  exercise    Exercise[]
   myExercise  MyExercise[]
-  ExerciseLog ExerciseLog[]
+  exerciseLog ExerciseLog[]
+  workout     Workout[]
 
   @@map("users")
 }
@@ -31,10 +32,11 @@ model Exercise {
   isCustom  Boolean  @default(false) @map("is_custom")
   createdAt DateTime @default(now()) @map("created_at")
 
-  userId      String?       @map("user_id")
-  user        User?         @relation(fields: [userId], references: [id])
-  myExercise  MyExercise[]
-  ExerciseLog ExerciseLog[]
+  userId          String?           @map("user_id")
+  user            User?             @relation(fields: [userId], references: [id])
+  myExercise      MyExercise[]
+  exerciseLog     ExerciseLog[]
+  workoutExercise WorkoutExercise[]
 
   @@map("exercises")
 }
@@ -63,10 +65,50 @@ model ExerciseLog {
 
   userId     String
   exerciseId String
-  // workoutId  String?
+  workoutId  String?
 
   user     User     @relation(fields: [userId], references: [id])
   exercise Exercise @relation(fields: [exerciseId], references: [id])
+  workout  Workout? @relation(fields: [workoutId], references: [id])
 
   @@map("exercise_logs")
+}
+
+model Workout {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  userId      String
+
+  user        User              @relation(fields: [userId], references: [id])
+  exercises   WorkoutExercise[]
+  schedules   WorkoutSchedule[]
+  exerciseLog ExerciseLog[]
+
+  @@map("workouts")
+}
+
+model WorkoutExercise {
+  id            String @id @default(cuid())
+  workoutId     String
+  exerciseId    String
+  defaultSets   Int?
+  defaultReps   Int?
+  defaultWeight Float?
+
+  workout  Workout  @relation(fields: [workoutId], references: [id])
+  exercise Exercise @relation(fields: [exerciseId], references: [id])
+
+  @@map("workout_exercises")
+}
+
+model WorkoutSchedule {
+  id        String @id @default(cuid())
+  workoutId String
+  dayOfWeek Int
+
+  workout Workout @relation(fields: [workoutId], references: [id])
+
+  @@map("workout_schedule")
 }
