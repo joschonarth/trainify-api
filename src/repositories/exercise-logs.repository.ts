@@ -19,4 +19,16 @@ export interface ExerciseLogsRepository {
     start: Date,
     end: Date,
   ): Promise<ExerciseLog | null>
+
+  findById(id: string): Promise<
+    | (ExerciseLog & {
+        exercise: {
+          id: string
+          name: string
+          category: string | null
+          type: string | null
+        }
+      })
+    | null
+  >
 }

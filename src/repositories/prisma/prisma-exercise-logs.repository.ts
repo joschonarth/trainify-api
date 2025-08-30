@@ -54,4 +54,15 @@ export class PrismaExerciseLogsRepository implements ExerciseLogsRepository {
       },
     })
   }
+
+  async findById(id: string) {
+    return prisma.exerciseLog.findUnique({
+      where: { id },
+      include: {
+        exercise: {
+          select: { id: true, name: true, category: true, type: true },
+        },
+      },
+    })
+  }
 }
