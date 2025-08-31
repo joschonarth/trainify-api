@@ -111,5 +111,6 @@ model WorkoutSchedule {
 
   workout Workout @relation(fields: [workoutId], references: [id])
 
+  @@unique([workoutId, dayOfWeek])
   @@map("workout_schedule")
 }
