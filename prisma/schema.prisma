@@ -38,6 +38,7 @@ model Exercise {
   exerciseLog     ExerciseLog[]
   workoutExercise WorkoutExercise[]
 
+  @@unique([name, userId])
   @@map("exercises")
 }
 

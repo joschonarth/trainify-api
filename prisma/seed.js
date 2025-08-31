@@ -79,11 +79,22 @@ async function main() {
   ]
 
   for (const ex of exercises) {
-    await prisma.exercise.upsert({
-      where: { name: ex.name },
-      update: {},
-      create: ex,
+    const exists = await prisma.exercise.findFirst({
+      where: {
+        name: ex.name,
+        userId: null,
+      },
     })
+
+    if (!exists) {
+      await prisma.exercise.create({
+        data: {
+          ...ex,
+          isCustom: false,
+          userId: null,
+        },
+      })
+    }
   }
 
   console.log('Seed completed ✅')
