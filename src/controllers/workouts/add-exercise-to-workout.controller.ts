@@ -1,6 +1,7 @@
 import { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
+import { ResourceNotFoundError } from '@/errors/resource-not-found.error'
 import { makeAddExerciseToWorkoutUseCase } from '@/use-cases/workouts/factories/make-add-exercise-to-workout-use-case'
 
 export async function addExerciseToWorkoutController(
@@ -18,18 +19,26 @@ export async function addExerciseToWorkoutController(
     workoutId: z.string(),
   })
 
-  const { exerciseId, defaultSets, defaultReps, defaultWeight } =
-    bodySchema.parse(request.body)
-  const { workoutId } = paramsSchema.parse(request.params)
+  try {
+    const { exerciseId, defaultSets, defaultReps, defaultWeight } =
+      bodySchema.parse(request.body)
+    const { workoutId } = paramsSchema.parse(request.params)
 
-  const useCase = makeAddExerciseToWorkoutUseCase()
-  const { workoutExercise } = await useCase.execute({
-    workoutId,
-    exerciseId,
-    defaultSets,
-    defaultReps,
-    defaultWeight,
-  })
+    const useCase = makeAddExerciseToWorkoutUseCase()
+    const { workoutExercise } = await useCase.execute({
+      workoutId,
+      exerciseId,
+      defaultSets,
+      defaultReps,
+      defaultWeight,
+    })
 
-  return reply.status(201).send({ workoutExercise })
+    return reply.status(201).send({ workoutExercise })
+  } catch (error) {
+    if (error instanceof ResourceNotFoundError) {
+      return reply.status(404).send({ message: error.message })
+    }
+
+    throw error
+  }
 }

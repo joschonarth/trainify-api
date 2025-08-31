@@ -1,6 +1,9 @@
 import { WorkoutExercise } from '@prisma/client'
 
+import { ResourceNotFoundError } from '@/errors/resource-not-found.error'
+import { ExercisesRepository } from '@/repositories/exercises.repository'
 import { WorkoutExercisesRepository } from '@/repositories/workout-exercises.repository'
+import { WorkoutsRepository } from '@/repositories/workouts.repository'
 
 interface AddExerciseToWorkoutUseCaseRequest {
   workoutId: string
@@ -15,7 +18,11 @@ interface AddExerciseToWorkoutUseCaseResponse {
 }
 
 export class AddExerciseToWorkoutUseCase {
-  constructor(private workoutExercisesRepository: WorkoutExercisesRepository) {}
+  constructor(
+    private workoutExercisesRepository: WorkoutExercisesRepository,
+    private workoutsRepository: WorkoutsRepository,
+    private exercisesRepository: ExercisesRepository,
+  ) {}
 
   async execute({
     workoutId,
@@ -24,6 +31,16 @@ export class AddExerciseToWorkoutUseCase {
     defaultReps,
     defaultWeight,
   }: AddExerciseToWorkoutUseCaseRequest): Promise<AddExerciseToWorkoutUseCaseResponse> {
+    const workout = await this.workoutsRepository.findById(workoutId)
+    if (!workout) {
+      throw new ResourceNotFoundError('Workout not found.')
+    }
+
+    const exercise = await this.exercisesRepository.findById(exerciseId)
+    if (!exercise) {
+      throw new ResourceNotFoundError('Exercise not found.')
+    }
+
     const workoutExercise =
       await this.workoutExercisesRepository.addExerciseToWorkout({
         workout: { connect: { id: workoutId } },

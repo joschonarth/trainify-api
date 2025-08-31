@@ -9,6 +9,12 @@ export class PrismaWorkoutsRepository implements WorkoutsRepository {
     return prisma.workout.create({ data })
   }
 
+  async findById(id: string): Promise<Workout | null> {
+    return prisma.workout.findUnique({
+      where: { id },
+    })
+  }
+
   async findAllByUser(userId: string) {
     return prisma.workout.findMany({
       where: { userId },

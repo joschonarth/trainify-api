@@ -2,6 +2,7 @@ import { Prisma, Workout } from '@prisma/client'
 
 export interface WorkoutsRepository {
   create(data: Prisma.WorkoutCreateInput): Promise<Workout>
+  findById(id: string): Promise<Workout | null>
   findAllByUser(userId: string): Promise<
     (Workout & {
       exercises: {
