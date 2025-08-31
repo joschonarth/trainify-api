@@ -1,11 +1,16 @@
-import { Exercise, Prisma } from '@prisma/client'
+import {
+  Exercise,
+  ExerciseCategory,
+  ExerciseType,
+  Prisma,
+} from '@prisma/client'
 
 export interface ExercisesRepository {
   create(data: Prisma.ExerciseCreateInput): Promise<Exercise>
   findById(id: string): Promise<Exercise | null>
   findAllGlobals(
     query: string,
-    category: string,
+    category: ExerciseCategory | null,
     page: number,
   ): Promise<Exercise[]>
   findByNameAndUser(name: string, userId: string): Promise<Exercise | null>
@@ -13,8 +18,8 @@ export interface ExercisesRepository {
     exerciseId: string,
     data: Partial<{
       name?: string
-      category?: string | null
-      type?: string | null
+      category?: ExerciseCategory | null
+      type?: ExerciseType | null
       sets?: number | null
       reps?: number | null
       weight?: number | null

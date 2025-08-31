@@ -1,3 +1,5 @@
+import { ExerciseCategory, ExerciseType } from '@prisma/client'
+
 import { ExerciseLogsRepository } from '@/repositories/exercise-logs.repository'
 
 interface FetchExerciseLogsUseCaseResponse {
@@ -5,8 +7,8 @@ interface FetchExerciseLogsUseCaseResponse {
     logId: string
     exerciseId: string
     name: string
-    category: string | null
-    type: string | null
+    category: ExerciseCategory | null
+    type: ExerciseType | null
     sets: number
     reps: number
     weight: number | null

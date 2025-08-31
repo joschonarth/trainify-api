@@ -1,10 +1,10 @@
-import { Exercise } from '@prisma/client'
+import { Exercise, ExerciseCategory } from '@prisma/client'
 
 import { ExercisesRepository } from '@/repositories/exercises.repository'
 
 interface FetchExercisesCatalogUseCaseRequest {
   query: string
-  category: string
+  category: ExerciseCategory
   page: number
 }
 

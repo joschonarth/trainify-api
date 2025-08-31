@@ -1,4 +1,9 @@
-import { Exercise, Prisma } from '@prisma/client'
+import {
+  Exercise,
+  ExerciseCategory,
+  ExerciseType,
+  Prisma,
+} from '@prisma/client'
 
 import { prisma } from '@/lib/prisma'
 
@@ -17,12 +22,12 @@ export class PrismaExercisesRepository implements ExercisesRepository {
 
   async findAllGlobals(
     query: string,
-    category: string,
+    category: ExerciseCategory | null,
     page: number = 1,
   ): Promise<Exercise[]> {
     const ITEMS_PER_PAGE = 10
 
-    const exercises = await prisma.exercise.findMany({
+    return prisma.exercise.findMany({
       where: {
         isCustom: false,
         ...(query && {
@@ -32,18 +37,14 @@ export class PrismaExercisesRepository implements ExercisesRepository {
           },
         }),
         ...(category && {
-          category: {
-            equals: category,
-            // TODO: add mode: 'insensitive' when migrating DB
-          },
+          category,
+          // TODO: add mode: 'insensitive' when migrating DB
         }),
       },
       take: ITEMS_PER_PAGE,
       skip: (page - 1) * ITEMS_PER_PAGE,
       orderBy: { name: 'asc' },
     })
-
-    return exercises
   }
 
   async findByNameAndUser(
@@ -63,8 +64,8 @@ export class PrismaExercisesRepository implements ExercisesRepository {
     exerciseId: string,
     data: {
       name?: string
-      category?: string | null
-      type?: string | null
+      category?: ExerciseCategory | null
+      type?: ExerciseType | null
       sets?: number | null
       reps?: number | null
       weight?: number | null

@@ -35,7 +35,7 @@ export class PrismaMyExercisesRepository implements MyExercisesRepository {
   async findAllByUser(
     userId: string,
     query?: string,
-    category?: string,
+    category?: Exercise['category'],
     page: number = 1,
   ): Promise<(MyExercise & { exercise: Exercise })[]> {
     const ITEMS_PER_PAGE = 10

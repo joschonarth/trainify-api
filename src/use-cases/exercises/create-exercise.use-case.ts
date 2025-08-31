@@ -1,4 +1,9 @@
-import { Exercise, MyExercise } from '@prisma/client'
+import {
+  Exercise,
+  ExerciseCategory,
+  ExerciseType,
+  MyExercise,
+} from '@prisma/client'
 
 import { ResourceAlreadyExistsError } from '@/errors/resource-already-exists.error'
 import { ExercisesRepository } from '@/repositories/exercises.repository'
@@ -7,8 +12,8 @@ import { MyExercisesRepository } from '@/repositories/my-exercises.repository'
 interface CreateExerciseUseCaseRequest {
   userId: string
   name: string
-  category: string | null
-  type: string | null
+  category: ExerciseCategory | null
+  type: ExerciseType | null
   sets: number | null
   reps: number | null
   weight: number | null

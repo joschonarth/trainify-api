@@ -1,11 +1,13 @@
+import { ExerciseCategory, ExerciseType } from '@prisma/client'
+
 import { MyExercisesRepository } from '@/repositories/my-exercises.repository'
 
 interface ExerciseDTO {
   myExerciseId: string
   exerciseId: string
   name: string
-  category: string | null
-  type: string | null
+  category: ExerciseCategory | null
+  type: ExerciseType | null
   sets: number | null
   reps: number | null
   weight: number | null
@@ -17,7 +19,7 @@ interface ExerciseDTO {
 interface FetchMyExercisesUseCaseRequest {
   userId: string
   query: string
-  category: string
+  category: ExerciseCategory
   page: number
 }
 

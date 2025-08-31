@@ -1,4 +1,4 @@
-import { ExerciseLog, Prisma } from '@prisma/client'
+import { Exercise, ExerciseLog, Prisma } from '@prisma/client'
 
 import { prisma } from '@/lib/prisma'
 
@@ -14,8 +14,8 @@ export class PrismaExerciseLogsRepository implements ExerciseLogsRepository {
       exercise: {
         id: string
         name: string
-        category: string | null
-        type: string | null
+        category: Exercise['category'] | null
+        type: Exercise['type'] | null
       }
     })[]
   > {
@@ -55,12 +55,27 @@ export class PrismaExerciseLogsRepository implements ExerciseLogsRepository {
     })
   }
 
-  async findById(id: string) {
+  async findById(id: string): Promise<
+    | (ExerciseLog & {
+        exercise: {
+          id: string
+          name: string
+          category: Exercise['category'] | null
+          type: Exercise['type'] | null
+        }
+      })
+    | null
+  > {
     return prisma.exerciseLog.findUnique({
       where: { id },
       include: {
         exercise: {
-          select: { id: true, name: true, category: true, type: true },
+          select: {
+            id: true,
+            name: true,
+            category: true,
+            type: true,
+          },
         },
       },
     })

@@ -1,3 +1,4 @@
+import { ExerciseCategory } from '@prisma/client'
 import { FastifyReply, FastifyRequest } from 'fastify'
 import z from 'zod'
 
@@ -9,7 +10,7 @@ export async function fetchExercisesCatalogController(
 ) {
   const fetchExercisesCatalogSchema = z.object({
     query: z.string().optional().default(''),
-    category: z.string().optional().default(''),
+    category: z.enum(ExerciseCategory).optional().default(undefined),
     page: z.coerce.number().min(1).default(1),
   })
 

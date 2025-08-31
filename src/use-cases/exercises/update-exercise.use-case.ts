@@ -1,4 +1,4 @@
-import { Exercise } from '@prisma/client'
+import { Exercise, ExerciseCategory, ExerciseType } from '@prisma/client'
 
 import { NotAllowedError } from '@/errors/not-allowed.error'
 import { ResourceNotFoundError } from '@/errors/resource-not-found.error'
@@ -8,8 +8,8 @@ interface UpdateExerciseUseCaseRequest {
   userId: string
   exerciseId: string
   name?: string | null | undefined
-  category?: string | null | undefined
-  type?: string | null | undefined
+  category?: ExerciseCategory | null | undefined
+  type?: ExerciseType | null | undefined
   sets?: number | null | undefined
   reps?: number | null | undefined
   weight?: number | null | undefined

@@ -1,3 +1,4 @@
+import { ExerciseCategory, ExerciseType } from '@prisma/client'
 import { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
@@ -15,8 +16,8 @@ export async function updateExerciseController(
 
   const bodySchema = z.object({
     name: z.string().optional(),
-    category: z.string().nullable().optional(),
-    type: z.string().nullable().optional(),
+    category: z.enum(ExerciseCategory).nullable(),
+    type: z.enum(ExerciseType).nullable(),
     sets: z.number().nullable().optional(),
     reps: z.number().nullable().optional(),
     weight: z.number().nullable().optional(),

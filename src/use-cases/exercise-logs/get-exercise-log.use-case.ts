@@ -1,4 +1,4 @@
-import { ExerciseLog } from '@prisma/client'
+import { ExerciseCategory, ExerciseLog } from '@prisma/client'
 
 import { ResourceNotFoundError } from '@/errors/resource-not-found.error'
 import { ExerciseLogsRepository } from '@/repositories/exercise-logs.repository'
@@ -12,7 +12,7 @@ interface GetExerciseLogUseCaseResponse {
     exercise: {
       id: string
       name: string
-      category: string | null
+      category: ExerciseCategory | null
       type: string | null
     }
   }

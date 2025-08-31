@@ -1,4 +1,4 @@
-import { ExerciseLog, Prisma } from '@prisma/client'
+import { Exercise, ExerciseLog, Prisma } from '@prisma/client'
 
 export interface ExerciseLogsRepository {
   create(data: Prisma.ExerciseLogCreateInput): Promise<ExerciseLog>
@@ -8,11 +8,12 @@ export interface ExerciseLogsRepository {
       exercise: {
         id: string
         name: string
-        category: string | null
-        type: string | null
+        category: Exercise['category'] | null
+        type: Exercise['type'] | null
       }
     })[]
   >
+
   findByUserAndExerciseBetweenDates(
     userId: string,
     exerciseId: string,
@@ -25,8 +26,8 @@ export interface ExerciseLogsRepository {
         exercise: {
           id: string
           name: string
-          category: string | null
-          type: string | null
+          category: Exercise['category'] | null
+          type: Exercise['type'] | null
         }
       })
     | null

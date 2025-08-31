@@ -9,7 +9,7 @@ export interface MyExercisesRepository {
   findAllByUser(
     userId: string,
     query: string,
-    category: string,
+    category: Exercise['category'] | null,
     page: number,
   ): Promise<(MyExercise & { exercise: Exercise })[]>
   findById(id: string): Promise<MyExercise | null>
