@@ -7,6 +7,22 @@ datasource db {
   url      = "file:./dev.db"
 }
 
+enum ExerciseCategory {
+  CHEST
+  BACK
+  LEGS
+  SHOULDERS
+  ARMS
+  FULL_BODY
+}
+
+enum ExerciseType {
+  STRENGTH
+  CARDIO
+  MOBILITY
+  FLEXIBILITY
+}
+
 model User {
   id          String        @id @default(uuid())
   name        String
@@ -22,15 +38,15 @@ model User {
 }
 
 model Exercise {
-  id        String   @id @default(cuid())
+  id        String            @id @default(cuid())
   name      String
-  category  String?
-  type      String?
+  category  ExerciseCategory?
+  type      ExerciseType?
   sets      Int?
   reps      Int?
   weight    Float?
-  isCustom  Boolean  @default(false) @map("is_custom")
-  createdAt DateTime @default(now()) @map("created_at")
+  isCustom  Boolean           @default(false) @map("is_custom")
+  createdAt DateTime          @default(now()) @map("created_at")
 
   userId          String?           @map("user_id")
   user            User?             @relation(fields: [userId], references: [id])
