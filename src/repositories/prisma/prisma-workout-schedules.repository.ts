@@ -1,4 +1,4 @@
-import { Prisma } from '@prisma/client'
+import { Prisma, WorkoutSchedule } from '@prisma/client'
 
 import { prisma } from '@/lib/prisma'
 
@@ -12,6 +12,12 @@ export class PrismaWorkoutSchedulesRepository
   ): Promise<void> {
     await prisma.workoutSchedule.createMany({
       data,
+    })
+  }
+
+  async findDaysByWorkout(workoutId: string): Promise<WorkoutSchedule[]> {
+    return prisma.workoutSchedule.findMany({
+      where: { workoutId },
     })
   }
 }

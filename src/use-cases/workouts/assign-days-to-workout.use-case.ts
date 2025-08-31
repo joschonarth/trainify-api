@@ -1,3 +1,4 @@
+import { ResourceAlreadyExistsError } from '@/errors/resource-already-exists.error'
 import { WorkoutSchedulesRepository } from '@/repositories/workout-schedules.repository'
 
 interface AssignDaysToWorkoutUseCaseRequest {
@@ -16,12 +17,24 @@ export class AssignDaysToWorkoutUseCase {
     workoutId,
     daysOfWeek,
   }: AssignDaysToWorkoutUseCaseRequest): Promise<AssignDaysToWorkoutUseCaseResponse> {
-    const data = daysOfWeek.map((day) => ({
+    const existingDays =
+      await this.workoutSchedulesRepository.findDaysByWorkout(workoutId)
+    const existingDaysSet = new Set(existingDays.map((d) => d.dayOfWeek))
+
+    const duplicateDays = daysOfWeek.filter((day) => existingDaysSet.has(day))
+
+    if (duplicateDays.length > 0) {
+      throw new ResourceAlreadyExistsError(
+        `Workout already has schedule for day(s): ${duplicateDays.join(', ')}`,
+      )
+    }
+
+    const newDays = daysOfWeek.map((day) => ({
       workoutId,
       dayOfWeek: day,
     }))
 
-    await this.workoutSchedulesRepository.assignDaysToWorkout(data)
+    await this.workoutSchedulesRepository.assignDaysToWorkout(newDays)
 
     return { days: daysOfWeek }
   }
