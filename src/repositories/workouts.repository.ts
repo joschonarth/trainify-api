@@ -1,8 +1,27 @@
 import { Prisma, Workout } from '@prisma/client'
 
+export type WorkoutWithDetails = Prisma.WorkoutGetPayload<{
+  include: {
+    exercises: {
+      include: {
+        exercise: {
+          select: {
+            id: true
+            name: true
+            category: true
+            type: true
+          }
+        }
+      }
+    }
+    schedules: true
+  }
+}>
+
 export interface WorkoutsRepository {
   create(data: Prisma.WorkoutCreateInput): Promise<Workout>
   findById(id: string): Promise<Workout | null>
+  findByIdWithDetails(id: string): Promise<WorkoutWithDetails | null>
   findAllByUser(userId: string): Promise<
     (Workout & {
       exercises: {
