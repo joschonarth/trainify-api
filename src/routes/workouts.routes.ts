@@ -4,12 +4,14 @@ import { addExerciseToWorkoutController } from '@/controllers/workouts/add-exerc
 import { assignDaysToWorkoutController } from '@/controllers/workouts/assign-days-to-workout.controller'
 import { createWorkoutController } from '@/controllers/workouts/create-workout.controller'
 import { fetchUserWorkoutsController } from '@/controllers/workouts/fetch-user-workouts.controller'
+import { getWorkoutDetailsController } from '@/controllers/workouts/get-workout-details'
 import { verifyJwt } from '@/middlewares/verify-jwt'
 
 export async function workoutsRoutes(app: FastifyInstance) {
   app.addHook('onRequest', verifyJwt)
 
   app.get('/workouts', fetchUserWorkoutsController)
+  app.get('/workouts/:workoutId', getWorkoutDetailsController)
 
   app.post('/workouts', createWorkoutController)
   app.post('/workouts/:workoutId/exercises', addExerciseToWorkoutController)

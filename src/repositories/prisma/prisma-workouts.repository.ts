@@ -2,7 +2,7 @@ import { Prisma, Workout } from '@prisma/client'
 
 import { prisma } from '@/lib/prisma'
 
-import { WorkoutsRepository } from '../workouts.repository'
+import { WorkoutsRepository, WorkoutWithDetails } from '../workouts.repository'
 
 export class PrismaWorkoutsRepository implements WorkoutsRepository {
   async create(data: Prisma.WorkoutCreateInput): Promise<Workout> {
@@ -12,6 +12,27 @@ export class PrismaWorkoutsRepository implements WorkoutsRepository {
   async findById(id: string): Promise<Workout | null> {
     return prisma.workout.findUnique({
       where: { id },
+    })
+  }
+
+  async findByIdWithDetails(id: string): Promise<WorkoutWithDetails | null> {
+    return prisma.workout.findUnique({
+      where: { id },
+      include: {
+        exercises: {
+          include: {
+            exercise: {
+              select: {
+                id: true,
+                name: true,
+                category: true,
+                type: true,
+              },
+            },
+          },
+        },
+        schedules: true,
+      },
     })
   }
 
