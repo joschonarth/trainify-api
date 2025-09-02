@@ -47,4 +47,5 @@ export interface WorkoutsRepository {
     id: string,
     data: { name?: string; description?: string | null },
   ): Promise<Workout>
+  delete(id: string): Promise<void>
 }

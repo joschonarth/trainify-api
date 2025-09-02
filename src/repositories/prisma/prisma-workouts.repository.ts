@@ -59,4 +59,10 @@ export class PrismaWorkoutsRepository implements WorkoutsRepository {
       data,
     })
   }
+
+  async delete(id: string): Promise<void> {
+    await prisma.workout.delete({
+      where: { id },
+    })
+  }
 }
