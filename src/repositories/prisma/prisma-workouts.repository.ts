@@ -49,4 +49,14 @@ export class PrismaWorkoutsRepository implements WorkoutsRepository {
       },
     })
   }
+
+  async update(
+    id: string,
+    data: { name?: string; description?: string | null },
+  ): Promise<Workout> {
+    return prisma.workout.update({
+      where: { id },
+      data,
+    })
+  }
 }

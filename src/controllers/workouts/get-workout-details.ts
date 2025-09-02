@@ -1,15 +1,19 @@
 import { FastifyReply, FastifyRequest } from 'fastify'
+import z from 'zod'
 
 import { ResourceNotFoundError } from '@/errors/resource-not-found.error'
-import { makeGetWorkoutDetailsUseCase } from '@/use-cases/workouts/factories/make-get-workout-use-case'
+import { makeGetWorkoutDetailsUseCase } from '@/use-cases/workouts/factories/make-get-workout-details-use-case'
 
 export async function getWorkoutDetailsController(
   request: FastifyRequest,
   reply: FastifyReply,
 ) {
-  try {
-    const { workoutId } = request.params as { workoutId: string }
+  const paramsSchema = z.object({
+    workoutId: z.string(),
+  })
 
+  try {
+    const { workoutId } = paramsSchema.parse(request.params)
     const getWorkoutDetailsUseCase = makeGetWorkoutDetailsUseCase()
 
     const { workout } = await getWorkoutDetailsUseCase.execute({
