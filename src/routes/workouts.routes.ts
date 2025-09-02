@@ -3,6 +3,7 @@ import { FastifyInstance } from 'fastify'
 import { addExerciseToWorkoutController } from '@/controllers/workouts/add-exercise-to-workout.controller'
 import { assignDaysToWorkoutController } from '@/controllers/workouts/assign-days-to-workout.controller'
 import { createWorkoutController } from '@/controllers/workouts/create-workout.controller'
+import { deleteWorkoutController } from '@/controllers/workouts/delete-workout.controller'
 import { fetchUserWorkoutsController } from '@/controllers/workouts/fetch-user-workouts.controller'
 import { getWorkoutDetailsController } from '@/controllers/workouts/get-workout-details'
 import { updateWorkoutController } from '@/controllers/workouts/update-workout.controller'
@@ -19,4 +20,6 @@ export async function workoutsRoutes(app: FastifyInstance) {
   app.post('/workouts/:workoutId/schedules', assignDaysToWorkoutController)
 
   app.put('/workouts/:workoutId', updateWorkoutController)
+
+  app.delete('/workouts/:workoutId', deleteWorkoutController)
 }
