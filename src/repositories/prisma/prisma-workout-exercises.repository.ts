@@ -32,4 +32,10 @@ export class PrismaWorkoutExercisesRepository
       data,
     })
   }
+
+  async removeExerciseFromWorkout(id: string): Promise<void> {
+    await prisma.workoutExercise.delete({
+      where: { id },
+    })
+  }
 }
