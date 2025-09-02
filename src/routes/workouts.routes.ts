@@ -7,6 +7,7 @@ import { deleteWorkoutController } from '@/controllers/workouts/delete-workout.c
 import { fetchUserWorkoutsController } from '@/controllers/workouts/fetch-user-workouts.controller'
 import { getWorkoutDetailsController } from '@/controllers/workouts/get-workout-details'
 import { updateWorkoutController } from '@/controllers/workouts/update-workout.controller'
+import { updateWorkoutExerciseDefaultsController } from '@/controllers/workouts/update-workout-exercise-defaults.controller'
 import { verifyJwt } from '@/middlewares/verify-jwt'
 
 export async function workoutsRoutes(app: FastifyInstance) {
@@ -20,6 +21,10 @@ export async function workoutsRoutes(app: FastifyInstance) {
   app.post('/workouts/:workoutId/schedules', assignDaysToWorkoutController)
 
   app.put('/workouts/:workoutId', updateWorkoutController)
+  app.put(
+    '/workouts/:workoutExerciseId/exercise',
+    updateWorkoutExerciseDefaultsController,
+  )
 
   app.delete('/workouts/:workoutId', deleteWorkoutController)
 }
