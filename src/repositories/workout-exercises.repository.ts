@@ -13,4 +13,5 @@ export interface WorkoutExercisesRepository {
       defaultWeight: number | null
     },
   ): Promise<WorkoutExercise>
+  removeExerciseFromWorkout(id: string): Promise<void>
 }
