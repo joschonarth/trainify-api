@@ -43,4 +43,8 @@ export interface WorkoutsRepository {
       }[]
     })[]
   >
+  update(
+    id: string,
+    data: { name?: string; description?: string | null },
+  ): Promise<Workout>
 }
