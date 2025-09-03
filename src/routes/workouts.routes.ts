@@ -23,7 +23,7 @@ export async function workoutsRoutes(app: FastifyInstance) {
 
   app.put('/workouts/:workoutId', updateWorkoutController)
   app.put(
-    '/workouts/:workoutExerciseId/exercise',
+    '/workouts/:workoutId/exercises/:exerciseId',
     updateWorkoutExerciseDefaultsController,
   )
 

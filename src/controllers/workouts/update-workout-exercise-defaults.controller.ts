@@ -15,18 +15,20 @@ export async function updateWorkoutExerciseDefaultsController(
   })
 
   const paramsSchema = z.object({
-    workoutExerciseId: z.string(),
+    workoutId: z.string(),
+    exerciseId: z.string(),
   })
 
   try {
     const { defaultSets, defaultReps, defaultWeight } = bodySchema.parse(
       request.body,
     )
-    const { workoutExerciseId } = paramsSchema.parse(request.params)
+    const { workoutId, exerciseId } = paramsSchema.parse(request.params)
 
     const useCase = makeUpdateWorkoutExerciseDefaultsUseCase()
     const { workoutExercise } = await useCase.execute({
-      workoutExerciseId,
+      workoutId,
+      exerciseId,
       defaultSets,
       defaultReps,
       defaultWeight,

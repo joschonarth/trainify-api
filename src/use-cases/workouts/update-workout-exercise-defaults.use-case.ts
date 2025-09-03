@@ -2,9 +2,11 @@ import { WorkoutExercise } from '@prisma/client'
 
 import { ResourceNotFoundError } from '@/errors/resource-not-found.error'
 import { WorkoutExercisesRepository } from '@/repositories/workout-exercises.repository'
+import { WorkoutsRepository } from '@/repositories/workouts.repository'
 
 interface UpdateWorkoutExerciseDefaultsUseCaseRequest {
-  workoutExerciseId: string
+  workoutId: string
+  exerciseId: string
   defaultSets: number | null
   defaultReps: number | null
   defaultWeight: number | null
@@ -15,27 +17,40 @@ interface UpdateWorkoutExerciseDefaultsUseCaseResponse {
 }
 
 export class UpdateWorkoutExerciseDefaultsUseCase {
-  constructor(private workoutExercisesRepository: WorkoutExercisesRepository) {}
+  constructor(
+    private workoutsRepository: WorkoutsRepository,
+    private workoutExercisesRepository: WorkoutExercisesRepository,
+  ) {}
 
   async execute({
-    workoutExerciseId,
+    workoutId,
+    exerciseId,
     defaultSets,
     defaultReps,
     defaultWeight,
   }: UpdateWorkoutExerciseDefaultsUseCaseRequest): Promise<UpdateWorkoutExerciseDefaultsUseCaseResponse> {
-    const existing =
-      await this.workoutExercisesRepository.findById?.(workoutExerciseId)
-    if (!existing) {
-      throw new ResourceNotFoundError('Exercise not found.')
+    const workout = await this.workoutsRepository.findById(workoutId)
+    if (!workout) {
+      throw new ResourceNotFoundError('Workout not found.')
     }
 
     const workoutExercise =
-      await this.workoutExercisesRepository.updateDefaults(workoutExerciseId, {
+      await this.workoutExercisesRepository.findByWorkoutAndExercise(
+        workoutId,
+        exerciseId,
+      )
+
+    if (!workoutExercise) {
+      throw new ResourceNotFoundError('Exercise not found in this workout.')
+    }
+
+    const updatedWorkoutExercise =
+      await this.workoutExercisesRepository.updateDefaults(workoutExercise.id, {
         defaultSets,
         defaultReps,
         defaultWeight,
       })
 
-    return { workoutExercise }
+    return { workoutExercise: updatedWorkoutExercise }
   }
 }
