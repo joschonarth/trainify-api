@@ -5,4 +5,6 @@ export interface WorkoutSchedulesRepository {
     data: Prisma.WorkoutScheduleCreateManyInput[],
   ): Promise<void>
   findDaysByWorkout(workoutId: string): Promise<WorkoutSchedule[]>
+  findById(id: string): Promise<WorkoutSchedule | null>
+  updateDay(id: string, dayOfWeek: number): Promise<WorkoutSchedule>
 }
