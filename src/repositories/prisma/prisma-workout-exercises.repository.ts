@@ -33,6 +33,17 @@ export class PrismaWorkoutExercisesRepository
     })
   }
 
+  async findByWorkoutAndExercise(
+    workoutId: string,
+    exerciseId: string,
+  ): Promise<WorkoutExercise | null> {
+    return prisma.workoutExercise.findUnique({
+      where: {
+        workoutId_exerciseId: { workoutId, exerciseId },
+      },
+    })
+  }
+
   async removeExerciseFromWorkout(id: string): Promise<void> {
     await prisma.workoutExercise.delete({
       where: { id },

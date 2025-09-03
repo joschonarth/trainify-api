@@ -9,14 +9,15 @@ export async function removeExerciseFromWorkoutController(
   reply: FastifyReply,
 ) {
   const paramsSchema = z.object({
-    workoutExerciseId: z.string(),
+    workoutId: z.string(),
+    exerciseId: z.string(),
   })
 
   try {
-    const { workoutExerciseId } = paramsSchema.parse(request.params)
+    const { workoutId, exerciseId } = paramsSchema.parse(request.params)
 
     const useCase = makeRemoveExerciseFromWorkoutUseCase()
-    await useCase.execute({ workoutExerciseId })
+    await useCase.execute({ workoutId, exerciseId })
 
     return reply.status(204).send()
   } catch (error) {

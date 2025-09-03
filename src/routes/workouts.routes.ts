@@ -29,7 +29,7 @@ export async function workoutsRoutes(app: FastifyInstance) {
 
   app.delete('/workouts/:workoutId', deleteWorkoutController)
   app.delete(
-    '/workouts/:workoutExerciseId/exercise',
+    '/workouts/:workoutId/exercises/:exerciseId',
     removeExerciseFromWorkoutController,
   )
 }

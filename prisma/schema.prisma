@@ -117,6 +117,7 @@ model WorkoutExercise {
   workout  Workout  @relation(fields: [workoutId], references: [id])
   exercise Exercise @relation(fields: [exerciseId], references: [id])
 
+  @@unique([workoutId, exerciseId])
   @@map("workout_exercises")
 }
 
