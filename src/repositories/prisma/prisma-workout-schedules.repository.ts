@@ -20,4 +20,15 @@ export class PrismaWorkoutSchedulesRepository
       where: { workoutId },
     })
   }
+
+  async findById(id: string): Promise<WorkoutSchedule | null> {
+    return prisma.workoutSchedule.findUnique({ where: { id } })
+  }
+
+  async updateDay(id: string, dayOfWeek: number): Promise<WorkoutSchedule> {
+    return prisma.workoutSchedule.update({
+      where: { id },
+      data: { dayOfWeek },
+    })
+  }
 }
