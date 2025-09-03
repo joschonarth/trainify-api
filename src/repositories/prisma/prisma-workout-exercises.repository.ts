@@ -13,6 +13,33 @@ export class PrismaWorkoutExercisesRepository
     })
   }
 
+  async findByWorkout(workoutId: string) {
+    return prisma.workoutExercise.findMany({
+      where: { workoutId },
+      include: {
+        exercise: {
+          select: {
+            id: true,
+            name: true,
+            category: true,
+            type: true,
+          },
+        },
+      },
+    })
+  }
+
+  async findByWorkoutAndExercise(
+    workoutId: string,
+    exerciseId: string,
+  ): Promise<WorkoutExercise | null> {
+    return prisma.workoutExercise.findUnique({
+      where: {
+        workoutId_exerciseId: { workoutId, exerciseId },
+      },
+    })
+  }
+
   async addExerciseToWorkout(
     data: Prisma.WorkoutExerciseCreateInput,
   ): Promise<WorkoutExercise> {
@@ -30,17 +57,6 @@ export class PrismaWorkoutExercisesRepository
     return prisma.workoutExercise.update({
       where: { id: workoutExerciseId },
       data,
-    })
-  }
-
-  async findByWorkoutAndExercise(
-    workoutId: string,
-    exerciseId: string,
-  ): Promise<WorkoutExercise | null> {
-    return prisma.workoutExercise.findUnique({
-      where: {
-        workoutId_exerciseId: { workoutId, exerciseId },
-      },
     })
   }
 
