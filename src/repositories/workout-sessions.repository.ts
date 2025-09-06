@@ -20,9 +20,11 @@ export interface WorkoutSessionWithWorkout extends WorkoutSession {
 }
 
 export interface WorkoutSessionsRepository {
+  findById(id: string): Promise<WorkoutSession | null>
   findByUserAndDate(userId: string, date: Date): Promise<WorkoutSession | null>
   findByIdWithWorkout(id: string): Promise<WorkoutSessionWithWorkout | null>
   create(
     data: Prisma.WorkoutSessionUncheckedCreateInput,
   ): Promise<WorkoutSession>
+  updateCompleted(id: string, completed: boolean): Promise<WorkoutSession>
 }
