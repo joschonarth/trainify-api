@@ -24,15 +24,16 @@ enum ExerciseType {
 }
 
 model User {
-  id          String        @id @default(uuid())
+  id          String           @id @default(uuid())
   name        String
-  email       String        @unique
+  email       String           @unique
   password    String
-  createdAt   DateTime      @default(now()) @map("created_at")
+  createdAt   DateTime         @default(now()) @map("created_at")
   exercise    Exercise[]
   myExercise  MyExercise[]
   exerciseLog ExerciseLog[]
   workout     Workout[]
+  sessions    WorkoutSession[]
 
   @@map("users")
 }
@@ -80,13 +81,15 @@ model ExerciseLog {
   date        DateTime @default(now())
   description String?
 
-  userId     String
-  exerciseId String
-  workoutId  String?
+  userId           String
+  exerciseId       String
+  workoutId        String?
+  workoutSessionId String?
 
-  user     User     @relation(fields: [userId], references: [id])
-  exercise Exercise @relation(fields: [exerciseId], references: [id])
-  workout  Workout? @relation(fields: [workoutId], references: [id])
+  user           User            @relation(fields: [userId], references: [id])
+  exercise       Exercise        @relation(fields: [exerciseId], references: [id])
+  workout        Workout?        @relation(fields: [workoutId], references: [id])
+  workoutSession WorkoutSession? @relation(fields: [workoutSessionId], references: [id])
 
   @@map("exercise_logs")
 }
@@ -102,6 +105,7 @@ model Workout {
   exercises   WorkoutExercise[]
   schedules   WorkoutSchedule[]
   exerciseLog ExerciseLog[]
+  sessions    WorkoutSession[]
 
   @@map("workouts")
 }
@@ -130,4 +134,19 @@ model WorkoutSchedule {
 
   @@unique([workoutId, dayOfWeek])
   @@map("workout_schedule")
+}
+
+model WorkoutSession {
+  id        String   @id @default(cuid())
+  date      DateTime @default(now())
+  completed Boolean  @default(false)
+
+  userId    String
+  workoutId String
+
+  user    User          @relation(fields: [userId], references: [id])
+  workout Workout       @relation(fields: [workoutId], references: [id])
+  logs    ExerciseLog[]
+
+  @@map("workout_sessions")
 }
