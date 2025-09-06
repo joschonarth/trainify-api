@@ -10,6 +10,17 @@ import {
 export class PrismaWorkoutSessionsRepository
   implements WorkoutSessionsRepository
 {
+  async findById(id: string): Promise<WorkoutSession | null> {
+    // 🔹 novo
+    return prisma.workoutSession.findUnique({
+      where: { id },
+      include: {
+        workout: true,
+        logs: true,
+      },
+    })
+  }
+
   async findByUserAndDate(
     userId: string,
     date: Date,
@@ -59,6 +70,16 @@ export class PrismaWorkoutSessionsRepository
   ): Promise<WorkoutSession> {
     return prisma.workoutSession.create({
       data,
+    })
+  }
+
+  async updateCompleted(
+    id: string,
+    completed: boolean,
+  ): Promise<WorkoutSession> {
+    return prisma.workoutSession.update({
+      where: { id },
+      data: { completed },
     })
   }
 }
