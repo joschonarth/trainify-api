@@ -7,4 +7,5 @@ export interface WorkoutSchedulesRepository {
   findDaysByWorkout(workoutId: string): Promise<WorkoutSchedule[]>
   findById(id: string): Promise<WorkoutSchedule | null>
   updateDay(id: string, dayOfWeek: number): Promise<WorkoutSchedule>
+  delete(id: string): Promise<void>
 }
