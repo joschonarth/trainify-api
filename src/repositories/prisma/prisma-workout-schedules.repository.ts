@@ -2,7 +2,10 @@ import { Prisma, WorkoutSchedule } from '@prisma/client'
 
 import { prisma } from '@/lib/prisma'
 
-import { WorkoutSchedulesRepository } from '../workout-schedules.repository'
+import {
+  WorkoutSchedulesRepository,
+  WorkoutScheduleWithWorkout,
+} from '../workout-schedules.repository'
 
 export class PrismaWorkoutSchedulesRepository
   implements WorkoutSchedulesRepository
@@ -23,6 +26,27 @@ export class PrismaWorkoutSchedulesRepository
 
   async findById(id: string): Promise<WorkoutSchedule | null> {
     return prisma.workoutSchedule.findUnique({ where: { id } })
+  }
+
+  async findByUserAndDay(
+    userId: string,
+    dayOfWeek: number,
+  ): Promise<WorkoutScheduleWithWorkout | null> {
+    return prisma.workoutSchedule.findFirst({
+      where: {
+        dayOfWeek,
+        workout: { userId },
+      },
+      include: {
+        workout: {
+          include: {
+            exercises: {
+              include: { exercise: true },
+            },
+          },
+        },
+      },
+    })
   }
 
   async updateDay(id: string, dayOfWeek: number): Promise<WorkoutSchedule> {
