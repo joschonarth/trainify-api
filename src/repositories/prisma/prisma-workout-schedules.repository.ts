@@ -31,4 +31,10 @@ export class PrismaWorkoutSchedulesRepository
       data: { dayOfWeek },
     })
   }
+
+  async delete(id: string): Promise<void> {
+    await prisma.workoutSchedule.delete({
+      where: { id },
+    })
+  }
 }

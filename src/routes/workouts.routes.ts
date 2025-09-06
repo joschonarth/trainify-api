@@ -9,6 +9,7 @@ import { fetchWorkoutExercisesController } from '@/controllers/workouts/fetch-wo
 import { fetchWorkoutSchedulesController } from '@/controllers/workouts/fetch-workout-schedules.controller'
 import { getWorkoutDetailsController } from '@/controllers/workouts/get-workout-details'
 import { removeExerciseFromWorkoutController } from '@/controllers/workouts/remove-exercise-from-workout.controller'
+import { removeWorkoutScheduleDayController } from '@/controllers/workouts/remove-workout-schedule-day.controller'
 import { updateWorkoutController } from '@/controllers/workouts/update-workout.controller'
 import { updateWorkoutExerciseDefaultsController } from '@/controllers/workouts/update-workout-exercise-defaults.controller'
 import { updateWorkoutScheduleDayController } from '@/controllers/workouts/update-workout-schedule-day.controller'
@@ -40,5 +41,9 @@ export async function workoutsRoutes(app: FastifyInstance) {
   app.delete(
     '/workouts/:workoutId/exercises/:exerciseId',
     removeExerciseFromWorkoutController,
+  )
+  app.delete(
+    '/workouts/:workoutId/schedules/:scheduleId',
+    removeWorkoutScheduleDayController,
   )
 }
