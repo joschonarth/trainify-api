@@ -29,7 +29,6 @@ export type WorkoutSessionWithWorkoutAndLogs = WorkoutSession & {
       defaultSets: number | null
       defaultReps: number | null
       defaultWeight: number | null
-      // o objeto exercise contém o id/nome do exercício
       exercise: {
         id: string
         name: string
@@ -49,7 +48,6 @@ export type WorkoutSessionWithWorkoutAndLogs = WorkoutSession & {
     exerciseId: string
     workoutId: string | null
     workoutSessionId: string | null
-    // se você incluiu relation exercise, esse campo também estará disponível
     exercise?: {
       id: string
       name: string
@@ -62,6 +60,9 @@ export interface WorkoutSessionsRepository {
   findByUserAndDate(userId: string, date: Date): Promise<WorkoutSession | null>
   findByIdWithWorkout(id: string): Promise<WorkoutSessionWithWorkout | null>
   findAllByUser(userId: string): Promise<WorkoutSessionWithWorkoutAndLogs[]>
+  findByIdWithWorkoutAndLogs(
+    id: string,
+  ): Promise<WorkoutSessionWithWorkoutAndLogs | null>
   create(
     data: Prisma.WorkoutSessionUncheckedCreateInput,
   ): Promise<WorkoutSession>
