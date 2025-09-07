@@ -81,6 +81,26 @@ export class PrismaWorkoutSessionsRepository
     }) as unknown as WorkoutSessionWithWorkoutAndLogs[]
   }
 
+  async findByIdWithWorkoutAndLogs(
+    id: string,
+  ): Promise<WorkoutSessionWithWorkoutAndLogs | null> {
+    return prisma.workoutSession.findUnique({
+      where: { id },
+      include: {
+        workout: {
+          include: {
+            exercises: {
+              include: { exercise: true },
+            },
+          },
+        },
+        logs: {
+          include: { exercise: true },
+        },
+      },
+    }) as unknown as WorkoutSessionWithWorkoutAndLogs | null
+  }
+
   async create(
     data: Prisma.WorkoutSessionUncheckedCreateInput,
   ): Promise<WorkoutSession> {
