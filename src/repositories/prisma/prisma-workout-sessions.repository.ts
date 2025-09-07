@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma'
 import {
   WorkoutSessionsRepository,
   WorkoutSessionWithWorkout,
+  WorkoutSessionWithWorkoutAndLogs,
 } from '../workout-sessions.repository'
 
 export class PrismaWorkoutSessionsRepository
@@ -63,6 +64,21 @@ export class PrismaWorkoutSessionsRepository
         },
       },
     }) as unknown as WorkoutSessionWithWorkout | null
+  }
+
+  async findAllByUser(
+    userId: string,
+  ): Promise<WorkoutSessionWithWorkoutAndLogs[]> {
+    return prisma.workoutSession.findMany({
+      where: { userId },
+      include: {
+        workout: {
+          include: { exercises: { include: { exercise: true } } },
+        },
+        logs: { include: { exercise: true } },
+      },
+      orderBy: { date: 'desc' },
+    }) as unknown as WorkoutSessionWithWorkoutAndLogs[]
   }
 
   async create(
