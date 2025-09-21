@@ -1,6 +1,7 @@
 import { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
+import { env } from '@/env'
 import { InvalidCredentialsError } from '@/errors/invalid-credentials.error'
 import { makeAuthenticateUseCase } from '@/use-cases/users/factories/make-authenticate-use-case'
 
@@ -31,6 +32,13 @@ export async function authenticateController(
         },
       },
     )
+
+    reply.setCookie('token', token, {
+      path: '/',
+      httpOnly: true,
+      secure: env.NODE_ENV === 'production',
+      sameSite: 'strict',
+    })
 
     return reply.status(200).send({
       token,
