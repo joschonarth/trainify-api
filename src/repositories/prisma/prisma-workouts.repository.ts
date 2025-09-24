@@ -47,6 +47,9 @@ export class PrismaWorkoutsRepository implements WorkoutsRepository {
         },
         schedules: true,
       },
+      orderBy: {
+        createdAt: 'desc',
+      },
     })
   }
 
