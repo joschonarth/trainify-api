@@ -13,8 +13,8 @@ export async function updateWorkoutController(
   })
 
   const bodySchema = z.object({
-    name: z.string().min(1),
-    description: z.string().nullable(),
+    name: z.string().min(1).optional(),
+    description: z.string().nullable().optional(),
   })
 
   try {
@@ -22,10 +22,17 @@ export async function updateWorkoutController(
     const { name, description } = bodySchema.parse(request.body)
 
     const useCase = makeUpdateWorkoutUseCase()
+
+    const updateData: Partial<{
+      name: string
+      description: string | null
+    }> = {}
+    if (name !== undefined) updateData.name = name
+    if (description !== undefined) updateData.description = description
+
     const { workout } = await useCase.execute({
       workoutId,
-      name,
-      description,
+      ...updateData,
     })
 
     return reply.status(200).send({ workout })
@@ -34,6 +41,6 @@ export async function updateWorkoutController(
       return reply.status(404).send({ message: error.message })
     }
 
-    throw error
+    return reply.status(500).send({ message: 'Internal server error.' })
   }
 }

@@ -5,8 +5,8 @@ import { WorkoutsRepository } from '@/repositories/workouts.repository'
 
 interface UpdateWorkoutUseCaseRequest {
   workoutId: string
-  name: string
-  description: string | null
+  name?: string
+  description?: string | null
 }
 
 interface UpdateWorkoutUseCaseResponse {
@@ -27,8 +27,8 @@ export class UpdateWorkoutUseCase {
     }
 
     const workout = await this.workoutsRepository.update(workoutId, {
-      name,
-      description,
+      name: name ?? workoutExists.name,
+      description: description ?? workoutExists.description,
     })
 
     return { workout }
