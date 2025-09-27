@@ -4,5 +4,7 @@ import { DeleteCustomExerciseUseCase } from '../delete-custom-exercise.use-case'
 
 export function makeDeleteCustomExerciseUseCase() {
   const exercisesRepository = new PrismaExercisesRepository()
-  return new DeleteCustomExerciseUseCase(exercisesRepository)
+  const useCase = new DeleteCustomExerciseUseCase(exercisesRepository)
+
+  return useCase
 }
