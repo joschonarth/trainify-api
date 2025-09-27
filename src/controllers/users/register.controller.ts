@@ -1,6 +1,7 @@
 import { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
+import { PasswordsDoNotMatchError } from '@/errors/passwords-do-not-match.error'
 import { UserAlreadyExistsError } from '@/errors/user-already-exists.error'
 import { makeRegisterUseCase } from '@/use-cases/users/factories/make-register-use-case'
 
@@ -12,9 +13,11 @@ export async function registerController(
     name: z.string(),
     email: z.email(),
     password: z.string().min(6),
+    passwordConfirmation: z.string().min(6),
   })
 
-  const { name, email, password } = registerBodySchema.parse(request.body)
+  const { name, email, password, passwordConfirmation } =
+    registerBodySchema.parse(request.body)
 
   try {
     const registerUseCase = makeRegisterUseCase()
@@ -23,10 +26,17 @@ export async function registerController(
       name,
       email,
       password,
+      passwordConfirmation,
     })
   } catch (error) {
     if (error instanceof UserAlreadyExistsError) {
       return reply.status(409).send({
+        message: error.message,
+      })
+    }
+
+    if (error instanceof PasswordsDoNotMatchError) {
+      return reply.status(400).send({
         message: error.message,
       })
     }
