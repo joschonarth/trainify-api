@@ -11,27 +11,27 @@ export async function updateExerciseController(
   reply: FastifyReply,
 ) {
   const paramsSchema = z.object({
-    id: z.string(),
+    exerciseId: z.string(),
   })
 
   const bodySchema = z.object({
     name: z.string().optional(),
-    category: z.enum(ExerciseCategory).nullable(),
-    type: z.enum(ExerciseType).nullable(),
-    sets: z.number().nullable().optional(),
-    reps: z.number().nullable().optional(),
-    weight: z.number().nullable().optional(),
+    category: z.enum(ExerciseCategory).optional(),
+    type: z.enum(ExerciseType).optional(),
+    sets: z.number().optional(),
+    reps: z.number().optional(),
+    weight: z.number().optional(),
   })
 
   try {
-    const { id } = paramsSchema.parse(request.params)
+    const { exerciseId } = paramsSchema.parse(request.params)
     const data = bodySchema.parse(request.body)
 
     const updateExerciseUseCase = makeUpdateExerciseUseCase()
 
     const { exercise } = await updateExerciseUseCase.execute({
       userId: request.user.sub,
-      exerciseId: id,
+      exerciseId,
       ...data,
     })
 

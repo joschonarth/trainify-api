@@ -24,7 +24,7 @@ export async function exercisesRoutes(app: FastifyInstance) {
     addExerciseFromCatalogController,
   )
 
-  app.put('/exercises/my/:id', updateExerciseController)
+  app.put('/exercises/:exerciseId', updateExerciseController)
 
   app.delete('/exercises/my/custom/:exerciseId', deleteCustomExerciseController)
   app.delete('/exercises/my/catalog/:id', removeCatalogExerciseController)
