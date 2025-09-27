@@ -86,13 +86,11 @@ export class PrismaExercisesRepository implements ExercisesRepository {
     })
   }
 
-  async delete(exerciseId: string): Promise<void> {
-    await prisma.myExercise.deleteMany({
-      where: { exerciseId },
-    })
-
-    await prisma.exercise.delete({
-      where: { id: exerciseId },
-    })
+  async delete(exerciseId: string) {
+    await prisma.$transaction([
+      prisma.myExercise.deleteMany({ where: { exerciseId } }),
+      prisma.workoutExercise.deleteMany({ where: { exerciseId } }),
+      prisma.exercise.delete({ where: { id: exerciseId } }),
+    ])
   }
 }
