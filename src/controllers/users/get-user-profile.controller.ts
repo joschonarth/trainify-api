@@ -2,7 +2,7 @@ import { FastifyReply, FastifyRequest } from 'fastify'
 
 import { makeGetUserProfileUseCase } from '@/use-cases/users/factories/make-get-user-profile-use-case'
 
-export async function profileController(
+export async function getUserProfileController(
   request: FastifyRequest,
   reply: FastifyReply,
 ) {

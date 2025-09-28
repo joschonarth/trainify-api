@@ -2,8 +2,9 @@ import { FastifyInstance } from 'fastify'
 
 import { authenticateController } from '@/controllers/users/authenticate.controller'
 import { fetchUserSchedulesController } from '@/controllers/users/fetch-user-schedules.controller'
-import { profileController } from '@/controllers/users/profile.controller'
+import { getUserProfileController } from '@/controllers/users/get-user-profile.controller'
 import { registerController } from '@/controllers/users/register.controller'
+import { updateUserProfileController } from '@/controllers/users/update-user-profile.controller'
 import { verifyJwt } from '@/middlewares/verify-jwt'
 
 export async function usersRoutes(app: FastifyInstance) {
@@ -11,7 +12,8 @@ export async function usersRoutes(app: FastifyInstance) {
   app.post('/sessions', authenticateController)
 
   /** Authenticated */
-  app.get('/me', { onRequest: [verifyJwt] }, profileController)
+  app.get('/me', { onRequest: [verifyJwt] }, getUserProfileController)
+  app.put('/me', { onRequest: [verifyJwt] }, updateUserProfileController)
   app.get(
     '/me/schedules',
     { onRequest: [verifyJwt] },
