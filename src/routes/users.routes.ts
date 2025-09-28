@@ -4,6 +4,7 @@ import { authenticateController } from '@/controllers/users/authenticate.control
 import { fetchUserSchedulesController } from '@/controllers/users/fetch-user-schedules.controller'
 import { getUserProfileController } from '@/controllers/users/get-user-profile.controller'
 import { registerController } from '@/controllers/users/register.controller'
+import { signOutController } from '@/controllers/users/sign-out.controller'
 import { updateUserProfileController } from '@/controllers/users/update-user-profile.controller'
 import { verifyJwt } from '@/middlewares/verify-jwt'
 
@@ -19,4 +20,6 @@ export async function usersRoutes(app: FastifyInstance) {
     { onRequest: [verifyJwt] },
     fetchUserSchedulesController,
   )
+
+  app.post('/logout', { onRequest: [verifyJwt] }, signOutController)
 }
