@@ -1,0 +1,49 @@
+import { FastifyReply, FastifyRequest } from 'fastify'
+import { z } from 'zod'
+
+import { InvalidCredentialsError } from '@/errors/invalid-credentials.error'
+import { PasswordsDoNotMatchError } from '@/errors/passwords-do-not-match.error'
+import { ResourceNotFoundError } from '@/errors/resource-not-found.error'
+import { makeChangePasswordUseCase } from '@/use-cases/users/factories/make-change-password-use-case'
+
+export async function changePasswordController(
+  request: FastifyRequest,
+  reply: FastifyReply,
+) {
+  const schema = z.object({
+    currentPassword: z.string().min(6),
+    newPassword: z.string().min(6),
+    passwordConfirmation: z.string().min(6),
+  })
+
+  const { currentPassword, newPassword, passwordConfirmation } = schema.parse(
+    request.body,
+  )
+
+  try {
+    const useCase = makeChangePasswordUseCase()
+
+    await useCase.execute({
+      userId: request.user.sub,
+      currentPassword,
+      newPassword,
+      passwordConfirmation,
+    })
+
+    return reply.status(200).send()
+  } catch (error) {
+    if (error instanceof ResourceNotFoundError) {
+      return reply.status(404).send({ message: error.message })
+    }
+
+    if (error instanceof InvalidCredentialsError) {
+      return reply.status(400).send({ message: error.message })
+    }
+
+    if (error instanceof PasswordsDoNotMatchError) {
+      return reply.status(400).send({ message: error.message })
+    }
+
+    throw error
+  }
+}

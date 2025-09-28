@@ -1,6 +1,7 @@
 import { FastifyInstance } from 'fastify'
 
 import { authenticateController } from '@/controllers/users/authenticate.controller'
+import { changePasswordController } from '@/controllers/users/change-password.controller'
 import { fetchUserSchedulesController } from '@/controllers/users/fetch-user-schedules.controller'
 import { getUserProfileController } from '@/controllers/users/get-user-profile.controller'
 import { registerController } from '@/controllers/users/register.controller'
@@ -22,4 +23,6 @@ export async function usersRoutes(app: FastifyInstance) {
   )
 
   app.post('/logout', { onRequest: [verifyJwt] }, signOutController)
+
+  app.put('/me/password', { onRequest: [verifyJwt] }, changePasswordController)
 }
