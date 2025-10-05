@@ -58,7 +58,7 @@ export class GetDailyWorkoutSessionUseCase {
       userId,
       workoutId: workout.id,
       date: today,
-      completed: false,
+      status: 'PENDING',
     })
 
     const detailedSession =

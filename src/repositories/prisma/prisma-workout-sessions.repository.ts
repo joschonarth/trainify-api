@@ -1,24 +1,18 @@
-import { Prisma, WorkoutSession } from '@prisma/client'
+import { Prisma, WorkoutSession, WorkoutSessionStatus } from '@prisma/client'
 
 import { prisma } from '@/lib/prisma'
 
 import {
   WorkoutSessionsRepository,
   WorkoutSessionWithWorkout,
-  WorkoutSessionWithWorkoutAndLogs,
 } from '../workout-sessions.repository'
 
 export class PrismaWorkoutSessionsRepository
   implements WorkoutSessionsRepository
 {
   async findById(id: string): Promise<WorkoutSession | null> {
-    // 🔹 novo
     return prisma.workoutSession.findUnique({
       where: { id },
-      include: {
-        workout: true,
-        logs: true,
-      },
     })
   }
 
@@ -26,24 +20,18 @@ export class PrismaWorkoutSessionsRepository
     userId: string,
     date: Date,
   ): Promise<WorkoutSession | null> {
+    const startOfDay = new Date(date)
+    startOfDay.setHours(0, 0, 0, 0)
+
+    const endOfDay = new Date(date)
+    endOfDay.setHours(23, 59, 59, 999)
+
     return prisma.workoutSession.findFirst({
       where: {
         userId,
         date: {
-          gte: new Date(date.setHours(0, 0, 0, 0)),
-          lt: new Date(date.setHours(23, 59, 59, 999)),
-        },
-      },
-      include: {
-        workout: {
-          include: {
-            exercises: {
-              include: { exercise: true },
-            },
-          },
-        },
-        logs: {
-          include: { exercise: true },
+          gte: startOfDay,
+          lte: endOfDay,
         },
       },
     })
@@ -56,66 +44,114 @@ export class PrismaWorkoutSessionsRepository
       where: { id },
       include: {
         workout: {
+          include: { exercises: { include: { exercise: true } } },
+        },
+        exerciseSessions: {
           include: {
-            exercises: {
-              include: { exercise: true },
-            },
+            exercise: true,
+            logs: true,
           },
         },
       },
     }) as unknown as WorkoutSessionWithWorkout | null
   }
 
-  async findAllByUser(
-    userId: string,
-  ): Promise<WorkoutSessionWithWorkoutAndLogs[]> {
-    return prisma.workoutSession.findMany({
+  async findAllByUser(userId: string): Promise<WorkoutSessionWithWorkout[]> {
+    const sessions = await prisma.workoutSession.findMany({
       where: { userId },
       include: {
         workout: {
           include: { exercises: { include: { exercise: true } } },
         },
-        logs: { include: { exercise: true } },
+        exerciseSessions: {
+          include: {
+            exercise: true,
+            logs: true,
+          },
+        },
       },
       orderBy: { date: 'desc' },
-    }) as unknown as WorkoutSessionWithWorkoutAndLogs[]
+    })
+
+    return sessions.map((session) => ({
+      ...session,
+      exerciseSessions: session.exerciseSessions.map((ex) => ({
+        id: ex.id,
+        sets: ex.plannedSets ?? 0,
+        reps: ex.plannedReps ?? 0,
+        weight: ex.plannedWeight ?? null,
+        completed: ex.completed,
+        exercise: {
+          id: ex.exercise.id,
+          name: ex.exercise.name,
+          category: ex.exercise.category,
+          type: ex.exercise.type,
+        },
+        logs: ex.logs.map((log) => ({
+          id: log.id,
+          sets: log.sets,
+          reps: log.reps,
+          weight: log.weight ?? null,
+          date: log.date,
+          description: log.description ?? null,
+        })),
+      })),
+    })) as WorkoutSessionWithWorkout[]
   }
 
-  async findByIdWithWorkoutAndLogs(
+  async findByIdWithWorkoutAndExerciseSessions(
     id: string,
-  ): Promise<WorkoutSessionWithWorkoutAndLogs | null> {
+  ): Promise<WorkoutSessionWithWorkout | null> {
     return prisma.workoutSession.findUnique({
       where: { id },
       include: {
         workout: {
+          include: { exercises: { include: { exercise: true } } },
+        },
+        exerciseSessions: {
           include: {
-            exercises: {
-              include: { exercise: true },
-            },
+            exercise: true,
+            logs: true,
           },
         },
-        logs: {
-          include: { exercise: true },
-        },
       },
-    }) as unknown as WorkoutSessionWithWorkoutAndLogs | null
+    }) as unknown as WorkoutSessionWithWorkout | null
   }
 
   async create(
     data: Prisma.WorkoutSessionUncheckedCreateInput,
   ): Promise<WorkoutSession> {
+    const workout = await prisma.workout.findUnique({
+      where: { id: data.workoutId },
+      include: { exercises: true },
+    })
+
+    if (!workout) {
+      throw new Error('Workout not found')
+    }
+
     return prisma.workoutSession.create({
-      data,
+      data: {
+        ...data,
+        exerciseSessions: {
+          create: workout.exercises.map((we) => ({
+            exerciseId: we.exerciseId,
+            plannedSets: we.defaultSets ?? null,
+            plannedReps: we.defaultReps ?? null,
+            plannedWeight: we.defaultWeight ?? null,
+          })),
+        },
+      },
     })
   }
 
-  async updateCompleted(
+  async updateStatus(
     id: string,
-    completed: boolean,
+    status: WorkoutSessionStatus,
   ): Promise<WorkoutSession> {
     return prisma.workoutSession.update({
       where: { id },
-      data: { completed },
+      data: { status },
     })
   }
 }
