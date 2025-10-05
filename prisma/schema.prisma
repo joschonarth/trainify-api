@@ -23,15 +23,23 @@ enum ExerciseType {
   FLEXIBILITY
 }
 
+enum WorkoutSessionStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  SKIPPED
+}
+
 model User {
-  id          String           @id @default(uuid())
-  name        String
-  email       String           @unique
-  password    String
-  age         Int?
-  height      Int?
-  weight      Float?
-  createdAt   DateTime         @default(now()) @map("created_at")
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  age       Int?
+  height    Int?
+  weight    Float?
+  createdAt DateTime @default(now()) @map("created_at")
+
   exercise    Exercise[]
   myExercise  MyExercise[]
   exerciseLog ExerciseLog[]
@@ -57,6 +65,7 @@ model Exercise {
   myExercise      MyExercise[]
   exerciseLog     ExerciseLog[]
   workoutExercise WorkoutExercise[]
+  sessions        ExerciseSession[]
 
   @@unique([name, userId])
   @@map("exercises")
@@ -76,27 +85,6 @@ model MyExercise {
   @@map("my_exercises")
 }
 
-model ExerciseLog {
-  id          String   @id @default(cuid())
-  sets        Int
-  reps        Int
-  weight      Float?
-  date        DateTime @default(now())
-  description String?
-
-  userId           String
-  exerciseId       String
-  workoutId        String?
-  workoutSessionId String?
-
-  user           User            @relation(fields: [userId], references: [id])
-  exercise       Exercise        @relation(fields: [exerciseId], references: [id])
-  workout        Workout?        @relation(fields: [workoutId], references: [id])
-  workoutSession WorkoutSession? @relation(fields: [workoutSessionId], references: [id])
-
-  @@map("exercise_logs")
-}
-
 model Workout {
   id          String   @id @default(cuid())
   name        String
@@ -104,11 +92,10 @@ model Workout {
   createdAt   DateTime @default(now())
   userId      String
 
-  user        User              @relation(fields: [userId], references: [id])
-  exercises   WorkoutExercise[]
-  schedules   WorkoutSchedule[]
-  exerciseLog ExerciseLog[]
-  sessions    WorkoutSession[]
+  user      User              @relation(fields: [userId], references: [id])
+  exercises WorkoutExercise[]
+  schedules WorkoutSchedule[]
+  sessions  WorkoutSession[]
 
   @@map("workouts")
 }
@@ -140,16 +127,54 @@ model WorkoutSchedule {
 }
 
 model WorkoutSession {
-  id        String   @id @default(cuid())
-  date      DateTime @default(now())
-  completed Boolean  @default(false)
+  id     String               @id @default(cuid())
+  date   DateTime             @default(now())
+  status WorkoutSessionStatus @default(PENDING)
 
   userId    String
   workoutId String
 
-  user    User          @relation(fields: [userId], references: [id])
-  workout Workout       @relation(fields: [workoutId], references: [id])
-  logs    ExerciseLog[]
+  user             User              @relation(fields: [userId], references: [id])
+  workout          Workout           @relation(fields: [workoutId], references: [id])
+  exerciseSessions ExerciseSession[]
 
   @@map("workout_sessions")
+}
+
+model ExerciseSession {
+  id        String  @id @default(cuid())
+  completed Boolean @default(false)
+
+  plannedSets   Int?
+  plannedReps   Int?
+  plannedWeight Float?
+
+  workoutSessionId String
+  exerciseId       String
+
+  workoutSession WorkoutSession @relation(fields: [workoutSessionId], references: [id])
+  exercise       Exercise       @relation(fields: [exerciseId], references: [id])
+  logs           ExerciseLog[]
+
+  @@unique([workoutSessionId, exerciseId])
+  @@map("exercise_sessions")
+}
+
+model ExerciseLog {
+  id          String   @id @default(cuid())
+  sets        Int
+  reps        Int
+  weight      Float?
+  date        DateTime @default(now())
+  description String?
+
+  exerciseSessionId String
+  userId            String
+  exerciseId        String
+
+  exerciseSession ExerciseSession @relation(fields: [exerciseSessionId], references: [id])
+  user            User            @relation(fields: [userId], references: [id])
+  exercise        Exercise        @relation(fields: [exerciseId], references: [id])
+
+  @@map("exercise_logs")
 }
