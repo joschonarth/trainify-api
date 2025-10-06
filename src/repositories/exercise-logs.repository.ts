@@ -3,6 +3,8 @@ import { Exercise, ExerciseLog, Prisma } from '@prisma/client'
 export interface ExerciseLogsRepository {
   create(data: Prisma.ExerciseLogCreateInput): Promise<ExerciseLog>
 
+  update(id: string, data: Prisma.ExerciseLogUpdateInput): Promise<ExerciseLog>
+
   findAllByUser(userId: string): Promise<
     (ExerciseLog & {
       exercise: {
@@ -32,4 +34,6 @@ export interface ExerciseLogsRepository {
       })
     | null
   >
+
+  findByExerciseSession(exerciseSessionId: string): Promise<ExerciseLog | null>
 }

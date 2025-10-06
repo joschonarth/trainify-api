@@ -9,6 +9,16 @@ export class PrismaExerciseLogsRepository implements ExerciseLogsRepository {
     return prisma.exerciseLog.create({ data })
   }
 
+  async update(
+    id: string,
+    data: Prisma.ExerciseLogUpdateInput,
+  ): Promise<ExerciseLog> {
+    return prisma.exerciseLog.update({
+      where: { id },
+      data,
+    })
+  }
+
   async findAllByUser(userId: string): Promise<
     (ExerciseLog & {
       exercise: {
@@ -31,9 +41,7 @@ export class PrismaExerciseLogsRepository implements ExerciseLogsRepository {
           },
         },
       },
-      orderBy: {
-        date: 'desc',
-      },
+      orderBy: { date: 'desc' },
     })
   }
 
@@ -47,10 +55,7 @@ export class PrismaExerciseLogsRepository implements ExerciseLogsRepository {
       where: {
         userId,
         exerciseId,
-        date: {
-          gte: start,
-          lte: end,
-        },
+        date: { gte: start, lte: end },
       },
     })
   }
@@ -70,14 +75,17 @@ export class PrismaExerciseLogsRepository implements ExerciseLogsRepository {
       where: { id },
       include: {
         exercise: {
-          select: {
-            id: true,
-            name: true,
-            category: true,
-            type: true,
-          },
+          select: { id: true, name: true, category: true, type: true },
         },
       },
+    })
+  }
+
+  async findByExerciseSession(
+    exerciseSessionId: string,
+  ): Promise<ExerciseLog | null> {
+    return prisma.exerciseLog.findFirst({
+      where: { exerciseSessionId },
     })
   }
 }

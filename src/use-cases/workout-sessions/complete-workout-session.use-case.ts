@@ -1,37 +1,96 @@
+import { WorkoutSessionStatus } from '@prisma/client'
+
 import { ResourceNotFoundError } from '@/errors/resource-not-found.error'
+import { ExerciseLogsRepository } from '@/repositories/exercise-logs.repository'
+import { ExerciseSessionsRepository } from '@/repositories/exercise-sessions.repository'
 import { WorkoutSessionsRepository } from '@/repositories/workout-sessions.repository'
 
 interface CompleteWorkoutSessionRequest {
   userId: string
   sessionId: string
+  status: WorkoutSessionStatus
+  exercises: {
+    exerciseSessionId: string
+    sets: number
+    reps: number
+    weight?: number | undefined
+    note?: string | undefined
+    completed: boolean
+  }[]
 }
 
 interface CompleteWorkoutSessionResponse {
-  session: {
-    id: string
-    completed: boolean
-    date: Date
-    workoutId: string
-  }
+  session: Awaited<ReturnType<WorkoutSessionsRepository['findByIdWithWorkout']>>
 }
 
 export class CompleteWorkoutSessionUseCase {
-  constructor(private workoutSessionsRepository: WorkoutSessionsRepository) {}
+  constructor(
+    private workoutSessionsRepository: WorkoutSessionsRepository,
+    private exerciseSessionsRepository: ExerciseSessionsRepository,
+    private exerciseLogsRepository: ExerciseLogsRepository,
+  ) {}
 
   async execute({
     userId,
     sessionId,
+    status,
+    exercises,
   }: CompleteWorkoutSessionRequest): Promise<CompleteWorkoutSessionResponse> {
-    const session = await this.workoutSessionsRepository.findById(sessionId)
+    const session =
+      await this.workoutSessionsRepository.findByIdWithWorkout(sessionId)
 
     if (!session || session.userId !== userId) {
-      throw new ResourceNotFoundError('Workout session not found.')
+      throw new ResourceNotFoundError(
+        'Workout session not found or does not belong to the user.',
+      )
     }
 
-    const updatedSession = await this.workoutSessionsRepository.updateCompleted(
-      sessionId,
-      true,
-    )
+    await this.workoutSessionsRepository.updateStatus(sessionId, status)
+
+    for (const ex of exercises) {
+      const exerciseSession = await this.exerciseSessionsRepository.findById(
+        ex.exerciseSessionId,
+      )
+      if (!exerciseSession) continue
+
+      await this.exerciseSessionsRepository.update({
+        id: ex.exerciseSessionId,
+        completed: ex.completed,
+      })
+
+      const existingLog =
+        await this.exerciseLogsRepository.findByExerciseSession(
+          ex.exerciseSessionId,
+        )
+
+      if (existingLog) {
+        await this.exerciseLogsRepository.update(existingLog.id, {
+          sets: ex.sets,
+          reps: ex.reps,
+          weight: ex.weight ?? null,
+          description: ex.note ?? null,
+          date: new Date(),
+        })
+      } else {
+        await this.exerciseLogsRepository.create({
+          sets: ex.sets,
+          reps: ex.reps,
+          weight: ex.weight ?? null,
+          description: ex.note ?? null,
+          date: new Date(),
+          user: { connect: { id: userId } },
+          exercise: { connect: { id: exerciseSession.exerciseId } },
+          exerciseSession: { connect: { id: ex.exerciseSessionId } },
+        })
+      }
+    }
+
+    const updatedSession =
+      await this.workoutSessionsRepository.findByIdWithWorkout(sessionId)
+
+    if (!updatedSession) {
+      throw new Error('Failed to retrieve updated session.')
+    }
 
     return { session: updatedSession }
   }

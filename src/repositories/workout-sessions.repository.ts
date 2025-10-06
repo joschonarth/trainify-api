@@ -1,4 +1,4 @@
-import { Prisma, WorkoutSession } from '@prisma/client'
+import { Prisma, WorkoutSession, WorkoutSessionStatus } from '@prisma/client'
 
 export interface WorkoutSessionWithWorkout extends WorkoutSession {
   workout: {
@@ -56,4 +56,23 @@ export interface WorkoutSessionsRepository {
   create(
     data: Prisma.WorkoutSessionUncheckedCreateInput,
   ): Promise<WorkoutSession>
+
+  updateStatus(
+    id: string,
+    status: WorkoutSessionStatus,
+  ): Promise<WorkoutSession>
+
+  completeWorkoutSession(
+    sessionId: string,
+    updates: {
+      status: WorkoutSessionStatus
+      exerciseSessions: {
+        id: string
+        completed: boolean
+        sets?: number | null
+        reps?: number | null
+        weight?: number | null
+      }[]
+    },
+  ): Promise<WorkoutSessionWithWorkout>
 }

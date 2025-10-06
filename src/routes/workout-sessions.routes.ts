@@ -19,7 +19,7 @@ export async function workoutSessionsRoutes(app: FastifyInstance) {
     createExerciseLogSessionController,
   )
 
-  app.patch(
+  app.post(
     '/workout-sessions/:sessionId/complete',
     completeWorkoutSessionController,
   )
