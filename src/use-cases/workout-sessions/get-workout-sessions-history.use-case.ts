@@ -1,13 +1,18 @@
 import { ResourceNotFoundError } from '@/errors/resource-not-found.error'
-import { WorkoutSessionsRepository } from '@/repositories/workout-sessions.repository'
+import {
+  WorkoutSessionsRepository,
+  WorkoutSessionWithWorkout,
+} from '@/repositories/workout-sessions.repository'
 
 interface ExerciseHistory {
   name: string
   plannedSets: number | null
   plannedReps: number | null
-  weight: number | null
-  loggedSets?: number | null
-  loggedReps?: number | null
+  plannedWeight: number | null
+  completed: boolean
+  actualSets?: number | null
+  actualReps?: number | null
+  actualWeight?: number | null
   description?: string | null
 }
 
@@ -15,7 +20,6 @@ interface SessionHistory {
   id: string
   date: Date
   workout: string
-  completed: boolean
   exercises: ExerciseHistory[]
 }
 
@@ -31,7 +35,8 @@ export class GetWorkoutSessionsHistoryUseCase {
   }: {
     userId: string
   }): Promise<GetWorkoutSessionsHistoryResponse> {
-    const sessions = await this.workoutSessionsRepository.findAllByUser(userId)
+    const sessions: WorkoutSessionWithWorkout[] =
+      await this.workoutSessionsRepository.findAllByUser(userId)
 
     if (!sessions || sessions.length === 0) {
       throw new ResourceNotFoundError('No workout sessions found.')
@@ -40,19 +45,20 @@ export class GetWorkoutSessionsHistoryUseCase {
     const sessionsHistory: SessionHistory[] = sessions.map((session) => ({
       id: session.id,
       date: session.date,
-      completed: session.completed,
       workout: session.workout.name,
-      exercises: session.workout.exercises.map((we) => {
-        const log = session.logs.find((l) => l.exerciseId === we.exercise.id)
+      exercises: (session.exerciseSessions ?? []).map((ex) => {
+        const lastLog = ex.logs.length > 0 ? ex.logs[ex.logs.length - 1] : null
 
         return {
-          name: we.exercise.name,
-          plannedSets: we.defaultSets,
-          plannedReps: we.defaultReps,
-          weight: we.defaultWeight,
-          loggedSets: log?.sets ?? null,
-          loggedReps: log?.reps ?? null,
-          description: log?.description ?? null,
+          name: ex.exercise.name,
+          plannedSets: ex.sets ?? null,
+          plannedReps: ex.reps ?? null,
+          plannedWeight: ex.weight ?? null,
+          completed: ex.completed ?? false,
+          loggedSets: lastLog?.sets ?? null,
+          loggedReps: lastLog?.reps ?? null,
+          loggedWeight: lastLog?.weight ?? null,
+          description: lastLog?.description ?? null,
         }
       }),
     }))
