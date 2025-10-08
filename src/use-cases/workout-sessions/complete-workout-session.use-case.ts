@@ -5,6 +5,8 @@ import { ExerciseLogsRepository } from '@/repositories/exercise-logs.repository'
 import { ExerciseSessionsRepository } from '@/repositories/exercise-sessions.repository'
 import { WorkoutSessionsRepository } from '@/repositories/workout-sessions.repository'
 
+import { UpdateUserStreakUseCase } from '../gamification/update-user-streak.use-case'
+
 interface CompleteWorkoutSessionRequest {
   userId: string
   sessionId: string
@@ -28,6 +30,8 @@ export class CompleteWorkoutSessionUseCase {
     private workoutSessionsRepository: WorkoutSessionsRepository,
     private exerciseSessionsRepository: ExerciseSessionsRepository,
     private exerciseLogsRepository: ExerciseLogsRepository,
+
+    private updateUserStreakUseCase: UpdateUserStreakUseCase,
   ) {}
 
   async execute({
@@ -83,6 +87,13 @@ export class CompleteWorkoutSessionUseCase {
           exerciseSession: { connect: { id: ex.exerciseSessionId } },
         })
       }
+    }
+
+    if (status === WorkoutSessionStatus.COMPLETED) {
+      await this.updateUserStreakUseCase.execute({
+        userId,
+        workoutDate: new Date(),
+      })
     }
 
     const updatedSession =
