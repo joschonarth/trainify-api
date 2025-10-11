@@ -1,4 +1,5 @@
 import { UserStreaksRepository } from '@/repositories/user-streaks.repository'
+import { daysBetweenDates } from '@/utils/get-days-between-dates'
 
 interface UpdateUserStreakUseCaseRequest {
   userId: string
@@ -24,10 +25,18 @@ export class UpdateUserStreakUseCase {
       return
     }
 
-    const lastWorkoutDate = new Date(existingStreak.lastWorkout!)
-    const diffInDays = Math.floor(
-      (workoutDate.getTime() - lastWorkoutDate.getTime()) /
-        (1000 * 60 * 60 * 24),
+    if (!existingStreak.lastWorkout) {
+      await this.userStreaksRepository.update(existingStreak.id, {
+        currentStreak: 1,
+        bestStreak: Math.max(existingStreak.bestStreak ?? 0, 1),
+        lastWorkout: workoutDate,
+      })
+      return
+    }
+
+    const diffInDays = daysBetweenDates(
+      new Date(existingStreak.lastWorkout),
+      workoutDate,
     )
 
     let currentStreak = existingStreak.currentStreak
