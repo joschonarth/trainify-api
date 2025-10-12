@@ -2,7 +2,6 @@ import { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
 import { makeLogWeightUseCase } from '@/use-cases/weight/factories/make-log-weight-use-case'
-import { LogWeightUseCase } from '@/use-cases/weight/log-weight.use-case'
 
 export async function logWeightController(
   request: FastifyRequest,
@@ -22,7 +21,7 @@ export async function logWeightController(
 
   const userId = request.user.sub
 
-  const logWeightUseCase: LogWeightUseCase = makeLogWeightUseCase()
+  const logWeightUseCase = makeLogWeightUseCase()
 
   const { weightLog } = await logWeightUseCase.execute({
     userId,

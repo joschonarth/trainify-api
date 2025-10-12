@@ -1,5 +1,6 @@
 import { FastifyInstance } from 'fastify'
 
+import { createWeightGoalController } from '@/controllers/weight/create-weight-goal.controller'
 import { listWeightLogsController } from '@/controllers/weight/list-weight-logs.controller'
 import { logWeightController } from '@/controllers/weight/log-weight.controller'
 import { verifyJwt } from '@/middlewares/verify-jwt'
@@ -9,4 +10,6 @@ export async function weightRoutes(app: FastifyInstance) {
 
   app.get('/weight/logs', listWeightLogsController)
   app.post('/weight/logs', logWeightController)
+
+  app.post('/weight/goals', createWeightGoalController)
 }
