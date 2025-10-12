@@ -40,7 +40,10 @@ export class PrismaWeightGoalsRepository implements WeightGoalsRepository {
   }
 
   async findAllByUserId(userId: string): Promise<WeightGoal[]> {
-    return prisma.weightGoal.findMany({ where: { userId } })
+    return prisma.weightGoal.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+    })
   }
 
   async markAsAchieved(id: string, achievedAt: Date): Promise<void> {
