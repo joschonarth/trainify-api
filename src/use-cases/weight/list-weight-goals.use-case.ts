@@ -6,6 +6,7 @@ import { calculateWeightGoalProgress } from '@/utils/calculate-weight-goal-progr
 
 interface ListWeightGoalsUseCaseRequest {
   userId: string
+  status?: 'active' | 'completed'
 }
 
 interface WeightGoalWithProgress extends WeightGoal {
@@ -24,8 +25,15 @@ export class ListWeightGoalsUseCase {
 
   async execute({
     userId,
+    status,
   }: ListWeightGoalsUseCaseRequest): Promise<ListWeightGoalsUseCaseResponse> {
-    const goals = await this.weightGoalsRepository.findAllByUserId(userId)
+    const filters = status ? { status } : undefined
+
+    const goals = await this.weightGoalsRepository.findAllByUserId(
+      userId,
+      filters,
+    )
+
     const latestLog = await this.weightLogsRepository.findLatestByUserId(userId)
 
     const weightGoals = goals.map((goal) => {

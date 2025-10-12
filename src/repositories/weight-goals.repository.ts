@@ -14,6 +14,9 @@ export interface WeightGoalsRepository {
   findById(id: string): Promise<WeightGoal | null>
   findActiveGoalByUserId(userId: string): Promise<WeightGoal | null>
   deactivateGoal(id: string): Promise<void>
-  findAllByUserId(userId: string): Promise<WeightGoal[]>
+  findAllByUserId(
+    userId: string,
+    filters?: { status?: 'active' | 'completed' },
+  ): Promise<WeightGoal[]>
   markAsAchieved(id: string, achievedAt: Date): Promise<void>
 }
