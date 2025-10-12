@@ -5,6 +5,7 @@ import { changePasswordController } from '@/controllers/users/change-password.co
 import { fetchUserSchedulesController } from '@/controllers/users/fetch-user-schedules.controller'
 import { getUserProfileController } from '@/controllers/users/get-user-profile.controller'
 import { registerController } from '@/controllers/users/register.controller'
+import { signInWithGoogleController } from '@/controllers/users/sign-in-with-google.controller'
 import { signOutController } from '@/controllers/users/sign-out.controller'
 import { updateUserProfileController } from '@/controllers/users/update-user-profile.controller'
 import { verifyJwt } from '@/middlewares/verify-jwt'
@@ -12,6 +13,9 @@ import { verifyJwt } from '@/middlewares/verify-jwt'
 export async function usersRoutes(app: FastifyInstance) {
   app.post('/users', registerController)
   app.post('/sessions', authenticateController)
+
+  /** Google Auth */
+  app.post('/sessions/google', signInWithGoogleController)
 
   /** Authenticated */
   app.get('/me', { onRequest: [verifyJwt] }, getUserProfileController)
