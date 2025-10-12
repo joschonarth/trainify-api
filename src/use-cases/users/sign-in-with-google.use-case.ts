@@ -17,7 +17,7 @@ export class SignInWithGoogleUseCase {
     token,
   }: SignInWithGoogleUseCaseRequest): Promise<SignInWithGoogleUseCaseResponse> {
     const response = await fetch(
-      `https://oauth2.googleapis.com/tokeninfo?id_token=${token}`,
+      `https://oauth2.googleapis.com/tokeninfo?access_token=${token}`,
     )
 
     const payload = await response.json()
