@@ -37,10 +37,12 @@ enum GoalType {
 }
 
 model User {
-  id        String   @id @default(uuid())
+  id        String  @id @default(uuid())
   name      String
-  email     String   @unique
-  password  String
+  email     String  @unique
+  password  String?
+  avatarUrl String?
+
   age       Int?
   height    Int?
   weight    Float?
