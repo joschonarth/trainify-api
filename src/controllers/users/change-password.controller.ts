@@ -24,7 +24,7 @@ export async function changePasswordController(
     const useCase = makeChangePasswordUseCase()
 
     await useCase.execute({
-      userId: request.user.sub,
+      userId: request.user.userId,
       currentPassword,
       newPassword,
       passwordConfirmation,

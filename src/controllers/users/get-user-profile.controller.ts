@@ -9,7 +9,7 @@ export async function getUserProfileController(
   const getUserProfile = makeGetUserProfileUseCase()
 
   const { user } = await getUserProfile.execute({
-    userId: request.user.sub,
+    userId: request.user.userId,
   })
 
   return reply.status(200).send({

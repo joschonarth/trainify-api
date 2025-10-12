@@ -27,6 +27,12 @@ export class ChangePasswordUseCase {
       throw new ResourceNotFoundError()
     }
 
+    if (!user.password) {
+      throw new InvalidCredentialsError(
+        'This user does not have a password set. Please sign in with Google or set a password first.',
+      )
+    }
+
     const isPasswordValid = await compare(currentPassword, user.password)
     if (!isPasswordValid) {
       throw new InvalidCredentialsError('Current password is incorrect.')

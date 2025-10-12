@@ -26,6 +26,12 @@ export class AuthenticateUseCase {
       throw new InvalidCredentialsError()
     }
 
+    if (!user.password) {
+      throw new InvalidCredentialsError(
+        'Use Google login to log into this account.',
+      )
+    }
+
     const doestPasswordMatches = await compare(password, user.password)
 
     if (!doestPasswordMatches) {

@@ -23,7 +23,7 @@ export async function updateUserProfileController(
     const updateUserProfile = makeUpdateUserProfileUseCase()
 
     const { user } = await updateUserProfile.execute({
-      userId: request.user.sub,
+      userId: request.user.userId,
       ...(name !== undefined && { name }),
       ...(age !== undefined && { age }),
       ...(height !== undefined && { height }),
