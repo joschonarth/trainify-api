@@ -43,10 +43,14 @@ export class AchieveWeightGoalUseCase {
     }
 
     const achievedAt = new Date()
-    await this.weightGoalsRepository.markAsAchieved(goal.id, achievedAt)
+
+    await Promise.all([
+      this.weightGoalsRepository.markAsAchieved(goal.id, achievedAt),
+      this.weightGoalsRepository.updateProgress(goal.id, 100),
+    ])
 
     return {
-      weightGoal: { ...goal, achievedAt, isActive: false },
+      weightGoal: { ...goal, achievedAt, isActive: false, progress: 100 },
       progress,
     }
   }

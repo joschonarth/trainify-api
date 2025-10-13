@@ -19,4 +19,5 @@ export interface WeightGoalsRepository {
     filters?: { status?: 'active' | 'completed' },
   ): Promise<WeightGoal[]>
   markAsAchieved(id: string, achievedAt: Date): Promise<void>
+  updateProgress(id: string, progress: number): Promise<void>
 }

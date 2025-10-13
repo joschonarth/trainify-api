@@ -17,6 +17,7 @@ export class PrismaWeightGoalsRepository implements WeightGoalsRepository {
         targetWeight: data.targetWeight,
         startDate: data.startDate ?? new Date(),
         endDate: data.endDate ?? null,
+        progress: 0,
       },
     })
   }
@@ -61,6 +62,13 @@ export class PrismaWeightGoalsRepository implements WeightGoalsRepository {
     await prisma.weightGoal.update({
       where: { id },
       data: { achievedAt, isActive: false },
+    })
+  }
+
+  async updateProgress(id: string, progress: number): Promise<void> {
+    await prisma.weightGoal.update({
+      where: { id },
+      data: { progress },
     })
   }
 }

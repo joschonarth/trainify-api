@@ -218,6 +218,7 @@ model WeightGoal {
   endDate      DateTime?
   achievedAt   DateTime?
   isActive     Boolean   @default(true)
+  progress     Float     @default(0)
 
   logs WeightLog[]
 

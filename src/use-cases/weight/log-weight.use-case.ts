@@ -1,6 +1,8 @@
 import { WeightLog } from '@prisma/client'
 
+import { WeightGoalsRepository } from '@/repositories/weight-goals.repository'
 import { WeightLogsRepository } from '@/repositories/weight-logs.repository'
+import { calculateWeightGoalProgress } from '@/utils/calculate-weight-goal-progress'
 
 interface LogWeightUseCaseRequest {
   userId: string
@@ -14,7 +16,10 @@ interface LogWeightUseCaseResponse {
 }
 
 export class LogWeightUseCase {
-  constructor(private weightLogsRepository: WeightLogsRepository) {}
+  constructor(
+    private weightLogsRepository: WeightLogsRepository,
+    private weightGoalsRepository: WeightGoalsRepository,
+  ) {}
 
   async execute({
     userId,
@@ -28,6 +33,16 @@ export class LogWeightUseCase {
       weight,
       note: note ?? null,
     })
+
+    if (goalId) {
+      const goal = await this.weightGoalsRepository.findById(goalId)
+
+      if (goal && goal.isActive) {
+        const progress = calculateWeightGoalProgress(goal, weight)
+
+        await this.weightGoalsRepository.updateProgress(goal.id, progress)
+      }
+    }
 
     return { weightLog }
   }
