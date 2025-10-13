@@ -6,6 +6,7 @@ import { getWeightGoalController } from '@/controllers/weight/get-weight-goal.co
 import { listWeightGoalsController } from '@/controllers/weight/list-weight-goals.controller'
 import { listWeightLogsController } from '@/controllers/weight/list-weight-logs.controller'
 import { logWeightController } from '@/controllers/weight/log-weight.controller'
+import { updateWeightGoalController } from '@/controllers/weight/update-weight-goal.controller'
 import { verifyJwt } from '@/middlewares/verify-jwt'
 
 export async function weightRoutes(app: FastifyInstance) {
@@ -20,4 +21,5 @@ export async function weightRoutes(app: FastifyInstance) {
   app.get('/weight/goals', listWeightGoalsController)
   app.post('/weight/goals', createWeightGoalController)
   app.patch('/weight/goals/:goalId/achieve', achieveWeightGoalController)
+  app.put('/weight/goals/:goalId', updateWeightGoalController)
 }

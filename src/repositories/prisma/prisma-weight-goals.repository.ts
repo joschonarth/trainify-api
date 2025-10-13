@@ -35,6 +35,13 @@ export class PrismaWeightGoalsRepository implements WeightGoalsRepository {
     })
   }
 
+  async findActiveGoalByUserId(userId: string): Promise<WeightGoal | null> {
+    return prisma.weightGoal.findFirst({
+      where: { userId, isActive: true },
+      orderBy: { createdAt: 'desc' },
+    })
+  }
+
   async create(data: CreateWeightGoalData): Promise<WeightGoal> {
     return prisma.weightGoal.create({
       data: {
@@ -62,6 +69,18 @@ export class PrismaWeightGoalsRepository implements WeightGoalsRepository {
     await prisma.weightGoal.update({
       where: { id },
       data: { achievedAt, isActive: false },
+    })
+  }
+
+  async update(
+    id: string,
+    data: { name?: string; description?: string | null; endDate?: Date | null },
+  ): Promise<WeightGoal> {
+    return prisma.weightGoal.update({
+      where: { id },
+      data: {
+        ...data,
+      },
     })
   }
 
