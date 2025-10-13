@@ -51,6 +51,35 @@ export class PrismaWeightLogsRepository implements WeightLogsRepository {
     })
   }
 
+  async findFirstByUserId(userId: string): Promise<WeightLog | null> {
+    return prisma.weightLog.findFirst({
+      where: { userId },
+      orderBy: { createdAt: 'asc' },
+    })
+  }
+
+  async findMinByUserId(userId: string): Promise<WeightLog | null> {
+    return prisma.weightLog.findFirst({
+      where: { userId },
+      orderBy: { weight: 'asc' },
+    })
+  }
+
+  async findMaxByUserId(userId: string): Promise<WeightLog | null> {
+    return prisma.weightLog.findFirst({
+      where: { userId },
+      orderBy: { weight: 'desc' },
+    })
+  }
+
+  async findAverageByUserId(userId: string): Promise<number | null> {
+    const result = await prisma.weightLog.aggregate({
+      where: { userId },
+      _avg: { weight: true },
+    })
+    return result._avg.weight ?? null
+  }
+
   async delete(id: string): Promise<void> {
     await prisma.weightLog.delete({
       where: { id },
