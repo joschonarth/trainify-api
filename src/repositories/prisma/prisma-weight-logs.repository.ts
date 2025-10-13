@@ -59,6 +59,13 @@ export class PrismaWeightLogsRepository implements WeightLogsRepository {
     })
   }
 
+  async findByGoalId(goalId: string): Promise<WeightLog[]> {
+    return prisma.weightLog.findMany({
+      where: { goalId },
+      orderBy: { createdAt: 'asc' },
+    })
+  }
+
   async findLatestByUserId(userId: string): Promise<WeightLog | null> {
     return prisma.weightLog.findFirst({
       where: { userId },
