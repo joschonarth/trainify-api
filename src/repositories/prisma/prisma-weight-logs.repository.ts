@@ -1,4 +1,4 @@
-import { WeightLog } from '@prisma/client'
+import { Prisma, WeightLog } from '@prisma/client'
 
 import { prisma } from '@/lib/prisma'
 
@@ -34,6 +34,28 @@ export class PrismaWeightLogsRepository implements WeightLogsRepository {
     return prisma.weightLog.findMany({
       where: { userId },
       orderBy: { createdAt: 'desc' },
+    })
+  }
+
+  async findManyByUserId(
+    userId: string,
+    filters?: { from?: Date; to?: Date },
+  ): Promise<WeightLog[]> {
+    const where: Prisma.WeightLogWhereInput = {
+      userId,
+      ...(filters?.from || filters?.to
+        ? {
+            createdAt: {
+              ...(filters.from ? { gte: filters.from } : {}),
+              ...(filters.to ? { lte: filters.to } : {}),
+            },
+          }
+        : {}),
+    }
+
+    return prisma.weightLog.findMany({
+      where,
+      orderBy: { createdAt: 'asc' },
     })
   }
 

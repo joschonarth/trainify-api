@@ -2,6 +2,7 @@ import { FastifyInstance } from 'fastify'
 
 import { achieveWeightGoalController } from '@/controllers/weight/achieve-weight-goal.controller'
 import { createWeightGoalController } from '@/controllers/weight/create-weight-goal.controller'
+import { getGeneralWeightAnalyticsController } from '@/controllers/weight/get-general-weight-analytics.controller'
 import { getWeightGoalController } from '@/controllers/weight/get-weight-goal.controller'
 import { getWeightSummaryController } from '@/controllers/weight/get-weight-summary.controller'
 import { listWeightGoalsController } from '@/controllers/weight/list-weight-goals.controller'
@@ -26,4 +27,5 @@ export async function weightRoutes(app: FastifyInstance) {
 
   /** Metrics */
   app.get('/weight/summary', getWeightSummaryController)
+  app.get('/weight/analytics', getGeneralWeightAnalyticsController)
 }
