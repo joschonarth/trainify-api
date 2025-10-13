@@ -1,6 +1,8 @@
 import { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
+import { InvalidWeightGoalError } from '@/errors/invalid-weight-goal.error'
+import { ResourceNotFoundError } from '@/errors/resource-not-found.error'
 import { makeLogWeightUseCase } from '@/use-cases/weight/factories/make-log-weight-use-case'
 
 export async function logWeightController(
@@ -13,22 +15,38 @@ export async function logWeightController(
     goalId: z.string().nullable().optional(),
   })
 
-  const rawBody = logWeightBodySchema.parse(request.body)
+  try {
+    const rawBody = logWeightBodySchema.parse(request.body)
 
-  const weight = rawBody.weight
-  const note = rawBody.note ?? null
-  const goalId = rawBody.goalId ?? null
+    const weight = rawBody.weight
+    const note = rawBody.note ?? null
+    const goalId = rawBody.goalId ?? null
 
-  const userId = request.user.sub
+    const userId = request.user.sub
 
-  const logWeightUseCase = makeLogWeightUseCase()
+    const logWeightUseCase = makeLogWeightUseCase()
 
-  const { weightLog } = await logWeightUseCase.execute({
-    userId,
-    weight,
-    note,
-    goalId,
-  })
+    const { weightLog } = await logWeightUseCase.execute({
+      userId,
+      weight,
+      note,
+      goalId,
+    })
 
-  return reply.status(201).send({ weightLog })
+    return reply.status(201).send({ weightLog })
+  } catch (error) {
+    if (error instanceof ResourceNotFoundError) {
+      return reply.status(404).send({
+        message: error.message,
+      })
+    }
+
+    if (error instanceof InvalidWeightGoalError) {
+      return reply.status(400).send({
+        message: error.message,
+      })
+    }
+
+    throw error
+  }
 }
