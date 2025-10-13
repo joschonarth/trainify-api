@@ -211,6 +211,9 @@ model WeightGoal {
   userId String
   user   User   @relation(fields: [userId], references: [id])
 
+  name        String
+  description String?
+
   goalType     GoalType
   startWeight  Float
   targetWeight Float

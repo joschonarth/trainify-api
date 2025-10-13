@@ -9,18 +9,26 @@ export async function createWeightGoalController(
   reply: FastifyReply,
 ) {
   const createGoalBodySchema = z.object({
+    name: z.string().min(1, 'Name is required'),
+    description: z.string().nullable().default(null),
     goalType: z.enum(GoalType),
     startWeight: z.number(),
     targetWeight: z.number(),
-    startDate: z.date().optional(),
-    endDate: z.date().nullable().optional(),
+    startDate: z.date().default(() => new Date()),
+    endDate: z.date().nullable().default(null),
   })
 
   const parsedBody = createGoalBodySchema.parse(request.body)
 
-  const { goalType, startWeight, targetWeight } = parsedBody
-  const startDate = parsedBody.startDate ?? new Date()
-  const endDate = parsedBody.endDate ?? null
+  const {
+    name,
+    description,
+    goalType,
+    startWeight,
+    targetWeight,
+    startDate,
+    endDate,
+  } = parsedBody
 
   const userId = request.user.sub
 
@@ -28,6 +36,8 @@ export async function createWeightGoalController(
 
   const { weightGoal } = await createWeightGoalUseCase.execute({
     userId,
+    name,
+    description,
     goalType,
     startWeight,
     targetWeight,

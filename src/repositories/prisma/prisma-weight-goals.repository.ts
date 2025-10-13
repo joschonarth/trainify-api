@@ -12,6 +12,8 @@ export class PrismaWeightGoalsRepository implements WeightGoalsRepository {
     return prisma.weightGoal.create({
       data: {
         user: { connect: { id: data.userId } },
+        name: data.name,
+        description: data.description ?? null,
         goalType: data.goalType,
         startWeight: data.startWeight,
         targetWeight: data.targetWeight,

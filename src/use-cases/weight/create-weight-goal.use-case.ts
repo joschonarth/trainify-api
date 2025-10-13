@@ -4,6 +4,8 @@ import { WeightGoalsRepository } from '@/repositories/weight-goals.repository'
 
 interface CreateWeightGoalUseCaseRequest {
   userId: string
+  name: string
+  description?: string | null
   goalType: GoalType
   startWeight: number
   targetWeight: number
@@ -20,6 +22,8 @@ export class CreateWeightGoalUseCase {
 
   async execute({
     userId,
+    name,
+    description,
     goalType,
     startWeight,
     targetWeight,
@@ -35,6 +39,8 @@ export class CreateWeightGoalUseCase {
 
     const weightGoal = await this.weightGoalsRepository.create({
       userId,
+      name,
+      description: description ?? null,
       goalType,
       startWeight,
       targetWeight,

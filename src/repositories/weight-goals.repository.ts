@@ -2,6 +2,8 @@ import { GoalType, WeightGoal } from '@prisma/client'
 
 export interface CreateWeightGoalData {
   userId: string
+  name: string
+  description?: string | null
   goalType: GoalType
   startWeight: number
   targetWeight: number
