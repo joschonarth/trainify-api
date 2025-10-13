@@ -15,6 +15,7 @@ export interface WeightLogsRepository {
     userId: string,
     filters?: { from?: Date; to?: Date },
   ): Promise<WeightLog[]>
+  findByGoalId(goalId: string): Promise<WeightLog[]>
   findLatestByUserId(userId: string): Promise<WeightLog | null>
   findLatestByGoalId(goalId: string): Promise<WeightLog | null>
   findFirstByUserId(userId: string): Promise<WeightLog | null>
