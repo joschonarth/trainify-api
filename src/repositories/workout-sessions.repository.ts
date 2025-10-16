@@ -75,4 +75,6 @@ export interface WorkoutSessionsRepository {
       }[]
     },
   ): Promise<WorkoutSessionWithWorkout>
+
+  countCompletedByUser(userId: string): Promise<number>
 }
