@@ -1,6 +1,7 @@
 import { Badge } from '@prisma/client'
 
 import { UnlockExerciseBadgesUseCase } from './unlock-exercise-badges.use-case'
+import { UnlockStreakBadgesUseCase } from './unlock-streak-badges.use-case'
 import { UnlockWorkoutBadgesUseCase } from './unlock-workout-badges.use-case'
 
 interface UnlockAllBadgesRequest {
@@ -15,6 +16,7 @@ export class UnlockAllBadgesUseCase {
   constructor(
     private unlockWorkoutBadgesUseCase: UnlockWorkoutBadgesUseCase,
     private unlockExerciseBadgesUseCase: UnlockExerciseBadgesUseCase,
+    private unlockStreakBadgesUseCase: UnlockStreakBadgesUseCase,
   ) {}
 
   async execute({
@@ -31,6 +33,11 @@ export class UnlockAllBadgesUseCase {
       userId,
     })
     unlockedBadges.push(...exerciseBadges.badges)
+
+    const streakBadges = await this.unlockStreakBadgesUseCase.execute({
+      userId,
+    })
+    unlockedBadges.push(...streakBadges.badges)
 
     return { badges: unlockedBadges }
   }
