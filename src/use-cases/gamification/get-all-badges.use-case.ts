@@ -40,6 +40,12 @@ export class GetAllBadgesUseCase {
       badgesWithStatus = badgesWithStatus.filter((b) => b.unlocked === unlocked)
     }
 
+    badgesWithStatus.sort((a, b) => {
+      if (a.unlocked && !b.unlocked) return -1
+      if (!a.unlocked && b.unlocked) return 1
+      return 0
+    })
+
     return { badges: badgesWithStatus }
   }
 }
