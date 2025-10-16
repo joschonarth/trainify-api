@@ -1,8 +1,8 @@
 import { PrismaExerciseLogsRepository } from '@/repositories/prisma/prisma-exercise-logs.repository'
 import { PrismaExerciseSessionsRepository } from '@/repositories/prisma/prisma-exercise-sessions.repository'
-import { PrismaUserStreaksRepository } from '@/repositories/prisma/prisma-user-streaks.repository'
 import { PrismaWorkoutSessionsRepository } from '@/repositories/prisma/prisma-workout-sessions.repository'
-import { UpdateUserStreakUseCase } from '@/use-cases/gamification/update-user-streak.use-case'
+import { makeUnlockAllBadgesUseCase } from '@/use-cases/gamification/factories/make-unlock-all-badges-use-case'
+import { makeUpdateUserStreakUseCase } from '@/use-cases/gamification/factories/make-update-user-streak-use-case'
 
 import { CompleteWorkoutSessionUseCase } from '../complete-workout-session.use-case'
 
@@ -10,11 +10,9 @@ export function makeCompleteWorkoutSessionUseCase() {
   const workoutSessionsRepository = new PrismaWorkoutSessionsRepository()
   const exerciseSessionsRepository = new PrismaExerciseSessionsRepository()
   const exerciseLogsRepository = new PrismaExerciseLogsRepository()
-  const userStreaksRepository = new PrismaUserStreaksRepository()
 
-  const updateUserStreakUseCase = new UpdateUserStreakUseCase(
-    userStreaksRepository,
-  )
+  const updateUserStreakUseCase = makeUpdateUserStreakUseCase()
+  const unlockAllBadgesUseCase = makeUnlockAllBadgesUseCase()
 
   const completeWorkoutSessionUseCase = new CompleteWorkoutSessionUseCase(
     workoutSessionsRepository,
@@ -22,6 +20,7 @@ export function makeCompleteWorkoutSessionUseCase() {
     exerciseLogsRepository,
 
     updateUserStreakUseCase,
+    unlockAllBadgesUseCase,
   )
 
   return completeWorkoutSessionUseCase

@@ -232,4 +232,13 @@ export class PrismaWorkoutSessionsRepository
       }
     })
   }
+
+  async countCompletedByUser(userId: string): Promise<number> {
+    return prisma.workoutSession.count({
+      where: {
+        userId,
+        status: 'COMPLETED',
+      },
+    })
+  }
 }

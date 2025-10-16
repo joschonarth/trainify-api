@@ -5,6 +5,7 @@ import { ExerciseLogsRepository } from '@/repositories/exercise-logs.repository'
 import { ExerciseSessionsRepository } from '@/repositories/exercise-sessions.repository'
 import { WorkoutSessionsRepository } from '@/repositories/workout-sessions.repository'
 
+import { UnlockAllBadgesUseCase } from '../gamification/unlock-all-badges.use-case'
 import { UpdateUserStreakUseCase } from '../gamification/update-user-streak.use-case'
 
 interface CompleteWorkoutSessionRequest {
@@ -32,6 +33,7 @@ export class CompleteWorkoutSessionUseCase {
     private exerciseLogsRepository: ExerciseLogsRepository,
 
     private updateUserStreakUseCase: UpdateUserStreakUseCase,
+    private unlockAllBadgesUseCase: UnlockAllBadgesUseCase,
   ) {}
 
   async execute({
@@ -95,6 +97,8 @@ export class CompleteWorkoutSessionUseCase {
         workoutDate: new Date(),
       })
     }
+
+    await this.unlockAllBadgesUseCase.execute({ userId })
 
     const updatedSession =
       await this.workoutSessionsRepository.findByIdWithWorkout(sessionId)
