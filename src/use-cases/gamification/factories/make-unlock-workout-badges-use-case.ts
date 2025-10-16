@@ -7,10 +7,10 @@ export function makeUnlockWorkoutBadgesUseCase() {
   const badgesRepository = new PrismaBadgesRepository()
   const workoutSessionRepository = new PrismaWorkoutSessionsRepository()
 
-  const userStreakUseCase = new UnlockWorkoutBadgesUseCase(
+  const unlockWorkoutBadgesUseCase = new UnlockWorkoutBadgesUseCase(
     badgesRepository,
     workoutSessionRepository,
   )
 
-  return userStreakUseCase
+  return unlockWorkoutBadgesUseCase
 }

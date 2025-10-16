@@ -88,4 +88,10 @@ export class PrismaExerciseLogsRepository implements ExerciseLogsRepository {
       where: { exerciseSessionId },
     })
   }
+
+  async countCompletedByUser(userId: string) {
+    return prisma.exerciseLog.count({
+      where: { userId },
+    })
+  }
 }

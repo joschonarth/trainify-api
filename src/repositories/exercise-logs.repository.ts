@@ -36,4 +36,6 @@ export interface ExerciseLogsRepository {
   >
 
   findByExerciseSession(exerciseSessionId: string): Promise<ExerciseLog | null>
+
+  countCompletedByUser(userId: string): Promise<number>
 }
