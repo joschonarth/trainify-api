@@ -46,18 +46,24 @@ const exerciseBadges = [
   },
   {
     name: 'Constância',
+    description: 'Completar 10 exercícios',
+    type: BadgeType.EXERCISE,
+    milestone: 10,
+  },
+  {
+    name: 'Explosão de Energia',
     description: 'Completar 50 exercícios',
     type: BadgeType.EXERCISE,
     milestone: 50,
   },
   {
-    name: 'Explosão de Energia',
+    name: 'Máquina de Treinar',
     description: 'Completar 100 exercícios',
     type: BadgeType.EXERCISE,
     milestone: 100,
   },
   {
-    name: 'Máquina de Treinar',
+    name: 'Lenda do Treino',
     description: 'Completar 500 exercícios',
     type: BadgeType.EXERCISE,
     milestone: 500,
