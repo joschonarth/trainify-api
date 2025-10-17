@@ -2,7 +2,7 @@ import { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
 import { ResourceNotFoundError } from '@/errors/resource-not-found.error'
-import { makeUpdateUserProfileUseCase } from '@/use-cases/users/factories/make-update-user-profile-use-case'
+import { makeUpdateUserProfileUseCase } from '@/modules/user/use-cases/factories/make-update-user-profile-use-case'
 
 export async function updateUserProfileController(
   request: FastifyRequest,

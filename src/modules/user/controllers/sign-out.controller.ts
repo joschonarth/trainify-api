@@ -1,6 +1,6 @@
 import { FastifyReply, FastifyRequest } from 'fastify'
 
-import { makeSignOutUseCase } from '@/use-cases/users/factories/make-sign-out-use-case'
+import { makeSignOutUseCase } from '@/modules/user/use-cases/factories/make-sign-out-use-case'
 
 export async function signOutController(
   request: FastifyRequest,

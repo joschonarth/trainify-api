@@ -1,7 +1,7 @@
 import { FastifyReply, FastifyRequest } from 'fastify'
 
 import { ResourceNotFoundError } from '@/errors/resource-not-found.error'
-import { makeFetchUserSchedulesUseCase } from '@/use-cases/users/factories/make-fetch-user-schedules-use-case'
+import { makeFetchUserSchedulesUseCase } from '@/modules/user/use-cases/factories/make-fetch-user-schedules-use-case'
 
 export async function fetchUserSchedulesController(
   request: FastifyRequest,

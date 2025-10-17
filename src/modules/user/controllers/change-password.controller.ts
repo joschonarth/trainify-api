@@ -1,10 +1,10 @@
 import { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
-import { InvalidCredentialsError } from '@/errors/invalid-credentials.error'
-import { PasswordsDoNotMatchError } from '@/errors/passwords-do-not-match.error'
+import { InvalidCredentialsError } from '@/modules/user/errors/invalid-credentials.error'
+import { PasswordsDoNotMatchError } from '@/modules/user/errors/passwords-do-not-match.error'
 import { ResourceNotFoundError } from '@/errors/resource-not-found.error'
-import { makeChangePasswordUseCase } from '@/use-cases/users/factories/make-change-password-use-case'
+import { makeChangePasswordUseCase } from '@/modules/user/use-cases/factories/make-change-password-use-case'
 
 export async function changePasswordController(
   request: FastifyRequest,

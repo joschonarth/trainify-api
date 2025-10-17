@@ -1,4 +1,4 @@
-import { PrismaUsersRepository } from '@/repositories/prisma/prisma-users.repository'
+import { PrismaUsersRepository } from '@/modules/user/repositories/prisma/prisma-users.repository'
 
 import { SignInWithGoogleUseCase } from '../sign-in-with-google.use-case'
 

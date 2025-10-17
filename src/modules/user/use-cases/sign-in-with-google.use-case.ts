@@ -1,6 +1,6 @@
 import { User } from '@prisma/client'
 
-import { UsersRepository } from '@/repositories/users.repository'
+import { UsersRepository } from '@/modules/user/repositories/users.repository'
 
 interface SignInWithGoogleUseCaseRequest {
   token: string

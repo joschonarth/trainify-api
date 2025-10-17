@@ -1,9 +1,9 @@
 import { User } from '@prisma/client'
 import { hash } from 'bcrypt'
 
-import { PasswordsDoNotMatchError } from '@/errors/passwords-do-not-match.error'
-import { UserAlreadyExistsError } from '@/errors/user-already-exists.error'
-import { UsersRepository } from '@/repositories/users.repository'
+import { PasswordsDoNotMatchError } from '@/modules/user/errors/passwords-do-not-match.error'
+import { UserAlreadyExistsError } from '@/modules/user/errors/user-already-exists.error'
+import { UsersRepository } from '@/modules/user/repositories/users.repository'
 
 interface RegisterUseCaseRequest {
   name: string

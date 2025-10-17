@@ -1,8 +1,8 @@
 import { compare } from 'bcrypt'
 import { beforeEach, describe, expect, it } from 'vitest'
 
-import { UserAlreadyExistsError } from '@/errors/user-already-exists.error'
-import { InMemoryUsersRepository } from '@/repositories/in-memory/in-memory-users.repository'
+import { UserAlreadyExistsError } from '@/modules/user/errors/user-already-exists.error'
+import { InMemoryUsersRepository } from '@/modules/user/repositories/in-memory/in-memory-users.repository'
 
 import { RegisterUseCase } from './register.use-case'
 

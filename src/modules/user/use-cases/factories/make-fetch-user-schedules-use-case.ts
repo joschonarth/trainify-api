@@ -1,4 +1,4 @@
-import { PrismaUsersRepository } from '@/repositories/prisma/prisma-users.repository'
+import { PrismaUsersRepository } from '@/modules/user/repositories/prisma/prisma-users.repository'
 import { PrismaWorkoutsRepository } from '@/repositories/prisma/prisma-workouts.repository'
 
 import { FetchUserSchedulesUseCase } from '../fetch-user-schedules.use-case'

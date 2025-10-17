@@ -1,9 +1,9 @@
 import { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
-import { PasswordsDoNotMatchError } from '@/errors/passwords-do-not-match.error'
-import { UserAlreadyExistsError } from '@/errors/user-already-exists.error'
-import { makeRegisterUseCase } from '@/use-cases/users/factories/make-register-use-case'
+import { PasswordsDoNotMatchError } from '@/modules/user/errors/passwords-do-not-match.error'
+import { UserAlreadyExistsError } from '@/modules/user/errors/user-already-exists.error'
+import { makeRegisterUseCase } from '@/modules/user/use-cases/factories/make-register-use-case'
 
 export async function registerController(
   request: FastifyRequest,

@@ -2,8 +2,8 @@ import { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
 import { env } from '@/env'
-import { InvalidGoogleTokenError } from '@/errors/invalid-google-token.error'
-import { makeSignInWithGoogleUseCase } from '@/use-cases/users/factories/make-sign-in-with-google-use-case'
+import { InvalidGoogleTokenError } from '@/modules/user/errors/invalid-google-token.error'
+import { makeSignInWithGoogleUseCase } from '@/modules/user/use-cases/factories/make-sign-in-with-google-use-case'
 
 export async function signInWithGoogleController(
   request: FastifyRequest,
