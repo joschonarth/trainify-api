@@ -5,6 +5,7 @@ import { WorkoutSessionsRepository } from '@/repositories/workout-sessions.repos
 interface CalendarDayStatus {
   date: string
   completed: boolean
+  sessionId?: string | undefined
 }
 
 interface GetWorkoutCalendarRequest {
@@ -49,6 +50,7 @@ export class GetWorkoutCalendarUseCase {
       return {
         date: date.format('YYYY-MM-DD'),
         completed: session?.status === 'COMPLETED',
+        sessionId: session?.id,
       }
     })
 
