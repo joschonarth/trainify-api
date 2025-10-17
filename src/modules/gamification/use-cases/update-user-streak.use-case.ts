@@ -1,4 +1,4 @@
-import { UserStreaksRepository } from '@/repositories/user-streaks.repository'
+import { UserStreaksRepository } from '@/modules/gamification/repositories/user-streaks.repository'
 import { daysBetweenDates } from '@/utils/get-days-between-dates'
 
 interface UpdateUserStreakUseCaseRequest {

@@ -5,8 +5,8 @@ import { ExerciseLogsRepository } from '@/repositories/exercise-logs.repository'
 import { ExerciseSessionsRepository } from '@/repositories/exercise-sessions.repository'
 import { WorkoutSessionsRepository } from '@/repositories/workout-sessions.repository'
 
-import { UnlockAllBadgesUseCase } from '../gamification/unlock-all-badges.use-case'
-import { UpdateUserStreakUseCase } from '../gamification/update-user-streak.use-case'
+import { UnlockAllBadgesUseCase } from '../../modules/gamification/use-cases/unlock-all-badges.use-case'
+import { UpdateUserStreakUseCase } from '../../modules/gamification/use-cases/update-user-streak.use-case'
 
 interface CompleteWorkoutSessionRequest {
   userId: string

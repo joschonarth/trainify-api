@@ -1,6 +1,6 @@
 import { Badge, BadgeType } from '@prisma/client'
 
-import { BadgesRepository } from '@/repositories/badges.repository'
+import { BadgesRepository } from '@/modules/gamification/repositories/badges.repository'
 
 interface GetAllBadgesUseCaseRequest {
   userId: string

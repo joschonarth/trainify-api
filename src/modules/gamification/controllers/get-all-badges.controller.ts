@@ -2,7 +2,7 @@ import { BadgeType } from '@prisma/client'
 import { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
-import { makeGetAllBadgesUseCase } from '@/use-cases/gamification/factories/make-get-all-badges-use-case'
+import { makeGetAllBadgesUseCase } from '@/modules/gamification/use-cases/factories/make-get-all-badges-use-case'
 
 const getAllBadgesQuerySchema = z.object({
   type: z.enum(BadgeType).optional().default(undefined),

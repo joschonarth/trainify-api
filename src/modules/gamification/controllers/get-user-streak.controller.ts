@@ -1,6 +1,6 @@
 import { FastifyReply, FastifyRequest } from 'fastify'
 
-import { makeGetUserStreakUseCase } from '@/use-cases/gamification/factories/make-get-user-streak-use-case'
+import { makeGetUserStreakUseCase } from '@/modules/gamification/use-cases/factories/make-get-user-streak-use-case'
 
 export async function getUserStreakController(
   request: FastifyRequest,

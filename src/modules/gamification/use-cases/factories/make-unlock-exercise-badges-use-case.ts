@@ -1,4 +1,4 @@
-import { PrismaBadgesRepository } from '@/repositories/prisma/prisma-badges.repository'
+import { PrismaBadgesRepository } from '@/modules/gamification/repositories/prisma/prisma-badges.repository'
 import { PrismaExerciseLogsRepository } from '@/repositories/prisma/prisma-exercise-logs.repository'
 
 import { UnlockExerciseBadgesUseCase } from '../unlock-exercise-badges.use-case'

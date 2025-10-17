@@ -1,6 +1,6 @@
 import { FastifyReply, FastifyRequest } from 'fastify'
 
-import { makeGetUnlockedBadgesUseCase } from '@/use-cases/gamification/factories/make-get-unlocked-badges-use-case'
+import { makeGetUnlockedBadgesUseCase } from '@/modules/gamification/use-cases/factories/make-get-unlocked-badges-use-case'
 
 export async function getUnlockedBadgesController(
   request: FastifyRequest,

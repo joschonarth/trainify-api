@@ -1,5 +1,5 @@
-import { PrismaBadgesRepository } from '@/repositories/prisma/prisma-badges.repository'
-import { PrismaUserStreaksRepository } from '@/repositories/prisma/prisma-user-streaks.repository'
+import { PrismaBadgesRepository } from '@/modules/gamification/repositories/prisma/prisma-badges.repository'
+import { PrismaUserStreaksRepository } from '@/modules/gamification/repositories/prisma/prisma-user-streaks.repository'
 
 import { UnlockStreakBadgesUseCase } from '../unlock-streak-badges.use-case'
 

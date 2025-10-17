@@ -1,4 +1,4 @@
-import { PrismaUserStreaksRepository } from '@/repositories/prisma/prisma-user-streaks.repository'
+import { PrismaUserStreaksRepository } from '@/modules/gamification/repositories/prisma/prisma-user-streaks.repository'
 
 import { GetUserStreakUseCase } from '../get-user-streak.use-case'
 

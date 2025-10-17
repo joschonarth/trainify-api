@@ -1,9 +1,9 @@
 import { FastifyInstance } from 'fastify'
 
+import { gamificationRoutes } from '../modules/gamification/routes'
 import { weightRoutes } from '../modules/weight/routes'
 import { exerciseLogsRoutes } from './exercise-logs.routes'
 import { exercisesRoutes } from './exercises.routes'
-import { gamificationRoutes } from './gamification.routes'
 import { usersRoutes } from './users.routes'
 import { workoutSessionsRoutes } from './workout-sessions.routes'
 import { workoutsRoutes } from './workouts.routes'

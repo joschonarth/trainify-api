@@ -1,7 +1,7 @@
 import { Badge } from '@prisma/client'
 
-import { BadgesRepository } from '@/repositories/badges.repository'
-import { UserStreaksRepository } from '@/repositories/user-streaks.repository'
+import { BadgesRepository } from '@/modules/gamification/repositories/badges.repository'
+import { UserStreaksRepository } from '@/modules/gamification/repositories/user-streaks.repository'
 
 interface UnlockStreakBadgesRequest {
   userId: string
