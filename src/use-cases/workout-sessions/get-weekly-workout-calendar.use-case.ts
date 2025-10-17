@@ -2,13 +2,13 @@ import dayjs from 'dayjs'
 
 import { WorkoutSessionsRepository } from '@/repositories/workout-sessions.repository'
 
-interface WeeklyWorkoutCalendar {
+interface CalendarWeekStatus {
   date: string
   completed: boolean
 }
 
 interface GetWeeklyWorkoutCalendarResponse {
-  week: WeeklyWorkoutCalendar[]
+  week: CalendarWeekStatus[]
 }
 
 export class GetWeeklyWorkoutCalendarUseCase {
@@ -24,7 +24,7 @@ export class GetWeeklyWorkoutCalendarUseCase {
       startOfWeek.add(i, 'day'),
     )
 
-    const weekStatus: WeeklyWorkoutCalendar[] = weekDates.map((date) => {
+    const weekStatus: CalendarWeekStatus[] = weekDates.map((date) => {
       const sessionForDay = sessions.find((s) =>
         dayjs(s.date).isSame(date, 'day'),
       )
