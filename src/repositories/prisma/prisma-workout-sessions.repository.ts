@@ -118,6 +118,25 @@ export class PrismaWorkoutSessionsRepository
     }) as unknown as WorkoutSessionWithWorkout | null
   }
 
+  async findByUserAndDateRange(
+    userId: string,
+    startDate: Date,
+    endDate: Date,
+  ): Promise<{ id: string; date: Date; status: WorkoutSessionStatus }[]> {
+    return prisma.workoutSession.findMany({
+      where: {
+        userId,
+        date: { gte: startDate, lte: endDate },
+      },
+      select: {
+        id: true,
+        date: true,
+        status: true,
+      },
+      orderBy: { date: 'asc' },
+    })
+  }
+
   async create(
     data: Prisma.WorkoutSessionUncheckedCreateInput,
   ): Promise<WorkoutSession> {

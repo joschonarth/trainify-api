@@ -53,6 +53,12 @@ export interface WorkoutSessionsRepository {
     id: string,
   ): Promise<WorkoutSessionWithWorkout | null>
 
+  findByUserAndDateRange(
+    userId: string,
+    startDate: Date,
+    endDate: Date,
+  ): Promise<{ id: string; date: Date; status: WorkoutSessionStatus }[]>
+
   create(
     data: Prisma.WorkoutSessionUncheckedCreateInput,
   ): Promise<WorkoutSession>
