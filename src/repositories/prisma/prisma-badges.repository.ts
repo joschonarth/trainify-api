@@ -9,6 +9,12 @@ export class PrismaBadgesRepository implements BadgesRepository {
     return prisma.badge.findMany()
   }
 
+  async findById(badgeId: string) {
+    return prisma.badge.findUnique({
+      where: { id: badgeId },
+    })
+  }
+
   async findByUser(userId: string) {
     return prisma.userBadge.findMany({
       where: { userId },
