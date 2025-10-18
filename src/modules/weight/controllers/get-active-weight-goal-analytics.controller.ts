@@ -1,15 +1,15 @@
 import { FastifyReply, FastifyRequest } from 'fastify'
 
-import { makeGetActiveGoalWeightAnalyticsUseCase } from '../use-cases/factories/make-get-active-goal-weight-analytics-use-case'
+import { makeGetActiveWeightGoalAnalyticsUseCase } from '../use-cases/factories/make-get-active-weight-goal-analytics-use-case'
 
-export async function getActiveGoalWeightAnalyticsController(
+export async function getActiveWeightGoalAnalyticsController(
   request: FastifyRequest,
   reply: FastifyReply,
 ) {
   const userId = request.user.sub
 
   const getActiveGoalAnalyticsUseCase =
-    makeGetActiveGoalWeightAnalyticsUseCase()
+    makeGetActiveWeightGoalAnalyticsUseCase()
 
   const analytics = await getActiveGoalAnalyticsUseCase.execute({ userId })
 

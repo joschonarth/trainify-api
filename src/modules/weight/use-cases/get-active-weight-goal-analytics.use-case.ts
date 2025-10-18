@@ -1,7 +1,7 @@
 import { WeightGoalsRepository } from '../repositories/weight-goals.repository'
 import { WeightLogsRepository } from '../repositories/weight-logs.repository'
 
-interface GetActiveGoalWeightAnalyticsRequest {
+interface GetActiveWeightGoalAnalyticsRequest {
   userId: string
 }
 
@@ -10,13 +10,13 @@ interface WeightDataPoint {
   weight: number
 }
 
-interface GetActiveGoalWeightAnalyticsResponse {
+interface GetActiveWeightGoalAnalyticsResponse {
   dataPoints: WeightDataPoint[]
   avgChangePerWeek: number
   trendDirection: 'increasing' | 'decreasing' | 'stable'
 }
 
-export class GetActiveGoalWeightAnalyticsUseCase {
+export class GetActiveWeightGoalAnalyticsUseCase {
   constructor(
     private weightLogsRepository: WeightLogsRepository,
     private weightGoalsRepository: WeightGoalsRepository,
@@ -24,7 +24,7 @@ export class GetActiveGoalWeightAnalyticsUseCase {
 
   async execute({
     userId,
-  }: GetActiveGoalWeightAnalyticsRequest): Promise<GetActiveGoalWeightAnalyticsResponse> {
+  }: GetActiveWeightGoalAnalyticsRequest): Promise<GetActiveWeightGoalAnalyticsResponse> {
     const activeGoal =
       await this.weightGoalsRepository.findActiveGoalByUserId(userId)
     if (!activeGoal) {
