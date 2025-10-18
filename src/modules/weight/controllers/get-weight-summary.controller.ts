@@ -1,7 +1,8 @@
 import { FastifyReply, FastifyRequest } from 'fastify'
 
 import { ResourceNotFoundError } from '@/errors/resource-not-found.error'
-import { makeGetWeightSummaryUseCase } from '@/modules/weight/use-cases/factories/make-get-weight-summary-use-case'
+
+import { makeGetWeightSummaryUseCase } from '../use-cases/factories/make-get-weight-summary-use-case'
 
 export async function getWeightSummaryController(
   request: FastifyRequest,

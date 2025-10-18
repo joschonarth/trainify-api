@@ -1,10 +1,11 @@
 import { WeightGoal } from '@prisma/client'
 
 import { ResourceNotFoundError } from '@/errors/resource-not-found.error'
-import { WeightGoalNotAchievedError } from '@/modules/weight/errors/weight-goal-not-achieved.error'
-import { WeightGoalsRepository } from '@/modules/weight/repositories/weight-goals.repository'
-import { WeightLogsRepository } from '@/modules/weight/repositories/weight-logs.repository'
-import { calculateWeightGoalProgress } from '@/modules/weight/utils/calculate-weight-goal-progress'
+
+import { WeightGoalNotAchievedError } from '../errors/weight-goal-not-achieved.error'
+import { WeightGoalsRepository } from '../repositories/weight-goals.repository'
+import { WeightLogsRepository } from '../repositories/weight-logs.repository'
+import { calculateWeightGoalProgress } from '../utils/calculate-weight-goal-progress'
 
 interface AchieveWeightGoalUseCaseRequest {
   goalId: string

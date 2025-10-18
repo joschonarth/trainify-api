@@ -1,9 +1,10 @@
 import { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
-import { InvalidWeightGoalError } from '@/modules/weight/errors/invalid-weight-goal.error'
 import { ResourceNotFoundError } from '@/errors/resource-not-found.error'
-import { makeLogWeightUseCase } from '@/modules/weight/use-cases/factories/make-log-weight-use-case'
+
+import { InvalidWeightGoalError } from '../errors/invalid-weight-goal.error'
+import { makeLogWeightUseCase } from '../use-cases/factories/make-log-weight-use-case'
 
 export async function logWeightController(
   request: FastifyRequest,

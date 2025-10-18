@@ -1,6 +1,6 @@
 import { FastifyReply, FastifyRequest } from 'fastify'
 
-import { makeListWeightLogsUseCase } from '@/modules/weight/use-cases/factories/make-list-weight-logs-use-case'
+import { makeListWeightLogsUseCase } from '../use-cases/factories/make-list-weight-logs-use-case'
 
 export async function listWeightLogsController(
   request: FastifyRequest,

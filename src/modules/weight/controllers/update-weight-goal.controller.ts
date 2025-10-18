@@ -1,9 +1,10 @@
 import { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
-import { InvalidWeightGoalError } from '@/modules/weight/errors/invalid-weight-goal.error'
 import { ResourceNotFoundError } from '@/errors/resource-not-found.error'
-import { makeUpdateWeightGoalUseCase } from '@/modules/weight/use-cases/factories/make-update-weight-goal-use-case'
+
+import { InvalidWeightGoalError } from '../errors/invalid-weight-goal.error'
+import { makeUpdateWeightGoalUseCase } from '../use-cases/factories/make-update-weight-goal-use-case'
 
 export async function updateWeightGoalController(
   request: FastifyRequest,

@@ -1,7 +1,7 @@
 import { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
-import { makeListWeightGoalsUseCase } from '@/modules/weight/use-cases/factories/make-list-weight-goals-use-case'
+import { makeListWeightGoalsUseCase } from '../use-cases/factories/make-list-weight-goals-use-case'
 
 export async function listWeightGoalsController(
   request: FastifyRequest,

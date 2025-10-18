@@ -1,7 +1,7 @@
 import { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
-import { makeGetGeneralWeightAnalyticsUseCase } from '@/modules/weight/use-cases/factories/make-get-general-weight-analytics-use-case'
+import { makeGetGeneralWeightAnalyticsUseCase } from '../use-cases/factories/make-get-general-weight-analytics-use-case'
 
 export async function getGeneralWeightAnalyticsController(
   request: FastifyRequest,

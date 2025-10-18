@@ -1,11 +1,11 @@
 import { WeightLog } from '@prisma/client'
 
-import { InvalidWeightGoalError } from '@/modules/weight/errors/invalid-weight-goal.error'
 import { ResourceNotFoundError } from '@/errors/resource-not-found.error'
-import { WeightGoalsRepository } from '@/modules/weight/repositories/weight-goals.repository'
-import { WeightLogsRepository } from '@/modules/weight/repositories/weight-logs.repository'
-import { calculateWeightGoalProgress } from '@/modules/weight/utils/calculate-weight-goal-progress'
 
+import { InvalidWeightGoalError } from '../errors/invalid-weight-goal.error'
+import { WeightGoalsRepository } from '../repositories/weight-goals.repository'
+import { WeightLogsRepository } from '../repositories/weight-logs.repository'
+import { calculateWeightGoalProgress } from '../utils/calculate-weight-goal-progress'
 import { AchieveWeightGoalUseCase } from './achieve-weight-goal.use-case'
 
 interface LogWeightUseCaseRequest {

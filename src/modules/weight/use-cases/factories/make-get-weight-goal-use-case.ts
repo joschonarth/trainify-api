@@ -1,5 +1,4 @@
-import { PrismaWeightGoalsRepository } from '@/modules/weight/repositories/prisma/prisma-weight-goals.repository'
-
+import { PrismaWeightGoalsRepository } from '../../repositories/prisma/prisma-weight-goals.repository'
 import { GetWeightGoalUseCase } from '../get-weight-goal.use-case'
 
 export function makeGetWeightGoalUseCase() {

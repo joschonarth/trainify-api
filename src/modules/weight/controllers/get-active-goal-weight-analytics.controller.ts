@@ -1,6 +1,6 @@
 import { FastifyReply, FastifyRequest } from 'fastify'
 
-import { makeGetActiveGoalWeightAnalyticsUseCase } from '@/modules/weight/use-cases/factories/make-get-active-goal-weight-analytics-use-case'
+import { makeGetActiveGoalWeightAnalyticsUseCase } from '../use-cases/factories/make-get-active-goal-weight-analytics-use-case'
 
 export async function getActiveGoalWeightAnalyticsController(
   request: FastifyRequest,

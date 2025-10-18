@@ -1,6 +1,6 @@
 import { WeightGoal } from '@prisma/client'
 
-import { WeightGoalsRepository } from '@/modules/weight/repositories/weight-goals.repository'
+import { WeightGoalsRepository } from '../repositories/weight-goals.repository'
 
 interface ListWeightGoalsUseCaseRequest {
   userId: string

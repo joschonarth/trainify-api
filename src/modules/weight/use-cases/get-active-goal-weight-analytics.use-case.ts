@@ -1,5 +1,5 @@
-import { WeightGoalsRepository } from '@/modules/weight/repositories/weight-goals.repository'
-import { WeightLogsRepository } from '@/modules/weight/repositories/weight-logs.repository'
+import { WeightGoalsRepository } from '../repositories/weight-goals.repository'
+import { WeightLogsRepository } from '../repositories/weight-logs.repository'
 
 interface GetActiveGoalWeightAnalyticsRequest {
   userId: string

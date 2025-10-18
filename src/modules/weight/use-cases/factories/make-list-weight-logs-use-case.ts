@@ -1,5 +1,4 @@
-import { PrismaWeightLogsRepository } from '@/modules/weight/repositories/prisma/prisma-weight-logs.repository'
-
+import { PrismaWeightLogsRepository } from '../../repositories/prisma/prisma-weight-logs.repository'
 import { ListWeightLogsUseCase } from '../list-weight-logs.use-case'
 
 export function makeListWeightLogsUseCase() {

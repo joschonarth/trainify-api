@@ -2,7 +2,8 @@ import { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
 import { ResourceNotFoundError } from '@/errors/resource-not-found.error'
-import { makeGetWeightGoalUseCase } from '@/modules/weight/use-cases/factories/make-get-weight-goal-use-case'
+
+import { makeGetWeightGoalUseCase } from '../use-cases/factories/make-get-weight-goal-use-case'
 
 export async function getWeightGoalController(
   request: FastifyRequest,

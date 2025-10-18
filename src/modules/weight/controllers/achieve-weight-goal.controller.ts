@@ -1,8 +1,9 @@
 import { FastifyReply, FastifyRequest } from 'fastify'
 
 import { ResourceNotFoundError } from '@/errors/resource-not-found.error'
-import { WeightGoalNotAchievedError } from '@/modules/weight/errors/weight-goal-not-achieved.error'
-import { makeAchieveWeightGoalUseCase } from '@/modules/weight/use-cases/factories/make-achieve-weight-goal-use-case'
+
+import { WeightGoalNotAchievedError } from '../errors/weight-goal-not-achieved.error'
+import { makeAchieveWeightGoalUseCase } from '../use-cases/factories/make-achieve-weight-goal-use-case'
 
 export async function achieveWeightGoalController(
   request: FastifyRequest<{ Params: { goalId: string } }>,

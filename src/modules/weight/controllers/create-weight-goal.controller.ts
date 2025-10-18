@@ -2,7 +2,7 @@ import { GoalType } from '@prisma/client'
 import { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
-import { makeCreateWeightGoalUseCase } from '@/modules/weight/use-cases/factories/make-create-weight-goal-use-case'
+import { makeCreateWeightGoalUseCase } from '../use-cases/factories/make-create-weight-goal-use-case'
 
 export async function createWeightGoalController(
   request: FastifyRequest,

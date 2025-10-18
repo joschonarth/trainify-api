@@ -1,5 +1,5 @@
-import { PrismaWeightLogsRepository } from '@/modules/weight/repositories/prisma/prisma-weight-logs.repository'
-import { GetGeneralWeightAnalyticsUseCase } from '@/modules/weight/use-cases/get-general-weight-analytics.use-case'
+import { PrismaWeightLogsRepository } from '../../repositories/prisma/prisma-weight-logs.repository'
+import { GetGeneralWeightAnalyticsUseCase } from '../get-general-weight-analytics.use-case'
 
 export function makeGetGeneralWeightAnalyticsUseCase() {
   const weightLogsRepository = new PrismaWeightLogsRepository()
