@@ -30,4 +30,5 @@ export interface WeightGoalsRepository {
     },
   ): Promise<WeightGoal>
   updateProgress(id: string, progress: number): Promise<void>
+  delete(id: string): Promise<void>
 }

@@ -24,7 +24,7 @@ export interface WeightLogsRepository {
   findAverageByUserId(userId: string): Promise<number | null>
   update(
     id: string,
-    data: { weight?: number; note?: string | null },
+    data: { goalId?: string | null; weight?: number; note?: string | null },
   ): Promise<WeightLog>
   delete(id: string): Promise<void>
 }
