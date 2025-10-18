@@ -1,8 +1,5 @@
-import { WeightGoal } from '@prisma/client'
-
 import { ResourceNotFoundError } from '@/errors/resource-not-found.error'
 
-import { WeightGoalsRepository } from '../repositories/weight-goals.repository'
 import { WeightLogsRepository } from '../repositories/weight-logs.repository'
 
 interface WeightSummaryResponse {
@@ -13,14 +10,10 @@ interface WeightSummaryResponse {
   minWeight: number | null
   maxWeight: number | null
   lastLogDate: Date | null
-  activeGoal: WeightGoal | null
 }
 
 export class GetWeightSummaryUseCase {
-  constructor(
-    private weightGoalsRepository: WeightGoalsRepository,
-    private weightLogsRepository: WeightLogsRepository,
-  ) {}
+  constructor(private weightLogsRepository: WeightLogsRepository) {}
 
   async execute(userId: string): Promise<WeightSummaryResponse> {
     const latestLog = await this.weightLogsRepository.findLatestByUserId(userId)
@@ -29,9 +22,6 @@ export class GetWeightSummaryUseCase {
       await this.weightLogsRepository.findAverageByUserId(userId)
     const minWeightLog = await this.weightLogsRepository.findMinByUserId(userId)
     const maxWeightLog = await this.weightLogsRepository.findMaxByUserId(userId)
-
-    const activeGoal =
-      await this.weightGoalsRepository.findActiveGoalByUserId(userId)
 
     if (!latestLog && !firstLog) {
       throw new ResourceNotFoundError('No weight logs found for this user.')
@@ -50,7 +40,6 @@ export class GetWeightSummaryUseCase {
       minWeight: minWeightLog?.weight ?? null,
       maxWeight: maxWeightLog?.weight ?? null,
       lastLogDate: latestLog?.createdAt ?? null,
-      activeGoal,
     }
   }
 }
