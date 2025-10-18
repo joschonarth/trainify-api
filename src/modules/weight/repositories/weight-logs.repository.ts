@@ -19,6 +19,7 @@ export interface WeightLogsRepository {
   findLatestByUserId(userId: string): Promise<WeightLog | null>
   findLatestByGoalId(goalId: string): Promise<WeightLog | null>
   findFirstByUserId(userId: string): Promise<WeightLog | null>
+  findFirstByGoalId(goalId: string): Promise<WeightLog | null>
   findMinByUserId(userId: string): Promise<WeightLog | null>
   findMaxByUserId(userId: string): Promise<WeightLog | null>
   findAverageByUserId(userId: string): Promise<number | null>

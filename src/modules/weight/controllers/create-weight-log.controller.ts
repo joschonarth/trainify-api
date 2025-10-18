@@ -4,20 +4,20 @@ import { z } from 'zod'
 import { ResourceNotFoundError } from '@/errors/resource-not-found.error'
 
 import { InvalidWeightGoalError } from '../errors/invalid-weight-goal.error'
-import { makeLogWeightUseCase } from '../use-cases/factories/make-log-weight-use-case'
+import { makeCreateWeightLogUseCase } from '../use-cases/factories/make-create-weight-log-use-case'
 
-export async function logWeightController(
+export async function createWeightLogController(
   request: FastifyRequest,
   reply: FastifyReply,
 ) {
-  const logWeightBodySchema = z.object({
+  const createWeightLogBodySchema = z.object({
     weight: z.number(),
     note: z.string().nullable().optional(),
     goalId: z.string().nullable().optional(),
   })
 
   try {
-    const rawBody = logWeightBodySchema.parse(request.body)
+    const rawBody = createWeightLogBodySchema.parse(request.body)
 
     const weight = rawBody.weight
     const note = rawBody.note ?? null
@@ -25,9 +25,9 @@ export async function logWeightController(
 
     const userId = request.user.sub
 
-    const logWeightUseCase = makeLogWeightUseCase()
+    const createWeightLogUseCase = makeCreateWeightLogUseCase()
 
-    const { weightLog } = await logWeightUseCase.execute({
+    const { weightLog } = await createWeightLogUseCase.execute({
       userId,
       weight,
       note,

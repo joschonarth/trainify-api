@@ -1,4 +1,4 @@
-import { WeightGoal, WeightLog } from '@prisma/client'
+import { Prisma, WeightGoal, WeightLog } from '@prisma/client'
 
 import { prisma } from '@/lib/prisma'
 
@@ -49,7 +49,7 @@ export class PrismaWeightGoalsRepository implements WeightGoalsRepository {
         name: data.name,
         description: data.description ?? null,
         goalType: data.goalType,
-        startWeight: data.startWeight,
+        startWeight: data.startWeight ?? 0,
         targetWeight: data.targetWeight,
         startDate: data.startDate ?? new Date(),
         endDate: data.endDate ?? null,
@@ -74,13 +74,11 @@ export class PrismaWeightGoalsRepository implements WeightGoalsRepository {
 
   async update(
     id: string,
-    data: { name?: string; description?: string | null; endDate?: Date | null },
+    data: Prisma.WeightGoalUpdateInput,
   ): Promise<WeightGoal> {
     return prisma.weightGoal.update({
       where: { id },
-      data: {
-        ...data,
-      },
+      data,
     })
   }
 

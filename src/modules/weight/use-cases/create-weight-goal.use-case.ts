@@ -7,7 +7,6 @@ interface CreateWeightGoalUseCaseRequest {
   name: string
   description?: string | null
   goalType: GoalType
-  startWeight: number
   targetWeight: number
   startDate?: Date
   endDate?: Date | null
@@ -25,7 +24,6 @@ export class CreateWeightGoalUseCase {
     name,
     description,
     goalType,
-    startWeight,
     targetWeight,
     startDate,
     endDate,
@@ -42,7 +40,6 @@ export class CreateWeightGoalUseCase {
       name,
       description: description ?? null,
       goalType,
-      startWeight,
       targetWeight,
       startDate: startDate ?? new Date(),
       endDate: endDate ?? null,

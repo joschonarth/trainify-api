@@ -12,7 +12,6 @@ export async function createWeightGoalController(
     name: z.string().min(1, 'Name is required'),
     description: z.string().nullable().default(null),
     goalType: z.enum(GoalType),
-    startWeight: z.number(),
     targetWeight: z.number(),
     startDate: z.date().default(() => new Date()),
     endDate: z.date().nullable().default(null),
@@ -20,15 +19,8 @@ export async function createWeightGoalController(
 
   const parsedBody = createGoalBodySchema.parse(request.body)
 
-  const {
-    name,
-    description,
-    goalType,
-    startWeight,
-    targetWeight,
-    startDate,
-    endDate,
-  } = parsedBody
+  const { name, description, goalType, targetWeight, startDate, endDate } =
+    parsedBody
 
   const userId = request.user.sub
 
@@ -39,7 +31,6 @@ export async function createWeightGoalController(
     name,
     description,
     goalType,
-    startWeight,
     targetWeight,
     startDate,
     endDate,
