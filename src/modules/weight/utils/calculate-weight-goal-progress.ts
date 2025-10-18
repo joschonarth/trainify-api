@@ -19,15 +19,22 @@ export function calculateWeightGoalProgress(
   currentWeight: number,
 ): number {
   const { goalType, startWeight, targetWeight } = goal
+
+  const effectiveStartWeight = startWeight ?? currentWeight
+
   let progress = 0
 
   if (goalType === 'LOSE') {
-    progress = (startWeight - currentWeight) / (startWeight - targetWeight)
+    progress =
+      (effectiveStartWeight - currentWeight) /
+      (effectiveStartWeight - targetWeight)
   } else if (goalType === 'GAIN') {
-    progress = (currentWeight - startWeight) / (targetWeight - startWeight)
+    progress =
+      (currentWeight - effectiveStartWeight) /
+      (targetWeight - effectiveStartWeight)
   } else {
     progress = 1 - Math.abs(currentWeight - targetWeight) / targetWeight
   }
 
-  return Math.min(Math.max(progress * 100, 0), 100)
+  return Math.min(Math.max(Number((progress * 100).toFixed(2)), 0), 100)
 }

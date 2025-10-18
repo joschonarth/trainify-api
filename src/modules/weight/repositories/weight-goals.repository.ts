@@ -1,4 +1,4 @@
-import { GoalType, Prisma, WeightGoal, WeightLog } from '@prisma/client'
+import { GoalType, WeightGoal, WeightLog } from '@prisma/client'
 
 export interface CreateWeightGoalData {
   userId: string
@@ -21,7 +21,15 @@ export interface WeightGoalsRepository {
   create(data: CreateWeightGoalData): Promise<WeightGoal>
   deactivateGoal(id: string): Promise<void>
   markAsAchieved(id: string, achievedAt: Date): Promise<void>
-  update(id: string, data: Prisma.WeightGoalUpdateInput): Promise<WeightGoal>
+  update(
+    id: string,
+    data: {
+      name?: string
+      description?: string | null
+      endDate?: Date | null
+      startWeight?: number | null
+    },
+  ): Promise<WeightGoal>
   updateProgress(id: string, progress: number): Promise<void>
   delete(id: string): Promise<void>
 }

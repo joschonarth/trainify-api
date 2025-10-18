@@ -222,7 +222,7 @@ model WeightGoal {
   description String?
 
   goalType     GoalType
-  startWeight  Float
+  startWeight  Float?
   targetWeight Float
   startDate    DateTime  @default(now())
   endDate      DateTime?
