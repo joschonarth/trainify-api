@@ -1,12 +1,15 @@
 import { ResourceNotFoundError } from '@/errors/resource-not-found.error'
 
+import { WeightGoalsRepository } from '../repositories/weight-goals.repository'
 import { WeightLogsRepository } from '../repositories/weight-logs.repository'
+import { calculateWeightGoalProgress } from '../utils/calculate-weight-goal-progress'
+import { AchieveWeightGoalUseCase } from './achieve-weight-goal.use-case'
 
 interface UpdateWeightLogRequest {
   logId: string
   userId: string
-  weight?: number | undefined
-  note?: string | null | undefined
+  weight?: number
+  note?: string | null
 }
 
 interface UpdateWeightLogResponse {
@@ -20,7 +23,11 @@ interface UpdateWeightLogResponse {
 }
 
 export class UpdateWeightLogUseCase {
-  constructor(private weightLogsRepository: WeightLogsRepository) {}
+  constructor(
+    private weightLogsRepository: WeightLogsRepository,
+    private weightGoalsRepository: WeightGoalsRepository,
+    private achieveWeightGoalUseCase: AchieveWeightGoalUseCase,
+  ) {}
 
   async execute({
     logId,
@@ -38,6 +45,21 @@ export class UpdateWeightLogUseCase {
       weight: weight ?? log.weight,
       note: note ?? log.note,
     })
+
+    if (updatedLog.goalId) {
+      const goal = await this.weightGoalsRepository.findById(updatedLog.goalId)
+      if (goal && goal.isActive) {
+        const progress = calculateWeightGoalProgress(goal, updatedLog.weight)
+        await this.weightGoalsRepository.updateProgress(goal.id, progress)
+
+        if (progress >= 100) {
+          await this.achieveWeightGoalUseCase.execute({
+            goalId: goal.id,
+            userId,
+          })
+        }
+      }
+    }
 
     return {
       id: updatedLog.id,
