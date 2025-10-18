@@ -36,6 +36,7 @@ export async function updateWeightLogController(
     if (error instanceof ResourceNotFoundError) {
       return reply.status(404).send({ message: error.message })
     }
+
     throw error
   }
 }
