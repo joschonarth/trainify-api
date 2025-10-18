@@ -26,6 +26,7 @@ export async function deleteWeightLogController(
     if (error instanceof ResourceNotFoundError) {
       return reply.status(404).send({ message: error.message })
     }
+
     throw error
   }
 }

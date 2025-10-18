@@ -1,6 +1,7 @@
 import { ResourceNotFoundError } from '@/errors/resource-not-found.error'
 
 import { WeightLogsRepository } from '../repositories/weight-logs.repository'
+import { CalculateWeightGoalProgressUseCase } from './calculate-weight-goal-progress.use-case'
 
 interface DeleteWeightLogRequest {
   logId: string
@@ -8,7 +9,10 @@ interface DeleteWeightLogRequest {
 }
 
 export class DeleteWeightLogUseCase {
-  constructor(private weightLogsRepository: WeightLogsRepository) {}
+  constructor(
+    private weightLogsRepository: WeightLogsRepository,
+    private calculateWeightGoalProgressUseCase: CalculateWeightGoalProgressUseCase,
+  ) {}
 
   async execute({ logId, userId }: DeleteWeightLogRequest): Promise<void> {
     const log = await this.weightLogsRepository.findById(logId)
@@ -18,5 +22,12 @@ export class DeleteWeightLogUseCase {
     }
 
     await this.weightLogsRepository.delete(logId)
+
+    if (log.goalId) {
+      await this.calculateWeightGoalProgressUseCase.execute({
+        goalId: log.goalId,
+        userId,
+      })
+    }
   }
 }
