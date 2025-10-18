@@ -71,7 +71,7 @@ export class CreateWeightLogUseCase {
     )
     await this.weightGoalsRepository.updateProgress(goal.id, progress)
 
-    if (progress >= 100) {
+    if (goal.goalType !== 'MAINTAIN' && progress >= 100 && goal.isActive) {
       await this.achieveWeightGoalUseCase.execute({ goalId: goal.id, userId })
     }
 
