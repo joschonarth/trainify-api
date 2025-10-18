@@ -22,5 +22,9 @@ export interface WeightLogsRepository {
   findMinByUserId(userId: string): Promise<WeightLog | null>
   findMaxByUserId(userId: string): Promise<WeightLog | null>
   findAverageByUserId(userId: string): Promise<number | null>
+  update(
+    id: string,
+    data: { weight?: number; note?: string | null },
+  ): Promise<WeightLog>
   delete(id: string): Promise<void>
 }

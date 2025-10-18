@@ -13,6 +13,7 @@ import { logWeightController } from '@/modules/weight/controllers/log-weight.con
 import { updateWeightGoalController } from '@/modules/weight/controllers/update-weight-goal.controller'
 
 import { getWeightLogController } from '../controllers/get-weight-log.controller'
+import { updateWeightLogController } from '../controllers/update-weight-log.controller'
 
 export async function weightRoutes(app: FastifyInstance) {
   app.addHook('onRequest', verifyJwt)
@@ -21,6 +22,7 @@ export async function weightRoutes(app: FastifyInstance) {
   app.get('/weight/logs', listWeightLogsController)
   app.get('/weight/logs/:logId', getWeightLogController)
   app.post('/weight/logs', logWeightController)
+  app.put('/weight/logs/:logId', updateWeightLogController)
 
   /** Weight Goals */
   app.get('/weight/goals/:goalId', getWeightGoalController)

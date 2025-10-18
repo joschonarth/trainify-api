@@ -109,6 +109,19 @@ export class PrismaWeightLogsRepository implements WeightLogsRepository {
     return result._avg.weight ?? null
   }
 
+  async update(
+    id: string,
+    data: { weight?: number; note?: string | null },
+  ): Promise<WeightLog> {
+    return prisma.weightLog.update({
+      where: { id },
+      data: {
+        ...(data.weight !== undefined ? { weight: data.weight } : {}),
+        ...(data.note !== undefined ? { note: data.note } : {}),
+      },
+    })
+  }
+
   async delete(id: string): Promise<void> {
     await prisma.weightLog.delete({
       where: { id },
