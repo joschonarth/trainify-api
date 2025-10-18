@@ -111,11 +111,12 @@ export class PrismaWeightLogsRepository implements WeightLogsRepository {
 
   async update(
     id: string,
-    data: { weight?: number; note?: string | null },
+    data: { goalId?: string | null; weight?: number; note?: string | null },
   ): Promise<WeightLog> {
     return prisma.weightLog.update({
       where: { id },
       data: {
+        ...(data.goalId !== undefined ? { goalId: data.goalId } : {}),
         ...(data.weight !== undefined ? { weight: data.weight } : {}),
         ...(data.note !== undefined ? { note: data.note } : {}),
       },

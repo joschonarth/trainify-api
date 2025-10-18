@@ -90,4 +90,10 @@ export class PrismaWeightGoalsRepository implements WeightGoalsRepository {
       data: { progress },
     })
   }
+
+  async delete(id: string): Promise<void> {
+    await prisma.weightGoal.delete({
+      where: { id },
+    })
+  }
 }

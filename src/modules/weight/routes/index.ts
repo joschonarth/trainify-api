@@ -5,6 +5,7 @@ import { verifyJwt } from '@/middlewares/verify-jwt'
 import { achieveWeightGoalController } from '../controllers/achieve-weight-goal.controller'
 import { createWeightGoalController } from '../controllers/create-weight-goal.controller'
 import { deactivateWeightGoalController } from '../controllers/deactivate-weight-goal.controller'
+import { deleteWeightGoalController } from '../controllers/delete-weight-goal.controller'
 import { deleteWeightLogController } from '../controllers/delete-weight-log.controller'
 import { getActiveWeightGoalController } from '../controllers/get-active-weight-goal.controller'
 import { getActiveWeightGoalAnalyticsController } from '../controllers/get-active-weight-goal-analytics.controller'
@@ -36,6 +37,7 @@ export async function weightRoutes(app: FastifyInstance) {
   app.patch('/weight/goals/:goalId/achieve', achieveWeightGoalController)
   app.patch('/weight/goals/:goalId/deactivate', deactivateWeightGoalController)
   app.put('/weight/goals/:goalId', updateWeightGoalController)
+  app.delete('/weight/goals/:goalId', deleteWeightGoalController)
 
   /** Metrics */
   app.get('/weight/summary', getWeightSummaryController)
