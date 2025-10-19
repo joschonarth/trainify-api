@@ -1,5 +1,5 @@
 import { ExerciseLogsRepository } from '@/modules/exercise/repositories/exercise-logs.repository'
-import { WorkoutSessionsRepository } from '@/repositories/workout-sessions.repository'
+import { WorkoutSessionsRepository } from '@/modules/session/repositories/workout-sessions.repository'
 
 interface GetUserMetricsRequest {
   userId: string

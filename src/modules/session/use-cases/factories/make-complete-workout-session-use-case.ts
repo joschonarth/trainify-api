@@ -1,8 +1,8 @@
+import { PrismaExerciseLogsRepository } from '@/modules/exercise/repositories/prisma/prisma-exercise-logs.repository'
 import { makeUnlockAllBadgesUseCase } from '@/modules/gamification/use-cases/factories/make-unlock-all-badges-use-case'
 import { makeUpdateUserStreakUseCase } from '@/modules/gamification/use-cases/factories/make-update-user-streak-use-case'
-import { PrismaExerciseLogsRepository } from '@/modules/exercise/repositories/prisma/prisma-exercise-logs.repository'
-import { PrismaExerciseSessionsRepository } from '@/repositories/prisma/prisma-exercise-sessions.repository'
-import { PrismaWorkoutSessionsRepository } from '@/repositories/prisma/prisma-workout-sessions.repository'
+import { PrismaExerciseSessionsRepository } from '@/modules/session/repositories/prisma/prisma-exercise-sessions.repository'
+import { PrismaWorkoutSessionsRepository } from '@/modules/session/repositories/prisma/prisma-workout-sessions.repository'
 
 import { CompleteWorkoutSessionUseCase } from '../complete-workout-session.use-case'
 

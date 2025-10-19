@@ -4,8 +4,8 @@ import { ResourceNotFoundError } from '@/errors/resource-not-found.error'
 import { ExerciseLogsRepository } from '@/modules/exercise/repositories/exercise-logs.repository'
 import { UnlockAllBadgesUseCase } from '@/modules/gamification/use-cases/unlock-all-badges.use-case'
 import { UpdateUserStreakUseCase } from '@/modules/gamification/use-cases/update-user-streak.use-case'
-import { ExerciseSessionsRepository } from '@/repositories/exercise-sessions.repository'
-import { WorkoutSessionsRepository } from '@/repositories/workout-sessions.repository'
+import { ExerciseSessionsRepository } from '@/modules/session/repositories/exercise-sessions.repository'
+import { WorkoutSessionsRepository } from '@/modules/session/repositories/workout-sessions.repository'
 
 interface CompleteWorkoutSessionRequest {
   userId: string

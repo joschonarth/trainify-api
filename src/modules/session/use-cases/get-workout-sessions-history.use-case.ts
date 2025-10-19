@@ -2,7 +2,7 @@ import { ResourceNotFoundError } from '@/errors/resource-not-found.error'
 import {
   WorkoutSessionsRepository,
   WorkoutSessionWithWorkout,
-} from '@/repositories/workout-sessions.repository'
+} from '@/modules/session/repositories/workout-sessions.repository'
 
 interface ExerciseHistory {
   name: string

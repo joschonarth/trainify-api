@@ -3,7 +3,7 @@ import { WorkoutSchedulesRepository } from '@/modules/workout/repositories/worko
 import {
   WorkoutSessionsRepository,
   WorkoutSessionWithWorkout,
-} from '@/repositories/workout-sessions.repository'
+} from '@/modules/session/repositories/workout-sessions.repository'
 
 interface GetDailyWorkoutSessionRequest {
   userId: string

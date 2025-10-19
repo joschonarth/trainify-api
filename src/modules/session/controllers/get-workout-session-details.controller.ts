@@ -2,7 +2,7 @@ import { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
 import { ResourceNotFoundError } from '@/errors/resource-not-found.error'
-import { makeGetWorkoutSessionDetailsUseCase } from '@/use-cases/workout-sessions/factories/make-get-workout-session-details-use-case'
+import { makeGetWorkoutSessionDetailsUseCase } from '@/modules/session/use-cases/factories/make-get-workout-session-details-use-case'
 
 export async function getWorkoutSessionDetailsController(
   request: FastifyRequest,

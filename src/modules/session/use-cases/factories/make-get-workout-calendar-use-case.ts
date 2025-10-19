@@ -1,4 +1,4 @@
-import { PrismaWorkoutSessionsRepository } from '@/repositories/prisma/prisma-workout-sessions.repository'
+import { PrismaWorkoutSessionsRepository } from '@/modules/session/repositories/prisma/prisma-workout-sessions.repository'
 
 import { GetWorkoutCalendarUseCase } from '../get-workout-calendar.use-case'
 

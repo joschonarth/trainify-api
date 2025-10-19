@@ -12,10 +12,10 @@ import { updateUserProfileController } from '@/modules/user/controllers/update-u
 
 export async function usersRoutes(app: FastifyInstance) {
   app.post('/users', registerController)
-  app.post('/sessions', authenticateController)
+  app.post('/auth', authenticateController)
 
   /** Google Auth */
-  app.post('/sessions/google', signInWithGoogleController)
+  app.post('/auth/google', signInWithGoogleController)
 
   /** Authenticated */
   app.get('/me', { onRequest: [verifyJwt] }, getUserProfileController)

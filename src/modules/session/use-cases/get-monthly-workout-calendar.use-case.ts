@@ -1,44 +1,32 @@
 import dayjs from 'dayjs'
 
-import { WorkoutSessionsRepository } from '@/repositories/workout-sessions.repository'
+import { WorkoutSessionsRepository } from '@/modules/session/repositories/workout-sessions.repository'
 
 interface CalendarDayStatus {
   date: string
   completed: boolean
-  sessionId?: string | undefined
 }
 
-interface GetWorkoutCalendarRequest {
-  userId: string
-  month?: number
-  year?: number
-}
-
-interface GetWorkoutCalendarResponse {
+interface GetMonthlyWorkoutCalendarResponse {
   days: CalendarDayStatus[]
 }
 
-export class GetWorkoutCalendarUseCase {
+export class GetMonthlyWorkoutCalendarUseCase {
   constructor(private workoutSessionsRepository: WorkoutSessionsRepository) {}
 
-  async execute({
-    userId,
-    year,
-    month,
-  }: GetWorkoutCalendarRequest): Promise<GetWorkoutCalendarResponse> {
+  async execute(
+    userId: string,
+    year?: number,
+    month?: number,
+  ): Promise<GetMonthlyWorkoutCalendarResponse> {
     const today = dayjs()
     const currentYear = year ?? today.year()
-    const currentMonth = (month ?? today.month() + 1) - 1 // dayjs months are 0-based
+    const currentMonth = month ?? today.month()
 
     const startOfMonth = dayjs(new Date(currentYear, currentMonth, 1))
     const endOfMonth = startOfMonth.endOf('month')
 
-    const sessions =
-      await this.workoutSessionsRepository.findByUserAndDateRange(
-        userId,
-        startOfMonth.toDate(),
-        endOfMonth.toDate(),
-      )
+    const sessions = await this.workoutSessionsRepository.findAllByUser(userId)
 
     const totalDays = endOfMonth.date()
     const daysArray = Array.from({ length: totalDays }, (_, i) =>
@@ -50,7 +38,6 @@ export class GetWorkoutCalendarUseCase {
       return {
         date: date.format('YYYY-MM-DD'),
         completed: session?.status === 'COMPLETED',
-        sessionId: session?.id,
       }
     })
 

@@ -1,5 +1,5 @@
 import { PrismaBadgesRepository } from '@/modules/gamification/repositories/prisma/prisma-badges.repository'
-import { PrismaWorkoutSessionsRepository } from '@/repositories/prisma/prisma-workout-sessions.repository'
+import { PrismaWorkoutSessionsRepository } from '@/modules/session/repositories/prisma/prisma-workout-sessions.repository'
 
 import { UnlockWorkoutBadgesUseCase } from '../unlock-workout-badges.use-case'
 

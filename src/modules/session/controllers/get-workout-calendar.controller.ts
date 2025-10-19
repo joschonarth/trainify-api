@@ -1,7 +1,7 @@
 import { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
-import { makeGetWorkoutCalendarUseCase } from '@/use-cases/workout-sessions/factories/make-get-workout-calendar-use-case'
+import { makeGetWorkoutCalendarUseCase } from '@/modules/session/use-cases/factories/make-get-workout-calendar-use-case'
 
 export async function getWorkoutCalendarController(
   request: FastifyRequest,

@@ -1,6 +1,6 @@
 import dayjs from 'dayjs'
 
-import { WorkoutSessionsRepository } from '@/repositories/workout-sessions.repository'
+import { WorkoutSessionsRepository } from '@/modules/session/repositories/workout-sessions.repository'
 
 interface CalendarWeekStatus {
   date: string

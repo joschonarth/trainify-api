@@ -1,7 +1,7 @@
 import { Badge } from '@prisma/client'
 
 import { BadgesRepository } from '@/modules/gamification/repositories/badges.repository'
-import { PrismaWorkoutSessionsRepository } from '@/repositories/prisma/prisma-workout-sessions.repository'
+import { PrismaWorkoutSessionsRepository } from '@/modules/session/repositories/prisma/prisma-workout-sessions.repository'
 
 interface UnlockWorkoutBadgesRequest {
   userId: string

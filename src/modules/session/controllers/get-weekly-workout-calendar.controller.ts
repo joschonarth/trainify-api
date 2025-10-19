@@ -1,6 +1,6 @@
 import { FastifyReply, FastifyRequest } from 'fastify'
 
-import { makeGetWeeklyWorkoutCalendarUseCase } from '@/use-cases/workout-sessions/factories/make-get-weekly-workout-calendar-use-case'
+import { makeGetWeeklyWorkoutCalendarUseCase } from '@/modules/session/use-cases/factories/make-get-weekly-workout-calendar-use-case'
 
 export async function getWeeklyWorkoutCalendarController(
   request: FastifyRequest,

@@ -1,7 +1,7 @@
 import { WorkoutSessionStatus } from '@prisma/client'
 
 import { ResourceNotFoundError } from '@/errors/resource-not-found.error'
-import { WorkoutSessionsRepository } from '@/repositories/workout-sessions.repository'
+import { WorkoutSessionsRepository } from '@/modules/session/repositories/workout-sessions.repository'
 
 interface ExerciseDetail {
   name: string
