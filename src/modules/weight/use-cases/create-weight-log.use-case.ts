@@ -65,9 +65,15 @@ export class CreateWeightLogUseCase {
       await this.weightGoalsRepository.update(goal.id, { startWeight: weight })
     }
 
+    const logs =
+      goal.goalType === 'MAINTAIN'
+        ? await this.weightLogsRepository.findByGoalId(goalId)
+        : []
+
     const progress = calculateWeightGoalProgress(
       { ...goal, startWeight },
       weightLog.weight,
+      logs,
     )
     await this.weightGoalsRepository.updateProgress(goal.id, progress)
 

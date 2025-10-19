@@ -39,15 +39,17 @@ export class CalculateWeightGoalProgressUseCase {
       return { goalId: goal.id, progress: 0, achieved: false }
     }
 
-    const progress = calculateWeightGoalProgress(goal, latestLog.weight)
+    const logs =
+      goal.goalType === 'MAINTAIN'
+        ? await this.weightLogsRepository.findByGoalId(goalId)
+        : []
+
+    const progress = calculateWeightGoalProgress(goal, latestLog.weight, logs)
     await this.weightGoalsRepository.updateProgress(goal.id, progress)
 
     let achieved = false
-    if (progress >= 100 && goal.isActive) {
-      await this.achieveWeightGoalUseCase.execute({
-        goalId: goal.id,
-        userId,
-      })
+    if (goal.goalType !== 'MAINTAIN' && progress >= 100 && goal.isActive) {
+      await this.achieveWeightGoalUseCase.execute({ goalId: goal.id, userId })
       achieved = true
     }
 
