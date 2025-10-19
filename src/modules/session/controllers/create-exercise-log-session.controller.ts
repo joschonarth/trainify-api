@@ -1,8 +1,8 @@
 import { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
-import { ResourceNotFoundError } from '@/errors/resource-not-found.error'
 import { makeCreateExerciseLogSessionUseCase } from '@/modules/session/use-cases/factories/make-create-exercise-log-session-use-case'
+import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
 export async function createExerciseLogSessionController(
   request: FastifyRequest,

@@ -1,6 +1,5 @@
 import { FastifyInstance } from 'fastify'
 
-import { verifyJwt } from '@/middlewares/verify-jwt'
 import { authenticateController } from '@/modules/user/controllers/authenticate.controller'
 import { changePasswordController } from '@/modules/user/controllers/change-password.controller'
 import { fetchUserSchedulesController } from '@/modules/user/controllers/fetch-user-schedules.controller'
@@ -9,6 +8,7 @@ import { registerController } from '@/modules/user/controllers/register.controll
 import { signInWithGoogleController } from '@/modules/user/controllers/sign-in-with-google.controller'
 import { signOutController } from '@/modules/user/controllers/sign-out.controller'
 import { updateUserProfileController } from '@/modules/user/controllers/update-user-profile.controller'
+import { verifyJwt } from '@/shared/middlewares/verify-jwt'
 
 export async function usersRoutes(app: FastifyInstance) {
   app.post('/users', registerController)

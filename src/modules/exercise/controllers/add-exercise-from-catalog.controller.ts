@@ -1,8 +1,8 @@
 import { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
-import { ResourceAlreadyExistsError } from '@/errors/resource-already-exists.error'
-import { ResourceNotFoundError } from '@/errors/resource-not-found.error'
+import { ResourceAlreadyExistsError } from '@/shared/errors/resource-already-exists.error'
+import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
 import { makeAddExerciseFromCatalog } from '../use-cases/factories/make-add-exercise-from-catalog-use-case'
 

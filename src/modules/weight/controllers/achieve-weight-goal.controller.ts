@@ -1,6 +1,6 @@
 import { FastifyReply, FastifyRequest } from 'fastify'
 
-import { ResourceNotFoundError } from '@/errors/resource-not-found.error'
+import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
 import { WeightGoalNotAchievedError } from '../errors/weight-goal-not-achieved.error'
 import { makeAchieveWeightGoalUseCase } from '../use-cases/factories/make-achieve-weight-goal-use-case'

@@ -1,8 +1,8 @@
 import { ExerciseLog } from '@prisma/client'
 
-import { ResourceNotFoundError } from '@/errors/resource-not-found.error'
 import { ExerciseLogsRepository } from '@/modules/exercise/repositories/exercise-logs.repository'
 import { WorkoutSessionsRepository } from '@/modules/session/repositories/workout-sessions.repository'
+import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
 interface CreateExerciseLogSessionUseCaseRequest {
   userId: string

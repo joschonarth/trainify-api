@@ -1,7 +1,7 @@
 import { MyExercise } from '@prisma/client'
 
-import { ResourceAlreadyExistsError } from '@/errors/resource-already-exists.error'
-import { ResourceNotFoundError } from '@/errors/resource-not-found.error'
+import { ResourceAlreadyExistsError } from '@/shared/errors/resource-already-exists.error'
+import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
 import { ExercisesRepository } from '../repositories/exercises.repository'
 import { MyExercisesRepository } from '../repositories/my-exercises.repository'

@@ -1,7 +1,7 @@
 import { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
-import { ResourceNotFoundError } from '@/errors/resource-not-found.error'
+import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
 import { InvalidWeightGoalError } from '../errors/invalid-weight-goal.error'
 import { makeCreateWeightLogUseCase } from '../use-cases/factories/make-create-weight-log-use-case'

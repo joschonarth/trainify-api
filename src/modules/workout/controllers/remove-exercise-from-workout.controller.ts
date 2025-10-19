@@ -1,7 +1,7 @@
 import { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
-import { ResourceNotFoundError } from '@/errors/resource-not-found.error'
+import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
 import { makeRemoveExerciseFromWorkoutUseCase } from '../use-cases/factories/make-remove-exercise-from-workout-use-case'
 

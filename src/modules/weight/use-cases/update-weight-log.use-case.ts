@@ -1,4 +1,4 @@
-import { ResourceNotFoundError } from '@/errors/resource-not-found.error'
+import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
 import { WeightLogsRepository } from '../repositories/weight-logs.repository'
 import { CalculateWeightGoalProgressUseCase } from './calculate-weight-goal-progress.use-case'

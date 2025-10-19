@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify'
 
-import { verifyJwt } from '@/middlewares/verify-jwt'
+import { verifyJwt } from '@/shared/middlewares/verify-jwt'
 
 import { addExerciseFromCatalogController } from '../controllers/add-exercise-from-catalog.controller'
 import { createExerciseController } from '../controllers/create-exercise.controller'

@@ -1,6 +1,6 @@
 import { WeightGoal } from '@prisma/client'
 
-import { ResourceNotFoundError } from '@/errors/resource-not-found.error'
+import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
 import { WeightGoalNotAchievedError } from '../errors/weight-goal-not-achieved.error'
 import { WeightGoalsRepository } from '../repositories/weight-goals.repository'

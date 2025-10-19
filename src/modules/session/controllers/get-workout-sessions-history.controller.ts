@@ -1,7 +1,7 @@
 import { FastifyReply, FastifyRequest } from 'fastify'
 
-import { ResourceNotFoundError } from '@/errors/resource-not-found.error'
 import { makeGetWorkoutSessionsHistoryUseCase } from '@/modules/session/use-cases/factories/make-get-workout-sessions-history-use-case'
+import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
 export async function getWorkoutSessionsHistoryController(
   request: FastifyRequest,

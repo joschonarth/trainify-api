@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify'
 
-import { verifyJwt } from '@/middlewares/verify-jwt'
+import { verifyJwt } from '@/shared/middlewares/verify-jwt'
 
 import { achieveWeightGoalController } from '../controllers/achieve-weight-goal.controller'
 import { createWeightGoalController } from '../controllers/create-weight-goal.controller'

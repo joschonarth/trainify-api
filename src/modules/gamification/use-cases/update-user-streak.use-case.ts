@@ -1,5 +1,5 @@
 import { UserStreaksRepository } from '@/modules/gamification/repositories/user-streaks.repository'
-import { daysBetweenDates } from '@/utils/get-days-between-dates'
+import { daysBetweenDates } from '@/modules/gamification/utils/get-days-between-dates'
 
 interface UpdateUserStreakUseCaseRequest {
   userId: string

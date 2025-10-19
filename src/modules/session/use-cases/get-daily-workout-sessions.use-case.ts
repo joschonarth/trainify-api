@@ -1,9 +1,9 @@
-import { ResourceNotFoundError } from '@/errors/resource-not-found.error'
-import { WorkoutSchedulesRepository } from '@/modules/workout/repositories/workout-schedules.repository'
 import {
   WorkoutSessionsRepository,
   WorkoutSessionWithWorkout,
 } from '@/modules/session/repositories/workout-sessions.repository'
+import { WorkoutSchedulesRepository } from '@/modules/workout/repositories/workout-schedules.repository'
+import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
 interface GetDailyWorkoutSessionRequest {
   userId: string

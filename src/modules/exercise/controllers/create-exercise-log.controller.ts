@@ -1,7 +1,7 @@
 import { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
-import { ResourceAlreadyExistsError } from '@/errors/resource-already-exists.error'
+import { ResourceAlreadyExistsError } from '@/shared/errors/resource-already-exists.error'
 
 import { makeCreateExerciseLogUseCase } from '../use-cases/factories/make-create-exercise-log-use-case'
 

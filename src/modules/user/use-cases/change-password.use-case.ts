@@ -2,8 +2,8 @@ import { compare, hash } from 'bcrypt'
 
 import { InvalidCredentialsError } from '@/modules/user/errors/invalid-credentials.error'
 import { PasswordsDoNotMatchError } from '@/modules/user/errors/passwords-do-not-match.error'
-import { ResourceNotFoundError } from '@/errors/resource-not-found.error'
 import { UsersRepository } from '@/modules/user/repositories/users.repository'
+import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
 interface ChangePasswordUseCaseRequest {
   userId: string

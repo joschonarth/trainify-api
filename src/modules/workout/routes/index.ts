@@ -1,6 +1,5 @@
 import { FastifyInstance } from 'fastify'
 
-import { verifyJwt } from '@/middlewares/verify-jwt'
 import { addExerciseToWorkoutController } from '@/modules/workout/controllers/add-exercise-to-workout.controller'
 import { assignDaysToWorkoutController } from '@/modules/workout/controllers/assign-days-to-workout.controller'
 import { createWorkoutController } from '@/modules/workout/controllers/create-workout.controller'
@@ -14,6 +13,7 @@ import { removeWorkoutScheduleDayController } from '@/modules/workout/controller
 import { updateWorkoutController } from '@/modules/workout/controllers/update-workout.controller'
 import { updateWorkoutExerciseDefaultsController } from '@/modules/workout/controllers/update-workout-exercise-defaults.controller'
 import { updateWorkoutScheduleDayController } from '@/modules/workout/controllers/update-workout-schedule-day.controller'
+import { verifyJwt } from '@/shared/middlewares/verify-jwt'
 
 export async function workoutsRoutes(app: FastifyInstance) {
   app.addHook('onRequest', verifyJwt)

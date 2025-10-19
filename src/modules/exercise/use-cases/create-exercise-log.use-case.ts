@@ -1,7 +1,7 @@
 import { ExerciseLog } from '@prisma/client'
 import dayjs from 'dayjs'
 
-import { ResourceAlreadyExistsError } from '@/errors/resource-already-exists.error'
+import { ResourceAlreadyExistsError } from '@/shared/errors/resource-already-exists.error'
 
 import { ExerciseLogsRepository } from '../repositories/exercise-logs.repository'
 

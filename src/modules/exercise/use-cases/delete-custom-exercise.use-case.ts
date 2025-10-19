@@ -1,5 +1,5 @@
-import { NotAllowedError } from '@/errors/not-allowed.error'
-import { ResourceNotFoundError } from '@/errors/resource-not-found.error'
+import { NotAllowedError } from '@/shared/errors/not-allowed.error'
+import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
 import { ExercisesRepository } from '../repositories/exercises.repository'
 

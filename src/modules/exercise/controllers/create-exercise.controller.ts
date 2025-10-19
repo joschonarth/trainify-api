@@ -2,7 +2,7 @@ import { ExerciseCategory, ExerciseType } from '@prisma/client'
 import { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
-import { ResourceAlreadyExistsError } from '@/errors/resource-already-exists.error'
+import { ResourceAlreadyExistsError } from '@/shared/errors/resource-already-exists.error'
 
 import { makeCreateExerciseUseCase } from '../use-cases/factories/make-create-exercise-use-case'
 
