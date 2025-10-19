@@ -64,6 +64,9 @@ export class CompleteWorkoutSessionUseCase {
       throw new ResourceNotFoundError('No exercises found for this session.')
     }
 
+    let anyExerciseCompleted = false
+    const now = new Date()
+
     for (const exercise of exercises) {
       const exerciseSession = exerciseSessions.find(
         (ex) => ex.id === exercise.exerciseSessionId,
@@ -75,7 +78,7 @@ export class CompleteWorkoutSessionUseCase {
         reps: exercise.reps,
         weight: exercise.weight ?? null,
         description: exercise.note ?? null,
-        date: new Date(),
+        date: now,
         user: { connect: { id: userId } },
         exercise: { connect: { id: exerciseSession.exercise.id } },
         exerciseSession: { connect: { id: exercise.exerciseSessionId } },
@@ -84,6 +87,10 @@ export class CompleteWorkoutSessionUseCase {
       await this.exerciseSessionsRepository.update(exercise.exerciseSessionId, {
         completed: exercise.completed,
       })
+
+      if (exercise.completed) {
+        anyExerciseCompleted = true
+      }
     }
 
     const updatedExerciseSessions =
@@ -92,10 +99,10 @@ export class CompleteWorkoutSessionUseCase {
 
     await this.workoutSessionsRepository.updateStatus(sessionId, newStatus)
 
-    if (newStatus === WorkoutSessionStatus.COMPLETED) {
+    if (anyExerciseCompleted) {
       await this.updateUserStreakUseCase.execute({
         userId,
-        workoutDate: new Date(),
+        logDate: now,
       })
     }
 

@@ -1,60 +1,62 @@
-import { UserStreaksRepository } from '@/modules/gamification/repositories/user-streaks.repository'
-import { daysBetweenDates } from '@/modules/gamification/utils/get-days-between-dates'
+import { UserStreakLogsRepository } from '../repositories/user-streak-logs.repository'
+import { UserStreaksRepository } from '../repositories/user-streaks.repository'
+import { daysBetweenDates } from '../utils/get-days-between-dates'
 
-interface UpdateUserStreakUseCaseRequest {
+interface UpdateUserStreakRequest {
   userId: string
-  workoutDate: Date
+  logDate: Date
 }
 
 export class UpdateUserStreakUseCase {
-  constructor(private userStreaksRepository: UserStreaksRepository) {}
+  constructor(
+    private userStreaksRepository: UserStreaksRepository,
+    private userStreakLogsRepository: UserStreakLogsRepository,
+  ) {}
 
-  async execute({
-    userId,
-    workoutDate,
-  }: UpdateUserStreakUseCaseRequest): Promise<void> {
-    const existingStreak = await this.userStreaksRepository.findByUserId(userId)
+  async execute({ userId, logDate }: UpdateUserStreakRequest) {
+    const normalizedDate = new Date(logDate.setHours(0, 0, 0, 0))
 
-    if (!existingStreak) {
+    const existingLog = await this.userStreakLogsRepository.findByUserAndDate(
+      userId,
+      normalizedDate,
+    )
+
+    if (existingLog) return
+
+    await this.userStreakLogsRepository.create({
+      userId,
+      date: normalizedDate,
+    })
+
+    const streak = await this.userStreaksRepository.findByUserId(userId)
+
+    if (!streak) {
       await this.userStreaksRepository.create({
         user: { connect: { id: userId } },
         currentStreak: 1,
         bestStreak: 1,
-        lastWorkout: workoutDate,
-      })
-      return
-    }
-
-    if (!existingStreak.lastWorkout) {
-      await this.userStreaksRepository.update(existingStreak.id, {
-        currentStreak: 1,
-        bestStreak: Math.max(existingStreak.bestStreak ?? 0, 1),
-        lastWorkout: workoutDate,
+        lastWorkout: normalizedDate,
       })
       return
     }
 
     const diffInDays = daysBetweenDates(
-      new Date(existingStreak.lastWorkout),
-      workoutDate,
+      new Date(streak.lastWorkout ?? normalizedDate),
+      normalizedDate,
     )
 
-    let currentStreak = existingStreak.currentStreak
-    let bestStreak = existingStreak.bestStreak
+    let current = streak.currentStreak
+    let best = streak.bestStreak
 
-    if (diffInDays === 0) {
-      return
-    } else if (diffInDays === 1) {
-      currentStreak += 1
-      if (currentStreak > bestStreak) bestStreak = currentStreak
-    } else {
-      currentStreak = 1
-    }
+    if (diffInDays === 1) current += 1
+    else if (diffInDays > 1) current = 1
 
-    await this.userStreaksRepository.update(existingStreak.id, {
-      currentStreak,
-      bestStreak,
-      lastWorkout: workoutDate,
+    if (current > best) best = current
+
+    await this.userStreaksRepository.update(streak.id, {
+      currentStreak: current,
+      bestStreak: best,
+      lastWorkout: normalizedDate,
     })
   }
 }
