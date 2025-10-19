@@ -1,5 +1,7 @@
 import { FastifyInstance } from 'fastify'
 
+import { metricsRoutes } from '@/modules/metric/routes'
+
 import { gamificationRoutes } from '../modules/gamification/routes'
 import { usersRoutes } from '../modules/user/routes'
 import { weightRoutes } from '../modules/weight/routes'
@@ -16,4 +18,5 @@ export async function appRoutes(app: FastifyInstance) {
   app.register(workoutSessionsRoutes)
   app.register(gamificationRoutes)
   app.register(weightRoutes)
+  app.register(metricsRoutes)
 }
