@@ -1,7 +1,7 @@
 import { WorkoutExercise } from '@prisma/client'
 
 import { ResourceNotFoundError } from '@/errors/resource-not-found.error'
-import { ExercisesRepository } from '@/repositories/exercises.repository'
+import { ExercisesRepository } from '@/modules/exercise/repositories/exercises.repository'
 
 import { WorkoutExercisesRepository } from '../repositories/workout-exercises.repository'
 import { WorkoutsRepository } from '../repositories/workouts.repository'

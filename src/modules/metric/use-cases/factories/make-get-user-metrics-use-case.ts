@@ -1,4 +1,4 @@
-import { PrismaExerciseLogsRepository } from '@/repositories/prisma/prisma-exercise-logs.repository'
+import { PrismaExerciseLogsRepository } from '@/modules/exercise/repositories/prisma/prisma-exercise-logs.repository'
 import { PrismaWorkoutSessionsRepository } from '@/repositories/prisma/prisma-workout-sessions.repository'
 
 import { GetUserMetricsUseCase } from '../get-user-metrics.use-case'

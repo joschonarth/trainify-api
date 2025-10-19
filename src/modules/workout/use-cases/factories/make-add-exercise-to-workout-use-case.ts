@@ -1,4 +1,4 @@
-import { PrismaExercisesRepository } from '@/repositories/prisma/prisma-exercises.repository'
+import { PrismaExercisesRepository } from '@/modules/exercise/repositories/prisma/prisma-exercises.repository'
 
 import { PrismaWorkoutExercisesRepository } from '../../repositories/prisma/prisma-workout-exercises.repository'
 import { PrismaWorkoutsRepository } from '../../repositories/prisma/prisma-workouts.repository'

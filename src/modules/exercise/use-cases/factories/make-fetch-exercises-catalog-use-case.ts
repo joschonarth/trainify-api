@@ -1,0 +1,10 @@
+import { PrismaExercisesRepository } from '@/modules/exercise/repositories/prisma/prisma-exercises.repository'
+
+import { FetchExercisesCatalogUseCase } from '../fetch-exercises-catalog.use-case'
+
+export function makeFetchExercisesCatalogUseCase() {
+  const exercisesRepository = new PrismaExercisesRepository()
+  const useCase = new FetchExercisesCatalogUseCase(exercisesRepository)
+
+  return useCase
+}

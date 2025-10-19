@@ -1,4 +1,4 @@
-import { ExerciseLogsRepository } from '@/repositories/exercise-logs.repository'
+import { ExerciseLogsRepository } from '@/modules/exercise/repositories/exercise-logs.repository'
 import { WorkoutSessionsRepository } from '@/repositories/workout-sessions.repository'
 
 interface GetUserMetricsRequest {

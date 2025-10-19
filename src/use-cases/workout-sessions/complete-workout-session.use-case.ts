@@ -1,9 +1,9 @@
 import { WorkoutSessionStatus } from '@prisma/client'
 
 import { ResourceNotFoundError } from '@/errors/resource-not-found.error'
+import { ExerciseLogsRepository } from '@/modules/exercise/repositories/exercise-logs.repository'
 import { UnlockAllBadgesUseCase } from '@/modules/gamification/use-cases/unlock-all-badges.use-case'
 import { UpdateUserStreakUseCase } from '@/modules/gamification/use-cases/update-user-streak.use-case'
-import { ExerciseLogsRepository } from '@/repositories/exercise-logs.repository'
 import { ExerciseSessionsRepository } from '@/repositories/exercise-sessions.repository'
 import { WorkoutSessionsRepository } from '@/repositories/workout-sessions.repository'
 
