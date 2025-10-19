@@ -1,6 +1,6 @@
 import { ResourceNotFoundError } from '@/errors/resource-not-found.error'
 import { UsersRepository } from '@/modules/user/repositories/users.repository'
-import { WorkoutsRepository } from '@/repositories/workouts.repository'
+import { WorkoutsRepository } from '@/modules/workout/repositories/workouts.repository'
 
 interface FetchUserSchedulesUseCaseRequest {
   userId: string
