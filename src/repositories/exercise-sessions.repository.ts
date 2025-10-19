@@ -23,6 +23,8 @@ export type ExerciseSessionWithLogs = ExerciseSession & {
 export interface ExerciseSessionsRepository {
   findById(id: string): Promise<ExerciseSession | null>
 
+  findBySessionId(sessionId: string): Promise<ExerciseSessionWithLogs[]>
+
   findByWorkoutSessionId(
     workoutSessionId: string,
   ): Promise<ExerciseSessionWithLogs[]>
@@ -34,7 +36,8 @@ export interface ExerciseSessionsRepository {
   ): Promise<ExerciseSession>
 
   update(
-    data: Prisma.ExerciseSessionUncheckedUpdateInput & { id: string },
+    id: string,
+    data: Prisma.ExerciseSessionUncheckedUpdateInput,
   ): Promise<ExerciseSession>
 
   delete(id: string): Promise<void>

@@ -14,6 +14,16 @@ export class PrismaExerciseSessionsRepository
     return prisma.exerciseSession.findUnique({ where: { id } })
   }
 
+  async findBySessionId(sessionId: string): Promise<ExerciseSessionWithLogs[]> {
+    return prisma.exerciseSession.findMany({
+      where: { workoutSessionId: sessionId },
+      include: {
+        exercise: true,
+        logs: true,
+      },
+    }) as unknown as ExerciseSessionWithLogs[]
+  }
+
   async findByWorkoutSessionId(
     workoutSessionId: string,
   ): Promise<ExerciseSessionWithLogs[]> {
@@ -43,12 +53,12 @@ export class PrismaExerciseSessionsRepository
   }
 
   async update(
-    data: Prisma.ExerciseSessionUncheckedUpdateInput & { id: string },
+    id: string,
+    data: Prisma.ExerciseSessionUncheckedUpdateInput,
   ): Promise<ExerciseSession> {
-    const { id, ...updateData } = data
     return prisma.exerciseSession.update({
       where: { id },
-      data: updateData,
+      data,
     })
   }
 

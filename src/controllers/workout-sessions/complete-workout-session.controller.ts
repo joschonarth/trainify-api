@@ -1,4 +1,3 @@
-import { WorkoutSessionStatus } from '@prisma/client'
 import { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
@@ -14,7 +13,6 @@ export async function completeWorkoutSessionController(
   })
 
   const bodySchema = z.object({
-    status: z.enum(WorkoutSessionStatus),
     exercises: z
       .array(
         z.object({
@@ -31,7 +29,7 @@ export async function completeWorkoutSessionController(
 
   try {
     const { sessionId } = paramsSchema.parse(request.params)
-    const { status, exercises } = bodySchema.parse(request.body)
+    const { exercises } = bodySchema.parse(request.body)
     const userId = request.user.sub
 
     const completeWorkoutSessionUseCase = makeCompleteWorkoutSessionUseCase()
@@ -39,7 +37,6 @@ export async function completeWorkoutSessionController(
     const { session } = await completeWorkoutSessionUseCase.execute({
       userId,
       sessionId,
-      status,
       exercises,
     })
 
