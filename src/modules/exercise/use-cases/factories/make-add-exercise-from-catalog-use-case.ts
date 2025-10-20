@@ -6,10 +6,10 @@ import { AddExerciseFromCatalogUseCase } from '../add-exercise-from-catalog.use-
 export function makeAddExerciseFromCatalog() {
   const exercisesRepository = new PrismaExercisesRepository()
   const myExercisesRepository = new PrismaMyExercisesRepository()
-  const useCase = new AddExerciseFromCatalogUseCase(
+  const addExerciseFromCatalogUseCase = new AddExerciseFromCatalogUseCase(
     exercisesRepository,
     myExercisesRepository,
   )
 
-  return useCase
+  return addExerciseFromCatalogUseCase
 }

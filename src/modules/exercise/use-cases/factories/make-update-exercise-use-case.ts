@@ -4,7 +4,7 @@ import { UpdateExerciseUseCase } from '../update-exercise.use-case'
 
 export function makeUpdateExerciseUseCase() {
   const exercisesRepository = new PrismaExercisesRepository()
-  const useCase = new UpdateExerciseUseCase(exercisesRepository)
+  const updateExerciseUseCase = new UpdateExerciseUseCase(exercisesRepository)
 
-  return useCase
+  return updateExerciseUseCase
 }

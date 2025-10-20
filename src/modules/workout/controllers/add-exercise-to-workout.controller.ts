@@ -25,8 +25,8 @@ export async function addExerciseToWorkoutController(
       bodySchema.parse(request.body)
     const { workoutId } = paramsSchema.parse(request.params)
 
-    const useCase = makeAddExerciseToWorkoutUseCase()
-    const { workoutExercise } = await useCase.execute({
+    const addExerciseToWorkoutUseCase = makeAddExerciseToWorkoutUseCase()
+    const { workoutExercise } = await addExerciseToWorkoutUseCase.execute({
       workoutId,
       exerciseId,
       defaultSets,

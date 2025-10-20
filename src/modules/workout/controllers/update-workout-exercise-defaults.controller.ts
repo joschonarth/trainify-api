@@ -26,14 +26,16 @@ export async function updateWorkoutExerciseDefaultsController(
     )
     const { workoutId, exerciseId } = paramsSchema.parse(request.params)
 
-    const useCase = makeUpdateWorkoutExerciseDefaultsUseCase()
-    const { workoutExercise } = await useCase.execute({
-      workoutId,
-      exerciseId,
-      defaultSets,
-      defaultReps,
-      defaultWeight,
-    })
+    const updateWorkoutExerciseDefaultsUseCase =
+      makeUpdateWorkoutExerciseDefaultsUseCase()
+    const { workoutExercise } =
+      await updateWorkoutExerciseDefaultsUseCase.execute({
+        workoutId,
+        exerciseId,
+        defaultSets,
+        defaultReps,
+        defaultWeight,
+      })
 
     return reply.status(200).send({ workoutExercise })
   } catch (error) {

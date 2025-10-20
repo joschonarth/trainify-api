@@ -17,8 +17,9 @@ export async function removeWorkoutScheduleDayController(
   try {
     const { workoutId, scheduleId } = paramsSchema.parse(request.params)
 
-    const useCase = makeRemoveWorkoutScheduleDayUseCase()
-    await useCase.execute({
+    const removeWorkoutScheduleDayUseCase =
+      makeRemoveWorkoutScheduleDayUseCase()
+    await removeWorkoutScheduleDayUseCase.execute({
       workoutId,
       scheduleId,
     })

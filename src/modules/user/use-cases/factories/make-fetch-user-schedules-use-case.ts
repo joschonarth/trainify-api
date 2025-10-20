@@ -6,10 +6,10 @@ import { FetchUserSchedulesUseCase } from '../fetch-user-schedules.use-case'
 export function makeFetchUserSchedulesUseCase() {
   const usersRepository = new PrismaUsersRepository()
   const workoutsRepository = new PrismaWorkoutsRepository()
-  const useCase = new FetchUserSchedulesUseCase(
+  const fetchUserSchedulesUseCase = new FetchUserSchedulesUseCase(
     usersRepository,
     workoutsRepository,
   )
 
-  return useCase
+  return fetchUserSchedulesUseCase
 }

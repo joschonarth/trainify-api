@@ -6,10 +6,10 @@ import { CreateExerciseLogSessionUseCase } from '../create-exercise-log-session.
 export function makeCreateExerciseLogSessionUseCase() {
   const exerciseLogsRepository = new PrismaExerciseLogsRepository()
   const workoutSessionsRepository = new PrismaWorkoutSessionsRepository()
-  const useCase = new CreateExerciseLogSessionUseCase(
+  const createExerciseLogSessionUseCase = new CreateExerciseLogSessionUseCase(
     exerciseLogsRepository,
     workoutSessionsRepository,
   )
 
-  return useCase
+  return createExerciseLogSessionUseCase
 }

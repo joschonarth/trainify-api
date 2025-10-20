@@ -1,7 +1,7 @@
 import { SignOutUseCase } from '../sign-out.use-case'
 
 export function makeSignOutUseCase() {
-  const useCase = new SignOutUseCase()
+  const signOutUseCase = new SignOutUseCase()
 
-  return useCase
+  return signOutUseCase
 }

@@ -22,7 +22,7 @@ export async function updateWorkoutController(
     const { workoutId } = paramsSchema.parse(request.params)
     const { name, description } = bodySchema.parse(request.body)
 
-    const useCase = makeUpdateWorkoutUseCase()
+    const updateWorkoutUseCase = makeUpdateWorkoutUseCase()
 
     const updateData: Partial<{
       name: string
@@ -31,7 +31,7 @@ export async function updateWorkoutController(
     if (name !== undefined) updateData.name = name
     if (description !== undefined) updateData.description = description
 
-    const { workout } = await useCase.execute({
+    const { workout } = await updateWorkoutUseCase.execute({
       workoutId,
       ...updateData,
     })

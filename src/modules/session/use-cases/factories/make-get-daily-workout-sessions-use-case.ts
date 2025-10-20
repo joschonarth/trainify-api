@@ -6,10 +6,10 @@ import { GetDailyWorkoutSessionUseCase } from '../get-daily-workout-sessions.use
 export function makeGetDailyWorkoutSessionUseCase() {
   const workoutSessionsRepository = new PrismaWorkoutSessionsRepository()
   const workoutSchedulesRepository = new PrismaWorkoutSchedulesRepository()
-  const useCase = new GetDailyWorkoutSessionUseCase(
+  const getDailyWorkoutSessionUseCase = new GetDailyWorkoutSessionUseCase(
     workoutSessionsRepository,
     workoutSchedulesRepository,
   )
 
-  return useCase
+  return getDailyWorkoutSessionUseCase
 }

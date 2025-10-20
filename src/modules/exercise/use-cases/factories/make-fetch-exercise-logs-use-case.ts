@@ -4,7 +4,9 @@ import { FetchExerciseLogsUseCase } from '../fetch-exercise-logs.use-case'
 
 export function makeFetchExerciseLogsUseCase() {
   const exerciseLogsRepository = new PrismaExerciseLogsRepository()
-  const useCase = new FetchExerciseLogsUseCase(exerciseLogsRepository)
+  const fetchExerciseLogsUseCase = new FetchExerciseLogsUseCase(
+    exerciseLogsRepository,
+  )
 
-  return useCase
+  return fetchExerciseLogsUseCase
 }

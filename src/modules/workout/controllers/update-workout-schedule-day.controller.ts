@@ -23,8 +23,9 @@ export async function updateWorkoutScheduleDayController(
     const { newDayOfWeek } = bodySchema.parse(request.body)
     const { workoutId, scheduleId } = paramsSchema.parse(request.params)
 
-    const useCase = makeUpdateWorkoutScheduleDayUseCase()
-    const { schedule } = await useCase.execute({
+    const updateWorkoutScheduleDayUseCase =
+      makeUpdateWorkoutScheduleDayUseCase()
+    const { schedule } = await updateWorkoutScheduleDayUseCase.execute({
       workoutId,
       scheduleId,
       newDayOfWeek,

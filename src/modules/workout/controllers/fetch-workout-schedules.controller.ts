@@ -16,8 +16,10 @@ export async function fetchWorkoutSchedulesController(
   try {
     const { workoutId } = paramsSchema.parse(request.params)
 
-    const useCase = makeFetchWorkoutSchedulesUseCase()
-    const { schedules } = await useCase.execute({ workoutId })
+    const fetchWorkoutSchedulesUseCase = makeFetchWorkoutSchedulesUseCase()
+    const { schedules } = await fetchWorkoutSchedulesUseCase.execute({
+      workoutId,
+    })
 
     return reply.status(200).send({ schedules })
   } catch (error) {

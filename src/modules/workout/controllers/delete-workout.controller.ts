@@ -16,8 +16,8 @@ export async function deleteWorkoutController(
   try {
     const { workoutId } = paramsSchema.parse(request.params)
 
-    const useCase = makeDeleteWorkoutUseCase()
-    await useCase.execute({ workoutId })
+    const deleteWorkoutUseCase = makeDeleteWorkoutUseCase()
+    await deleteWorkoutUseCase.execute({ workoutId })
 
     return reply.status(204).send()
   } catch (error) {

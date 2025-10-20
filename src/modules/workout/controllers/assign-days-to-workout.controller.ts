@@ -18,8 +18,11 @@ export async function assignDaysToWorkoutController(
   const { daysOfWeek } = bodySchema.parse(request.body)
   const { workoutId } = paramsSchema.parse(request.params)
 
-  const useCase = makeAssignDaysToWorkoutUseCase()
-  const { assignedDays } = await useCase.execute({ workoutId, daysOfWeek })
+  const assignDaysToWorkoutUseCase = makeAssignDaysToWorkoutUseCase()
+  const { assignedDays } = await assignDaysToWorkoutUseCase.execute({
+    workoutId,
+    daysOfWeek,
+  })
 
   return reply.status(200).send({ assignedDays })
 }
