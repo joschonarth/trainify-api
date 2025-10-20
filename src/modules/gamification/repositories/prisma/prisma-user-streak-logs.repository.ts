@@ -45,6 +45,13 @@ export class PrismaUserStreakLogsRepository
     })
   }
 
+  async findAllByUser(userId: string): Promise<UserStreakLog[]> {
+    return prisma.userStreakLog.findMany({
+      where: { userId },
+      orderBy: { date: 'asc' },
+    })
+  }
+
   async create(data: { userId: string; date: Date }): Promise<UserStreakLog> {
     return prisma.userStreakLog.create({
       data,

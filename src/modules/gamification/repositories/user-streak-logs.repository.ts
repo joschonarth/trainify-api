@@ -7,5 +7,6 @@ export interface UserStreakLogsRepository {
     startDate: Date,
     endDate: Date,
   ): Promise<UserStreakLog[]>
+  findAllByUser(userId: string): Promise<UserStreakLog[]>
   create(data: { userId: string; date: Date }): Promise<UserStreakLog>
 }

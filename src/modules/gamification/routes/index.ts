@@ -7,6 +7,7 @@ import { getBadgesStatsController } from '../controllers/get-badges-stats.contro
 import { getUnlockedBadgesController } from '../controllers/get-unlocked-badges.controller'
 import { getUserStreakController } from '../controllers/get-user-streak.controller'
 import { getUserStreakCalendarController } from '../controllers/get-user-streak-calendar.controller'
+import { getUserStreakLogsController } from '../controllers/get-user-streak-logs.controller'
 import { refreshUserStreakController } from '../controllers/refresh-user-streak.controller'
 
 export async function gamificationRoutes(app: FastifyInstance) {
@@ -16,6 +17,7 @@ export async function gamificationRoutes(app: FastifyInstance) {
   app.get('/streak', getUserStreakController)
   app.get('/streak/refresh', refreshUserStreakController)
   app.get('/streak/calendar', getUserStreakCalendarController)
+  app.get('/streak/logs', getUserStreakLogsController)
 
   /** Badges */
   app.get('/badges', getAllBadgesController)
