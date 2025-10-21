@@ -32,7 +32,18 @@ export class CreateWeightLogUseCase {
     note,
     goalId,
   }: CreateWeightLogUseCaseRequest): Promise<CreateWeightLogUseCaseResponse> {
-    if (!goalId) {
+    let goal = null
+
+    if (goalId) {
+      goal = await this.weightGoalsRepository.findById(goalId)
+      if (!goal) {
+        throw new ResourceNotFoundError('Weight goal not found.')
+      }
+    } else {
+      goal = await this.weightGoalsRepository.findActiveGoalByUserId(userId)
+    }
+
+    if (!goal) {
       const weightLog = await this.weightLogsRepository.create({
         userId,
         goalId: null,
@@ -42,19 +53,13 @@ export class CreateWeightLogUseCase {
       return { weightLog }
     }
 
-    const goal = await this.weightGoalsRepository.findById(goalId)
-
-    if (!goal) {
-      throw new ResourceNotFoundError('Weight goal not found.')
-    }
-
     if (!goal.isActive) {
       throw new InvalidWeightGoalError()
     }
 
     const weightLog = await this.weightLogsRepository.create({
       userId,
-      goalId,
+      goalId: goal.id,
       weight,
       note: note ?? null,
     })
@@ -62,12 +67,14 @@ export class CreateWeightLogUseCase {
     let startWeight = goal.startWeight
     if (!startWeight) {
       startWeight = weight
-      await this.weightGoalsRepository.update(goal.id, { startWeight: weight })
+      await this.weightGoalsRepository.update(goal.id, {
+        startWeight: weight,
+      })
     }
 
     const logs =
       goal.goalType === 'MAINTAIN'
-        ? await this.weightLogsRepository.findByGoalId(goalId)
+        ? await this.weightLogsRepository.findByGoalId(goal.id)
         : []
 
     const progress = calculateWeightGoalProgress(
@@ -78,7 +85,10 @@ export class CreateWeightLogUseCase {
     await this.weightGoalsRepository.updateProgress(goal.id, progress)
 
     if (goal.goalType !== 'MAINTAIN' && progress >= 100 && goal.isActive) {
-      await this.achieveWeightGoalUseCase.execute({ goalId: goal.id, userId })
+      await this.achieveWeightGoalUseCase.execute({
+        goalId: goal.id,
+        userId,
+      })
     }
 
     return { weightLog }

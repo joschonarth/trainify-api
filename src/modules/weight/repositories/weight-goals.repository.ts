@@ -20,6 +20,7 @@ export interface WeightGoalsRepository {
   findActiveGoalByUserId(userId: string): Promise<WeightGoal | null>
   create(data: CreateWeightGoalData): Promise<WeightGoal>
   deactivateGoal(id: string): Promise<void>
+  deactivateAllByUserId(userId: string): Promise<void>
   markAsAchieved(id: string, achievedAt: Date): Promise<void>
   update(
     id: string,

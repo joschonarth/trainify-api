@@ -13,7 +13,6 @@ export async function createWeightLogController(
   const createWeightLogBodySchema = z.object({
     weight: z.number(),
     note: z.string().nullable().optional(),
-    goalId: z.string().nullable().optional(),
   })
 
   try {
@@ -21,7 +20,6 @@ export async function createWeightLogController(
 
     const weight = rawBody.weight
     const note = rawBody.note ?? null
-    const goalId = rawBody.goalId ?? null
 
     const userId = request.user.sub
 
@@ -31,7 +29,6 @@ export async function createWeightLogController(
       userId,
       weight,
       note,
-      goalId,
     })
 
     return reply.status(201).send({ weightLog })

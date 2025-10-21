@@ -28,12 +28,7 @@ export class CreateWeightGoalUseCase {
     startDate,
     endDate,
   }: CreateWeightGoalUseCaseRequest): Promise<CreateWeightGoalUseCaseResponse> {
-    const activeGoal =
-      await this.weightGoalsRepository.findActiveGoalByUserId(userId)
-
-    if (activeGoal) {
-      await this.weightGoalsRepository.deactivateGoal(activeGoal.id)
-    }
+    await this.weightGoalsRepository.deactivateAllByUserId(userId)
 
     const weightGoal = await this.weightGoalsRepository.create({
       userId,

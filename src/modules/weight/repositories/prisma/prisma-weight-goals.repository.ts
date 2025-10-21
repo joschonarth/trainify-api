@@ -65,6 +65,13 @@ export class PrismaWeightGoalsRepository implements WeightGoalsRepository {
     })
   }
 
+  async deactivateAllByUserId(userId: string): Promise<void> {
+    await prisma.weightGoal.updateMany({
+      where: { userId, isActive: true },
+      data: { isActive: false },
+    })
+  }
+
   async markAsAchieved(id: string, achievedAt: Date): Promise<void> {
     await prisma.weightGoal.update({
       where: { id },
