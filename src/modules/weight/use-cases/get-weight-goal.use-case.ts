@@ -10,15 +10,7 @@ interface GetWeightGoalUseCaseRequest {
 }
 
 interface GetWeightGoalUseCaseResponse {
-  weightGoal: WeightGoal & {
-    logs: {
-      id: string
-      weight: number
-      note: string | null
-      date: Date
-      createdAt: Date
-    }[]
-  }
+  weightGoal: WeightGoal
 }
 
 export class GetWeightGoalUseCase {

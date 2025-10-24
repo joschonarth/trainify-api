@@ -1,4 +1,4 @@
-import { WeightGoal, WeightLog } from '@prisma/client'
+import { WeightGoal } from '@prisma/client'
 
 import { prisma } from '@/lib/prisma'
 
@@ -8,12 +8,9 @@ import {
 } from '../weight-goals.repository'
 
 export class PrismaWeightGoalsRepository implements WeightGoalsRepository {
-  async findById(
-    id: string,
-  ): Promise<(WeightGoal & { logs: WeightLog[] }) | null> {
+  async findById(id: string): Promise<WeightGoal | null> {
     return prisma.weightGoal.findUnique({
       where: { id },
-      include: { logs: true },
     })
   }
 

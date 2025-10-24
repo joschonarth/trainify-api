@@ -12,6 +12,7 @@ import { getActiveWeightGoalController } from '../controllers/get-active-weight-
 import { getActiveWeightGoalAnalyticsController } from '../controllers/get-active-weight-goal-analytics.controller'
 import { getGeneralWeightAnalyticsController } from '../controllers/get-general-weight-analytics.controller'
 import { getWeightGoalController } from '../controllers/get-weight-goal.controller'
+import { getWeightGoalLogsController } from '../controllers/get-weight-goal-logs.controller'
 import { getWeightLogController } from '../controllers/get-weight-log.controller'
 import { getWeightSummaryController } from '../controllers/get-weight-summary.controller'
 import { listWeightGoalsController } from '../controllers/list-weight-goals.controller'
@@ -31,6 +32,7 @@ export async function weightRoutes(app: FastifyInstance) {
 
   /** Weight Goals */
   app.get('/weight/goals/:goalId', getWeightGoalController)
+  app.get('/weight/goals/:goalId/logs', getWeightGoalLogsController)
   app.get('/weight/goals/active', getActiveWeightGoalController)
   app.get('/weight/goals', listWeightGoalsController)
   app.post('/weight/goals', createWeightGoalController)
