@@ -21,9 +21,11 @@ export class DeleteWeightGoalUseCase {
       throw new ResourceNotFoundError('Weight goal not found')
     }
 
-    if (goal.logs.length > 0) {
+    const logs = await this.weightLogsRepository.findByGoalId(goalId)
+
+    if (logs.length > 0) {
       await Promise.all(
-        goal.logs.map((log) =>
+        logs.map((log) =>
           this.weightLogsRepository.update(log.id, { goalId: null }),
         ),
       )
