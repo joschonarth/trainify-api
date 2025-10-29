@@ -2,6 +2,8 @@ import { User } from '@prisma/client'
 
 import { UsersRepository } from '@/modules/user/repositories/users.repository'
 
+import { InvalidGoogleTokenError } from '../errors/invalid-google-token.error'
+
 interface SignInWithGoogleUseCaseRequest {
   token: string
 }
@@ -17,19 +19,28 @@ export class SignInWithGoogleUseCase {
     token,
   }: SignInWithGoogleUseCaseRequest): Promise<SignInWithGoogleUseCaseResponse> {
     const response = await fetch(
-      `https://oauth2.googleapis.com/tokeninfo?access_token=${token}`,
+      'https://www.googleapis.com/oauth2/v2/userinfo',
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
     )
 
-    const payload = await response.json()
-
-    if (payload.error_description) {
-      throw new Error('Token do Google inválido.')
+    if (!response.ok) {
+      throw new InvalidGoogleTokenError(
+        'Could not verify Google authentication.',
+      )
     }
+
+    const payload = await response.json()
 
     const { email, name, picture } = payload
 
     if (!email) {
-      throw new Error('Não foi possível obter o e-mail do usuário Google.')
+      throw new InvalidGoogleTokenError(
+        'Google account email could not be retrieved.',
+      )
     }
 
     let user = await this.usersRepository.findByEmail(email)
@@ -37,10 +48,23 @@ export class SignInWithGoogleUseCase {
     if (!user) {
       user = await this.usersRepository.create({
         email,
-        name: name ?? 'Usuário Google',
+        name: name ?? 'Google User',
         password: null,
         avatarUrl: picture ?? null,
       })
+    } else {
+      const needsUpdate =
+        (!user.name && name) ||
+        (!user.avatarUrl && picture) ||
+        user.name !== name ||
+        user.avatarUrl !== picture
+
+      if (needsUpdate) {
+        user = await this.usersRepository.update(user.id, {
+          name: name ?? user.name,
+          avatarUrl: picture ?? user.avatarUrl,
+        })
+      }
     }
 
     return { user }
