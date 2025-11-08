@@ -60,6 +60,15 @@ export class PrismaExercisesRepository implements ExercisesRepository {
     })
   }
 
+  async findManyByUser(userId: string) {
+    return prisma.exercise.findMany({
+      where: {
+        userId,
+      },
+      orderBy: { createdAt: 'desc' },
+    })
+  }
+
   async update(
     exerciseId: string,
     data: {

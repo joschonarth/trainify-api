@@ -9,6 +9,7 @@ import { deleteCustomExerciseController } from '../controllers/delete-custom-exe
 import { fetchExerciseLogsController } from '../controllers/fetch-exercise-logs.controller'
 import { fetchExercisesCatalogController } from '../controllers/fetch-exercises-catalog.controller'
 import { fetchMyExercisesController } from '../controllers/fetch-my-exercises.controller'
+import { fetchUserExercisesController } from '../controllers/fetch-user-exercises.controller'
 import { getExerciseDetailsController } from '../controllers/get-exercise-details.controller'
 import { getExerciseLogController } from '../controllers/get-exercise-log.controller'
 import { removeCatalogExerciseController } from '../controllers/remove-catalog-exercise.controller'
@@ -17,6 +18,7 @@ import { updateExerciseController } from '../controllers/update-exercise.control
 export async function exercisesRoutes(app: FastifyInstance) {
   app.addHook('onRequest', verifyJwt)
 
+  app.get('/exercises', fetchUserExercisesController)
   app.get('/exercises/:id', getExerciseDetailsController)
   app.get('/exercises/my', fetchMyExercisesController)
   app.get('/exercises/catalog', fetchExercisesCatalogController)
