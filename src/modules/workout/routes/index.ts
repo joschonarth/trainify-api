@@ -15,32 +15,41 @@ import { updateWorkoutExerciseDefaultsController } from '@/modules/workout/contr
 import { updateWorkoutScheduleDayController } from '@/modules/workout/controllers/update-workout-schedule-day.controller'
 import { verifyJwt } from '@/shared/middlewares/verify-jwt'
 
+import { createOrAttachExerciseToWorkoutController } from '../controllers/create-or-attach-exercise-to-workout.controller'
+
 export async function workoutsRoutes(app: FastifyInstance) {
   app.addHook('onRequest', verifyJwt)
 
+  // --- WORKOUTS ---
   app.get('/workouts', fetchUserWorkoutsController)
   app.get('/workouts/:workoutId', getWorkoutDetailsController)
-  app.get('/workouts/:workoutId/exercises', fetchWorkoutExercisesController)
-  app.get('/workouts/:workoutId/schedules', fetchWorkoutSchedulesController)
-
   app.post('/workouts', createWorkoutController)
-  app.post('/workouts/:workoutId/exercises', addExerciseToWorkoutController)
-  app.post('/workouts/:workoutId/schedules', assignDaysToWorkoutController)
-
   app.put('/workouts/:workoutId', updateWorkoutController)
+  app.delete('/workouts/:workoutId', deleteWorkoutController)
+
+  // --- EXERCISES ---
+  app.get('/workouts/:workoutId/exercises', fetchWorkoutExercisesController)
+
+  app.post('/workouts/:workoutId/exercises', addExerciseToWorkoutController)
+  app.post(
+    '/workouts/:workoutId/exercises/create-or-attach',
+    createOrAttachExerciseToWorkoutController,
+  )
   app.put(
     '/workouts/:workoutId/exercises/:exerciseId',
     updateWorkoutExerciseDefaultsController,
   )
-  app.put(
-    '/workouts/:workoutId/schedules/:scheduleId',
-    updateWorkoutScheduleDayController,
-  )
-
-  app.delete('/workouts/:workoutId', deleteWorkoutController)
   app.delete(
     '/workouts/:workoutId/exercises/:exerciseId',
     removeExerciseFromWorkoutController,
+  )
+
+  // --- SCHEDULES ---
+  app.get('/workouts/:workoutId/schedules', fetchWorkoutSchedulesController)
+  app.post('/workouts/:workoutId/schedules', assignDaysToWorkoutController)
+  app.put(
+    '/workouts/:workoutId/schedules/:scheduleId',
+    updateWorkoutScheduleDayController,
   )
   app.delete(
     '/workouts/:workoutId/schedules/:scheduleId',
