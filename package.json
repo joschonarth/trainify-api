@@ -12,8 +12,6 @@
     "test:coverage": "vitest run --coverage",
     "test:ui": "vitest --ui",
     "seed": "node prisma/seeds/index.js",
-    "seed:badges": "node prisma/seeds/badges.seed.js",
-    "seed:exercises": "node prisma/seeds/exercises.seed.js",
     "lint": "eslint . --ext .js,.ts,.tsx --fix"
   },
   "keywords": [],

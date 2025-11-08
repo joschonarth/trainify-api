@@ -1,0 +1,24 @@
+import { PrismaClient } from '@prisma/client'
+
+export const prisma = new PrismaClient()
+
+export async function seedUser() {
+  console.log('👤 Seeding user...')
+
+  const user = await prisma.user.upsert({
+    where: { email: 'joao@example.com' },
+    update: {},
+    create: {
+      name: 'João Teste',
+      email: 'joao@example.com',
+      password: '$2b$06$z1egRKOP6/a/uQh/yPewO.k0LbZbIiqYLuFlc6Z52HrRUC60dPDyS',
+      age: 22,
+      height: 178,
+      weight: 72.5,
+      avatarUrl: 'https://github.com/joschonarth.png',
+    },
+  })
+
+  console.log(`✅ User seeded: ${user.name}`)
+  return user
+}

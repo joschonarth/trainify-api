@@ -46,9 +46,9 @@ const exerciseBadges = [
   },
   {
     name: 'Constância',
-    description: 'Completar 10 exercícios',
+    description: 'Completar 25 exercícios',
     type: BadgeType.EXERCISE,
-    milestone: 10,
+    milestone: 25,
   },
   {
     name: 'Explosão de Energia',
@@ -104,8 +104,8 @@ const streakBadges = [
   },
 ]
 
-async function main() {
-  console.log('🌱 Starting badges seed...')
+export async function seedBadges() {
+  console.log('🏅 Starting badges seed...')
 
   const allBadges = [...workoutBadges, ...exerciseBadges, ...streakBadges]
 
@@ -119,12 +119,3 @@ async function main() {
 
   console.log(`✅ Successfully inserted ${allBadges.length} badges!`)
 }
-
-main()
-  .catch((e) => {
-    console.error(e)
-    process.exit(1)
-  })
-  .finally(async () => {
-    await prisma.$disconnect()
-  })
