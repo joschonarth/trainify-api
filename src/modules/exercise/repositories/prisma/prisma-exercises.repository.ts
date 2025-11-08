@@ -60,10 +60,16 @@ export class PrismaExercisesRepository implements ExercisesRepository {
     })
   }
 
-  async findManyByUser(userId: string) {
+  async findManyByUser(
+    userId: string,
+    category?: ExerciseCategory | null,
+    type?: ExerciseType | null,
+  ): Promise<Exercise[]> {
     return prisma.exercise.findMany({
       where: {
         userId,
+        ...(category && { category }),
+        ...(type && { type }),
       },
       orderBy: { createdAt: 'desc' },
     })

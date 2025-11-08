@@ -14,7 +14,11 @@ export interface ExercisesRepository {
     page: number,
   ): Promise<Exercise[]>
   findByNameAndUser(name: string, userId: string): Promise<Exercise | null>
-  findManyByUser(userId: string): Promise<Exercise[]>
+  findManyByUser(
+    userId: string,
+    category?: ExerciseCategory | null,
+    type?: ExerciseType | null,
+  ): Promise<Exercise[]>
   update(
     exerciseId: string,
     data: Partial<{
