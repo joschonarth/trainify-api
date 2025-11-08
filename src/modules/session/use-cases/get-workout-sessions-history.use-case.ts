@@ -1,3 +1,5 @@
+import { WorkoutSessionStatus } from '@prisma/client'
+
 import {
   WorkoutSessionsRepository,
   WorkoutSessionWithWorkout,
@@ -19,6 +21,7 @@ interface ExerciseHistory {
 interface SessionHistory {
   id: string
   date: Date
+  status: WorkoutSessionStatus
   workout: string
   exercises: ExerciseHistory[]
 }
@@ -45,6 +48,7 @@ export class GetWorkoutSessionsHistoryUseCase {
     const sessionsHistory: SessionHistory[] = sessions.map((session) => ({
       id: session.id,
       date: session.date,
+      status: session.status,
       workout: session.workout.name,
       exercises: (session.exerciseSessions ?? []).map((ex) => {
         const lastLog = ex.logs.length > 0 ? ex.logs[ex.logs.length - 1] : null
