@@ -16,6 +16,7 @@ import { updateWorkoutScheduleDayController } from '@/modules/workout/controller
 import { verifyJwt } from '@/shared/middlewares/verify-jwt'
 
 import { createOrAttachExerciseToWorkoutController } from '../controllers/create-or-attach-exercise-to-workout.controller'
+import { getWorkoutStatsController } from '../controllers/get-workout-stats.controller'
 
 export async function workoutsRoutes(app: FastifyInstance) {
   app.addHook('onRequest', verifyJwt)
@@ -26,6 +27,7 @@ export async function workoutsRoutes(app: FastifyInstance) {
   app.post('/workouts', createWorkoutController)
   app.put('/workouts/:workoutId', updateWorkoutController)
   app.delete('/workouts/:workoutId', deleteWorkoutController)
+  app.get('/workouts/:workoutId/stats', getWorkoutStatsController)
 
   // --- EXERCISES ---
   app.get('/workouts/:workoutId/exercises', fetchWorkoutExercisesController)
