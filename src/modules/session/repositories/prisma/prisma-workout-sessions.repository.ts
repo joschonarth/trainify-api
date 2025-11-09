@@ -207,6 +207,78 @@ export class PrismaWorkoutSessionsRepository
     })
   }
 
+  async findDetailedByUserAndDateRange(
+    userId: string,
+    startDate: Date,
+    endDate: Date,
+  ): Promise<WorkoutSessionWithWorkout[]> {
+    const sessions = await prisma.workoutSession.findMany({
+      where: {
+        userId,
+        date: {
+          gte: startDate,
+          lte: endDate,
+        },
+      },
+      include: {
+        workout: {
+          include: {
+            exercises: {
+              include: {
+                exercise: {
+                  select: { id: true, name: true, category: true, type: true },
+                },
+              },
+            },
+          },
+        },
+        exerciseSessions: {
+          include: {
+            exercise: {
+              select: { id: true, name: true, category: true, type: true },
+            },
+            logs: {
+              select: {
+                id: true,
+                sets: true,
+                reps: true,
+                weight: true,
+                date: true,
+                description: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: { date: 'asc' },
+    })
+
+    return sessions.map((session) => ({
+      ...session,
+      exerciseSessions: session.exerciseSessions.map((ex) => ({
+        id: ex.id,
+        sets: ex.plannedSets ?? 0,
+        reps: ex.plannedReps ?? 0,
+        weight: ex.plannedWeight ?? null,
+        completed: ex.completed,
+        exercise: {
+          id: ex.exercise.id,
+          name: ex.exercise.name,
+          category: ex.exercise.category,
+          type: ex.exercise.type,
+        },
+        logs: ex.logs.map((log) => ({
+          id: log.id,
+          sets: log.sets,
+          reps: log.reps,
+          weight: log.weight ?? null,
+          date: log.date,
+          description: log.description ?? null,
+        })),
+      })),
+    })) as WorkoutSessionWithWorkout[]
+  }
+
   async create(
     data: Prisma.WorkoutSessionUncheckedCreateInput,
   ): Promise<WorkoutSession> {

@@ -2,6 +2,7 @@ import { FastifyInstance } from 'fastify'
 
 import { verifyJwt } from '@/shared/middlewares/verify-jwt'
 
+import { compareWeeklyWorkoutsController } from '../controllers/compare-weekly-workouts.controller'
 import { compareWorkoutExercisesController } from '../controllers/compare-workout-exercises.controller'
 import { compareWorkoutSessionsController } from '../controllers/compare-workout-sessions.controller'
 import { completeWorkoutSessionController } from '../controllers/complete-workout-session.controller'
@@ -40,4 +41,6 @@ export async function sessionsRoutes(app: FastifyInstance) {
     '/workouts/:workoutId/sessions',
     getWorkoutSessionsByWorkoutController,
   )
+
+  app.get('/sessions/workouts/compare/weekly', compareWeeklyWorkoutsController)
 }

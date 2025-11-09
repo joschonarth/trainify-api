@@ -85,6 +85,12 @@ export interface WorkoutSessionsRepository {
     })[]
   >
 
+  findDetailedByUserAndDateRange(
+    userId: string,
+    startDate: Date,
+    endDate: Date,
+  ): Promise<WorkoutSessionWithWorkout[]>
+
   create(
     data: Prisma.WorkoutSessionUncheckedCreateInput,
   ): Promise<WorkoutSession>
