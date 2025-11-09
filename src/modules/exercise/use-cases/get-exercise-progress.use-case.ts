@@ -27,7 +27,11 @@ export class GetExerciseProgressUseCase {
       weight: log.weight ?? 0,
       reps: log.reps,
       sets: log.sets,
+      volume: log.volume ?? log.sets * log.reps * (log.weight ?? 0),
     }))
+
+    const totalVolume = progress.reduce((sum, log) => sum + log.volume, 0)
+    const avgVolume = totalVolume / progress.length
 
     const firstLog = orderedLogs[0] ?? null
 
@@ -35,6 +39,8 @@ export class GetExerciseProgressUseCase {
       exerciseId,
       exerciseName: firstLog?.exercise?.name ?? null,
       totalLogs: orderedLogs.length,
+      totalVolume,
+      avgVolume,
       progress,
     }
   }
