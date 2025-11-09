@@ -34,30 +34,38 @@ export async function seedWorkoutSessions() {
         workoutId: workout.id,
 
         exerciseSessions: {
-          create: workout.exercises.map((we, index) => ({
-            completed: true,
-            plannedSets: we.defaultSets ?? 3,
-            plannedReps: we.defaultReps ?? 10,
-            plannedWeight: we.defaultWeight ?? 0,
-            exerciseId: we.exerciseId,
+          create: workout.exercises.map((we, index) => {
+            const sets = we.exercise.sets ?? 3
+            const reps = we.exercise.reps ?? 10
+            const weight = we.exercise.weight ?? 0
+            const volume = sets * reps * weight
 
-            logs: {
-              create: [
-                {
-                  sets: we.defaultSets ?? 3,
-                  reps: we.defaultReps ?? 10,
-                  weight: we.defaultWeight ?? 0,
-                  date: new Date(),
-                  description:
-                    index % 2 === 0
-                      ? 'Execução padrão'
-                      : 'Teste de carga progressiva',
-                  userId: user.id,
-                  exerciseId: we.exerciseId,
-                },
-              ],
-            },
-          })),
+            return {
+              completed: true,
+              plannedSets: sets,
+              plannedReps: reps,
+              plannedWeight: weight,
+              exerciseId: we.exerciseId,
+
+              logs: {
+                create: [
+                  {
+                    sets,
+                    reps,
+                    weight,
+                    volume,
+                    date: new Date(),
+                    description:
+                      index % 2 === 0
+                        ? 'Execução padrão'
+                        : 'Teste de carga progressiva',
+                    userId: user.id,
+                    exerciseId: we.exerciseId,
+                  },
+                ],
+              },
+            }
+          }),
         },
       },
       include: {

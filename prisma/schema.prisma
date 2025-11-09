@@ -189,8 +189,9 @@ model ExerciseLog {
   sets        Int
   reps        Int
   weight      Float?
-  date        DateTime @default(now())
+  volume      Float?
   description String?
+  date        DateTime @default(now())
 
   exerciseSessionId String
   userId            String

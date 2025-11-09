@@ -52,6 +52,7 @@ export class CompleteWorkoutSessionUseCase {
   }: CompleteWorkoutSessionRequest): Promise<CompleteWorkoutSessionResponse> {
     const session =
       await this.workoutSessionsRepository.findByIdWithWorkout(sessionId)
+
     if (!session || session.userId !== userId) {
       throw new ResourceNotFoundError(
         'Workout session not found or does not belong to user.',
@@ -60,6 +61,7 @@ export class CompleteWorkoutSessionUseCase {
 
     const exerciseSessions =
       await this.exerciseSessionsRepository.findByWorkoutSessionId(sessionId)
+
     if (!exerciseSessions.length) {
       throw new ResourceNotFoundError('No exercises found for this session.')
     }
@@ -73,10 +75,14 @@ export class CompleteWorkoutSessionUseCase {
       )
       if (!exerciseSession) continue
 
+      const weight = exercise.weight ?? 0
+      const volume = exercise.sets * exercise.reps * weight
+
       await this.exerciseLogsRepository.create({
         sets: exercise.sets,
         reps: exercise.reps,
         weight: exercise.weight ?? null,
+        volume,
         description: exercise.note ?? null,
         date: now,
         user: { connect: { id: userId } },
@@ -95,6 +101,7 @@ export class CompleteWorkoutSessionUseCase {
 
     const updatedExerciseSessions =
       await this.exerciseSessionsRepository.findByWorkoutSessionId(sessionId)
+
     const newStatus = this.deriveSessionStatus(updatedExerciseSessions)
 
     await this.workoutSessionsRepository.updateStatus(sessionId, newStatus)
