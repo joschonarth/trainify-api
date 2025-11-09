@@ -10,6 +10,9 @@ import { getWorkoutSessionDetailsController } from '@/modules/session/controller
 import { getWorkoutSessionsHistoryController } from '@/modules/session/controllers/get-workout-sessions-history.controller'
 import { verifyJwt } from '@/shared/middlewares/verify-jwt'
 
+import { compareWorkoutSessionsController } from '../controllers/compare-workout-sessions.controller'
+import { getWorkoutSessionsByWorkoutController } from '../controllers/get-workout-sessions-by-workout.controller'
+
 export async function sessionsRoutes(app: FastifyInstance) {
   app.addHook('onRequest', verifyJwt)
 
@@ -25,4 +28,11 @@ export async function sessionsRoutes(app: FastifyInstance) {
   app.post('/sessions/:sessionId/logs', createExerciseLogSessionController)
 
   app.post('/sessions/:sessionId/complete', completeWorkoutSessionController)
+
+  app.get('/sessions/:workoutId/comparison', compareWorkoutSessionsController)
+
+  app.get(
+    '/workouts/:workoutId/sessions',
+    getWorkoutSessionsByWorkoutController,
+  )
 }
