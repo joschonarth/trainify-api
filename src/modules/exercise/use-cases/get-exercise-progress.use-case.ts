@@ -23,7 +23,7 @@ export class GetExerciseProgressUseCase {
     const orderedLogs = logs.sort((a, b) => a.date.getTime() - b.date.getTime())
 
     const progress = orderedLogs.map((log) => ({
-      date: log.date.toISOString().split('T')[0],
+      date: log.date.toISOString(),
       weight: log.weight ?? 0,
       reps: log.reps,
       sets: log.sets,
@@ -35,12 +35,20 @@ export class GetExerciseProgressUseCase {
 
     const firstLog = orderedLogs[0] ?? null
 
+    const maxVolumeData =
+      await this.exerciseLogsRepository.findMaxVolumeByExerciseAndUser(
+        userId,
+        exerciseId,
+      )
+
     return {
       exerciseId,
       exerciseName: firstLog?.exercise?.name ?? null,
       totalLogs: orderedLogs.length,
       totalVolume,
       avgVolume,
+      maxVolume: maxVolumeData?.maxVolume ?? 0,
+      maxVolumeDate: maxVolumeData?.date ?? null,
       progress,
     }
   }

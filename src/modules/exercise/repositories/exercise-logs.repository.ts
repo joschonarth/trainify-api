@@ -52,4 +52,9 @@ export interface ExerciseLogsRepository {
   >
 
   countCompletedByUser(userId: string): Promise<number>
+
+  findMaxVolumeByExerciseAndUser(
+    userId: string,
+    exerciseId: string,
+  ): Promise<{ maxVolume: number; date: Date } | null>
 }

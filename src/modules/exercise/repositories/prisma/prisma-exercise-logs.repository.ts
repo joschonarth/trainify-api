@@ -123,4 +123,21 @@ export class PrismaExerciseLogsRepository implements ExerciseLogsRepository {
       where: { userId },
     })
   }
+
+  async findMaxVolumeByExerciseAndUser(
+    userId: string,
+    exerciseId: string,
+  ): Promise<{ maxVolume: number; date: Date } | null> {
+    const result = await prisma.exerciseLog.findFirst({
+      where: { userId, exerciseId },
+      orderBy: { volume: 'desc' },
+      select: {
+        volume: true,
+        date: true,
+      },
+    })
+
+    if (!result) return null
+    return { maxVolume: result.volume ?? 0, date: result.date }
+  }
 }
