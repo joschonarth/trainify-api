@@ -37,5 +37,19 @@ export interface ExerciseLogsRepository {
 
   findByExerciseSession(exerciseSessionId: string): Promise<ExerciseLog | null>
 
+  findManyByExerciseAndUser(
+    userId: string,
+    exerciseId: string,
+  ): Promise<
+    (ExerciseLog & {
+      exercise: {
+        id: string
+        name: string
+        category: Exercise['category'] | null
+        type: Exercise['type'] | null
+      }
+    })[]
+  >
+
   countCompletedByUser(userId: string): Promise<number>
 }

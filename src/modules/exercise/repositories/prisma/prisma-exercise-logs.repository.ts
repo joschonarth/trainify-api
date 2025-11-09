@@ -89,6 +89,35 @@ export class PrismaExerciseLogsRepository implements ExerciseLogsRepository {
     })
   }
 
+  async findManyByExerciseAndUser(
+    userId: string,
+    exerciseId: string,
+  ): Promise<
+    (ExerciseLog & {
+      exercise: {
+        id: string
+        name: string
+        category: Exercise['category'] | null
+        type: Exercise['type'] | null
+      }
+    })[]
+  > {
+    return prisma.exerciseLog.findMany({
+      where: { userId, exerciseId },
+      include: {
+        exercise: {
+          select: {
+            id: true,
+            name: true,
+            category: true,
+            type: true,
+          },
+        },
+      },
+      orderBy: { date: 'asc' },
+    })
+  }
+
   async countCompletedByUser(userId: string) {
     return prisma.exerciseLog.count({
       where: { userId },
