@@ -1,4 +1,12 @@
-import { Prisma, WorkoutSession, WorkoutSessionStatus } from '@prisma/client'
+import {
+  Exercise,
+  ExerciseLog,
+  ExerciseSession,
+  Prisma,
+  Workout,
+  WorkoutSession,
+  WorkoutSessionStatus,
+} from '@prisma/client'
 
 export interface WorkoutSessionWithWorkout extends WorkoutSession {
   workout: {
@@ -63,6 +71,19 @@ export interface WorkoutSessionsRepository {
     userId: string,
     workoutId: string,
   ): Promise<WorkoutSessionWithWorkout[]>
+
+  findManyByWorkoutId(
+    workoutId: string,
+    userId: string,
+  ): Promise<
+    (WorkoutSession & {
+      exerciseSessions: (ExerciseSession & {
+        exercise: Exercise
+        logs: ExerciseLog[]
+      })[]
+      workout: Workout
+    })[]
+  >
 
   create(
     data: Prisma.WorkoutSessionUncheckedCreateInput,

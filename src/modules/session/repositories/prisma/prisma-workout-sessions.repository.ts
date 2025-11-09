@@ -186,6 +186,27 @@ export class PrismaWorkoutSessionsRepository
     })) as WorkoutSessionWithWorkout[]
   }
 
+  async findManyByWorkoutId(workoutId: string, userId: string) {
+    return prisma.workoutSession.findMany({
+      where: {
+        workoutId,
+        userId,
+      },
+      include: {
+        exerciseSessions: {
+          include: {
+            exercise: true,
+            logs: true,
+          },
+        },
+        workout: true,
+      },
+      orderBy: {
+        date: 'asc',
+      },
+    })
+  }
+
   async create(
     data: Prisma.WorkoutSessionUncheckedCreateInput,
   ): Promise<WorkoutSession> {
