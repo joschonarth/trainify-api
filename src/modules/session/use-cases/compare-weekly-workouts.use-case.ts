@@ -1,9 +1,14 @@
+import dayjs from 'dayjs'
+import isoWeek from 'dayjs/plugin/isoWeek'
+
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
 import {
   WorkoutSessionsRepository,
   WorkoutSessionWithWorkout,
 } from '../repositories/workout-sessions.repository'
+
+dayjs.extend(isoWeek)
 
 interface CompareWeeklyWorkoutsRequest {
   userId: string
@@ -40,20 +45,10 @@ export class CompareWeeklyWorkoutsUseCase {
   async execute({
     userId,
   }: CompareWeeklyWorkoutsRequest): Promise<WeeklyComparisonResult> {
-    const today = new Date()
-    const dayOfWeek = today.getDay() || 7
-    const startDate = new Date(today)
-    startDate.setDate(today.getDate() - dayOfWeek + 1)
-    startDate.setHours(0, 0, 0, 0)
-
-    const endDate = new Date(startDate)
-    endDate.setDate(startDate.getDate() + 6)
-    endDate.setHours(23, 59, 59, 999)
-
-    const prevStart = new Date(startDate)
-    prevStart.setDate(startDate.getDate() - 7)
-    const prevEnd = new Date(endDate)
-    prevEnd.setDate(endDate.getDate() - 7)
+    const startDate = dayjs().startOf('isoWeek').toDate()
+    const endDate = dayjs().endOf('isoWeek').toDate()
+    const prevStart = dayjs(startDate).subtract(1, 'week').toDate()
+    const prevEnd = dayjs(endDate).subtract(1, 'week').toDate()
 
     const currentWeekSessions =
       await this.workoutSessionsRepository.findDetailedByUserAndDateRange(
@@ -116,14 +111,14 @@ export class CompareWeeklyWorkoutsUseCase {
     return {
       userId,
       currentWeek: {
-        start: startDate.toISOString(),
-        end: endDate.toISOString(),
+        start: dayjs(startDate).toISOString(),
+        end: dayjs(endDate).toISOString(),
         totalWorkouts: currentWeekSessions.length,
         ...current,
       },
       previousWeek: {
-        start: prevStart.toISOString(),
-        end: prevEnd.toISOString(),
+        start: dayjs(prevStart).toISOString(),
+        end: dayjs(prevEnd).toISOString(),
         totalWorkouts: previousWeekSessions.length,
         ...previous,
       },

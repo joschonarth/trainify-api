@@ -1,3 +1,5 @@
+import dayjs from 'dayjs'
+
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
 import {
@@ -40,52 +42,38 @@ export class CompareMonthlyWorkoutsUseCase {
   async execute({
     userId,
   }: CompareMonthlyWorkoutsRequest): Promise<MonthlyComparisonResult> {
-    const now = new Date()
-    const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1)
-    const currentMonthEnd = new Date(
-      now.getFullYear(),
-      now.getMonth() + 1,
-      0,
-      23,
-      59,
-      59,
-      999,
-    )
-
-    const previousMonthStart = new Date(
-      now.getFullYear(),
-      now.getMonth() - 1,
-      1,
-    )
-    const previousMonthEnd = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      0,
-      23,
-      59,
-      59,
-      999,
-    )
+    const startDate = dayjs().startOf('month').toDate()
+    const endDate = dayjs().endOf('month').toDate()
+    const prevStart = dayjs(startDate)
+      .subtract(1, 'month')
+      .startOf('month')
+      .toDate()
+    const prevEnd = dayjs(startDate)
+      .subtract(1, 'month')
+      .endOf('month')
+      .toDate()
 
     const currentMonthSessions =
       await this.workoutSessionsRepository.findDetailedByUserAndDateRange(
         userId,
-        currentMonthStart,
-        currentMonthEnd,
+        startDate,
+        endDate,
       )
 
     const previousMonthSessions =
       await this.workoutSessionsRepository.findDetailedByUserAndDateRange(
         userId,
-        previousMonthStart,
-        previousMonthEnd,
+        prevStart,
+        prevEnd,
       )
 
     if (!currentMonthSessions.length || !previousMonthSessions.length) {
       throw new ResourceNotFoundError('Not enough sessions to compare months.')
     }
 
-    const calculateMetrics = (sessions: WorkoutSessionWithWorkout[]) => {
+    const calculateMetrics = (
+      sessions: WorkoutSessionWithWorkout[],
+    ): Omit<MonthSummary, 'start' | 'end' | 'totalWorkouts'> => {
       let totalSets = 0
       let totalReps = 0
       let totalWeight = 0
@@ -127,14 +115,14 @@ export class CompareMonthlyWorkoutsUseCase {
     return {
       userId,
       currentMonth: {
-        start: currentMonthStart.toISOString(),
-        end: currentMonthEnd.toISOString(),
+        start: dayjs(startDate).toISOString(),
+        end: dayjs(endDate).toISOString(),
         totalWorkouts: currentMonthSessions.length,
         ...current,
       },
       previousMonth: {
-        start: previousMonthStart.toISOString(),
-        end: previousMonthEnd.toISOString(),
+        start: dayjs(prevStart).toISOString(),
+        end: dayjs(prevEnd).toISOString(),
         totalWorkouts: previousMonthSessions.length,
         ...previous,
       },
