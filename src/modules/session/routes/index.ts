@@ -1,17 +1,18 @@
 import { FastifyInstance } from 'fastify'
 
-import { completeWorkoutSessionController } from '@/modules/session/controllers/complete-workout-session.controller'
-import { createExerciseLogSessionController } from '@/modules/session/controllers/create-exercise-log-session.controller'
-import { getDailyWorkoutSessionController } from '@/modules/session/controllers/get-daily-workout-sessions.controller'
-import { getMonthlyWorkoutCalendarController } from '@/modules/session/controllers/get-monthly-workout-calendar.controller'
-import { getWeeklyWorkoutCalendarController } from '@/modules/session/controllers/get-weekly-workout-calendar.controller'
-import { getWorkoutCalendarController } from '@/modules/session/controllers/get-workout-calendar.controller'
-import { getWorkoutSessionDetailsController } from '@/modules/session/controllers/get-workout-session-details.controller'
-import { getWorkoutSessionsHistoryController } from '@/modules/session/controllers/get-workout-sessions-history.controller'
 import { verifyJwt } from '@/shared/middlewares/verify-jwt'
 
+import { compareWorkoutExercisesController } from '../controllers/compare-workout-exercises.controller'
 import { compareWorkoutSessionsController } from '../controllers/compare-workout-sessions.controller'
+import { completeWorkoutSessionController } from '../controllers/complete-workout-session.controller'
+import { createExerciseLogSessionController } from '../controllers/create-exercise-log-session.controller'
+import { getDailyWorkoutSessionController } from '../controllers/get-daily-workout-sessions.controller'
+import { getMonthlyWorkoutCalendarController } from '../controllers/get-monthly-workout-calendar.controller'
+import { getWeeklyWorkoutCalendarController } from '../controllers/get-weekly-workout-calendar.controller'
+import { getWorkoutCalendarController } from '../controllers/get-workout-calendar.controller'
+import { getWorkoutSessionDetailsController } from '../controllers/get-workout-session-details.controller'
 import { getWorkoutSessionsByWorkoutController } from '../controllers/get-workout-sessions-by-workout.controller'
+import { getWorkoutSessionsHistoryController } from '../controllers/get-workout-sessions-history.controller'
 
 export async function sessionsRoutes(app: FastifyInstance) {
   app.addHook('onRequest', verifyJwt)
@@ -30,6 +31,10 @@ export async function sessionsRoutes(app: FastifyInstance) {
   app.post('/sessions/:sessionId/complete', completeWorkoutSessionController)
 
   app.get('/sessions/:workoutId/comparison', compareWorkoutSessionsController)
+  app.get(
+    '/sessions/:workoutId/exercises/comparison',
+    compareWorkoutExercisesController,
+  )
 
   app.get(
     '/workouts/:workoutId/sessions',
