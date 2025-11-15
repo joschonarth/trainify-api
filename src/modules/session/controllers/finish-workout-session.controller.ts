@@ -3,6 +3,8 @@ import { z } from 'zod'
 
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
+import { WorkoutSessionAlreadyCompletedError } from '../errors/workout-session-already-completed.error'
+import { WorkoutSessionNotStartedError } from '../errors/workout-session-not-started.error'
 import { makeFinishWorkoutSessionUseCase } from '../use-cases/factories/make-finish-workout-session-use-case'
 
 export async function finishWorkoutSessionController(
@@ -28,6 +30,14 @@ export async function finishWorkoutSessionController(
   } catch (error) {
     if (error instanceof ResourceNotFoundError) {
       return reply.status(404).send({ message: error.message })
+    }
+
+    if (error instanceof WorkoutSessionNotStartedError) {
+      return reply.status(400).send({ message: error.message })
+    }
+
+    if (error instanceof WorkoutSessionAlreadyCompletedError) {
+      return reply.status(409).send({ message: error.message })
     }
 
     throw error

@@ -3,9 +3,11 @@ import { WorkoutSessionStatus } from '@prisma/client'
 import { ExerciseLogsRepository } from '@/modules/exercise/repositories/exercise-logs.repository'
 import { UnlockAllBadgesUseCase } from '@/modules/gamification/use-cases/unlock-all-badges.use-case'
 import { UpdateUserStreakUseCase } from '@/modules/gamification/use-cases/update-user-streak.use-case'
-import { ExerciseSessionsRepository } from '@/modules/session/repositories/exercise-sessions.repository'
-import { WorkoutSessionsRepository } from '@/modules/session/repositories/workout-sessions.repository'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
+
+import { WorkoutSessionNotFinishedError } from '../errors/workout-session-not-finished.error'
+import { ExerciseSessionsRepository } from '../repositories/exercise-sessions.repository'
+import { WorkoutSessionsRepository } from '../repositories/workout-sessions.repository'
 
 interface CompleteWorkoutSessionRequest {
   userId: string
@@ -57,6 +59,10 @@ export class CompleteWorkoutSessionUseCase {
       throw new ResourceNotFoundError(
         'Workout session not found or does not belong to user.',
       )
+    }
+
+    if (!session.endedAt) {
+      throw new WorkoutSessionNotFinishedError()
     }
 
     const exerciseSessions =

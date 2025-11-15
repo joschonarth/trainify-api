@@ -2,6 +2,8 @@ import { WorkoutSessionStatus } from '@prisma/client'
 
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
+import { WorkoutSessionAlreadyCompletedError } from '../errors/workout-session-already-completed.error'
+import { WorkoutSessionNotStartedError } from '../errors/workout-session-not-started.error'
 import { WorkoutSessionsRepository } from '../repositories/workout-sessions.repository'
 
 interface FinishWorkoutSessionRequest {
@@ -20,11 +22,11 @@ export class FinishWorkoutSessionUseCase {
     }
 
     if (session.status === WorkoutSessionStatus.COMPLETED) {
-      throw new Error('Workout session already completed.')
+      throw new WorkoutSessionAlreadyCompletedError()
     }
 
     if (!session.startedAt) {
-      throw new Error('Workout session has not started.')
+      throw new WorkoutSessionNotStartedError()
     }
 
     const now = new Date()
