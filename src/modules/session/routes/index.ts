@@ -9,6 +9,7 @@ import { compareWorkoutSessionsController } from '../controllers/compare-workout
 import { compareWorkoutsController } from '../controllers/compare-workouts.controller'
 import { completeWorkoutSessionController } from '../controllers/complete-workout-session.controller'
 import { createExerciseLogSessionController } from '../controllers/create-exercise-log-session.controller'
+import { finishWorkoutSessionController } from '../controllers/finish-workout-session.controller'
 import { getDailyWorkoutSessionController } from '../controllers/get-daily-workout-sessions.controller'
 import { getMonthlyWorkoutCalendarController } from '../controllers/get-monthly-workout-calendar.controller'
 import { getWeeklyWorkoutCalendarController } from '../controllers/get-weekly-workout-calendar.controller'
@@ -16,6 +17,7 @@ import { getWorkoutCalendarController } from '../controllers/get-workout-calenda
 import { getWorkoutSessionDetailsController } from '../controllers/get-workout-session-details.controller'
 import { getWorkoutSessionsByWorkoutController } from '../controllers/get-workout-sessions-by-workout.controller'
 import { getWorkoutSessionsHistoryController } from '../controllers/get-workout-sessions-history.controller'
+import { startWorkoutSessionController } from '../controllers/start-workout-session.controller'
 
 export async function sessionsRoutes(app: FastifyInstance) {
   app.addHook('onRequest', verifyJwt)
@@ -50,4 +52,7 @@ export async function sessionsRoutes(app: FastifyInstance) {
     '/sessions/workouts/compare/monthly',
     compareMonthlyWorkoutsController,
   )
+
+  app.post('/sessions/:sessionId/start', startWorkoutSessionController)
+  app.post('/sessions/:sessionId/finish', finishWorkoutSessionController)
 }

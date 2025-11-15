@@ -306,6 +306,16 @@ export class PrismaWorkoutSessionsRepository
     })
   }
 
+  async update(
+    id: string,
+    data: Prisma.WorkoutSessionUpdateInput,
+  ): Promise<WorkoutSession> {
+    return prisma.workoutSession.update({
+      where: { id },
+      data,
+    })
+  }
+
   async updateStatus(
     id: string,
     status: WorkoutSessionStatus,

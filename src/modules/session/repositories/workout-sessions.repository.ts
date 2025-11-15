@@ -95,6 +95,11 @@ export interface WorkoutSessionsRepository {
     data: Prisma.WorkoutSessionUncheckedCreateInput,
   ): Promise<WorkoutSession>
 
+  update(
+    id: string,
+    data: Prisma.WorkoutSessionUpdateInput,
+  ): Promise<WorkoutSession>
+
   updateStatus(
     id: string,
     status: WorkoutSessionStatus,
