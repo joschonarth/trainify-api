@@ -65,10 +65,11 @@ model User {
 
   streak UserStreak?
 
-  WeightGoal    WeightGoal[]
-  WeightLog     WeightLog[]
-  UserBadge     UserBadge[]
-  UserStreakLog UserStreakLog[]
+  WeightGoal       WeightGoal[]
+  WeightLog        WeightLog[]
+  UserBadge        UserBadge[]
+  UserStreakLog    UserStreakLog[]
+  workoutSchedules WorkoutSchedule[]
 
   @@map("users")
 }
@@ -141,12 +142,14 @@ model WorkoutExercise {
 
 model WorkoutSchedule {
   id        String @id @default(cuid())
-  workoutId String
   dayOfWeek Int
+  userId    String
+  workoutId String
 
+  user    User    @relation(fields: [userId], references: [id])
   workout Workout @relation(fields: [workoutId], references: [id])
 
-  @@unique([workoutId, dayOfWeek])
+  @@unique([userId, dayOfWeek])
   @@map("workout_schedule")
 }
 

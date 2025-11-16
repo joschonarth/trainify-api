@@ -35,14 +35,12 @@ export class PrismaWorkoutSchedulesRepository
     return prisma.workoutSchedule.findFirst({
       where: {
         dayOfWeek,
-        workout: { userId },
+        userId,
       },
       include: {
         workout: {
           include: {
-            exercises: {
-              include: { exercise: true },
-            },
+            exercises: { include: { exercise: true } },
           },
         },
       },

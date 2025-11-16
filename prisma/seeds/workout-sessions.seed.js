@@ -3,43 +3,42 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
 export async function seedWorkoutSessions() {
-  console.log(
-    '🏋️‍♂️ Seeding workout sessions (2 sessions per workout across 2 weeks)...',
-  )
+  console.log('🏋️‍♂️ Seeding workout sessions...')
 
   const user = await prisma.user.findFirst()
+
+  if (!user) {
+    console.warn('⚠️ No user found. Skipping session seed.')
+    return
+  }
 
   const workouts = await prisma.workout.findMany({
     where: { userId: user.id },
     include: {
       exercises: {
-        include: {
-          exercise: true,
-        },
+        include: { exercise: true },
       },
     },
   })
 
-  if (!user || workouts.length === 0) {
-    console.warn(
-      '⚠️ User or Workouts not found, skipping workout sessions seed.',
-    )
+  if (workouts.length === 0) {
+    console.warn('⚠️ No workouts found. Skipping session seed.')
     return
   }
 
-  const today = new Date()
-  const weekStart = new Date(today)
-  weekStart.setDate(today.getDate() - 7)
-  weekStart.setHours(9, 0, 0, 0)
+  const baseDate = new Date()
+  baseDate.setDate(baseDate.getDate() - 60)
+  baseDate.setHours(9, 0, 0, 0)
 
   for (const [index, workout] of workouts.entries()) {
     const sessionDates = [
-      new Date(weekStart.getTime() + index * 24 * 60 * 60 * 1000),
-      new Date(weekStart.getTime() + (index + 7) * 24 * 60 * 60 * 1000),
+      new Date(baseDate.getTime() + index * 3 * 24 * 60 * 60 * 1000),
+      new Date(baseDate.getTime() + (index * 3 + 10) * 24 * 60 * 60 * 1000),
     ]
 
-    for (const [sessionIndex, sessionDate] of sessionDates.entries()) {
-      const isLater = sessionIndex === 1
+    for (let i = 0; i < sessionDates.length; i++) {
+      const sessionDate = sessionDates[i]
+      const progressive = i === 1
 
       const workoutSession = await prisma.workoutSession.create({
         data: {
@@ -49,17 +48,22 @@ export async function seedWorkoutSessions() {
           workoutId: workout.id,
 
           exerciseSessions: {
-            create: workout.exercises.map((we, exIndex) => {
+            create: workout.exercises.map((we) => {
               const baseSets = we.defaultSets ?? we.exercise?.sets ?? 3
               const baseReps = we.defaultReps ?? we.exercise?.reps ?? 10
               const baseWeight = we.defaultWeight ?? we.exercise?.weight ?? 0
 
-              const sets =
-                baseSets + (isLater ? Math.floor(Math.random() * 2) : 0)
-              const reps =
-                baseReps + (isLater ? Math.floor(Math.random() * 3) : 0)
-              const weight =
-                baseWeight + (isLater ? Math.floor(Math.random() * 5) : 0)
+              const sets = progressive
+                ? baseSets + Math.floor(Math.random() * 2)
+                : baseSets
+
+              const reps = progressive
+                ? baseReps + Math.floor(Math.random() * 3)
+                : baseReps
+
+              const weight = progressive
+                ? baseWeight + Math.floor(Math.random() * 5)
+                : baseWeight
 
               const volume = sets * reps * weight
 
@@ -78,10 +82,9 @@ export async function seedWorkoutSessions() {
                       weight,
                       volume,
                       date: sessionDate,
-                      description:
-                        exIndex % 2 === 0
-                          ? 'Sessão padrão'
-                          : 'Sessão com carga progressiva',
+                      description: progressive
+                        ? 'Sessão com progressão de carga'
+                        : 'Sessão base',
                       userId: user.id,
                       exerciseId: we.exerciseId,
                     },
@@ -110,5 +113,5 @@ export async function seedWorkoutSessions() {
     }
   }
 
-  console.log('🎉 Finished seeding 2 sessions per workout (one per week)!')
+  console.log('🎉 Finished seeding workout sessions!')
 }

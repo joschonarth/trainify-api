@@ -15,6 +15,8 @@ export async function assignDaysToWorkoutController(
     workoutId: z.string(),
   })
 
+  const userId = request.user.sub
+
   const { daysOfWeek } = bodySchema.parse(request.body)
   const { workoutId } = paramsSchema.parse(request.params)
 
@@ -22,6 +24,7 @@ export async function assignDaysToWorkoutController(
   const { assignedDays } = await assignDaysToWorkoutUseCase.execute({
     workoutId,
     daysOfWeek,
+    userId,
   })
 
   return reply.status(200).send({ assignedDays })
