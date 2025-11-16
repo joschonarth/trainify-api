@@ -42,9 +42,7 @@ export class GetDailyWorkoutSessionUseCase {
       return { session: detailedSession }
     }
 
-    const jsDay = today.getDay()
-
-    const dayOfWeek = jsDay === 0 ? 7 : jsDay
+    const dayOfWeek = today.getDay()
 
     const schedule = await this.workoutSchedulesRepository.findByUserAndDay(
       userId,
