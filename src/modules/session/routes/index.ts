@@ -17,7 +17,9 @@ import { getWorkoutCalendarController } from '../controllers/get-workout-calenda
 import { getWorkoutSessionDetailsController } from '../controllers/get-workout-session-details.controller'
 import { getWorkoutSessionsByWorkoutController } from '../controllers/get-workout-sessions-by-workout.controller'
 import { getWorkoutSessionsHistoryController } from '../controllers/get-workout-sessions-history.controller'
+import { startExerciseTimerController } from '../controllers/start-exercise-timer.controller'
 import { startWorkoutSessionController } from '../controllers/start-workout-session.controller'
+import { stopExerciseTimerController } from '../controllers/stop-exercise-timer.controller'
 
 export async function sessionsRoutes(app: FastifyInstance) {
   app.addHook('onRequest', verifyJwt)
@@ -55,4 +57,13 @@ export async function sessionsRoutes(app: FastifyInstance) {
 
   app.post('/sessions/:sessionId/start', startWorkoutSessionController)
   app.post('/sessions/:sessionId/finish', finishWorkoutSessionController)
+
+  app.post(
+    '/sessions/exercises/:exerciseSessionId/start',
+    startExerciseTimerController,
+  )
+  app.post(
+    '/sessions/exercises/:exerciseSessionId/stop',
+    stopExerciseTimerController,
+  )
 }
