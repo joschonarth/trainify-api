@@ -16,6 +16,9 @@ interface ExerciseHistory {
   actualReps?: number | null
   actualWeight?: number | null
   description?: string | null
+  duration?: number | null
+  startedAt?: Date | null
+  endedAt?: Date | null
 }
 
 interface SessionHistory {
@@ -23,6 +26,9 @@ interface SessionHistory {
   date: Date
   status: WorkoutSessionStatus
   workout: string
+  duration?: number | null
+  startedAt?: Date | null
+  endedAt?: Date | null
   exercises: ExerciseHistory[]
 }
 
@@ -50,6 +56,9 @@ export class GetWorkoutSessionsHistoryUseCase {
       date: session.date,
       status: session.status,
       workout: session.workout.name,
+      duration: session.duration ?? null,
+      startedAt: session.startedAt ?? null,
+      endedAt: session.endedAt ?? null,
       exercises: (session.exerciseSessions ?? []).map((ex) => {
         const lastLog = ex.logs.length > 0 ? ex.logs[ex.logs.length - 1] : null
 
@@ -63,6 +72,9 @@ export class GetWorkoutSessionsHistoryUseCase {
           loggedReps: lastLog?.reps ?? null,
           loggedWeight: lastLog?.weight ?? null,
           description: lastLog?.description ?? null,
+          duration: ex.duration ?? null,
+          startedAt: ex.startedAt ?? null,
+          endedAt: ex.endedAt ?? null,
         }
       }),
     }))

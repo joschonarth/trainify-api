@@ -40,15 +40,35 @@ export async function seedWorkoutSessions() {
       const sessionDate = sessionDates[i]
       const progressive = i === 1
 
+      const workoutDurationMinutes = 45 + Math.floor(Math.random() * 45)
+      const startedAt = new Date(sessionDate)
+      const endedAt = new Date(
+        sessionDate.getTime() + workoutDurationMinutes * 60 * 1000,
+      )
+      const duration = workoutDurationMinutes * 60 // segundos
+
       const workoutSession = await prisma.workoutSession.create({
         data: {
           date: sessionDate,
           status: 'COMPLETED',
           userId: user.id,
           workoutId: workout.id,
+          startedAt,
+          endedAt,
+          duration,
 
           exerciseSessions: {
-            create: workout.exercises.map((we) => {
+            create: workout.exercises.map((we, idx) => {
+              const segment = (duration * 1000) / workout.exercises.length
+
+              const exerciseStart = new Date(
+                startedAt.getTime() + idx * segment,
+              )
+              const exerciseEnd = new Date(exerciseStart.getTime() + segment)
+              const exerciseDuration = Math.floor(
+                (exerciseEnd.getTime() - exerciseStart.getTime()) / 1000,
+              )
+
               const baseSets = we.defaultSets ?? we.exercise?.sets ?? 3
               const baseReps = we.defaultReps ?? we.exercise?.reps ?? 10
               const baseWeight = we.defaultWeight ?? we.exercise?.weight ?? 0
@@ -72,6 +92,9 @@ export async function seedWorkoutSessions() {
                 plannedSets: sets,
                 plannedReps: reps,
                 plannedWeight: weight,
+                startedAt: exerciseStart,
+                endedAt: exerciseEnd,
+                duration: exerciseDuration,
                 exerciseId: we.exerciseId,
 
                 logs: {

@@ -31,6 +31,9 @@ export interface WorkoutSessionWithWorkout extends WorkoutSession {
     reps: number
     weight: number | null
     completed: boolean
+    startedAt: Date | null
+    endedAt: Date | null
+    duration: number | null
     exercise: {
       id: string
       name: string

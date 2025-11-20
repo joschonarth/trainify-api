@@ -29,9 +29,8 @@ export class FinishWorkoutSessionUseCase {
       throw new WorkoutSessionNotStartedError()
     }
 
-    const now = new Date()
+    const endedAt = new Date()
 
-    const endedAt = now
     const duration = session.startedAt
       ? Math.floor((endedAt.getTime() - session.startedAt.getTime()) / 1000)
       : 0

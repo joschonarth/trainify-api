@@ -81,6 +81,9 @@ export class PrismaWorkoutSessionsRepository
         reps: ex.plannedReps ?? 0,
         weight: ex.plannedWeight ?? null,
         completed: ex.completed,
+        duration: ex.duration ?? null,
+        startedAt: ex.startedAt ?? null,
+        endedAt: ex.endedAt ?? null,
         exercise: {
           id: ex.exercise.id,
           name: ex.exercise.name,
@@ -168,6 +171,9 @@ export class PrismaWorkoutSessionsRepository
         reps: ex.plannedReps ?? 0,
         weight: ex.plannedWeight ?? null,
         completed: ex.completed,
+        duration: ex.duration ?? null,
+        startedAt: ex.startedAt ?? null,
+        endedAt: ex.endedAt ?? null,
         exercise: {
           id: ex.exercise.id,
           name: ex.exercise.name,
@@ -261,6 +267,9 @@ export class PrismaWorkoutSessionsRepository
         reps: ex.plannedReps ?? 0,
         weight: ex.plannedWeight ?? null,
         completed: ex.completed,
+        duration: ex.duration ?? null,
+        startedAt: ex.startedAt ?? null,
+        endedAt: ex.endedAt ?? null,
         exercise: {
           id: ex.exercise.id,
           name: ex.exercise.name,
@@ -385,6 +394,9 @@ export class PrismaWorkoutSessionsRepository
           reps: ex.plannedReps ?? 0,
           weight: ex.plannedWeight ?? null,
           completed: ex.completed,
+          duration: ex.duration ?? null,
+          startedAt: ex.startedAt ?? null,
+          endedAt: ex.endedAt ?? null,
           exercise: {
             id: ex.exercise.id,
             name: ex.exercise.name,
