@@ -13,6 +13,9 @@ interface ExerciseDetail {
   loggedReps?: number | null
   loggedWeight?: number | null
   description?: string | null
+  startedAt?: Date | null
+  endedAt?: Date | null
+  duration?: number | null
 }
 
 interface WorkoutSessionDetail {
@@ -20,6 +23,9 @@ interface WorkoutSessionDetail {
   date: Date
   status: WorkoutSessionStatus
   workout: string
+  startedAt?: Date | null
+  endedAt?: Date | null
+  duration?: number | null
   exercises: ExerciseDetail[]
 }
 
@@ -49,6 +55,9 @@ export class GetWorkoutSessionDetailsUseCase {
       date: session.date,
       status: session.status,
       workout: session.workout.name,
+      startedAt: session.startedAt ?? null,
+      endedAt: session.endedAt ?? null,
+      duration: session.duration ?? null,
       exercises: session.workout.exercises.map((we) => {
         const exerciseSession = session.exerciseSessions.find(
           (es) => es.exercise.id === we.exercise.id,
@@ -68,6 +77,9 @@ export class GetWorkoutSessionDetailsUseCase {
           loggedReps: lastLog?.reps ?? null,
           loggedWeight: lastLog?.weight ?? null,
           description: lastLog?.description ?? null,
+          startedAt: exerciseSession?.startedAt ?? null,
+          endedAt: exerciseSession?.endedAt ?? null,
+          duration: exerciseSession?.duration ?? null,
         }
       }),
     }
