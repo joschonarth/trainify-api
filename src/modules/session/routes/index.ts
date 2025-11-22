@@ -11,6 +11,7 @@ import { completeWorkoutSessionController } from '../controllers/complete-workou
 import { createExerciseLogSessionController } from '../controllers/create-exercise-log-session.controller'
 import { finishWorkoutSessionController } from '../controllers/finish-workout-session.controller'
 import { getDailyWorkoutSessionController } from '../controllers/get-daily-workout-sessions.controller'
+import { getExerciseSessionDetailsController } from '../controllers/get-exercise-session-details.controller'
 import { getMonthlyWorkoutCalendarController } from '../controllers/get-monthly-workout-calendar.controller'
 import { getWeeklyWorkoutCalendarController } from '../controllers/get-weekly-workout-calendar.controller'
 import { getWorkoutCalendarController } from '../controllers/get-workout-calendar.controller'
@@ -65,5 +66,10 @@ export async function sessionsRoutes(app: FastifyInstance) {
   app.post(
     '/sessions/exercises/:exerciseSessionId/stop',
     stopExerciseTimerController,
+  )
+
+  app.get(
+    '/sessions/exercises/:exerciseSessionId',
+    getExerciseSessionDetailsController,
   )
 }
