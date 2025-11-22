@@ -159,6 +159,57 @@ export async function seedWorkoutExercises(userId, workouts) {
       reps: 15,
       weight: 0,
     },
+    // Treino F - Mobilidade e Alongamento
+    {
+      name: 'Alongamento de Isquiotibiais',
+      category: ExerciseCategory.FULL_BODY,
+      type: ExerciseType.STRETCH,
+      sets: 3,
+      reps: 20,
+      weight: 0,
+    },
+    {
+      name: 'Mobilidade de Quadril',
+      category: ExerciseCategory.FULL_BODY,
+      type: ExerciseType.STRETCH,
+      sets: 3,
+      reps: 15,
+      weight: 0,
+    },
+    {
+      name: 'Alongamento de Ombros',
+      category: ExerciseCategory.SHOULDERS,
+      type: ExerciseType.STRETCH,
+      sets: 3,
+      reps: 20,
+      weight: 0,
+    },
+
+    // Treino G - HIIT e Condicionamento
+    {
+      name: 'Corrida no Lugar',
+      category: ExerciseCategory.CARDIO,
+      type: ExerciseType.CARDIO,
+      sets: 3,
+      reps: 60,
+      weight: 0,
+    },
+    {
+      name: 'Mountain Climbers',
+      category: ExerciseCategory.FULL_BODY,
+      type: ExerciseType.CARDIO,
+      sets: 3,
+      reps: 30,
+      weight: 0,
+    },
+    {
+      name: 'Polichinelo',
+      category: ExerciseCategory.FULL_BODY,
+      type: ExerciseType.CARDIO,
+      sets: 3,
+      reps: 25,
+      weight: 0,
+    },
   ]
 
   const createdExercises = []
@@ -183,18 +234,27 @@ export async function seedWorkoutExercises(userId, workouts) {
     C: [8, 9, 10, 11],
     D: [12, 13, 14],
     E: [15, 16, 17],
+    F: [18, 19, 20],
+    G: [21, 22, 23],
   }
 
   const dataToInsert = []
 
   workouts.forEach((workout, index) => {
-    const key = ['A', 'B', 'C', 'D', 'E'][index]
+    const key = ['A', 'B', 'C', 'D', 'E', 'F', 'G'][index]
     const exIndexes = workoutExercisesMap[key]
+
     if (exIndexes) {
       exIndexes.forEach((i) => {
+        const ex = createdExercises[i]
+
         dataToInsert.push({
           workoutId: workout.id,
-          exerciseId: createdExercises[i].id,
+          exerciseId: ex.id,
+
+          defaultSets: ex.sets ?? 3,
+          defaultReps: ex.reps ?? 10,
+          defaultWeight: ex.weight ?? 0,
         })
       })
     }

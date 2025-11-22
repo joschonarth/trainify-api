@@ -45,7 +45,7 @@ export async function seedWorkoutSessions() {
       const endedAt = new Date(
         sessionDate.getTime() + workoutDurationMinutes * 60 * 1000,
       )
-      const duration = workoutDurationMinutes * 60 // segundos
+      const duration = workoutDurationMinutes * 60
 
       const workoutSession = await prisma.workoutSession.create({
         data: {

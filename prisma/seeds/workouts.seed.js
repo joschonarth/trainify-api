@@ -36,6 +36,18 @@ export async function seedWorkouts(userId) {
         'Treino de corpo inteiro com intensidade moderada para manutenção e resistência.',
       userId,
     },
+    {
+      name: 'Treino F - Mobilidade e Alongamento',
+      description:
+        'Foco em mobilidade articular, alongamentos dinâmicos e prevenção de lesões.',
+      userId,
+    },
+    {
+      name: 'Treino G - HIIT e Condicionamento',
+      description:
+        'Treino de alta intensidade voltado para queima calórica e melhora cardiovascular.',
+      userId,
+    },
   ]
 
   const createdWorkouts = []

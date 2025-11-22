@@ -15,7 +15,7 @@ export async function seedWorkoutSchedule(userId, workouts) {
     return
   }
 
-  const weekDays = [1, 2, 3, 4, 5]
+  const weekDays = [1, 2, 3, 4, 5, 6, 7]
 
   let workoutIndex = 0
 
