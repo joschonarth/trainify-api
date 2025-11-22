@@ -7,6 +7,7 @@ import { compareWeeklyWorkoutsController } from '../controllers/compare-weekly-w
 import { compareWorkoutExercisesController } from '../controllers/compare-workout-exercises.controller'
 import { compareWorkoutSessionsController } from '../controllers/compare-workout-sessions.controller'
 import { compareWorkoutsController } from '../controllers/compare-workouts.controller'
+import { completeExerciseSessionController } from '../controllers/complete-exercise-session.controller'
 import { completeWorkoutSessionController } from '../controllers/complete-workout-session.controller'
 import { createExerciseLogSessionController } from '../controllers/create-exercise-log-session.controller'
 import { finishWorkoutSessionController } from '../controllers/finish-workout-session.controller'
@@ -71,5 +72,10 @@ export async function sessionsRoutes(app: FastifyInstance) {
   app.get(
     '/sessions/exercises/:exerciseSessionId',
     getExerciseSessionDetailsController,
+  )
+
+  app.patch(
+    '/sessions/exercises/:exerciseSessionId/complete',
+    completeExerciseSessionController,
   )
 }
