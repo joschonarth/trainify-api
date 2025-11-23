@@ -5,7 +5,6 @@ import { UnlockAllBadgesUseCase } from '@/modules/gamification/use-cases/unlock-
 import { UpdateUserStreakUseCase } from '@/modules/gamification/use-cases/update-user-streak.use-case'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
-import { WorkoutSessionNotFinishedError } from '../errors/workout-session-not-finished.error'
 import { ExerciseSessionsRepository } from '../repositories/exercise-sessions.repository'
 import { WorkoutSessionsRepository } from '../repositories/workout-sessions.repository'
 
@@ -61,8 +60,16 @@ export class CompleteWorkoutSessionUseCase {
       )
     }
 
-    if (!session.endedAt) {
-      throw new WorkoutSessionNotFinishedError()
+    if (!session.endedAt && session.startedAt) {
+      const now = new Date()
+
+      const duration = Math.floor(
+        (now.getTime() - session.startedAt.getTime()) / 1000,
+      )
+      await this.workoutSessionsRepository.update(sessionId, {
+        endedAt: now,
+        duration,
+      })
     }
 
     const exerciseSessions =
