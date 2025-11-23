@@ -13,11 +13,12 @@ export async function updateUserProfileController(
     age: z.number().int().positive().optional(),
     height: z.number().int().positive().optional(),
     weight: z.number().positive().optional(),
+    gender: z.enum(['male', 'female', 'other']).optional(),
+    birthdate: z.string().optional(),
   })
 
-  const { name, age, height, weight } = updateProfileBodySchema.parse(
-    request.body,
-  )
+  const { name, age, height, weight, gender, birthdate } =
+    updateProfileBodySchema.parse(request.body)
 
   try {
     const updateUserProfile = makeUpdateUserProfileUseCase()
@@ -28,6 +29,8 @@ export async function updateUserProfileController(
       ...(age !== undefined && { age }),
       ...(height !== undefined && { height }),
       ...(weight !== undefined && { weight }),
+      ...(gender !== undefined && { gender }),
+      ...(birthdate !== undefined && { birthdate: new Date(birthdate) }),
     })
 
     return reply.status(200).send({

@@ -9,6 +9,8 @@ interface UpdateUserProfileUseCaseRequest {
   age?: number
   height?: number
   weight?: number
+  gender?: string
+  birthdate?: Date
 }
 
 interface UpdateUserProfileUseCaseResponse {
@@ -24,6 +26,8 @@ export class UpdateUserProfileUseCase {
     age,
     height,
     weight,
+    gender,
+    birthdate,
   }: UpdateUserProfileUseCaseRequest): Promise<UpdateUserProfileUseCaseResponse> {
     const user = await this.usersRepository.findById(userId)
 
@@ -34,14 +38,17 @@ export class UpdateUserProfileUseCase {
     const updatedUser = await this.usersRepository.update(
       userId,
       Object.fromEntries(
-        Object.entries({ name, age, height, weight }).filter(
-          ([, value]) => value !== undefined,
-        ),
+        Object.entries({
+          name,
+          age,
+          height,
+          weight,
+          gender,
+          birthdate,
+        }).filter(([, value]) => value !== undefined),
       ),
     )
 
-    return {
-      user: updatedUser,
-    }
+    return { user: updatedUser }
   }
 }

@@ -55,6 +55,9 @@ model User {
   age       Int?
   height    Int?
   weight    Float?
+  gender    String?
+  birthdate DateTime?
+
   createdAt DateTime @default(now()) @map("created_at")
 
   exercise    Exercise[]
