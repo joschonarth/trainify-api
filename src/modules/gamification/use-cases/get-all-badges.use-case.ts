@@ -10,6 +10,7 @@ interface GetAllBadgesUseCaseRequest {
 
 interface BadgeWithStatus extends Badge {
   unlocked: boolean
+  unlockedAt?: Date | undefined
 }
 
 interface GetAllBadgesUseCaseResponse {
@@ -29,12 +30,16 @@ export class GetAllBadgesUseCase {
       : await this.badgesRepository.findAll()
 
     const userBadges = await this.badgesRepository.findByUser(userId)
-    const unlockedIds = userBadges.map((ub) => ub.badgeId)
+    const userBadgesMap = new Map(userBadges.map((ub) => [ub.badgeId, ub]))
 
-    let badgesWithStatus: BadgeWithStatus[] = allBadges.map((b) => ({
-      ...b,
-      unlocked: unlockedIds.includes(b.id),
-    }))
+    let badgesWithStatus: BadgeWithStatus[] = allBadges.map((b) => {
+      const userBadge = userBadgesMap.get(b.id)
+      return {
+        ...b,
+        unlocked: !!userBadge,
+        unlockedAt: userBadge?.unlockedAt,
+      }
+    })
 
     if (unlocked !== undefined) {
       badgesWithStatus = badgesWithStatus.filter((b) => b.unlocked === unlocked)
