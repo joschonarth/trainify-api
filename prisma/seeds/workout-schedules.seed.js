@@ -15,7 +15,7 @@ export async function seedWorkoutSchedule(userId, workouts) {
     return
   }
 
-  const weekDays = [1, 2, 3, 4, 5, 6, 7]
+  const weekDays = [1, 2, 3, 4, 5, 6, 0]
 
   let workoutIndex = 0
 
@@ -37,9 +37,7 @@ export async function seedWorkoutSchedule(userId, workouts) {
       },
     })
 
-    console.log(
-      `✅ Assigned workout "${workout.name}" to user ${userId} on day ${dayOfWeek}`,
-    )
+    console.log(`✅ Assigned workout "${workout.name}" on day ${dayOfWeek}`)
 
     workoutIndex++
   }

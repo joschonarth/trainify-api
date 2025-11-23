@@ -12,7 +12,7 @@ export async function seedUser() {
       name: 'João Teste',
       email: 'joao@example.com',
       password: '$2b$06$z1egRKOP6/a/uQh/yPewO.k0LbZbIiqYLuFlc6Z52HrRUC60dPDyS',
-      age: 22,
+      birthdate: new Date('2004-04-19'),
       height: 178,
       weight: 72.5,
       avatarUrl: 'https://github.com/joschonarth.png',

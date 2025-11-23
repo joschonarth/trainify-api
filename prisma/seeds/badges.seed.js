@@ -118,4 +118,31 @@ export async function seedBadges() {
   }
 
   console.log(`✅ Successfully inserted ${allBadges.length} badges!`)
+
+  const user = await prisma.user.findUnique({
+    where: { email: 'joao@example.com' },
+  })
+  if (!user) throw new Error('User not found!')
+
+  const badgesToUnlock = [
+    'Primeiro Passo',
+    'Força Inicial',
+    'Começo da Jornada',
+  ]
+
+  for (const badgeName of badgesToUnlock) {
+    const badge = await prisma.badge.findUnique({ where: { name: badgeName } })
+    if (badge) {
+      await prisma.userBadge.upsert({
+        where: { userId_badgeId: { userId: user.id, badgeId: badge.id } },
+        update: {},
+        create: {
+          userId: user.id,
+          badgeId: badge.id,
+        },
+      })
+    }
+  }
+
+  console.log(`🎉 Unlocked initial badges for user ${user.name}`)
 }
