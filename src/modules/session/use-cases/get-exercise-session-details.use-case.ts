@@ -1,45 +1,30 @@
 import { ExerciseSessionsRepository } from '@/modules/session/repositories/exercise-sessions.repository'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
-interface ExerciseSessionLogDetail {
-  id: string
-  sets: number
-  reps: number
-  weight: number | null
-  description: string | null
-  date: Date
-}
-
-interface ExerciseSessionDetail {
+interface ExerciseSessionDetails {
   id: string
   exerciseId: string
   exerciseName: string
   category: string | null
   type: string | null
 
-  // planejado
   plannedSets: number | null
   plannedReps: number | null
   plannedWeight: number | null
 
-  // status / progresso
   completed: boolean
   startedAt?: Date | null
   endedAt?: Date | null
   duration?: number | null
 
-  // último log
   loggedSets?: number | null
   loggedReps?: number | null
   loggedWeight?: number | null
   description?: string | null
-
-  // lista completa de logs
-  logs: ExerciseSessionLogDetail[]
 }
 
 interface GetExerciseSessionDetailsResponse {
-  session: ExerciseSessionDetail
+  session: ExerciseSessionDetails
 }
 
 export class GetExerciseSessionDetailsUseCase {
@@ -61,7 +46,7 @@ export class GetExerciseSessionDetailsUseCase {
       ? exerciseSession.logs[exerciseSession.logs.length - 1]
       : null
 
-    const sessionDetail: ExerciseSessionDetail = {
+    const sessionDetail: ExerciseSessionDetails = {
       id: exerciseSession.id,
       exerciseId: exerciseSession.exercise.id,
       exerciseName: exerciseSession.exercise.name,
@@ -81,15 +66,6 @@ export class GetExerciseSessionDetailsUseCase {
       loggedReps: lastLog?.reps ?? null,
       loggedWeight: lastLog?.weight ?? null,
       description: lastLog?.description ?? null,
-
-      logs: exerciseSession.logs.map((log) => ({
-        id: log.id,
-        sets: log.sets,
-        reps: log.reps,
-        weight: log.weight,
-        description: log.description,
-        date: log.date,
-      })),
     }
 
     return { session: sessionDetail }
