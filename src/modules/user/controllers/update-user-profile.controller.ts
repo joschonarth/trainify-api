@@ -10,14 +10,13 @@ export async function updateUserProfileController(
 ) {
   const updateProfileBodySchema = z.object({
     name: z.string().optional(),
-    age: z.number().int().positive().optional(),
     height: z.number().int().positive().optional(),
     weight: z.number().positive().optional(),
     gender: z.enum(['male', 'female', 'other']).optional(),
     birthdate: z.string().optional(),
   })
 
-  const { name, age, height, weight, gender, birthdate } =
+  const { name, height, weight, gender, birthdate } =
     updateProfileBodySchema.parse(request.body)
 
   try {
@@ -26,7 +25,6 @@ export async function updateUserProfileController(
     const { user } = await updateUserProfile.execute({
       userId: request.user.userId,
       ...(name !== undefined && { name }),
-      ...(age !== undefined && { age }),
       ...(height !== undefined && { height }),
       ...(weight !== undefined && { weight }),
       ...(gender !== undefined && { gender }),

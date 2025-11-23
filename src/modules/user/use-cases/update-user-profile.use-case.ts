@@ -6,7 +6,6 @@ import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 interface UpdateUserProfileUseCaseRequest {
   userId: string
   name?: string
-  age?: number
   height?: number
   weight?: number
   gender?: string
@@ -23,7 +22,6 @@ export class UpdateUserProfileUseCase {
   async execute({
     userId,
     name,
-    age,
     height,
     weight,
     gender,
@@ -40,7 +38,6 @@ export class UpdateUserProfileUseCase {
       Object.fromEntries(
         Object.entries({
           name,
-          age,
           height,
           weight,
           gender,

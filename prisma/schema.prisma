@@ -52,7 +52,6 @@ model User {
   password  String?
   avatarUrl String?
 
-  age       Int?
   height    Int?
   weight    Float?
   gender    String?
