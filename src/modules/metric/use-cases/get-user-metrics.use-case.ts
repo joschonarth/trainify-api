@@ -8,6 +8,7 @@ interface GetUserMetricsRequest {
 interface GetUserMetricsResponse {
   totalWorkouts: number
   totalExercises: number
+  totalWorkoutDuration: number
 }
 
 export class GetUserMetricsUseCase {
@@ -19,11 +20,17 @@ export class GetUserMetricsUseCase {
   async execute({
     userId,
   }: GetUserMetricsRequest): Promise<GetUserMetricsResponse> {
-    const [totalWorkouts, totalExercises] = await Promise.all([
+    const [totalWorkouts, totalExercises, sessions] = await Promise.all([
       this.workoutSessionsRepository.countCompletedByUser(userId),
       this.exerciseLogsRepository.countCompletedByUser(userId),
+      this.workoutSessionsRepository.findAllByUser(userId),
     ])
 
-    return { totalWorkouts, totalExercises }
+    const totalWorkoutDuration = sessions.reduce(
+      (acc, s) => acc + (s.duration ?? 0),
+      0,
+    )
+
+    return { totalWorkouts, totalExercises, totalWorkoutDuration }
   }
 }
