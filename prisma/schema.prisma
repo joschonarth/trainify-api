@@ -77,15 +77,13 @@ model User {
 }
 
 model Exercise {
-  id        String            @id @default(cuid())
-  name      String
-  category  ExerciseCategory?
-  type      ExerciseType?
-  sets      Int?
-  reps      Int?
-  weight    Float?
-  isCustom  Boolean           @default(false) @map("is_custom")
-  createdAt DateTime          @default(now()) @map("created_at")
+  id       String            @id @default(cuid())
+  name     String
+  category ExerciseCategory?
+  type     ExerciseType?
+
+  isCustom  Boolean  @default(false) @map("is_custom")
+  createdAt DateTime @default(now()) @map("created_at")
 
   userId          String?           @map("user_id")
   user            User?             @relation(fields: [userId], references: [id])
@@ -128,8 +126,9 @@ model Workout {
 }
 
 model WorkoutExercise {
-  id            String @id @default(cuid())
-  workoutId     String
+  id        String @id @default(cuid())
+  workoutId String
+
   exerciseId    String
   defaultSets   Int?
   defaultReps   Int?

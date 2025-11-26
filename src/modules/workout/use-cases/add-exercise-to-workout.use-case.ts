@@ -1,6 +1,7 @@
 import { WorkoutExercise } from '@prisma/client'
 
 import { ExercisesRepository } from '@/modules/exercise/repositories/exercises.repository'
+import { ResourceAlreadyExistsError } from '@/shared/errors/resource-already-exists.error'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
 import { WorkoutExercisesRepository } from '../repositories/workout-exercises.repository'
@@ -40,6 +41,18 @@ export class AddExerciseToWorkoutUseCase {
     const exercise = await this.exercisesRepository.findById(exerciseId)
     if (!exercise) {
       throw new ResourceNotFoundError('Exercise not found.')
+    }
+
+    const existing =
+      await this.workoutExercisesRepository.findByWorkoutAndExercise(
+        workoutId,
+        exerciseId,
+      )
+
+    if (existing) {
+      throw new ResourceAlreadyExistsError(
+        'Exercise is already added to this workout.',
+      )
     }
 
     const workoutExercise =

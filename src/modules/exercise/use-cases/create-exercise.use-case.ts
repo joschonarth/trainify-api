@@ -1,44 +1,28 @@
-import {
-  Exercise,
-  ExerciseCategory,
-  ExerciseType,
-  MyExercise,
-} from '@prisma/client'
+import { Exercise, ExerciseCategory, ExerciseType } from '@prisma/client'
 
 import { ResourceAlreadyExistsError } from '@/shared/errors/resource-already-exists.error'
 
 import { ExercisesRepository } from '../repositories/exercises.repository'
-import { MyExercisesRepository } from '../repositories/my-exercises.repository'
 
 interface CreateExerciseUseCaseRequest {
   userId: string
   name: string
   category: ExerciseCategory | null
   type: ExerciseType | null
-  sets: number | null
-  reps: number | null
-  weight: number | null
 }
 
 interface CreateExerciseUseCaseResponse {
   exercise: Exercise
-  myExercise: MyExercise
 }
 
 export class CreateExerciseUseCase {
-  constructor(
-    private exercisesRepository: ExercisesRepository,
-    private myExercisesRepository: MyExercisesRepository,
-  ) {}
+  constructor(private exercisesRepository: ExercisesRepository) {}
 
   async execute({
     userId,
     name,
     category,
     type,
-    sets,
-    reps,
-    weight,
   }: CreateExerciseUseCaseRequest): Promise<CreateExerciseUseCaseResponse> {
     const existingExercise = await this.exercisesRepository.findByNameAndUser(
       name,
@@ -47,7 +31,7 @@ export class CreateExerciseUseCase {
 
     if (existingExercise) {
       throw new ResourceAlreadyExistsError(
-        'Exercise with this name already exists.',
+        'Exercise with this name already exists for this user.',
       )
     }
 
@@ -56,18 +40,10 @@ export class CreateExerciseUseCase {
       category,
       type,
       isCustom: true,
-      sets,
-      reps,
-      weight,
       createdAt: new Date(),
       user: { connect: { id: userId } },
     })
 
-    const myExercise = await this.myExercisesRepository.addExercise(
-      userId,
-      exercise.id,
-    )
-
-    return { exercise, myExercise }
+    return { exercise }
   }
 }

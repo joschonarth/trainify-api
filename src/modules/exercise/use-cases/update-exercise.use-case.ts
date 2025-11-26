@@ -11,9 +11,6 @@ interface UpdateExerciseUseCaseRequest {
   name?: string | null | undefined
   category?: ExerciseCategory | null | undefined
   type?: ExerciseType | null | undefined
-  sets?: number | null | undefined
-  reps?: number | null | undefined
-  weight?: number | null | undefined
 }
 
 interface UpdateExerciseUseCaseResponse {
@@ -29,9 +26,6 @@ export class UpdateExerciseUseCase {
     name,
     category,
     type,
-    sets,
-    reps,
-    weight,
   }: UpdateExerciseUseCaseRequest): Promise<UpdateExerciseUseCaseResponse> {
     const exercise = await this.exercisesRepository.findById(exerciseId)
 
@@ -51,9 +45,6 @@ export class UpdateExerciseUseCase {
       name: name ?? exercise.name,
       category: category ?? exercise.category,
       type: type ?? exercise.type,
-      sets: sets ?? exercise.sets,
-      reps: reps ?? exercise.reps,
-      weight: weight ?? exercise.weight,
     })
 
     return { exercise: updatedExercise }
