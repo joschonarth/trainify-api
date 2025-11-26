@@ -16,6 +16,7 @@ export interface ExercisesRepository {
   findByNameAndUser(name: string, userId: string): Promise<Exercise | null>
   findManyByUser(
     userId: string,
+    query?: string | null,
     category?: ExerciseCategory | null,
     type?: ExerciseType | null,
   ): Promise<Exercise[]>
@@ -25,9 +26,6 @@ export interface ExercisesRepository {
       name?: string
       category?: ExerciseCategory | null
       type?: ExerciseType | null
-      sets?: number | null
-      reps?: number | null
-      weight?: number | null
     }>,
   ): Promise<Exercise>
   delete(exerciseId: string): Promise<void>

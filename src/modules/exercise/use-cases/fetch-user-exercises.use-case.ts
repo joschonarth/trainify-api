@@ -4,6 +4,7 @@ import { ExercisesRepository } from '../repositories/exercises.repository'
 
 interface FetchUserExercisesUseCaseRequest {
   userId: string
+  query?: string
   category?: ExerciseCategory | null
   type?: ExerciseType | null
 }
@@ -17,11 +18,13 @@ export class FetchUserExercisesUseCase {
 
   async execute({
     userId,
+    query,
     category,
     type,
   }: FetchUserExercisesUseCaseRequest): Promise<FetchUserExercisesUseCaseResponse> {
     const exercises = await this.exercisesRepository.findManyByUser(
       userId,
+      query,
       category,
       type,
     )

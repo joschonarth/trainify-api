@@ -9,17 +9,21 @@ export async function fetchUserExercisesController(
   reply: FastifyReply,
 ) {
   const fetchUserExercisesSchema = z.object({
+    query: z.string().optional().default(''),
     category: z.enum(ExerciseCategory).optional().default(undefined),
     type: z.enum(ExerciseType).optional().default(undefined),
   })
 
-  const { category, type } = fetchUserExercisesSchema.parse(request.query)
+  const { query, category, type } = fetchUserExercisesSchema.parse(
+    request.query,
+  )
 
   const userId = request.user.sub
 
   const fetchUserExercisesUseCase = makeFetchUserExercisesUseCase()
   const { exercises } = await fetchUserExercisesUseCase.execute({
     userId,
+    query,
     category,
     type,
   })

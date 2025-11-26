@@ -62,12 +62,14 @@ export class PrismaExercisesRepository implements ExercisesRepository {
 
   async findManyByUser(
     userId: string,
+    query?: string | null,
     category?: ExerciseCategory | null,
     type?: ExerciseType | null,
   ): Promise<Exercise[]> {
     return prisma.exercise.findMany({
       where: {
         userId,
+        ...(query && { query }),
         ...(category && { category }),
         ...(type && { type }),
       },
@@ -81,9 +83,6 @@ export class PrismaExercisesRepository implements ExercisesRepository {
       name?: string
       category?: ExerciseCategory | null
       type?: ExerciseType | null
-      sets?: number | null
-      reps?: number | null
-      weight?: number | null
     },
   ): Promise<Exercise> {
     const prismaData: Prisma.ExerciseUpdateInput = {}
@@ -91,9 +90,6 @@ export class PrismaExercisesRepository implements ExercisesRepository {
     if (data.name !== undefined) prismaData.name = data.name
     if (data.category !== undefined) prismaData.category = data.category
     if (data.type !== undefined) prismaData.type = data.type
-    if (data.sets !== undefined) prismaData.sets = data.sets
-    if (data.reps !== undefined) prismaData.reps = data.reps
-    if (data.weight !== undefined) prismaData.weight = data.weight
 
     return prisma.exercise.update({
       where: { id: exerciseId },
