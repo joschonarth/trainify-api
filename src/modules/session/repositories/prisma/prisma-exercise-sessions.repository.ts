@@ -46,6 +46,26 @@ export class PrismaExerciseSessionsRepository
     }) as unknown as ExerciseSessionWithLogs | null
   }
 
+  async findManyByUserAndExercise(
+    userId: string,
+    exerciseId: string,
+  ): Promise<ExerciseSessionWithLogs[]> {
+    return prisma.exerciseSession.findMany({
+      where: {
+        exerciseId,
+        logs: {
+          some: {
+            userId,
+          },
+        },
+      },
+      include: {
+        exercise: true,
+        logs: true,
+      },
+    }) as unknown as ExerciseSessionWithLogs[]
+  }
+
   async create(
     data: Prisma.ExerciseSessionUncheckedCreateInput,
   ): Promise<ExerciseSession> {

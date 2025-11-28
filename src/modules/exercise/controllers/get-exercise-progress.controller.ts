@@ -5,7 +5,7 @@ import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
 import { makeGetExerciseProgressUseCase } from '../use-cases/factories/make-get-exercise-progress-use-case'
 
-export async function fetchExerciseProgressController(
+export async function getExerciseProgressController(
   request: FastifyRequest,
   reply: FastifyReply,
 ) {

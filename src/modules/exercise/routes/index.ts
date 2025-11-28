@@ -7,12 +7,12 @@ import { createExerciseController } from '../controllers/create-exercise.control
 import { createExerciseLogController } from '../controllers/create-exercise-log.controller'
 import { deleteCustomExerciseController } from '../controllers/delete-custom-exercise.controller'
 import { fetchExerciseLogsController } from '../controllers/fetch-exercise-logs.controller'
-import { fetchExerciseProgressController } from '../controllers/fetch-exercise-progress.controller'
 import { fetchExercisesCatalogController } from '../controllers/fetch-exercises-catalog.controller'
 import { fetchMyExercisesController } from '../controllers/fetch-my-exercises.controller'
 import { fetchUserExercisesController } from '../controllers/fetch-user-exercises.controller'
 import { getExerciseDetailsController } from '../controllers/get-exercise-details.controller'
 import { getExerciseLogController } from '../controllers/get-exercise-log.controller'
+import { getExerciseProgressController } from '../controllers/get-exercise-progress.controller'
 import { removeCatalogExerciseController } from '../controllers/remove-catalog-exercise.controller'
 import { updateExerciseController } from '../controllers/update-exercise.controller'
 
@@ -43,5 +43,5 @@ export async function exercisesRoutes(app: FastifyInstance) {
   app.post('/exercise-logs', createExerciseLogController)
 
   /** Exercise Progress */
-  app.get('/exercises/:exerciseId/progress', fetchExerciseProgressController)
+  app.get('/exercises/:exerciseId/progress', getExerciseProgressController)
 }

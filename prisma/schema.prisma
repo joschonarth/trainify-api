@@ -15,6 +15,7 @@ enum ExerciseCategory {
   LEGS
   SHOULDERS
   ARMS
+  ABS
   FULL_BODY
 }
 
@@ -82,7 +83,7 @@ model Exercise {
   category ExerciseCategory?
   type     ExerciseType?
 
-  isCustom  Boolean  @default(false) @map("is_custom")
+  isCustom  Boolean  @default(true) @map("is_custom")
   createdAt DateTime @default(now()) @map("created_at")
 
   userId          String?           @map("user_id")

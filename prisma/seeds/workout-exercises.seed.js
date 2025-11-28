@@ -108,10 +108,10 @@ export async function seedWorkoutExercises(userId, workouts) {
       defaultWeight: 10,
     },
 
-    // Treino D - Core e Estabilização
+    // Treino D - Abdômen e Estabilização
     {
       name: 'Prancha',
-      category: ExerciseCategory.CORE,
+      category: ExerciseCategory.ABS,
       type: ExerciseType.STABILITY,
       defaultSets: 3,
       defaultReps: 1,
@@ -119,7 +119,7 @@ export async function seedWorkoutExercises(userId, workouts) {
     },
     {
       name: 'Abdominal Infra',
-      category: ExerciseCategory.CORE,
+      category: ExerciseCategory.ABS,
       type: ExerciseType.STRENGTH,
       defaultSets: 3,
       defaultReps: 15,
@@ -127,7 +127,7 @@ export async function seedWorkoutExercises(userId, workouts) {
     },
     {
       name: 'Extensão Lombar',
-      category: ExerciseCategory.LOWER_BACK,
+      category: ExerciseCategory.BACK,
       type: ExerciseType.STRENGTH,
       defaultSets: 3,
       defaultReps: 12,
@@ -154,7 +154,7 @@ export async function seedWorkoutExercises(userId, workouts) {
     {
       name: 'Flexão de Braço',
       category: ExerciseCategory.CHEST,
-      type: ExerciseType.BODYWEIGHT,
+      type: ExerciseType.STRENGTH,
       defaultSets: 3,
       defaultReps: 15,
       defaultWeight: 0,
@@ -164,7 +164,7 @@ export async function seedWorkoutExercises(userId, workouts) {
     {
       name: 'Alongamento de Isquiotibiais',
       category: ExerciseCategory.FULL_BODY,
-      type: ExerciseType.STRETCH,
+      type: ExerciseType.FLEXIBILITY,
       defaultSets: 3,
       defaultReps: 20,
       defaultWeight: 0,
@@ -172,7 +172,7 @@ export async function seedWorkoutExercises(userId, workouts) {
     {
       name: 'Mobilidade de Quadril',
       category: ExerciseCategory.FULL_BODY,
-      type: ExerciseType.STRETCH,
+      type: ExerciseType.FLEXIBILITY,
       defaultSets: 3,
       defaultReps: 15,
       defaultWeight: 0,
@@ -180,7 +180,7 @@ export async function seedWorkoutExercises(userId, workouts) {
     {
       name: 'Alongamento de Ombros',
       category: ExerciseCategory.SHOULDERS,
-      type: ExerciseType.STRETCH,
+      type: ExerciseType.FLEXIBILITY,
       defaultSets: 3,
       defaultReps: 20,
       defaultWeight: 0,
@@ -189,7 +189,7 @@ export async function seedWorkoutExercises(userId, workouts) {
     // Treino G - HIIT
     {
       name: 'Corrida no Lugar',
-      category: ExerciseCategory.CARDIO,
+      category: ExerciseCategory.LEGS,
       type: ExerciseType.CARDIO,
       defaultSets: 3,
       defaultReps: 60,

@@ -6,15 +6,13 @@ export type ExerciseSessionWithLogs = ExerciseSession & {
     name: string
     category: string | null
     type: string | null
-    sets: number | null
-    reps: number | null
-    weight: number | null
   }
   logs: {
     id: string
     sets: number
     reps: number
     weight: number | null
+    volume: number | null
     date: Date
     description: string | null
   }[]
@@ -30,6 +28,11 @@ export interface ExerciseSessionsRepository {
   ): Promise<ExerciseSessionWithLogs[]>
 
   findByIdWithLogs(id: string): Promise<ExerciseSessionWithLogs | null>
+
+  findManyByUserAndExercise(
+    userId: string,
+    exerciseId: string,
+  ): Promise<ExerciseSessionWithLogs[]>
 
   create(
     data: Prisma.ExerciseSessionUncheckedCreateInput,
