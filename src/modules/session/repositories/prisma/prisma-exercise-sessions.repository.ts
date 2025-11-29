@@ -49,6 +49,7 @@ export class PrismaExerciseSessionsRepository
   async findManyByUserAndExercise(
     userId: string,
     exerciseId: string,
+    fromDate: Date,
   ): Promise<ExerciseSessionWithLogs[]> {
     return prisma.exerciseSession.findMany({
       where: {
@@ -58,6 +59,7 @@ export class PrismaExerciseSessionsRepository
             userId,
           },
         },
+        ...(fromDate && { startedAt: { gte: fromDate } }),
       },
       include: {
         exercise: true,

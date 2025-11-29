@@ -13,8 +13,13 @@ export async function getExerciseSessionProgressController(
     exerciseId: z.cuid(),
   })
 
+  const querySchema = z.object({
+    period: z.enum(['WEEK', 'MONTH', 'ALL']).optional().default('ALL'),
+  })
+
   try {
     const { exerciseId } = paramsSchema.parse(request.params)
+    const { period } = querySchema.parse(request.query)
 
     const userId = request.user.sub
 
@@ -24,6 +29,7 @@ export async function getExerciseSessionProgressController(
     const result = await getExerciseSessionProgressUseCase.execute({
       userId,
       exerciseId,
+      period,
     })
 
     return reply.status(200).send(result)

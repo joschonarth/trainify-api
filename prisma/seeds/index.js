@@ -15,8 +15,8 @@ async function main() {
   const user = await seedUser()
   const workouts = await seedWorkouts(user.id)
   await seedWorkoutExercises(user.id, workouts)
-  await seedWorkoutSessions(user.id, workouts)
   await seedWorkoutSchedule(user.id, workouts)
+  await seedWorkoutSessions(user.id)
   await seedBadges()
 
   console.log('🎉 All seeds executed successfully!')

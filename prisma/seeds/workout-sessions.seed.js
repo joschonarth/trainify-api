@@ -3,138 +3,108 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
 export async function seedWorkoutSessions() {
-  console.log('🏋️‍♂️ Seeding workout sessions...')
+  console.log('🔥 Seeding completed workout sessions...')
 
   const user = await prisma.user.findFirst()
-
   if (!user) {
-    console.warn('⚠️ No user found. Skipping session seed.')
+    console.error('❌ User not found.')
     return
   }
 
-  const workouts = await prisma.workout.findMany({
+  const schedules = await prisma.workoutSchedule.findMany({
     where: { userId: user.id },
     include: {
-      exercises: {
-        include: { exercise: true },
+      workout: {
+        include: {
+          exercises: {
+            include: { exercise: true },
+          },
+        },
       },
     },
   })
 
-  if (workouts.length === 0) {
-    console.warn('⚠️ No workouts found. Skipping session seed.')
-    return
-  }
+  const today = new Date()
 
-  const baseDate = new Date()
-  baseDate.setDate(baseDate.getDate() - 60)
-  baseDate.setHours(9, 0, 0, 0)
+  for (const schedule of schedules) {
+    const workout = schedule.workout
 
-  for (const [index, workout] of workouts.entries()) {
-    const sessionDates = [
-      new Date(baseDate.getTime() + index * 3 * 24 * 60 * 60 * 1000),
-      new Date(baseDate.getTime() + (index * 3 + 10) * 24 * 60 * 60 * 1000),
-    ]
+    for (let week = 1; week <= 8; week++) {
+      const sessionDate = new Date()
+      sessionDate.setDate(today.getDate() - week * 7 + schedule.dayOfWeek)
 
-    for (let i = 0; i < sessionDates.length; i++) {
-      const sessionDate = sessionDates[i]
-      const progressive = i === 1
+      const startHour = 18
+      const startMin = Math.floor(Math.random() * 30)
 
-      const workoutDurationMinutes = 45 + Math.floor(Math.random() * 45)
       const startedAt = new Date(sessionDate)
-      const endedAt = new Date(
-        sessionDate.getTime() + workoutDurationMinutes * 60 * 1000,
-      )
-      const duration = workoutDurationMinutes * 60
+      startedAt.setHours(startHour, startMin, 0)
 
-      const workoutSession = await prisma.workoutSession.create({
+      const endedAt = new Date(startedAt)
+      endedAt.setMinutes(startedAt.getMinutes() + 40)
+
+      const duration = Math.floor((endedAt - startedAt) / 60000)
+
+      console.log(
+        `📌 Creating COMPLETED session for workout "${workout.name}" on ${sessionDate}`,
+      )
+
+      await prisma.workoutSession.create({
         data: {
-          date: sessionDate,
-          status: 'COMPLETED',
           userId: user.id,
           workoutId: workout.id,
+
+          date: sessionDate,
+          status: 'COMPLETED',
+
           startedAt,
           endedAt,
           duration,
 
           exerciseSessions: {
-            create: workout.exercises.map((we, idx) => {
-              const segment = (duration * 1000) / workout.exercises.length
+            create: workout.exercises.map((we, index) => {
+              const exStart = new Date(startedAt)
+              exStart.setMinutes(exStart.getMinutes() + index * 7)
 
-              const exerciseStart = new Date(
-                startedAt.getTime() + idx * segment,
-              )
-              const exerciseEnd = new Date(exerciseStart.getTime() + segment)
-              const exerciseDuration = Math.floor(
-                (exerciseEnd.getTime() - exerciseStart.getTime()) / 1000,
-              )
+              const exEnd = new Date(exStart)
+              exEnd.setMinutes(exEnd.getMinutes() + 5)
 
-              const baseSets = we.defaultSets ?? we.exercise?.sets ?? 3
-              const baseReps = we.defaultReps ?? we.exercise?.reps ?? 10
-              const baseWeight = we.defaultWeight ?? we.exercise?.weight ?? 0
+              const plannedSets = we.defaultSets ?? 3
+              const plannedReps = we.defaultReps ?? 12
+              const plannedWeight = we.defaultWeight ?? 0
 
-              const sets = progressive
-                ? baseSets + Math.floor(Math.random() * 2)
-                : baseSets
-
-              const reps = progressive
-                ? baseReps + Math.floor(Math.random() * 3)
-                : baseReps
-
-              const weight = progressive
-                ? baseWeight + Math.floor(Math.random() * 5)
-                : baseWeight
-
-              const volume = sets * reps * weight
+              const volume = plannedSets * plannedReps * (plannedWeight || 1)
 
               return {
-                completed: true,
-                plannedSets: sets,
-                plannedReps: reps,
-                plannedWeight: weight,
-                startedAt: exerciseStart,
-                endedAt: exerciseEnd,
-                duration: exerciseDuration,
                 exerciseId: we.exerciseId,
 
+                completed: true,
+                plannedSets,
+                plannedReps,
+                plannedWeight,
+
+                startedAt: exStart,
+                endedAt: exEnd,
+                duration: Math.floor((exEnd - exStart) / 60000),
+
                 logs: {
-                  create: [
-                    {
-                      sets,
-                      reps,
-                      weight,
-                      volume,
-                      date: sessionDate,
-                      description: progressive
-                        ? 'Sessão com progressão de carga'
-                        : 'Sessão base',
-                      userId: user.id,
-                      exerciseId: we.exerciseId,
-                    },
-                  ],
+                  create: {
+                    sets: plannedSets,
+                    reps: plannedReps,
+                    weight: plannedWeight,
+                    volume,
+                    description: 'A última repetição foi difícil.',
+                    userId: user.id,
+                    exerciseId: we.exerciseId,
+                    date: exEnd,
+                  },
                 },
               }
             }),
           },
         },
-        include: {
-          exerciseSessions: {
-            include: {
-              logs: true,
-              exercise: true,
-            },
-          },
-          workout: true,
-        },
       })
-
-      console.log(
-        `✅ Created session for "${workout.name}" on ${
-          sessionDate.toISOString().split('T')[0]
-        } (${workoutSession.exerciseSessions.length} exercises)`,
-      )
     }
   }
 
-  console.log('🎉 Finished seeding workout sessions!')
+  console.log('✅ Completed workout sessions seeded!')
 }

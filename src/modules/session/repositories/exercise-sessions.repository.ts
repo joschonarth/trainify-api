@@ -32,6 +32,7 @@ export interface ExerciseSessionsRepository {
   findManyByUserAndExercise(
     userId: string,
     exerciseId: string,
+    fromDate?: Date,
   ): Promise<ExerciseSessionWithLogs[]>
 
   create(
