@@ -18,7 +18,7 @@ app.register(cors, {
 
 app.register(fastifyCookie, {
   parseOptions: {
-    sameSite: 'none',
+    sameSite: env.NODE_ENV === 'production' ? 'none' : 'strict',
     secure: env.NODE_ENV === 'production',
   },
 })
