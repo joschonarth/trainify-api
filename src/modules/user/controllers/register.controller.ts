@@ -46,7 +46,7 @@ export async function registerController(
       path: '/',
       httpOnly: true,
       secure: env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: 'none',
     })
 
     return reply.status(201).send({
