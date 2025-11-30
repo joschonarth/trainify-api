@@ -9,3 +9,6 @@ dev.db
 
 # Tests
 coverage
+
+# Build
+build

@@ -1,0 +1,14 @@
+services:
+  trainify-pg:
+    image: bitnami/postgresql
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRESQL_USERNAME=docker
+      - POSTGRESQL_PASSWORD=docker
+      - POSTGRESQL_DATABASE=trainify
+    volumes:
+      - trainify-pg-data:/bitnami/postgresql
+
+volumes:
+  trainify-pg-data:
