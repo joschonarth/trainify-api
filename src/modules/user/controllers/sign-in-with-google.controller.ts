@@ -33,7 +33,7 @@ export async function signInWithGoogleController(
       path: '/',
       httpOnly: true,
       secure: env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: 'none',
     })
 
     return reply.status(200).send({
