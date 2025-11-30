@@ -1,7 +1,7 @@
+import fastifyCookie from '@fastify/cookie'
 import cors from '@fastify/cors'
 import fastifyJwt from '@fastify/jwt'
 import fastify from 'fastify'
-import fastifyCookie from 'fastify-cookie'
 import z, { ZodError } from 'zod'
 
 import { appRoutes } from './app.routes'
@@ -10,13 +10,18 @@ import { env } from './env'
 export const app = fastify()
 
 app.register(cors, {
-  origin: true,
+  origin: ['http://localhost:5173', 'https://trainify-web.vercel.app'],
   credentials: true,
   allowedHeaders: ['Content-Type', 'Authorization'],
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
 })
 
-app.register(fastifyCookie)
+app.register(fastifyCookie, {
+  parseOptions: {
+    sameSite: 'none',
+    secure: env.NODE_ENV === 'production',
+  },
+})
 
 app.register(fastifyJwt, {
   secret: env.JWT_SECRET,
