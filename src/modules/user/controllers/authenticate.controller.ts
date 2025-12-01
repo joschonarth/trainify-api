@@ -40,7 +40,7 @@ export async function authenticateController(
       path: '/',
       httpOnly: true,
       secure: env.NODE_ENV === 'production',
-      sameSite: env.NODE_ENV === 'production' ? 'none' : 'strict',
+      sameSite: 'none',
     })
 
     return reply.status(200).send({

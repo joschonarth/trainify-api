@@ -46,7 +46,7 @@ export async function registerController(
       path: '/',
       httpOnly: true,
       secure: env.NODE_ENV === 'production',
-      sameSite: env.NODE_ENV === 'production' ? 'none' : 'strict',
+      sameSite: 'none',
     })
 
     return reply.status(201).send({
@@ -64,6 +64,8 @@ export async function registerController(
         message: error.message,
       })
     }
+
+    console.error('Erro inesperado ao criar usuário:', error)
 
     throw error
   }
