@@ -13,8 +13,9 @@ export async function seedUser() {
       email: 'joao@example.com',
       password: '$2b$06$z1egRKOP6/a/uQh/yPewO.k0LbZbIiqYLuFlc6Z52HrRUC60dPDyS',
       birthdate: new Date('2004-04-19'),
-      height: 178,
-      weight: 72.5,
+      gender: 'male',
+      height: 190,
+      weight: 100,
       avatarUrl: 'https://github.com/joschonarth.png',
     },
   })

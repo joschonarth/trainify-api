@@ -34,7 +34,7 @@ export async function seedWorkoutExercises(userId, workouts) {
     {
       name: 'Mergulho nas Paralelas',
       category: ExerciseCategory.TRICEPS,
-      type: ExerciseType.BODYWEIGHT,
+      type: ExerciseType.STRENGTH,
       defaultSets: 3,
       defaultReps: 10,
       defaultWeight: 0,
@@ -112,7 +112,7 @@ export async function seedWorkoutExercises(userId, workouts) {
     {
       name: 'Prancha',
       category: ExerciseCategory.ABS,
-      type: ExerciseType.STABILITY,
+      type: ExerciseType.MOBILITY,
       defaultSets: 3,
       defaultReps: 1,
       defaultWeight: 0,

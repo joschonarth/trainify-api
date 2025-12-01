@@ -53,16 +53,21 @@ export async function seedWorkouts(userId) {
   const createdWorkouts = []
 
   for (const workout of workouts) {
-    const existing = await prisma.workout.findFirst({
-      where: { name: workout.name, userId },
+    const w = await prisma.workout.upsert({
+      where: {
+        name_userId: {
+          name: workout.name,
+          userId,
+        },
+      },
+      update: {},
+      create: {
+        ...workout,
+        userId,
+      },
     })
 
-    if (!existing) {
-      const w = await prisma.workout.create({ data: workout })
-      createdWorkouts.push(w)
-    } else {
-      createdWorkouts.push(existing)
-    }
+    createdWorkouts.push(w)
   }
 
   console.log(`✅ ${createdWorkouts.length} workouts seeded!`)

@@ -107,9 +107,9 @@ const streakBadges = [
 export async function seedBadges() {
   console.log('🏅 Starting badges seed...')
 
-  const allBadges = [...workoutBadges, ...exerciseBadges, ...streakBadges]
+  const staticBadges = [...workoutBadges, ...exerciseBadges, ...streakBadges]
 
-  for (const badge of allBadges) {
+  for (const badge of staticBadges) {
     await prisma.badge.upsert({
       where: { name: badge.name },
       update: {},
@@ -117,31 +117,73 @@ export async function seedBadges() {
     })
   }
 
+  const allBadges = await prisma.badge.findMany()
+
   console.log(`✅ Successfully inserted ${allBadges.length} badges!`)
 
   const user = await prisma.user.findUnique({
     where: { email: 'joao@example.com' },
   })
+
   if (!user) throw new Error('User not found!')
 
-  const badgesToUnlock = [
-    'Primeiro Passo',
-    'Força Inicial',
-    'Começo da Jornada',
-  ]
+  const totalWorkouts = await prisma.workoutSession.count({
+    where: { userId: user.id, status: 'COMPLETED' },
+  })
 
-  for (const badgeName of badgesToUnlock) {
-    const badge = await prisma.badge.findUnique({ where: { name: badgeName } })
-    if (badge) {
-      await prisma.userBadge.upsert({
-        where: { userId_badgeId: { userId: user.id, badgeId: badge.id } },
-        update: {},
-        create: {
+  const totalExercises = await prisma.exerciseSession.count({
+    where: { completed: true, workoutSession: { userId: user.id } },
+  })
+
+  const streak = await prisma.userStreak.findUnique({
+    where: { userId: user.id },
+  })
+
+  const currentStreak = streak?.bestStreak ?? 0
+
+  console.log({
+    totalWorkouts,
+    totalExercises,
+    currentStreak,
+  })
+
+  const badgesToUnlock = allBadges.filter((badge) => {
+    if (badge.type === 'WORKOUT') {
+      return totalWorkouts >= badge.milestone
+    }
+    if (badge.type === 'EXERCISE') {
+      return totalExercises >= badge.milestone
+    }
+    if (badge.type === 'STREAK') {
+      return currentStreak >= badge.milestone
+    }
+    return false
+  })
+
+  const firstSession = await prisma.workoutSession.findFirst({
+    where: { userId: user.id },
+    orderBy: { date: 'asc' },
+  })
+  const baseDate = firstSession?.date ?? new Date()
+
+  for (const badge of badgesToUnlock) {
+    const unlockedAt = new Date(baseDate)
+    unlockedAt.setDate(unlockedAt.getDate() + badge.milestone)
+
+    await prisma.userBadge.upsert({
+      where: {
+        userId_badgeId: {
           userId: user.id,
           badgeId: badge.id,
         },
-      })
-    }
+      },
+      update: {},
+      create: {
+        userId: user.id,
+        badgeId: badge.id,
+        unlockedAt,
+      },
+    })
   }
 
   console.log(`🎉 Unlocked initial badges for user ${user.name}`)
