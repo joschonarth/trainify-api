@@ -25,26 +25,51 @@ export class RegisterUseCase {
     password,
     passwordConfirmation,
   }: RegisterUseCaseRequest): Promise<RegisterUseCaseResponse> {
+    console.log('[RegisterUseCase] Iniciando registro:', email)
+
     if (password !== passwordConfirmation) {
+      console.log('[RegisterUseCase] Senhas não conferem')
       throw new PasswordsDoNotMatchError()
     }
 
-    const userWithSameEmail = await this.usersRepository.findByEmail(email)
+    let userWithSameEmail: User | null = null
+    try {
+      userWithSameEmail = await this.usersRepository.findByEmail(email)
+      console.log(
+        '[RegisterUseCase] Verificado usuário existente:',
+        userWithSameEmail,
+      )
+    } catch (err) {
+      console.error('[RegisterUseCase] Erro ao buscar usuário existente:', err)
+      throw err
+    }
 
     if (userWithSameEmail) {
       throw new UserAlreadyExistsError()
     }
 
-    const passwordHash = await hash(password, 6)
-
-    const user = await this.usersRepository.create({
-      name,
-      email,
-      password: passwordHash,
-    })
-
-    return {
-      user,
+    let passwordHash: string
+    try {
+      passwordHash = await hash(password, 6)
+      console.log('[RegisterUseCase] Password hash gerado')
+    } catch (err) {
+      console.error('[RegisterUseCase] Erro ao gerar hash da senha:', err)
+      throw err
     }
+
+    let user: User
+    try {
+      user = await this.usersRepository.create({
+        name,
+        email,
+        password: passwordHash,
+      })
+      console.log('[RegisterUseCase] Usuário criado com sucesso:', user)
+    } catch (err) {
+      console.error('[RegisterUseCase] Erro ao criar usuário no banco:', err)
+      throw err
+    }
+
+    return { user }
   }
 }
