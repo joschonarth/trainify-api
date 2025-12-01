@@ -11,13 +11,11 @@ import { seedWorkouts } from './workouts.seed.js'
 const prisma = new PrismaClient()
 
 async function main() {
-  console.log('🌱 Checking if seed has already been executed...')
+  console.log('🌱 Checking seed state...')
 
-  const existingSeedUser = await prisma.user.findFirst({
-    where: { email: 'joao@example.com' },
-  })
+  const state = await prisma.seedState.findFirst()
 
-  if (existingSeedUser) {
+  if (state?.executed) {
     console.log('⚠️ Seed already executed. Skipping...')
     return
   }
@@ -33,6 +31,12 @@ async function main() {
   await seedWeights(user.id)
 
   console.log('🎉 All seeds executed successfully!')
+
+  await prisma.seedState.create({
+    data: {
+      executed: true,
+    },
+  })
 }
 
 main()
