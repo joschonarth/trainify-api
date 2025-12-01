@@ -1,4 +1,4 @@
-import { User } from '@prisma/client'
+import { User, UserStreak } from '@prisma/client'
 
 import { UsersRepository } from '@/modules/user/repositories/users.repository'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
@@ -8,7 +8,7 @@ interface GetUserProfileUseCaseRequest {
 }
 
 interface GetUserProfileUseCaseResponse {
-  user: User
+  user: User & { streak?: UserStreak }
 }
 
 export class GetUserProfileUseCase {
