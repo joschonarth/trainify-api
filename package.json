@@ -14,6 +14,7 @@
     "test:coverage": "vitest run --coverage",
     "test:ui": "vitest --ui",
     "seed": "node prisma/seeds/index.js",
+    "seed:reset": "node prisma/seeds/reset-and-seed.js",
     "lint": "eslint . --ext .js,.ts,.tsx --fix"
   },
   "keywords": [],
