@@ -2,11 +2,6 @@ generator client {
   provider = "prisma-client-js"
 }
 
-// datasource db {
-//   provider = "sqlite"
-//   url      = "file:./dev.db"
-// }
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -321,4 +316,6 @@ model SeedState {
   id        String   @id @default(cuid())
   executed  Boolean  @default(false)
   createdAt DateTime @default(now())
+
+  @@map("seed_state")
 }
