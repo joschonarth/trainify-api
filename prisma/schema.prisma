@@ -141,7 +141,7 @@ model WorkoutExercise {
   defaultReps   Int?
   defaultWeight Float?
 
-  workout  Workout  @relation(fields: [workoutId], references: [id])
+  workout  Workout  @relation(fields: [workoutId], references: [id], onDelete: Cascade)
   exercise Exercise @relation(fields: [exerciseId], references: [id])
 
   @@unique([workoutId, exerciseId])
@@ -155,7 +155,7 @@ model WorkoutSchedule {
   workoutId String
 
   user    User    @relation(fields: [userId], references: [id])
-  workout Workout @relation(fields: [workoutId], references: [id])
+  workout Workout @relation(fields: [workoutId], references: [id], onDelete: Cascade)
 
   @@unique([userId, dayOfWeek])
   @@map("workout_schedule")
@@ -174,7 +174,7 @@ model WorkoutSession {
   workoutId String
 
   user             User              @relation(fields: [userId], references: [id])
-  workout          Workout           @relation(fields: [workoutId], references: [id])
+  workout          Workout           @relation(fields: [workoutId], references: [id], onDelete: Cascade)
   exerciseSessions ExerciseSession[]
 
   @@map("workout_sessions")
@@ -195,7 +195,7 @@ model ExerciseSession {
   workoutSessionId String
   exerciseId       String
 
-  workoutSession WorkoutSession @relation(fields: [workoutSessionId], references: [id])
+  workoutSession WorkoutSession @relation(fields: [workoutSessionId], references: [id], onDelete: Cascade)
   exercise       Exercise       @relation(fields: [exerciseId], references: [id])
   logs           ExerciseLog[]
 
@@ -216,7 +216,7 @@ model ExerciseLog {
   userId            String
   exerciseId        String
 
-  exerciseSession ExerciseSession @relation(fields: [exerciseSessionId], references: [id])
+  exerciseSession ExerciseSession @relation(fields: [exerciseSessionId], references: [id], onDelete: Cascade)
   user            User            @relation(fields: [userId], references: [id])
   exercise        Exercise        @relation(fields: [exerciseId], references: [id])
 
