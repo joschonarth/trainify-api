@@ -10,7 +10,10 @@ import { env } from './env'
 export const app = fastify()
 
 app.register(cors, {
-  origin: ['http://localhost:5173', 'https://trainify-web.vercel.app'],
+  origin:
+    env.NODE_ENV === 'production'
+      ? 'https://trainify-web.vercel.app'
+      : 'http://localhost:5173',
   credentials: true,
   allowedHeaders: ['Content-Type', 'Authorization'],
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
@@ -18,7 +21,7 @@ app.register(cors, {
 
 app.register(fastifyCookie, {
   parseOptions: {
-    sameSite: 'none',
+    sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax',
     secure: env.NODE_ENV === 'production',
   },
 })
