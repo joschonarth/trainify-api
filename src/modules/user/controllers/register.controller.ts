@@ -20,8 +20,6 @@ export async function registerController(
   const { name, email, password, passwordConfirmation } =
     registerBodySchema.parse(request.body)
 
-  console.log('[registerController] Requisição recebida:', { email, name })
-
   try {
     const registerUseCase = makeRegisterUseCase()
     const { user } = await registerUseCase.execute({
@@ -40,29 +38,23 @@ export async function registerController(
       path: '/',
       httpOnly: true,
       secure: env.NODE_ENV === 'production',
-      sameSite: 'none',
+      sameSite: env.NODE_ENV === 'production' ? 'none' : 'strict',
     })
 
-    console.log(
-      '[registerController] Registro finalizado com sucesso:',
-      user.id,
-    )
     return reply.status(201).send({ token })
-  } catch (error: any) {
-    console.error('[registerController] Erro ao registrar usuário:', error)
-
+  } catch (error) {
     if (error instanceof UserAlreadyExistsError) {
-      return reply.status(409).send({ message: error.message })
+      return reply.status(409).send({
+        message: error.message,
+      })
     }
 
     if (error instanceof PasswordsDoNotMatchError) {
-      return reply.status(400).send({ message: error.message })
+      return reply.status(400).send({
+        message: error.message,
+      })
     }
 
-    // Retorna mensagem detalhada apenas para debugging; depois pode remover
-    return reply.status(500).send({
-      message: 'Erro interno ao criar usuário',
-      error: error?.message || String(error),
-    })
+    throw error
   }
 }
