@@ -33,7 +33,9 @@ export async function seedWeights(userId) {
   while (currentWeight > 84) {
     const change = Math.floor(Math.random() * 3)
     currentWeight -= change
-    if (currentWeight < 84) currentWeight = 84
+    if (currentWeight < 84) {
+      currentWeight = 84
+    }
 
     logs.push({
       userId,
@@ -62,6 +64,6 @@ export async function seedWeights(userId) {
   })
 
   console.log(
-    `✅ ${logs.length} weight logs created, progress up to ${currentWeight}kg`,
+    `✅ ${logs.length} weight logs created, progress up to ${currentWeight}kg`
   )
 }

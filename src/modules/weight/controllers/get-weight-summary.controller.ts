@@ -1,4 +1,4 @@
-import { FastifyReply, FastifyRequest } from 'fastify'
+import type { FastifyReply, FastifyRequest } from 'fastify'
 
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
@@ -6,7 +6,7 @@ import { makeGetWeightSummaryUseCase } from '../use-cases/factories/make-get-wei
 
 export async function getWeightSummaryController(
   request: FastifyRequest,
-  reply: FastifyReply,
+  reply: FastifyReply
 ) {
   try {
     const userId = request.user.sub

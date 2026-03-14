@@ -12,7 +12,7 @@ export function makeCalculateWeightGoalProgressUseCase() {
     new CalculateWeightGoalProgressUseCase(
       weightGoalsRepository,
       weightLogsRepository,
-      achieveWeightGoalUseCase,
+      achieveWeightGoalUseCase
     )
 
   return calculateWeightGoalProgressUseCase

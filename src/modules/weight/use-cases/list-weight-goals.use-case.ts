@@ -1,6 +1,6 @@
-import { WeightGoal } from '@prisma/client'
+import type { WeightGoal } from '@prisma/client'
 
-import { WeightGoalsRepository } from '../repositories/weight-goals.repository'
+import type { WeightGoalsRepository } from '../repositories/weight-goals.repository'
 
 interface ListWeightGoalsUseCaseRequest {
   userId: string
@@ -22,7 +22,7 @@ export class ListWeightGoalsUseCase {
 
     const weightGoals = await this.weightGoalsRepository.findAllByUserId(
       userId,
-      filters,
+      filters
     )
 
     return { weightGoals }

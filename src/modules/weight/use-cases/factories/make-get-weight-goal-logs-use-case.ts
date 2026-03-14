@@ -7,7 +7,7 @@ export function makeGetWeightGoalLogsUseCase() {
   const weightLogsRepository = new PrismaWeightLogsRepository()
   const getWeightGoalLogsUseCase = new GetWeightGoalLogsUseCase(
     weightGoalsRepository,
-    weightLogsRepository,
+    weightLogsRepository
   )
 
   return getWeightGoalLogsUseCase

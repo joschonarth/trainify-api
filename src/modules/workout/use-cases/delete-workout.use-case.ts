@@ -1,6 +1,6 @@
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
-import { WorkoutsRepository } from '../repositories/workouts.repository'
+import type { WorkoutsRepository } from '../repositories/workouts.repository'
 
 interface DeleteWorkoutUseCaseRequest {
   workoutId: string

@@ -1,8 +1,8 @@
-import { Prisma, WeightLog } from '@prisma/client'
+import type { Prisma, WeightLog } from '@prisma/client'
 
 import { prisma } from '@/lib/prisma'
 
-import {
+import type {
   CreateWeightLogData,
   WeightLogsRepository,
 } from '../weight-logs.repository'
@@ -39,7 +39,7 @@ export class PrismaWeightLogsRepository implements WeightLogsRepository {
 
   async findManyByUserId(
     userId: string,
-    filters?: { from?: Date; to?: Date },
+    filters?: { from?: Date; to?: Date }
   ): Promise<WeightLog[]> {
     const where: Prisma.WeightLogWhereInput = {
       userId,
@@ -118,14 +118,14 @@ export class PrismaWeightLogsRepository implements WeightLogsRepository {
 
   async update(
     id: string,
-    data: { goalId?: string | null; weight?: number; note?: string | null },
+    data: { goalId?: string | null; weight?: number; note?: string | null }
   ): Promise<WeightLog> {
     return prisma.weightLog.update({
       where: { id },
       data: {
-        ...(data.goalId !== undefined ? { goalId: data.goalId } : {}),
-        ...(data.weight !== undefined ? { weight: data.weight } : {}),
-        ...(data.note !== undefined ? { note: data.note } : {}),
+        ...(data.goalId === undefined ? {} : { goalId: data.goalId }),
+        ...(data.weight === undefined ? {} : { weight: data.weight }),
+        ...(data.note === undefined ? {} : { note: data.note }),
       },
     })
   }

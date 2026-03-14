@@ -1,6 +1,6 @@
-import { Prisma } from '@prisma/client'
+import type { Prisma } from '@prisma/client'
 
-import { WorkoutSessionWithWorkout } from '../../workout-sessions.repository'
+import type { WorkoutSessionWithWorkout } from '../../workout-sessions.repository'
 
 type PrismaSession = Prisma.WorkoutSessionGetPayload<{
   include: {
@@ -18,7 +18,7 @@ type PrismaSession = Prisma.WorkoutSessionGetPayload<{
 }>
 
 export function mapWorkoutSession(
-  session: PrismaSession,
+  session: PrismaSession
 ): WorkoutSessionWithWorkout {
   return {
     ...session,

@@ -20,7 +20,7 @@ export function makeCompleteWorkoutSessionUseCase() {
     exerciseLogsRepository,
 
     updateUserStreakUseCase,
-    unlockAllBadgesUseCase,
+    unlockAllBadgesUseCase
   )
 
   return completeWorkoutSessionUseCase

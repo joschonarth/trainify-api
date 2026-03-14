@@ -1,8 +1,11 @@
-import { Prisma, Workout } from '@prisma/client'
+import type { Prisma, Workout } from '@prisma/client'
 
 import { prisma } from '@/lib/prisma'
 
-import { WorkoutsRepository, WorkoutWithDetails } from '../workouts.repository'
+import type {
+  WorkoutsRepository,
+  WorkoutWithDetails,
+} from '../workouts.repository'
 
 export class PrismaWorkoutsRepository implements WorkoutsRepository {
   async create(data: Prisma.WorkoutCreateInput): Promise<Workout> {
@@ -55,7 +58,7 @@ export class PrismaWorkoutsRepository implements WorkoutsRepository {
 
   async update(
     id: string,
-    data: { name?: string; description?: string | null },
+    data: { name?: string; description?: string | null }
   ): Promise<Workout> {
     return prisma.workout.update({
       where: { id },

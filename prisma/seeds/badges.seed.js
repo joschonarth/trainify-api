@@ -125,7 +125,9 @@ export async function seedBadges() {
     where: { email: 'joao@example.com' },
   })
 
-  if (!user) throw new Error('User not found!')
+  if (!user) {
+    throw new Error('User not found!')
+  }
 
   const totalWorkouts = await prisma.workoutSession.count({
     where: { userId: user.id, status: 'COMPLETED' },

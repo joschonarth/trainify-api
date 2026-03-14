@@ -1,11 +1,11 @@
-import { FastifyReply, FastifyRequest } from 'fastify'
+import type { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
 import { makeGetWorkoutSessionsByWorkoutUseCase } from '../use-cases/factories/make-get-workout-sessions-by-workout-use-case'
 
 export async function getWorkoutSessionsByWorkoutController(
   request: FastifyRequest,
-  reply: FastifyReply,
+  reply: FastifyReply
 ) {
   const paramsSchema = z.object({
     workoutId: z.cuid(),

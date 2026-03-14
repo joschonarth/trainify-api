@@ -5,7 +5,7 @@ import { FetchExercisesCatalogUseCase } from '../fetch-exercises-catalog.use-cas
 export function makeFetchExercisesCatalogUseCase() {
   const exercisesRepository = new PrismaExercisesRepository()
   const fetchExercisesCatalogUseCase = new FetchExercisesCatalogUseCase(
-    exercisesRepository,
+    exercisesRepository
   )
 
   return fetchExercisesCatalogUseCase

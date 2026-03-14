@@ -1,10 +1,10 @@
-import { FastifyReply, FastifyRequest } from 'fastify'
+import type { FastifyReply, FastifyRequest } from 'fastify'
 
 import { makeListWeightLogsUseCase } from '../use-cases/factories/make-list-weight-logs-use-case'
 
 export async function listWeightLogsController(
   request: FastifyRequest,
-  reply: FastifyReply,
+  reply: FastifyReply
 ) {
   const userId = request.user.sub
 

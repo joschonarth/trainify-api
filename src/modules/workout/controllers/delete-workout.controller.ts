@@ -1,4 +1,4 @@
-import { FastifyReply, FastifyRequest } from 'fastify'
+import type { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
@@ -7,7 +7,7 @@ import { makeDeleteWorkoutUseCase } from '../use-cases/factories/make-delete-wor
 
 export async function deleteWorkoutController(
   request: FastifyRequest,
-  reply: FastifyReply,
+  reply: FastifyReply
 ) {
   const paramsSchema = z.object({
     workoutId: z.string(),

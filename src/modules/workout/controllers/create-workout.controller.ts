@@ -1,11 +1,11 @@
-import { FastifyReply, FastifyRequest } from 'fastify'
+import type { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
 import { makeCreateWorkoutUseCase } from '../use-cases/factories/make-create-workout-use-case'
 
 export async function createWorkoutController(
   request: FastifyRequest,
-  reply: FastifyReply,
+  reply: FastifyReply
 ) {
   const createWorkoutBodySchema = z.object({
     name: z.string(),

@@ -1,8 +1,8 @@
 import { NotAllowedError } from '@/shared/errors/not-allowed.error'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
-import { WorkoutSchedulesRepository } from '../repositories/workout-schedules.repository'
-import { WorkoutsRepository } from '../repositories/workouts.repository'
+import type { WorkoutSchedulesRepository } from '../repositories/workout-schedules.repository'
+import type { WorkoutsRepository } from '../repositories/workouts.repository'
 
 interface AssignDaysToWorkoutUseCaseRequest {
   workoutId: string
@@ -17,7 +17,7 @@ interface AssignDaysToWorkoutUseCaseResponse {
 export class AssignDaysToWorkoutUseCase {
   constructor(
     private workoutsRepository: WorkoutsRepository,
-    private workoutSchedulesRepository: WorkoutSchedulesRepository,
+    private workoutSchedulesRepository: WorkoutSchedulesRepository
   ) {}
 
   async execute({

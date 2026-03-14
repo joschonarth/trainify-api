@@ -1,4 +1,4 @@
-import { FastifyReply, FastifyRequest } from 'fastify'
+import type { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
@@ -7,7 +7,7 @@ import { makeUpdateWorkoutUseCase } from '../use-cases/factories/make-update-wor
 
 export async function updateWorkoutController(
   request: FastifyRequest,
-  reply: FastifyReply,
+  reply: FastifyReply
 ) {
   const paramsSchema = z.object({
     workoutId: z.string(),
@@ -28,8 +28,12 @@ export async function updateWorkoutController(
       name: string
       description: string | null
     }> = {}
-    if (name !== undefined) updateData.name = name
-    if (description !== undefined) updateData.description = description
+    if (name !== undefined) {
+      updateData.name = name
+    }
+    if (description !== undefined) {
+      updateData.description = description
+    }
 
     const { workout } = await updateWorkoutUseCase.execute({
       workoutId,

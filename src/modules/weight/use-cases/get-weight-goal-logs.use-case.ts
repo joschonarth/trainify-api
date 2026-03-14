@@ -1,7 +1,7 @@
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
-import { WeightGoalsRepository } from '../repositories/weight-goals.repository'
-import { WeightLogsRepository } from '../repositories/weight-logs.repository'
+import type { WeightGoalsRepository } from '../repositories/weight-goals.repository'
+import type { WeightLogsRepository } from '../repositories/weight-logs.repository'
 
 interface GetWeightGoalLogsUseCaseRequest {
   goalId: string
@@ -21,7 +21,7 @@ interface GetWeightGoalLogsUseCaseResponse {
 export class GetWeightGoalLogsUseCase {
   constructor(
     private weightGoalsRepository: WeightGoalsRepository,
-    private weightLogsRepository: WeightLogsRepository,
+    private weightLogsRepository: WeightLogsRepository
   ) {}
 
   async execute({

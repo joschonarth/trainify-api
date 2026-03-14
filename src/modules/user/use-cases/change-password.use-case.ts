@@ -2,7 +2,7 @@ import { compare, hash } from 'bcrypt'
 
 import { InvalidCredentialsError } from '@/modules/user/errors/invalid-credentials.error'
 import { PasswordsDoNotMatchError } from '@/modules/user/errors/passwords-do-not-match.error'
-import { UsersRepository } from '@/modules/user/repositories/users.repository'
+import type { UsersRepository } from '@/modules/user/repositories/users.repository'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
 interface ChangePasswordUseCaseRequest {
@@ -29,7 +29,7 @@ export class ChangePasswordUseCase {
 
     if (!user.password) {
       throw new InvalidCredentialsError(
-        'This user does not have a password set. Please sign in with Google or set a password first.',
+        'This user does not have a password set. Please sign in with Google or set a password first.'
       )
     }
 
@@ -40,7 +40,7 @@ export class ChangePasswordUseCase {
 
     if (newPassword !== passwordConfirmation) {
       throw new PasswordsDoNotMatchError(
-        'New password and confirmation do not match.',
+        'New password and confirmation do not match.'
       )
     }
 

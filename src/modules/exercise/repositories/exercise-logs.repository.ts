@@ -1,4 +1,4 @@
-import { Exercise, ExerciseLog, Prisma } from '@prisma/client'
+import type { Exercise, ExerciseLog, Prisma } from '@prisma/client'
 
 export interface ExerciseLogsRepository {
   create(data: Prisma.ExerciseLogCreateInput): Promise<ExerciseLog>
@@ -20,7 +20,7 @@ export interface ExerciseLogsRepository {
     userId: string,
     exerciseId: string,
     start: Date,
-    end: Date,
+    end: Date
   ): Promise<ExerciseLog | null>
 
   findById(id: string): Promise<
@@ -39,7 +39,7 @@ export interface ExerciseLogsRepository {
 
   findManyByExerciseAndUser(
     userId: string,
-    exerciseId: string,
+    exerciseId: string
   ): Promise<
     (ExerciseLog & {
       exercise: {
@@ -55,6 +55,6 @@ export interface ExerciseLogsRepository {
 
   findMaxVolumeByExerciseAndUser(
     userId: string,
-    exerciseId: string,
+    exerciseId: string
   ): Promise<{ maxVolume: number; date: Date } | null>
 }

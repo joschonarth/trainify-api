@@ -1,11 +1,11 @@
-import { FastifyReply, FastifyRequest } from 'fastify'
+import type { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
 import { makeAssignDaysToWorkoutUseCase } from '../use-cases/factories/make-assign-days-to-workout-use-case'
 
 export async function assignDaysToWorkoutController(
   request: FastifyRequest,
-  reply: FastifyReply,
+  reply: FastifyReply
 ) {
   const bodySchema = z.object({
     daysOfWeek: z.array(z.number().min(0).max(6)), // 0 = Sunday, 6 = Saturday

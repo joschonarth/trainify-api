@@ -1,8 +1,8 @@
-import { ExerciseSession, Prisma } from '@prisma/client'
+import type { ExerciseSession, Prisma } from '@prisma/client'
 
 import { prisma } from '@/lib/prisma'
 
-import {
+import type {
   ExerciseSessionsRepository,
   ExerciseSessionWithLogs,
 } from '../exercise-sessions.repository'
@@ -25,7 +25,7 @@ export class PrismaExerciseSessionsRepository
   }
 
   async findByWorkoutSessionId(
-    workoutSessionId: string,
+    workoutSessionId: string
   ): Promise<ExerciseSessionWithLogs[]> {
     return prisma.exerciseSession.findMany({
       where: { workoutSessionId },
@@ -49,7 +49,7 @@ export class PrismaExerciseSessionsRepository
   async findManyByUserAndExercise(
     userId: string,
     exerciseId: string,
-    fromDate: Date,
+    fromDate: Date
   ): Promise<ExerciseSessionWithLogs[]> {
     return prisma.exerciseSession.findMany({
       where: {
@@ -69,14 +69,14 @@ export class PrismaExerciseSessionsRepository
   }
 
   async create(
-    data: Prisma.ExerciseSessionUncheckedCreateInput,
+    data: Prisma.ExerciseSessionUncheckedCreateInput
   ): Promise<ExerciseSession> {
     return prisma.exerciseSession.create({ data })
   }
 
   async update(
     id: string,
-    data: Prisma.ExerciseSessionUncheckedUpdateInput,
+    data: Prisma.ExerciseSessionUncheckedUpdateInput
   ): Promise<ExerciseSession> {
     return prisma.exerciseSession.update({
       where: { id },

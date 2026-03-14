@@ -1,12 +1,12 @@
 import { WorkoutSessionStatus } from '@prisma/client'
 
-import { ExerciseLogsRepository } from '@/modules/exercise/repositories/exercise-logs.repository'
-import { UnlockAllBadgesUseCase } from '@/modules/gamification/use-cases/unlock-all-badges.use-case'
-import { UpdateUserStreakUseCase } from '@/modules/gamification/use-cases/update-user-streak.use-case'
+import type { ExerciseLogsRepository } from '@/modules/exercise/repositories/exercise-logs.repository'
+import type { UnlockAllBadgesUseCase } from '@/modules/gamification/use-cases/unlock-all-badges.use-case'
+import type { UpdateUserStreakUseCase } from '@/modules/gamification/use-cases/update-user-streak.use-case'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
-import { ExerciseSessionsRepository } from '../repositories/exercise-sessions.repository'
-import { WorkoutSessionsRepository } from '../repositories/workout-sessions.repository'
+import type { ExerciseSessionsRepository } from '../repositories/exercise-sessions.repository'
+import type { WorkoutSessionsRepository } from '../repositories/workout-sessions.repository'
 
 interface CompleteWorkoutSessionRequest {
   userId: string
@@ -32,17 +32,21 @@ export class CompleteWorkoutSessionUseCase {
     private exerciseLogsRepository: ExerciseLogsRepository,
 
     private updateUserStreakUseCase: UpdateUserStreakUseCase,
-    private unlockAllBadgesUseCase: UnlockAllBadgesUseCase,
+    private unlockAllBadgesUseCase: UnlockAllBadgesUseCase
   ) {}
 
   private deriveSessionStatus(
-    exercises: { completed: boolean }[],
+    exercises: { completed: boolean }[]
   ): WorkoutSessionStatus {
     const total = exercises.length
     const completedCount = exercises.filter((ex) => ex.completed).length
 
-    if (completedCount === 0) return WorkoutSessionStatus.PENDING
-    if (completedCount < total) return WorkoutSessionStatus.INCOMPLETE
+    if (completedCount === 0) {
+      return WorkoutSessionStatus.PENDING
+    }
+    if (completedCount < total) {
+      return WorkoutSessionStatus.INCOMPLETE
+    }
     return WorkoutSessionStatus.COMPLETED
   }
 
@@ -56,7 +60,7 @@ export class CompleteWorkoutSessionUseCase {
 
     if (!session || session.userId !== userId) {
       throw new ResourceNotFoundError(
-        'Workout session not found or does not belong to user.',
+        'Workout session not found or does not belong to user.'
       )
     }
 
@@ -64,7 +68,7 @@ export class CompleteWorkoutSessionUseCase {
       const now = new Date()
 
       const duration = Math.floor(
-        (now.getTime() - session.startedAt.getTime()) / 1000,
+        (now.getTime() - session.startedAt.getTime()) / 1000
       )
       await this.workoutSessionsRepository.update(sessionId, {
         endedAt: now,
@@ -84,9 +88,11 @@ export class CompleteWorkoutSessionUseCase {
 
     for (const exercise of exercises) {
       const exerciseSession = exerciseSessions.find(
-        (ex) => ex.id === exercise.exerciseSessionId,
+        (ex) => ex.id === exercise.exerciseSessionId
       )
-      if (!exerciseSession) continue
+      if (!exerciseSession) {
+        continue
+      }
 
       const weight = exercise.weight ?? 0
       const volume = exercise.sets * exercise.reps * weight

@@ -8,7 +8,7 @@ export function makeGetUserMetricsUseCase() {
   const exerciseLogsRepository = new PrismaExerciseLogsRepository()
   const getUserMetricsUseCase = new GetUserMetricsUseCase(
     workoutSessionsRepository,
-    exerciseLogsRepository,
+    exerciseLogsRepository
   )
 
   return getUserMetricsUseCase

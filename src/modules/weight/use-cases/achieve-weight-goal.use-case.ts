@@ -1,10 +1,10 @@
-import { WeightGoal } from '@prisma/client'
+import type { WeightGoal } from '@prisma/client'
 
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
 import { WeightGoalNotAchievedError } from '../errors/weight-goal-not-achieved.error'
-import { WeightGoalsRepository } from '../repositories/weight-goals.repository'
-import { WeightLogsRepository } from '../repositories/weight-logs.repository'
+import type { WeightGoalsRepository } from '../repositories/weight-goals.repository'
+import type { WeightLogsRepository } from '../repositories/weight-logs.repository'
 import { calculateWeightGoalProgress } from '../utils/calculate-weight-goal-progress'
 
 interface AchieveWeightGoalUseCaseRequest {
@@ -20,7 +20,7 @@ interface AchieveWeightGoalUseCaseResponse {
 export class AchieveWeightGoalUseCase {
   constructor(
     private weightGoalsRepository: WeightGoalsRepository,
-    private weightLogsRepository: WeightLogsRepository,
+    private weightLogsRepository: WeightLogsRepository
   ) {}
 
   async execute({
@@ -40,7 +40,7 @@ export class AchieveWeightGoalUseCase {
     const progress = calculateWeightGoalProgress(goal, latestLog.weight)
 
     if (progress < 100) {
-      throw new WeightGoalNotAchievedError(`Weight goal not yet achieved.`)
+      throw new WeightGoalNotAchievedError('Weight goal not yet achieved.')
     }
 
     const achievedAt = new Date()

@@ -1,6 +1,6 @@
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
-import { WorkoutSchedulesRepository } from '../repositories/workout-schedules.repository'
+import type { WorkoutSchedulesRepository } from '../repositories/workout-schedules.repository'
 
 interface RemoveWorkoutScheduleDayUseCaseRequest {
   workoutId: string

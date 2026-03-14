@@ -1,5 +1,5 @@
-import { UserStreakLogsRepository } from '../repositories/user-streak-logs.repository'
-import { UserStreaksRepository } from '../repositories/user-streaks.repository'
+import type { UserStreakLogsRepository } from '../repositories/user-streak-logs.repository'
+import type { UserStreaksRepository } from '../repositories/user-streaks.repository'
 import { daysBetweenDates } from '../utils/get-days-between-dates'
 
 interface UpdateUserStreakUseCaseRequest {
@@ -17,7 +17,7 @@ interface UpdateUserStreakUseCaseResponse {
 export class UpdateUserStreakUseCase {
   constructor(
     private userStreaksRepository: UserStreaksRepository,
-    private userStreakLogsRepository: UserStreakLogsRepository,
+    private userStreakLogsRepository: UserStreakLogsRepository
   ) {}
 
   async execute({
@@ -32,7 +32,7 @@ export class UpdateUserStreakUseCase {
     if (!isRefresh) {
       const existingLog = await this.userStreakLogsRepository.findByUserAndDate(
         userId,
-        normalizedDate,
+        normalizedDate
       )
       if (existingLog) {
         return streak
@@ -68,20 +68,27 @@ export class UpdateUserStreakUseCase {
 
     const diffInDays = daysBetweenDates(
       new Date(streak.lastWorkout ?? normalizedDate),
-      normalizedDate,
+      normalizedDate
     )
 
     let current = streak.currentStreak
     let best = streak.bestStreak
 
-    if (diffInDays > 1) current = 0
-
-    if (!isRefresh) {
-      if (diffInDays === 1) current += 1
-      else if (diffInDays > 1) current = 1
+    if (diffInDays > 1) {
+      current = 0
     }
 
-    if (current > best) best = current
+    if (!isRefresh) {
+      if (diffInDays === 1) {
+        current += 1
+      } else if (diffInDays > 1) {
+        current = 1
+      }
+    }
+
+    if (current > best) {
+      best = current
+    }
 
     const updated = await this.userStreaksRepository.update(streak.id, {
       currentStreak: current,

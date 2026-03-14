@@ -1,4 +1,4 @@
-import { FastifyReply, FastifyRequest } from 'fastify'
+import type { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
 import { makeGetExerciseSessionDetailsUseCase } from '@/modules/session/use-cases/factories/make-get-exercise-session-details-use-case'
@@ -6,7 +6,7 @@ import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
 export async function getExerciseSessionDetailsController(
   request: FastifyRequest,
-  reply: FastifyReply,
+  reply: FastifyReply
 ) {
   const paramsSchema = z.object({
     exerciseSessionId: z.string(),

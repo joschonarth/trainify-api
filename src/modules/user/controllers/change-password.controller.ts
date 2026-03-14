@@ -1,4 +1,4 @@
-import { FastifyReply, FastifyRequest } from 'fastify'
+import type { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
 import { InvalidCredentialsError } from '@/modules/user/errors/invalid-credentials.error'
@@ -8,7 +8,7 @@ import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
 export async function changePasswordController(
   request: FastifyRequest,
-  reply: FastifyReply,
+  reply: FastifyReply
 ) {
   const schema = z.object({
     currentPassword: z.string().min(6),
@@ -17,7 +17,7 @@ export async function changePasswordController(
   })
 
   const { currentPassword, newPassword, passwordConfirmation } = schema.parse(
-    request.body,
+    request.body
   )
 
   try {

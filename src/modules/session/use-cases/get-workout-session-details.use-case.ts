@@ -1,6 +1,6 @@
-import { WorkoutSessionStatus } from '@prisma/client'
+import type { WorkoutSessionStatus } from '@prisma/client'
 
-import { WorkoutSessionsRepository } from '@/modules/session/repositories/workout-sessions.repository'
+import type { WorkoutSessionsRepository } from '@/modules/session/repositories/workout-sessions.repository'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
 interface ExerciseDetail {
@@ -43,7 +43,7 @@ export class GetWorkoutSessionDetailsUseCase {
   }): Promise<GetWorkoutSessionDetailsResponse> {
     const session =
       await this.workoutSessionsRepository.findByIdWithWorkoutAndExerciseSessions(
-        sessionId,
+        sessionId
       )
 
     if (!session) {
@@ -60,7 +60,7 @@ export class GetWorkoutSessionDetailsUseCase {
       duration: session.duration ?? null,
       exercises: session.workout.exercises.map((we) => {
         const exerciseSession = session.exerciseSessions.find(
-          (es) => es.exercise.id === we.exercise.id,
+          (es) => es.exercise.id === we.exercise.id
         )
 
         const lastLog = exerciseSession?.logs?.length

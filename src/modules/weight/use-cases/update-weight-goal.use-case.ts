@@ -1,10 +1,10 @@
-import { WeightGoal } from '@prisma/client'
+import type { WeightGoal } from '@prisma/client'
 
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
 import { InvalidWeightGoalError } from '../errors/invalid-weight-goal.error'
-import { WeightGoalsRepository } from '../repositories/weight-goals.repository'
-import { WeightLogsRepository } from '../repositories/weight-logs.repository'
+import type { WeightGoalsRepository } from '../repositories/weight-goals.repository'
+import type { WeightLogsRepository } from '../repositories/weight-logs.repository'
 
 interface UpdateWeightGoalRequest {
   goalId: string
@@ -21,7 +21,7 @@ interface UpdateWeightGoalResponse {
 export class UpdateWeightGoalUseCase {
   constructor(
     private weightGoalsRepository: WeightGoalsRepository,
-    private weightLogsRepository: WeightLogsRepository,
+    private weightLogsRepository: WeightLogsRepository
   ) {}
 
   async execute({
@@ -38,7 +38,7 @@ export class UpdateWeightGoalUseCase {
 
     if (goal.achievedAt) {
       throw new InvalidWeightGoalError(
-        'Cannot edit a goal that has already been achieved',
+        'Cannot edit a goal that has already been achieved'
       )
     }
 
@@ -51,7 +51,7 @@ export class UpdateWeightGoalUseCase {
         await this.weightLogsRepository.findLatestByGoalId(goalId)
       if (latestLog && endDate < latestLog.date) {
         throw new InvalidWeightGoalError(
-          'End date cannot be before the last logged weight date',
+          'End date cannot be before the last logged weight date'
         )
       }
     }

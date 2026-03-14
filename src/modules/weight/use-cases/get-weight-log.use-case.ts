@@ -1,6 +1,6 @@
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
-import { WeightLogsRepository } from '../repositories/weight-logs.repository'
+import type { WeightLogsRepository } from '../repositories/weight-logs.repository'
 
 interface GetWeightLogRequest {
   logId: string

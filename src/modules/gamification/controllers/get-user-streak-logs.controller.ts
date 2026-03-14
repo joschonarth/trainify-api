@@ -1,4 +1,4 @@
-import { FastifyReply, FastifyRequest } from 'fastify'
+import type { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
 import { makeGetUserStreakLogsUseCase } from '../use-cases/factories/make-get-user-streak-logs-use-case'
@@ -7,7 +7,7 @@ export async function getUserStreakLogsController(
   request: FastifyRequest<{
     Querystring: { startDate?: string; endDate?: string }
   }>,
-  reply: FastifyReply,
+  reply: FastifyReply
 ) {
   const userId = request.user.sub
 
@@ -24,8 +24,12 @@ export async function getUserStreakLogsController(
     userId,
   }
 
-  if (startDate) requestPayload.startDate = new Date(startDate)
-  if (endDate) requestPayload.endDate = new Date(endDate)
+  if (startDate) {
+    requestPayload.startDate = new Date(startDate)
+  }
+  if (endDate) {
+    requestPayload.endDate = new Date(endDate)
+  }
 
   const { logs } = await getUserStreakLogsUseCase.execute(requestPayload)
 

@@ -4,7 +4,7 @@ import { GetUserStreakCalendarUseCase } from '../get-user-streak-calendar.use-ca
 export function makeGetUserStreakCalendarUseCase() {
   const userStreakLogsRepository = new PrismaUserStreakLogsRepository()
   const getUserStreakCalendarUseCase = new GetUserStreakCalendarUseCase(
-    userStreakLogsRepository,
+    userStreakLogsRepository
   )
 
   return getUserStreakCalendarUseCase

@@ -8,7 +8,7 @@ export function makeCreateExerciseUseCase() {
   const myExercisesRepository = new PrismaMyExercisesRepository()
   const createExerciseUseCase = new CreateExerciseUseCase(
     exercisesRepository,
-    myExercisesRepository,
+    myExercisesRepository
   )
 
   return createExerciseUseCase

@@ -1,4 +1,4 @@
-import { FastifyInstance } from 'fastify'
+import type { FastifyInstance } from 'fastify'
 
 import { verifyJwt } from '@/shared/middlewares/verify-jwt'
 
@@ -28,7 +28,7 @@ export async function exercisesRoutes(app: FastifyInstance) {
   app.post(
     '/exercises/catalog/:id/add',
     { onRequest: [verifyJwt] },
-    addExerciseFromCatalogController,
+    addExerciseFromCatalogController
   )
 
   app.put('/exercises/:exerciseId', updateExerciseController)

@@ -1,6 +1,6 @@
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
-import {
+import type {
   WorkoutSessionsRepository,
   WorkoutSessionWithWorkout,
 } from '../repositories/workout-sessions.repository'
@@ -42,24 +42,24 @@ export class CompareWorkoutExercisesUseCase {
     const sessions =
       await this.workoutSessionRepository.findManyByWorkoutAndUser(
         userId,
-        workoutId,
+        workoutId
       )
 
     if (!sessions || sessions.length < 2) {
       throw new ResourceNotFoundError(
-        'Not enough sessions to compare exercises for this workout.',
+        'Not enough sessions to compare exercises for this workout.'
       )
     }
 
     const sorted = [...sessions].sort(
-      (a, b) => b.date.getTime() - a.date.getTime(),
+      (a, b) => b.date.getTime() - a.date.getTime()
     )
 
     const last = sorted[0]!
     const previous = sorted[1]!
 
     const mapExercises = (
-      session: WorkoutSessionWithWorkout,
+      session: WorkoutSessionWithWorkout
     ): Record<
       string,
       { sets: number; weight: number; reps: number; volume: number }
@@ -73,7 +73,9 @@ export class CompareWorkoutExercisesUseCase {
         const exerciseName = exerciseSession.exercise.name
         const logs = exerciseSession.logs
 
-        if (!logs.length) continue
+        if (!logs.length) {
+          continue
+        }
 
         const avgWeight =
           logs.reduce((acc, log) => acc + (log.weight ?? 0), 0) / logs.length
@@ -104,7 +106,9 @@ export class CompareWorkoutExercisesUseCase {
       const lastData = lastExercises[exercise]
       const prevData = prevExercises[exercise]
 
-      if (!lastData || !prevData) continue
+      if (!(lastData && prevData)) {
+        continue
+      }
 
       progress.push({
         exercise,

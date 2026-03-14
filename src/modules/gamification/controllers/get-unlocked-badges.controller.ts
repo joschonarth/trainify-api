@@ -1,10 +1,10 @@
-import { FastifyReply, FastifyRequest } from 'fastify'
+import type { FastifyReply, FastifyRequest } from 'fastify'
 
 import { makeGetUnlockedBadgesUseCase } from '@/modules/gamification/use-cases/factories/make-get-unlocked-badges-use-case'
 
 export async function getUnlockedBadgesController(
   request: FastifyRequest,
-  reply: FastifyReply,
+  reply: FastifyReply
 ) {
   const userId = request.user.sub
 

@@ -8,7 +8,7 @@ export function makeUpdateUserStreakUseCase() {
   const userStreakLogsRepository = new PrismaUserStreakLogsRepository()
   const updateUserStreakUseCase = new UpdateUserStreakUseCase(
     userStreaksRepository,
-    userStreakLogsRepository,
+    userStreakLogsRepository
   )
 
   return updateUserStreakUseCase

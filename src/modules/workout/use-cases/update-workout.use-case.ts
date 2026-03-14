@@ -1,8 +1,8 @@
-import { Workout } from '@prisma/client'
+import type { Workout } from '@prisma/client'
 
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
-import { WorkoutsRepository } from '../repositories/workouts.repository'
+import type { WorkoutsRepository } from '../repositories/workouts.repository'
 
 interface UpdateWorkoutUseCaseRequest {
   workoutId: string

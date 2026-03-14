@@ -1,6 +1,6 @@
-import { Workout } from '@prisma/client'
+import type { Workout } from '@prisma/client'
 
-import { WorkoutsRepository } from '../repositories/workouts.repository'
+import type { WorkoutsRepository } from '../repositories/workouts.repository'
 
 interface CreateWorkoutUseCaseRequest {
   name: string

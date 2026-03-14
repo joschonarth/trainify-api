@@ -1,5 +1,5 @@
-import { UsersRepository } from '@/modules/user/repositories/users.repository'
-import { WorkoutsRepository } from '@/modules/workout/repositories/workouts.repository'
+import type { UsersRepository } from '@/modules/user/repositories/users.repository'
+import type { WorkoutsRepository } from '@/modules/workout/repositories/workouts.repository'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
 interface FetchUserSchedulesUseCaseRequest {
@@ -26,7 +26,7 @@ interface FetchUserSchedulesUseCaseResponse {
 export class FetchUserSchedulesUseCase {
   constructor(
     private usersRepository: UsersRepository,
-    private workoutsRepository: WorkoutsRepository,
+    private workoutsRepository: WorkoutsRepository
   ) {}
 
   async execute({
@@ -54,7 +54,7 @@ export class FetchUserSchedulesUseCase {
             weight: we.defaultWeight,
           })),
         },
-      })),
+      }))
     )
 
     return { schedules }

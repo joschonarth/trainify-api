@@ -7,7 +7,7 @@ export function makeStartExerciseTimerUseCase() {
   const workoutSessionsRepository = new PrismaWorkoutSessionsRepository()
   const startExerciseTimerUseCase = new StartExerciseTimerUseCase(
     exerciseSessionsRepository,
-    workoutSessionsRepository,
+    workoutSessionsRepository
   )
 
   return startExerciseTimerUseCase

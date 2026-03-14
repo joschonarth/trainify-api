@@ -9,13 +9,13 @@ export function makeCreateWeightLogUseCase() {
 
   const achieveWeightGoalUseCase = new AchieveWeightGoalUseCase(
     weightGoalsRepository,
-    weightLogsRepository,
+    weightLogsRepository
   )
 
   const createWeightLogUseCase = new CreateWeightLogUseCase(
     weightLogsRepository,
     weightGoalsRepository,
-    achieveWeightGoalUseCase,
+    achieveWeightGoalUseCase
   )
 
   return createWeightLogUseCase

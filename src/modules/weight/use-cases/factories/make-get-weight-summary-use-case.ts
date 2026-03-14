@@ -5,7 +5,7 @@ export function makeGetWeightSummaryUseCase() {
   const weightLogsRepository = new PrismaWeightLogsRepository()
 
   const getWeightSummaryUseCase = new GetWeightSummaryUseCase(
-    weightLogsRepository,
+    weightLogsRepository
   )
 
   return getWeightSummaryUseCase

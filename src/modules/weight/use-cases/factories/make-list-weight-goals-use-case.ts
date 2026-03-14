@@ -5,7 +5,7 @@ export function makeListWeightGoalsUseCase() {
   const weightGoalsRepository = new PrismaWeightGoalsRepository()
 
   const listWeightGoalsUseCase = new ListWeightGoalsUseCase(
-    weightGoalsRepository,
+    weightGoalsRepository
   )
 
   return listWeightGoalsUseCase

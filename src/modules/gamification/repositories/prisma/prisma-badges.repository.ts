@@ -1,6 +1,6 @@
-import { BadgeType, PrismaClient } from '@prisma/client'
+import { type BadgeType, PrismaClient } from '@prisma/client'
 
-import { BadgesRepository } from '../badges.repository'
+import type { BadgesRepository } from '../badges.repository'
 
 const prisma = new PrismaClient()
 

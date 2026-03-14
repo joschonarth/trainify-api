@@ -1,7 +1,7 @@
-import { ExerciseLog } from '@prisma/client'
+import type { ExerciseLog } from '@prisma/client'
 
-import { ExerciseLogsRepository } from '@/modules/exercise/repositories/exercise-logs.repository'
-import { WorkoutSessionsRepository } from '@/modules/session/repositories/workout-sessions.repository'
+import type { ExerciseLogsRepository } from '@/modules/exercise/repositories/exercise-logs.repository'
+import type { WorkoutSessionsRepository } from '@/modules/session/repositories/workout-sessions.repository'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
 interface CreateExerciseLogSessionUseCaseRequest {
@@ -21,7 +21,7 @@ interface CreateExerciseLogSessionUseCaseResponse {
 export class CreateExerciseLogSessionUseCase {
   constructor(
     private exerciseLogsRepository: ExerciseLogsRepository,
-    private workoutSessionsRepository: WorkoutSessionsRepository,
+    private workoutSessionsRepository: WorkoutSessionsRepository
   ) {}
 
   async execute({
@@ -41,7 +41,7 @@ export class CreateExerciseLogSessionUseCase {
     }
 
     const exerciseInWorkout = session.workout.exercises.find(
-      (we) => we.exercise.id === exerciseId,
+      (we) => we.exercise.id === exerciseId
     )
 
     if (!exerciseInWorkout) {

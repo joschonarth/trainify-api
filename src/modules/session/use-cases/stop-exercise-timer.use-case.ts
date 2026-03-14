@@ -1,8 +1,8 @@
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
 import { ExerciseTimerNotStartedError } from '../errors/exercise-timer-not-started.error'
-import { ExerciseSessionsRepository } from '../repositories/exercise-sessions.repository'
-import { WorkoutSessionsRepository } from '../repositories/workout-sessions.repository'
+import type { ExerciseSessionsRepository } from '../repositories/exercise-sessions.repository'
+import type { WorkoutSessionsRepository } from '../repositories/workout-sessions.repository'
 
 interface StopExerciseTimerRequest {
   userId: string
@@ -12,7 +12,7 @@ interface StopExerciseTimerRequest {
 export class StopExerciseTimerUseCase {
   constructor(
     private exerciseSessionsRepository: ExerciseSessionsRepository,
-    private workoutSessionsRepository: WorkoutSessionsRepository,
+    private workoutSessionsRepository: WorkoutSessionsRepository
   ) {}
 
   async execute({ userId, exerciseSessionId }: StopExerciseTimerRequest) {
@@ -24,7 +24,7 @@ export class StopExerciseTimerUseCase {
     }
 
     const workoutSession = await this.workoutSessionsRepository.findById(
-      exerciseSession.workoutSessionId,
+      exerciseSession.workoutSessionId
     )
 
     if (!workoutSession || workoutSession.userId !== userId) {
@@ -38,7 +38,7 @@ export class StopExerciseTimerUseCase {
     const now = new Date()
 
     const elapsed = Math.floor(
-      (now.getTime() - exerciseSession.startedAt.getTime()) / 1000,
+      (now.getTime() - exerciseSession.startedAt.getTime()) / 1000
     )
 
     const updated = await this.exerciseSessionsRepository.update(
@@ -46,7 +46,7 @@ export class StopExerciseTimerUseCase {
       {
         endedAt: now,
         duration: elapsed,
-      },
+      }
     )
 
     return { exerciseSession: updated, elapsed }

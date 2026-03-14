@@ -1,8 +1,8 @@
-import { Exercise, ExerciseCategory, ExerciseType } from '@prisma/client'
+import type { Exercise, ExerciseCategory, ExerciseType } from '@prisma/client'
 
 import { ResourceAlreadyExistsError } from '@/shared/errors/resource-already-exists.error'
 
-import { ExercisesRepository } from '../repositories/exercises.repository'
+import type { ExercisesRepository } from '../repositories/exercises.repository'
 
 interface CreateExerciseUseCaseRequest {
   userId: string
@@ -26,12 +26,12 @@ export class CreateExerciseUseCase {
   }: CreateExerciseUseCaseRequest): Promise<CreateExerciseUseCaseResponse> {
     const existingExercise = await this.exercisesRepository.findByNameAndUser(
       name,
-      userId,
+      userId
     )
 
     if (existingExercise) {
       throw new ResourceAlreadyExistsError(
-        'Exercise with this name already exists for this user.',
+        'Exercise with this name already exists for this user.'
       )
     }
 

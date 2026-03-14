@@ -9,7 +9,7 @@ export function makeUnlockExerciseBadgesUseCase() {
 
   const unlockExerciseBadgesUseCase = new UnlockExerciseBadgesUseCase(
     badgesRepository,
-    exerciseLogsRepository,
+    exerciseLogsRepository
   )
 
   return unlockExerciseBadgesUseCase

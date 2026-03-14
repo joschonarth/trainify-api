@@ -1,6 +1,6 @@
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
-import { WeightLogsRepository } from '../repositories/weight-logs.repository'
+import type { WeightLogsRepository } from '../repositories/weight-logs.repository'
 
 interface WeightSummaryResponse {
   currentWeight: number | null
@@ -23,7 +23,7 @@ export class GetWeightSummaryUseCase {
     const minWeightLog = await this.weightLogsRepository.findMinByUserId(userId)
     const maxWeightLog = await this.weightLogsRepository.findMaxByUserId(userId)
 
-    if (!latestLog && !firstLog) {
+    if (!(latestLog || firstLog)) {
       throw new ResourceNotFoundError('No weight logs found for this user.')
     }
 

@@ -1,4 +1,4 @@
-import { FastifyReply, FastifyRequest } from 'fastify'
+import type { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
 import { env } from '@/env'
@@ -7,7 +7,7 @@ import { makeSignInWithGoogleUseCase } from '@/modules/user/use-cases/factories/
 
 export async function signInWithGoogleController(
   request: FastifyRequest,
-  reply: FastifyReply,
+  reply: FastifyReply
 ) {
   const bodySchema = z.object({ token: z.string() })
   const { token } = bodySchema.parse(request.body)
@@ -26,7 +26,7 @@ export async function signInWithGoogleController(
         sign: {
           sub: user.id,
         },
-      },
+      }
     )
 
     reply.setCookie('token', tokenJwt, {

@@ -1,6 +1,6 @@
-import { User } from '@prisma/client'
+import type { User } from '@prisma/client'
 
-import { UsersRepository } from '@/modules/user/repositories/users.repository'
+import type { UsersRepository } from '@/modules/user/repositories/users.repository'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
 interface UpdateUserProfileUseCaseRequest {
@@ -42,8 +42,8 @@ export class UpdateUserProfileUseCase {
           weight,
           gender,
           birthdate,
-        }).filter(([, value]) => value !== undefined),
-      ),
+        }).filter(([, value]) => value !== undefined)
+      )
     )
 
     return { user: updatedUser }

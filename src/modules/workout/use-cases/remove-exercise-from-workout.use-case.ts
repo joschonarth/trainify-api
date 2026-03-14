@@ -1,7 +1,7 @@
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
-import { WorkoutExercisesRepository } from '../repositories/workout-exercises.repository'
-import { WorkoutsRepository } from '../repositories/workouts.repository'
+import type { WorkoutExercisesRepository } from '../repositories/workout-exercises.repository'
+import type { WorkoutsRepository } from '../repositories/workouts.repository'
 
 interface RemoveExerciseFromWorkoutUseCaseRequest {
   workoutId: string
@@ -11,7 +11,7 @@ interface RemoveExerciseFromWorkoutUseCaseRequest {
 export class RemoveExerciseFromWorkoutUseCase {
   constructor(
     private workoutsRepository: WorkoutsRepository,
-    private workoutExercisesRepository: WorkoutExercisesRepository,
+    private workoutExercisesRepository: WorkoutExercisesRepository
   ) {}
 
   async execute({
@@ -26,7 +26,7 @@ export class RemoveExerciseFromWorkoutUseCase {
     const workoutExercise =
       await this.workoutExercisesRepository.findByWorkoutAndExercise(
         workoutId,
-        exerciseId,
+        exerciseId
       )
 
     if (!workoutExercise) {
@@ -34,7 +34,7 @@ export class RemoveExerciseFromWorkoutUseCase {
     }
 
     await this.workoutExercisesRepository.removeExerciseFromWorkout(
-      workoutExercise.id,
+      workoutExercise.id
     )
   }
 }

@@ -1,15 +1,15 @@
-import { UserStreakLog } from '@prisma/client'
+import type { UserStreakLog } from '@prisma/client'
 
 import { prisma } from '@/lib/prisma'
 
-import { UserStreakLogsRepository } from '../user-streak-logs.repository'
+import type { UserStreakLogsRepository } from '../user-streak-logs.repository'
 
 export class PrismaUserStreakLogsRepository
   implements UserStreakLogsRepository
 {
   async findByUserAndDate(
     userId: string,
-    date: Date,
+    date: Date
   ): Promise<UserStreakLog | null> {
     const startOfDay = new Date(date)
     startOfDay.setHours(0, 0, 0, 0)
@@ -31,7 +31,7 @@ export class PrismaUserStreakLogsRepository
   async findByUserAndDateRange(
     userId: string,
     startDate: Date,
-    endDate: Date,
+    endDate: Date
   ): Promise<UserStreakLog[]> {
     return prisma.userStreakLog.findMany({
       where: {

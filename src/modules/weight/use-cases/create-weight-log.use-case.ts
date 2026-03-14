@@ -1,11 +1,11 @@
-import { WeightLog } from '@prisma/client'
+import type { WeightLog } from '@prisma/client'
 
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
 import { InvalidWeightGoalError } from '../errors/invalid-weight-goal.error'
-import { WeightGoalsRepository } from '../repositories/weight-goals.repository'
-import { WeightLogsRepository } from '../repositories/weight-logs.repository'
-import { AchieveWeightGoalUseCase } from '../use-cases/achieve-weight-goal.use-case'
+import type { WeightGoalsRepository } from '../repositories/weight-goals.repository'
+import type { WeightLogsRepository } from '../repositories/weight-logs.repository'
+import type { AchieveWeightGoalUseCase } from '../use-cases/achieve-weight-goal.use-case'
 import { calculateWeightGoalProgress } from '../utils/calculate-weight-goal-progress'
 
 interface CreateWeightLogUseCaseRequest {
@@ -23,7 +23,7 @@ export class CreateWeightLogUseCase {
   constructor(
     private weightLogsRepository: WeightLogsRepository,
     private weightGoalsRepository: WeightGoalsRepository,
-    private achieveWeightGoalUseCase: AchieveWeightGoalUseCase,
+    private achieveWeightGoalUseCase: AchieveWeightGoalUseCase
   ) {}
 
   async execute({
@@ -80,7 +80,7 @@ export class CreateWeightLogUseCase {
     const progress = calculateWeightGoalProgress(
       { ...goal, startWeight },
       weightLog.weight,
-      logs,
+      logs
     )
     await this.weightGoalsRepository.updateProgress(goal.id, progress)
 

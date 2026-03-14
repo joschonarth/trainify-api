@@ -7,7 +7,7 @@ export function makeAssignDaysToWorkoutUseCase() {
   const workoutSchedulesRepository = new PrismaWorkoutSchedulesRepository()
   const assignDaysToWorkoutUseCase = new AssignDaysToWorkoutUseCase(
     workoutsRepository,
-    workoutSchedulesRepository,
+    workoutSchedulesRepository
   )
 
   return assignDaysToWorkoutUseCase

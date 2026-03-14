@@ -5,7 +5,7 @@ import { GetMonthlyWorkoutCalendarUseCase } from '../get-monthly-workout-calenda
 export function makeGetMonthlyWorkoutCalendarUseCase() {
   const workoutSessionsRepository = new PrismaWorkoutSessionsRepository()
   const getMonthlyWorkoutCalendarUseCase = new GetMonthlyWorkoutCalendarUseCase(
-    workoutSessionsRepository,
+    workoutSessionsRepository
   )
 
   return getMonthlyWorkoutCalendarUseCase

@@ -1,9 +1,9 @@
-import { User } from '@prisma/client'
+import type { User } from '@prisma/client'
 import { hash } from 'bcrypt'
 
 import { PasswordsDoNotMatchError } from '@/modules/user/errors/passwords-do-not-match.error'
 import { UserAlreadyExistsError } from '@/modules/user/errors/user-already-exists.error'
-import { UsersRepository } from '@/modules/user/repositories/users.repository'
+import type { UsersRepository } from '@/modules/user/repositories/users.repository'
 
 interface RegisterUseCaseRequest {
   name: string
@@ -37,7 +37,7 @@ export class RegisterUseCase {
       userWithSameEmail = await this.usersRepository.findByEmail(email)
       console.log(
         '[RegisterUseCase] Verificado usuário existente:',
-        userWithSameEmail,
+        userWithSameEmail
       )
     } catch (err) {
       console.error('[RegisterUseCase] Erro ao buscar usuário existente:', err)

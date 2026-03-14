@@ -9,7 +9,7 @@ export function makeGetActiveWeightGoalAnalyticsUseCase() {
   const getActiveWeightGoalAnalyticsUseCase =
     new GetActiveWeightGoalAnalyticsUseCase(
       weightLogsRepository,
-      weightGoalsRepository,
+      weightGoalsRepository
     )
 
   return getActiveWeightGoalAnalyticsUseCase

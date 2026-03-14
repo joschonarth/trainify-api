@@ -1,6 +1,6 @@
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
-import { MyExercisesRepository } from '../repositories/my-exercises.repository'
+import type { MyExercisesRepository } from '../repositories/my-exercises.repository'
 
 interface RemoveCatalogExerciseUseCaseRequest {
   userId: string

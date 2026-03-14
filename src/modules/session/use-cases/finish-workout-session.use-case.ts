@@ -4,7 +4,7 @@ import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
 import { WorkoutSessionAlreadyCompletedError } from '../errors/workout-session-already-completed.error'
 import { WorkoutSessionNotStartedError } from '../errors/workout-session-not-started.error'
-import { WorkoutSessionsRepository } from '../repositories/workout-sessions.repository'
+import type { WorkoutSessionsRepository } from '../repositories/workout-sessions.repository'
 
 interface FinishWorkoutSessionRequest {
   sessionId: string

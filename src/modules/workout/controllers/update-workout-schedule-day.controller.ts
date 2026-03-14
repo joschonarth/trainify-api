@@ -1,4 +1,4 @@
-import { FastifyReply, FastifyRequest } from 'fastify'
+import type { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
 import { ResourceAlreadyExistsError } from '@/shared/errors/resource-already-exists.error'
@@ -8,7 +8,7 @@ import { makeUpdateWorkoutScheduleDayUseCase } from '../use-cases/factories/make
 
 export async function updateWorkoutScheduleDayController(
   request: FastifyRequest,
-  reply: FastifyReply,
+  reply: FastifyReply
 ) {
   const bodySchema = z.object({
     newDayOfWeek: z.number().min(0).max(6),

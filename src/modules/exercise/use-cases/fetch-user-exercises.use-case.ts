@@ -1,6 +1,6 @@
-import { Exercise, ExerciseCategory, ExerciseType } from '@prisma/client'
+import type { Exercise, ExerciseCategory, ExerciseType } from '@prisma/client'
 
-import { ExercisesRepository } from '../repositories/exercises.repository'
+import type { ExercisesRepository } from '../repositories/exercises.repository'
 
 interface FetchUserExercisesUseCaseRequest {
   userId: string
@@ -26,7 +26,7 @@ export class FetchUserExercisesUseCase {
       userId,
       query,
       category,
-      type,
+      type
     )
 
     return { exercises }

@@ -1,9 +1,9 @@
-import { WorkoutExercise } from '@prisma/client'
+import type { WorkoutExercise } from '@prisma/client'
 
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
-import { WorkoutExercisesRepository } from '../repositories/workout-exercises.repository'
-import { WorkoutsRepository } from '../repositories/workouts.repository'
+import type { WorkoutExercisesRepository } from '../repositories/workout-exercises.repository'
+import type { WorkoutsRepository } from '../repositories/workouts.repository'
 
 interface UpdateWorkoutExerciseDefaultsUseCaseRequest {
   workoutId: string
@@ -20,7 +20,7 @@ interface UpdateWorkoutExerciseDefaultsUseCaseResponse {
 export class UpdateWorkoutExerciseDefaultsUseCase {
   constructor(
     private workoutsRepository: WorkoutsRepository,
-    private workoutExercisesRepository: WorkoutExercisesRepository,
+    private workoutExercisesRepository: WorkoutExercisesRepository
   ) {}
 
   async execute({
@@ -38,7 +38,7 @@ export class UpdateWorkoutExerciseDefaultsUseCase {
     const workoutExercise =
       await this.workoutExercisesRepository.findByWorkoutAndExercise(
         workoutId,
-        exerciseId,
+        exerciseId
       )
 
     if (!workoutExercise) {

@@ -1,4 +1,4 @@
-import {
+import type {
   Exercise,
   ExerciseCategory,
   ExerciseType,
@@ -11,14 +11,14 @@ export interface ExercisesRepository {
   findAllGlobals(
     query: string,
     category: ExerciseCategory | null,
-    page: number,
+    page: number
   ): Promise<Exercise[]>
   findByNameAndUser(name: string, userId: string): Promise<Exercise | null>
   findManyByUser(
     userId: string,
     query?: string | null,
     category?: ExerciseCategory | null,
-    type?: ExerciseType | null,
+    type?: ExerciseType | null
   ): Promise<Exercise[]>
   update(
     exerciseId: string,
@@ -26,7 +26,7 @@ export interface ExercisesRepository {
       name?: string
       category?: ExerciseCategory | null
       type?: ExerciseType | null
-    }>,
+    }>
   ): Promise<Exercise>
   delete(exerciseId: string): Promise<void>
 }

@@ -1,11 +1,11 @@
-import { FastifyReply, FastifyRequest } from 'fastify'
+import type { FastifyReply, FastifyRequest } from 'fastify'
 
 import { makeGetWorkoutSessionsHistoryUseCase } from '@/modules/session/use-cases/factories/make-get-workout-sessions-history-use-case'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
 export async function getWorkoutSessionsHistoryController(
   request: FastifyRequest,
-  reply: FastifyReply,
+  reply: FastifyReply
 ) {
   try {
     const userId = request.user.sub

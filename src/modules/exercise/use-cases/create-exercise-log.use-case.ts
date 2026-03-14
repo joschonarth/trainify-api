@@ -1,9 +1,9 @@
-import { ExerciseLog } from '@prisma/client'
+import type { ExerciseLog } from '@prisma/client'
 import dayjs from 'dayjs'
 
 import { ResourceAlreadyExistsError } from '@/shared/errors/resource-already-exists.error'
 
-import { ExerciseLogsRepository } from '../repositories/exercise-logs.repository'
+import type { ExerciseLogsRepository } from '../repositories/exercise-logs.repository'
 
 interface CreateExerciseLogUseCaseRequest {
   userId: string
@@ -39,12 +39,12 @@ export class CreateExerciseLogUseCase {
         userId,
         exerciseId,
         startOfDay,
-        endOfDay,
+        endOfDay
       )
 
     if (existingLog) {
       throw new ResourceAlreadyExistsError(
-        'Exercise log for this exercise already exists today.',
+        'Exercise log for this exercise already exists today.'
       )
     }
 

@@ -1,6 +1,6 @@
-import { Badge, BadgeType } from '@prisma/client'
+import type { Badge, BadgeType } from '@prisma/client'
 
-import { BadgesRepository } from '@/modules/gamification/repositories/badges.repository'
+import type { BadgesRepository } from '@/modules/gamification/repositories/badges.repository'
 
 interface GetAllBadgesUseCaseRequest {
   userId: string
@@ -46,8 +46,12 @@ export class GetAllBadgesUseCase {
     }
 
     badgesWithStatus.sort((a, b) => {
-      if (a.unlocked && !b.unlocked) return -1
-      if (!a.unlocked && b.unlocked) return 1
+      if (a.unlocked && !b.unlocked) {
+        return -1
+      }
+      if (!a.unlocked && b.unlocked) {
+        return 1
+      }
       return 0
     })
 

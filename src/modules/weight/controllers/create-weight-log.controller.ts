@@ -1,4 +1,4 @@
-import { FastifyReply, FastifyRequest } from 'fastify'
+import type { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
@@ -8,7 +8,7 @@ import { makeCreateWeightLogUseCase } from '../use-cases/factories/make-create-w
 
 export async function createWeightLogController(
   request: FastifyRequest,
-  reply: FastifyReply,
+  reply: FastifyReply
 ) {
   const createWeightLogBodySchema = z.object({
     weight: z.number(),

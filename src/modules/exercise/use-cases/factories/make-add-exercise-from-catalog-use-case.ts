@@ -8,7 +8,7 @@ export function makeAddExerciseFromCatalog() {
   const myExercisesRepository = new PrismaMyExercisesRepository()
   const addExerciseFromCatalogUseCase = new AddExerciseFromCatalogUseCase(
     exercisesRepository,
-    myExercisesRepository,
+    myExercisesRepository
   )
 
   return addExerciseFromCatalogUseCase

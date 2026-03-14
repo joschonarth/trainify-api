@@ -1,4 +1,4 @@
-import {
+import type {
   Exercise,
   ExerciseCategory,
   ExerciseType,
@@ -7,7 +7,7 @@ import {
 
 import { prisma } from '@/lib/prisma'
 
-import { ExercisesRepository } from '../exercises.repository'
+import type { ExercisesRepository } from '../exercises.repository'
 
 export class PrismaExercisesRepository implements ExercisesRepository {
   async create(data: Prisma.ExerciseCreateInput): Promise<Exercise> {
@@ -23,7 +23,7 @@ export class PrismaExercisesRepository implements ExercisesRepository {
   async findAllGlobals(
     query: string,
     category: ExerciseCategory | null,
-    page: number = 1,
+    page = 1
   ): Promise<Exercise[]> {
     const ITEMS_PER_PAGE = 10
 
@@ -49,7 +49,7 @@ export class PrismaExercisesRepository implements ExercisesRepository {
 
   async findByNameAndUser(
     name: string,
-    userId: string,
+    userId: string
   ): Promise<Exercise | null> {
     return prisma.exercise.findFirst({
       where: {
@@ -64,7 +64,7 @@ export class PrismaExercisesRepository implements ExercisesRepository {
     userId: string,
     query?: string | null,
     category?: ExerciseCategory | null,
-    type?: ExerciseType | null,
+    type?: ExerciseType | null
   ): Promise<Exercise[]> {
     return prisma.exercise.findMany({
       where: {
@@ -83,13 +83,19 @@ export class PrismaExercisesRepository implements ExercisesRepository {
       name?: string
       category?: ExerciseCategory | null
       type?: ExerciseType | null
-    },
+    }
   ): Promise<Exercise> {
     const prismaData: Prisma.ExerciseUpdateInput = {}
 
-    if (data.name !== undefined) prismaData.name = data.name
-    if (data.category !== undefined) prismaData.category = data.category
-    if (data.type !== undefined) prismaData.type = data.type
+    if (data.name !== undefined) {
+      prismaData.name = data.name
+    }
+    if (data.category !== undefined) {
+      prismaData.category = data.category
+    }
+    if (data.type !== undefined) {
+      prismaData.type = data.type
+    }
 
     return prisma.exercise.update({
       where: { id: exerciseId },

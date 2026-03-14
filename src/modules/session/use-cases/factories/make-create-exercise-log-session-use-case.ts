@@ -8,7 +8,7 @@ export function makeCreateExerciseLogSessionUseCase() {
   const workoutSessionsRepository = new PrismaWorkoutSessionsRepository()
   const createExerciseLogSessionUseCase = new CreateExerciseLogSessionUseCase(
     exerciseLogsRepository,
-    workoutSessionsRepository,
+    workoutSessionsRepository
   )
 
   return createExerciseLogSessionUseCase

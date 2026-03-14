@@ -1,7 +1,7 @@
 import { ResourceAlreadyExistsError } from '@/shared/errors/resource-already-exists.error'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
-import { WorkoutSchedulesRepository } from '../repositories/workout-schedules.repository'
+import type { WorkoutSchedulesRepository } from '../repositories/workout-schedules.repository'
 
 interface UpdateWorkoutScheduleDayUseCaseRequest {
   workoutId: string
@@ -34,17 +34,17 @@ export class UpdateWorkoutScheduleDayUseCase {
       await this.workoutSchedulesRepository.findDaysByWorkout(workoutId)
     if (
       existingDays.some(
-        (d) => d.dayOfWeek === newDayOfWeek && d.id !== scheduleId,
+        (d) => d.dayOfWeek === newDayOfWeek && d.id !== scheduleId
       )
     ) {
       throw new ResourceAlreadyExistsError(
-        `Workout already has schedule for day ${newDayOfWeek}`,
+        `Workout already has schedule for day ${newDayOfWeek}`
       )
     }
 
     const updatedSchedule = await this.workoutSchedulesRepository.updateDay(
       scheduleId,
-      newDayOfWeek,
+      newDayOfWeek
     )
 
     return { schedule: updatedSchedule }

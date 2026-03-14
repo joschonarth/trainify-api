@@ -8,7 +8,7 @@ export function makeFetchUserSchedulesUseCase() {
   const workoutsRepository = new PrismaWorkoutsRepository()
   const fetchUserSchedulesUseCase = new FetchUserSchedulesUseCase(
     usersRepository,
-    workoutsRepository,
+    workoutsRepository
   )
 
   return fetchUserSchedulesUseCase

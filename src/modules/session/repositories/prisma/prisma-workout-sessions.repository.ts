@@ -1,8 +1,12 @@
-import { Prisma, WorkoutSession, WorkoutSessionStatus } from '@prisma/client'
+import type {
+  Prisma,
+  WorkoutSession,
+  WorkoutSessionStatus,
+} from '@prisma/client'
 
 import { prisma } from '@/lib/prisma'
 
-import {
+import type {
   WorkoutSessionsRepository,
   WorkoutSessionWithWorkout,
 } from '../workout-sessions.repository'
@@ -20,7 +24,7 @@ export class PrismaWorkoutSessionsRepository
 
   async findByUserAndDate(
     userId: string,
-    date: Date,
+    date: Date
   ): Promise<WorkoutSession | null> {
     const startOfDay = new Date(date)
     startOfDay.setHours(0, 0, 0, 0)
@@ -40,7 +44,7 @@ export class PrismaWorkoutSessionsRepository
   }
 
   async findByIdWithWorkout(
-    id: string,
+    id: string
   ): Promise<WorkoutSessionWithWorkout | null> {
     const session = await prisma.workoutSession.findUnique({
       where: { id },
@@ -61,7 +65,7 @@ export class PrismaWorkoutSessionsRepository
   }
 
   async findByIdWithWorkoutAndExerciseSessions(
-    id: string,
+    id: string
   ): Promise<WorkoutSessionWithWorkout | null> {
     const session = await prisma.workoutSession.findUnique({
       where: { id },
@@ -74,7 +78,7 @@ export class PrismaWorkoutSessionsRepository
   async findByUserAndDateRange(
     userId: string,
     startDate: Date,
-    endDate: Date,
+    endDate: Date
   ): Promise<{ id: string; date: Date; status: WorkoutSessionStatus }[]> {
     return prisma.workoutSession.findMany({
       where: {
@@ -92,7 +96,7 @@ export class PrismaWorkoutSessionsRepository
 
   async findManyByWorkoutAndUser(
     userId: string,
-    workoutId: string,
+    workoutId: string
   ): Promise<WorkoutSessionWithWorkout[]> {
     const sessions = await prisma.workoutSession.findMany({
       where: { userId, workoutId },
@@ -127,7 +131,7 @@ export class PrismaWorkoutSessionsRepository
   async findDetailedByUserAndDateRange(
     userId: string,
     startDate: Date,
-    endDate: Date,
+    endDate: Date
   ): Promise<WorkoutSessionWithWorkout[]> {
     const sessions = await prisma.workoutSession.findMany({
       where: { userId, date: { gte: startDate, lte: endDate } },
@@ -139,7 +143,7 @@ export class PrismaWorkoutSessionsRepository
   }
 
   async create(
-    data: Prisma.WorkoutSessionUncheckedCreateInput,
+    data: Prisma.WorkoutSessionUncheckedCreateInput
   ): Promise<WorkoutSession> {
     const workout = await prisma.workout.findUnique({
       where: { id: data.workoutId },
@@ -167,7 +171,7 @@ export class PrismaWorkoutSessionsRepository
 
   async update(
     id: string,
-    data: Prisma.WorkoutSessionUpdateInput,
+    data: Prisma.WorkoutSessionUpdateInput
   ): Promise<WorkoutSession> {
     return prisma.workoutSession.update({
       where: { id },
@@ -177,7 +181,7 @@ export class PrismaWorkoutSessionsRepository
 
   async updateStatus(
     id: string,
-    status: WorkoutSessionStatus,
+    status: WorkoutSessionStatus
   ): Promise<WorkoutSession> {
     return prisma.workoutSession.update({
       where: { id },
@@ -196,7 +200,7 @@ export class PrismaWorkoutSessionsRepository
         reps?: number | null
         weight?: number | null
       }[]
-    },
+    }
   ): Promise<WorkoutSessionWithWorkout> {
     return await prisma.$transaction(async (tx) => {
       await tx.workoutSession.update({

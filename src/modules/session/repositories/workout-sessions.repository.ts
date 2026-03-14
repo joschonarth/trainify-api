@@ -1,4 +1,4 @@
-import {
+import type {
   Exercise,
   ExerciseLog,
   ExerciseSession,
@@ -61,23 +61,23 @@ export interface WorkoutSessionsRepository {
   findAllByUser(userId: string): Promise<WorkoutSessionWithWorkout[]>
 
   findByIdWithWorkoutAndExerciseSessions(
-    id: string,
+    id: string
   ): Promise<WorkoutSessionWithWorkout | null>
 
   findByUserAndDateRange(
     userId: string,
     startDate: Date,
-    endDate: Date,
+    endDate: Date
   ): Promise<{ id: string; date: Date; status: WorkoutSessionStatus }[]>
 
   findManyByWorkoutAndUser(
     userId: string,
-    workoutId: string,
+    workoutId: string
   ): Promise<WorkoutSessionWithWorkout[]>
 
   findManyByWorkoutId(
     workoutId: string,
-    userId: string,
+    userId: string
   ): Promise<
     (WorkoutSession & {
       exerciseSessions: (ExerciseSession & {
@@ -91,21 +91,21 @@ export interface WorkoutSessionsRepository {
   findDetailedByUserAndDateRange(
     userId: string,
     startDate: Date,
-    endDate: Date,
+    endDate: Date
   ): Promise<WorkoutSessionWithWorkout[]>
 
   create(
-    data: Prisma.WorkoutSessionUncheckedCreateInput,
+    data: Prisma.WorkoutSessionUncheckedCreateInput
   ): Promise<WorkoutSession>
 
   update(
     id: string,
-    data: Prisma.WorkoutSessionUpdateInput,
+    data: Prisma.WorkoutSessionUpdateInput
   ): Promise<WorkoutSession>
 
   updateStatus(
     id: string,
-    status: WorkoutSessionStatus,
+    status: WorkoutSessionStatus
   ): Promise<WorkoutSession>
 
   completeWorkoutSession(
@@ -119,7 +119,7 @@ export interface WorkoutSessionsRepository {
         reps?: number | null
         weight?: number | null
       }[]
-    },
+    }
   ): Promise<WorkoutSessionWithWorkout>
 
   countCompletedByUser(userId: string): Promise<number>

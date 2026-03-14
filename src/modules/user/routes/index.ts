@@ -1,4 +1,4 @@
-import { FastifyInstance } from 'fastify'
+import type { FastifyInstance } from 'fastify'
 
 import { authenticateController } from '@/modules/user/controllers/authenticate.controller'
 import { changePasswordController } from '@/modules/user/controllers/change-password.controller'
@@ -23,7 +23,7 @@ export async function usersRoutes(app: FastifyInstance) {
   app.get(
     '/me/schedules',
     { onRequest: [verifyJwt] },
-    fetchUserSchedulesController,
+    fetchUserSchedulesController
   )
 
   app.post('/logout', { onRequest: [verifyJwt] }, signOutController)

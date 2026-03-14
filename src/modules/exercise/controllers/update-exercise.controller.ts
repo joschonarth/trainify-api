@@ -1,5 +1,5 @@
 import { ExerciseCategory, ExerciseType } from '@prisma/client'
-import { FastifyReply, FastifyRequest } from 'fastify'
+import type { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
 import { NotAllowedError } from '@/shared/errors/not-allowed.error'
@@ -9,7 +9,7 @@ import { makeUpdateExerciseUseCase } from '../use-cases/factories/make-update-ex
 
 export async function updateExerciseController(
   request: FastifyRequest,
-  reply: FastifyReply,
+  reply: FastifyReply
 ) {
   const paramsSchema = z.object({
     exerciseId: z.string(),

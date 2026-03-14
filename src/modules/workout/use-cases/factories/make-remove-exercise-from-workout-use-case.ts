@@ -7,7 +7,7 @@ export function makeRemoveExerciseFromWorkoutUseCase() {
   const workoutExercisesRepository = new PrismaWorkoutExercisesRepository()
   const removeExerciseFromWorkoutUseCase = new RemoveExerciseFromWorkoutUseCase(
     workoutsRepository,
-    workoutExercisesRepository,
+    workoutExercisesRepository
   )
 
   return removeExerciseFromWorkoutUseCase

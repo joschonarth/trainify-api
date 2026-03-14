@@ -9,7 +9,7 @@ export function makeUnlockStreakBadgesUseCase() {
 
   const unlockStreakBadgesUseCase = new UnlockStreakBadgesUseCase(
     badgesRepository,
-    userStreaksRepository,
+    userStreaksRepository
   )
 
   return unlockStreakBadgesUseCase

@@ -1,6 +1,6 @@
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
-import {
+import type {
   WorkoutSessionsRepository,
   WorkoutSessionWithWorkout,
 } from '../repositories/workout-sessions.repository'
@@ -59,24 +59,24 @@ export class CompareWorkoutSessionsUseCase {
     const sessions =
       await this.workoutSessionRepository.findManyByWorkoutAndUser(
         userId,
-        workoutId,
+        workoutId
       )
 
     if (!sessions || sessions.length < 2) {
       throw new ResourceNotFoundError(
-        'Not enough sessions to compare this workout.',
+        'Not enough sessions to compare this workout.'
       )
     }
 
     const sorted = [...sessions].sort(
-      (a, b) => b.date.getTime() - a.date.getTime(),
+      (a, b) => b.date.getTime() - a.date.getTime()
     )
 
     const last = sorted[0]!
     const previous = sorted[1]!
 
     const mapToWorkoutSessionData = (
-      session: WorkoutSessionWithWorkout,
+      session: WorkoutSessionWithWorkout
     ): WorkoutSessionData => {
       const exercises: ExerciseData[] = session.exerciseSessions.flatMap(
         (exerciseSession) =>
@@ -84,7 +84,7 @@ export class CompareWorkoutSessionsUseCase {
             sets: log.sets,
             reps: log.reps,
             weight: log.weight ?? 0,
-          })),
+          }))
       )
 
       return {

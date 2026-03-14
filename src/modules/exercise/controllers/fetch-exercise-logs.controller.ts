@@ -1,10 +1,10 @@
-import { FastifyReply, FastifyRequest } from 'fastify'
+import type { FastifyReply, FastifyRequest } from 'fastify'
 
 import { makeFetchExerciseLogsUseCase } from '../use-cases/factories/make-fetch-exercise-logs-use-case'
 
 export async function fetchExerciseLogsController(
   request: FastifyRequest,
-  reply: FastifyReply,
+  reply: FastifyReply
 ) {
   try {
     const userId = request.user.sub

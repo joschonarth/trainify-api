@@ -1,4 +1,4 @@
-import { FastifyReply, FastifyRequest } from 'fastify'
+import type { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
 import { NotAllowedError } from '@/shared/errors/not-allowed.error'
@@ -8,7 +8,7 @@ import { makeGetExerciseDetailsUseCase } from '../use-cases/factories/make-get-e
 
 export async function getExerciseDetailsController(
   request: FastifyRequest,
-  reply: FastifyReply,
+  reply: FastifyReply
 ) {
   const paramsSchema = z.object({
     id: z.cuid(),

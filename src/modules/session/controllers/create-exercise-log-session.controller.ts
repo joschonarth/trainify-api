@@ -1,4 +1,4 @@
-import { FastifyReply, FastifyRequest } from 'fastify'
+import type { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
 import { makeCreateExerciseLogSessionUseCase } from '@/modules/session/use-cases/factories/make-create-exercise-log-session-use-case'
@@ -6,7 +6,7 @@ import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
 export async function createExerciseLogSessionController(
   request: FastifyRequest,
-  reply: FastifyReply,
+  reply: FastifyReply
 ) {
   const createExerciseLogSessionBodySchema = z.object({
     exerciseId: z.string(),
