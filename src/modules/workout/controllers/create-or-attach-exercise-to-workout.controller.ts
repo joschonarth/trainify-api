@@ -1,5 +1,5 @@
 import { ExerciseCategory, ExerciseType } from '@prisma/client'
-import { FastifyReply, FastifyRequest } from 'fastify'
+import type { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
@@ -8,7 +8,7 @@ import { makeCreateOrAttachExerciseToWorkoutUseCase } from '../use-cases/factori
 
 export async function createOrAttachExerciseToWorkoutController(
   request: FastifyRequest,
-  reply: FastifyReply,
+  reply: FastifyReply
 ) {
   const paramsSchema = z.object({
     workoutId: z.string(),
@@ -26,7 +26,7 @@ export async function createOrAttachExerciseToWorkoutController(
   try {
     const { workoutId } = paramsSchema.parse(request.params)
     const { name, category, type, sets, reps, weight } = bodySchema.parse(
-      request.body,
+      request.body
     )
 
     const userId = request.user.sub

@@ -5,7 +5,7 @@ import { RemoveCatalogExerciseUseCase } from '../remove-catalog-exercise.use-cas
 export function makeRemoveCatalogExerciseUseCase() {
   const myExercisesRepository = new PrismaMyExercisesRepository()
   const removeCatalogExerciseUseCase = new RemoveCatalogExerciseUseCase(
-    myExercisesRepository,
+    myExercisesRepository
   )
 
   return removeCatalogExerciseUseCase

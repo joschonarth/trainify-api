@@ -1,6 +1,6 @@
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
-import {
+import type {
   WorkoutsRepository,
   WorkoutWithDetails,
 } from '../repositories/workouts.repository'

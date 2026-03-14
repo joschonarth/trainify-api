@@ -1,4 +1,4 @@
-import { FastifyReply, FastifyRequest } from 'fastify'
+import type { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
 import { ResourceAlreadyExistsError } from '@/shared/errors/resource-already-exists.error'
@@ -7,7 +7,7 @@ import { makeCreateExerciseLogUseCase } from '../use-cases/factories/make-create
 
 export async function createExerciseLogController(
   request: FastifyRequest,
-  reply: FastifyReply,
+  reply: FastifyReply
 ) {
   const createExerciseLogBodySchema = z.object({
     exerciseId: z.string(),

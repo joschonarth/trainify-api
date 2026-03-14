@@ -1,10 +1,10 @@
-import { FastifyReply, FastifyRequest } from 'fastify'
+import type { FastifyReply, FastifyRequest } from 'fastify'
 
 import { makeGetActiveWeightGoalAnalyticsUseCase } from '../use-cases/factories/make-get-active-weight-goal-analytics-use-case'
 
 export async function getActiveWeightGoalAnalyticsController(
   request: FastifyRequest,
-  reply: FastifyReply,
+  reply: FastifyReply
 ) {
   const userId = request.user.sub
 

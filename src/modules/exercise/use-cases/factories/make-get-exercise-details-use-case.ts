@@ -5,7 +5,7 @@ import { GetExerciseDetailsUseCase } from '../get-exercise-details.use-case'
 export function makeGetExerciseDetailsUseCase() {
   const exercisesRepository = new PrismaExercisesRepository()
   const getExerciseDetailsUseCase = new GetExerciseDetailsUseCase(
-    exercisesRepository,
+    exercisesRepository
   )
 
   return getExerciseDetailsUseCase

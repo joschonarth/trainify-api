@@ -1,11 +1,11 @@
-import { FastifyReply, FastifyRequest } from 'fastify'
+import type { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
 import { makeGetWorkoutCalendarUseCase } from '@/modules/session/use-cases/factories/make-get-workout-calendar-use-case'
 
 export async function getWorkoutCalendarController(
   request: FastifyRequest,
-  reply: FastifyReply,
+  reply: FastifyReply
 ) {
   const userId = request.user.sub
 

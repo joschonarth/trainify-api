@@ -4,7 +4,7 @@ import { CompareWorkoutExercisesUseCase } from '../compare-workout-exercises.use
 export function makeCompareWorkoutExercisesUseCase() {
   const workoutSessionsRepository = new PrismaWorkoutSessionsRepository()
   const compareWorkoutExercisesUseCase = new CompareWorkoutExercisesUseCase(
-    workoutSessionsRepository,
+    workoutSessionsRepository
   )
 
   return compareWorkoutExercisesUseCase

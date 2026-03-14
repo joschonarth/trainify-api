@@ -9,7 +9,7 @@ export function makeUpdateWeightLogUseCase() {
 
   const updateWeightLogUseCase = new UpdateWeightLogUseCase(
     weightLogsRepository,
-    calculateWeightGoalProgressUseCase,
+    calculateWeightGoalProgressUseCase
   )
 
   return updateWeightLogUseCase

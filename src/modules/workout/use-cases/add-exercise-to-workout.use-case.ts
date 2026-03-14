@@ -1,11 +1,11 @@
-import { WorkoutExercise } from '@prisma/client'
+import type { WorkoutExercise } from '@prisma/client'
 
-import { ExercisesRepository } from '@/modules/exercise/repositories/exercises.repository'
+import type { ExercisesRepository } from '@/modules/exercise/repositories/exercises.repository'
 import { ResourceAlreadyExistsError } from '@/shared/errors/resource-already-exists.error'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
-import { WorkoutExercisesRepository } from '../repositories/workout-exercises.repository'
-import { WorkoutsRepository } from '../repositories/workouts.repository'
+import type { WorkoutExercisesRepository } from '../repositories/workout-exercises.repository'
+import type { WorkoutsRepository } from '../repositories/workouts.repository'
 
 interface AddExerciseToWorkoutUseCaseRequest {
   workoutId: string
@@ -23,7 +23,7 @@ export class AddExerciseToWorkoutUseCase {
   constructor(
     private workoutExercisesRepository: WorkoutExercisesRepository,
     private workoutsRepository: WorkoutsRepository,
-    private exercisesRepository: ExercisesRepository,
+    private exercisesRepository: ExercisesRepository
   ) {}
 
   async execute({
@@ -46,12 +46,12 @@ export class AddExerciseToWorkoutUseCase {
     const existing =
       await this.workoutExercisesRepository.findByWorkoutAndExercise(
         workoutId,
-        exerciseId,
+        exerciseId
       )
 
     if (existing) {
       throw new ResourceAlreadyExistsError(
-        'Exercise is already added to this workout.',
+        'Exercise is already added to this workout.'
       )
     }
 

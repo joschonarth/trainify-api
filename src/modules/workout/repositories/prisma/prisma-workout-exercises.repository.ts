@@ -1,8 +1,8 @@
-import { Prisma, WorkoutExercise } from '@prisma/client'
+import type { Prisma, WorkoutExercise } from '@prisma/client'
 
 import { prisma } from '@/lib/prisma'
 
-import { WorkoutExercisesRepository } from '../workout-exercises.repository'
+import type { WorkoutExercisesRepository } from '../workout-exercises.repository'
 
 export class PrismaWorkoutExercisesRepository
   implements WorkoutExercisesRepository
@@ -31,7 +31,7 @@ export class PrismaWorkoutExercisesRepository
 
   async findByWorkoutAndExercise(
     workoutId: string,
-    exerciseId: string,
+    exerciseId: string
   ): Promise<WorkoutExercise | null> {
     return prisma.workoutExercise.findUnique({
       where: {
@@ -41,7 +41,7 @@ export class PrismaWorkoutExercisesRepository
   }
 
   async addExerciseToWorkout(
-    data: Prisma.WorkoutExerciseCreateInput,
+    data: Prisma.WorkoutExerciseCreateInput
   ): Promise<WorkoutExercise> {
     return prisma.workoutExercise.create({ data })
   }
@@ -52,7 +52,7 @@ export class PrismaWorkoutExercisesRepository
       defaultSets: number | null
       defaultReps: number | null
       defaultWeight: number | null
-    },
+    }
   ): Promise<WorkoutExercise> {
     return prisma.workoutExercise.update({
       where: { id: workoutExerciseId },

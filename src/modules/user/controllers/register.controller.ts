@@ -1,4 +1,4 @@
-import { FastifyReply, FastifyRequest } from 'fastify'
+import type { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
 import { env } from '@/env'
@@ -8,7 +8,7 @@ import { makeRegisterUseCase } from '@/modules/user/use-cases/factories/make-reg
 
 export async function registerController(
   request: FastifyRequest,
-  reply: FastifyReply,
+  reply: FastifyReply
 ) {
   const registerBodySchema = z.object({
     name: z.string(),
@@ -31,7 +31,7 @@ export async function registerController(
 
     const token = await reply.jwtSign(
       { userId: user.id, email: user.email },
-      { sign: { sub: user.id } },
+      { sign: { sub: user.id } }
     )
 
     reply.setCookie('token', token, {

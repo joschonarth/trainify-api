@@ -5,7 +5,7 @@ import { GetExerciseProgressUseCase } from '../get-exercise-progress.use-case'
 export function makeGetExerciseProgressUseCase() {
   const exerciseLogsRepository = new PrismaExerciseLogsRepository()
   const getExerciseProgressUseCase = new GetExerciseProgressUseCase(
-    exerciseLogsRepository,
+    exerciseLogsRepository
   )
 
   return getExerciseProgressUseCase

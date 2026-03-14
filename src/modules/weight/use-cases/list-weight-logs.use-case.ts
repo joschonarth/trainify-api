@@ -1,6 +1,6 @@
-import { WeightLog } from '@prisma/client'
+import type { WeightLog } from '@prisma/client'
 
-import { WeightLogsRepository } from '../repositories/weight-logs.repository'
+import type { WeightLogsRepository } from '../repositories/weight-logs.repository'
 
 interface ListWeightLogsUseCaseRequest {
   userId: string

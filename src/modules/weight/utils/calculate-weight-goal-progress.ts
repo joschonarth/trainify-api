@@ -1,4 +1,4 @@
-import { WeightGoal, WeightLog } from '@prisma/client'
+import type { WeightGoal, WeightLog } from '@prisma/client'
 
 /**
  * Calculates the progress of a weight goal as a percentage (0-100%).
@@ -22,7 +22,7 @@ export function calculateWeightGoalProgress(
   goal: WeightGoal,
   currentWeight: number,
   logs: WeightLog[] = [],
-  maintainTolerance = 2,
+  maintainTolerance = 2
 ): number {
   const { goalType, startWeight, targetWeight } = goal
   const effectiveStartWeight = startWeight ?? currentWeight
@@ -58,11 +58,11 @@ export function calculateWeightGoalProgress(
         ? 1
         : Math.max(
             1 - (meanDistance - maintainTolerance) / maintainTolerance,
-            0,
+            0
           )
 
     const consistencyScore = Math.exp(
-      -(stdDev ** 2) / (2 * maintainTolerance ** 2),
+      -(stdDev ** 2) / (2 * maintainTolerance ** 2)
     )
 
     const progress = meanScore * consistencyScore * 100

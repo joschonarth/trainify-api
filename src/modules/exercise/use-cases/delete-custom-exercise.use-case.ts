@@ -1,7 +1,7 @@
 import { NotAllowedError } from '@/shared/errors/not-allowed.error'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
-import { ExercisesRepository } from '../repositories/exercises.repository'
+import type { ExercisesRepository } from '../repositories/exercises.repository'
 
 interface DeleteCustomExerciseUseCaseRequest {
   userId: string

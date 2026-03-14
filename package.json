@@ -15,23 +15,23 @@
     "test:ui": "vitest --ui",
     "seed": "node prisma/seeds/index.js",
     "seed:reset": "node prisma/seeds/reset-and-seed.js",
-    "lint": "eslint . --ext .js,.ts,.tsx --fix"
+    "check": "ultracite check",
+    "fix": "ultracite fix"
   },
   "keywords": [],
   "author": "João Otávio Schonarth",
   "license": "MIT",
   "description": "",
   "devDependencies": {
-    "@rocketseat/eslint-config": "2.2.2",
+    "@biomejs/biome": "2.4.7",
     "@types/bcrypt": "6.0.0",
     "@types/node": "24.3.0",
     "@vitest/coverage-v8": "3.2.4",
     "@vitest/ui": "3.2.4",
-    "eslint": "8.57.1",
-    "eslint-plugin-simple-import-sort": "12.1.1",
     "prisma": "6.14.0",
     "tsx": "4.20.4",
     "typescript": "5.9.2",
+    "ultracite": "7.3.1",
     "vite-tsconfig-paths": "5.1.4",
     "vitest": "3.2.4"
   },

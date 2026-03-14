@@ -1,5 +1,5 @@
-import { ExerciseLogsRepository } from '@/modules/exercise/repositories/exercise-logs.repository'
-import { WorkoutSessionsRepository } from '@/modules/session/repositories/workout-sessions.repository'
+import type { ExerciseLogsRepository } from '@/modules/exercise/repositories/exercise-logs.repository'
+import type { WorkoutSessionsRepository } from '@/modules/session/repositories/workout-sessions.repository'
 
 interface GetUserMetricsRequest {
   userId: string
@@ -14,7 +14,7 @@ interface GetUserMetricsResponse {
 export class GetUserMetricsUseCase {
   constructor(
     private workoutSessionsRepository: WorkoutSessionsRepository,
-    private exerciseLogsRepository: ExerciseLogsRepository,
+    private exerciseLogsRepository: ExerciseLogsRepository
   ) {}
 
   async execute({
@@ -28,7 +28,7 @@ export class GetUserMetricsUseCase {
 
     const totalWorkoutDuration = sessions.reduce(
       (acc, s) => acc + (s.duration ?? 0),
-      0,
+      0
     )
 
     return { totalWorkouts, totalExercises, totalWorkoutDuration }

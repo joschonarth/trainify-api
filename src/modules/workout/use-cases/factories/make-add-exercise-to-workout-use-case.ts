@@ -11,7 +11,7 @@ export function makeAddExerciseToWorkoutUseCase() {
   const addExerciseToWorkoutUseCase = new AddExerciseToWorkoutUseCase(
     workoutExercisesRepository,
     workoutsRepository,
-    exercisesRepository,
+    exercisesRepository
   )
 
   return addExerciseToWorkoutUseCase

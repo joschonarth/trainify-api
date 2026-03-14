@@ -1,10 +1,10 @@
-import { FastifyReply, FastifyRequest } from 'fastify'
+import type { FastifyReply, FastifyRequest } from 'fastify'
 
 import { makeUpdateUserStreakUseCase } from '../use-cases/factories/make-update-user-streak-use-case'
 
 export async function refreshUserStreakController(
   request: FastifyRequest,
-  reply: FastifyReply,
+  reply: FastifyReply
 ) {
   const userId = request.user.sub
   const updateUserStreakUseCase = makeUpdateUserStreakUseCase()

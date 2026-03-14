@@ -1,8 +1,8 @@
-import { Exercise, MyExercise } from '@prisma/client'
+import type { Exercise, MyExercise } from '@prisma/client'
 
 import { prisma } from '@/lib/prisma'
 
-import { MyExercisesRepository } from '../my-exercises.repository'
+import type { MyExercisesRepository } from '../my-exercises.repository'
 
 export class PrismaMyExercisesRepository implements MyExercisesRepository {
   async addExercise(userId: string, exerciseId: string): Promise<MyExercise> {
@@ -18,7 +18,7 @@ export class PrismaMyExercisesRepository implements MyExercisesRepository {
 
   async findByUserAndExercise(
     userId: string,
-    exerciseId: string,
+    exerciseId: string
   ): Promise<MyExercise | null> {
     const myExercise = await prisma.myExercise.findUnique({
       where: {
@@ -36,7 +36,7 @@ export class PrismaMyExercisesRepository implements MyExercisesRepository {
     userId: string,
     query?: string,
     category?: Exercise['category'],
-    page: number = 1,
+    page = 1
   ): Promise<(MyExercise & { exercise: Exercise })[]> {
     const ITEMS_PER_PAGE = 10
 

@@ -4,7 +4,7 @@ import { GetGeneralWeightAnalyticsUseCase } from '../get-general-weight-analytic
 export function makeGetGeneralWeightAnalyticsUseCase() {
   const weightLogsRepository = new PrismaWeightLogsRepository()
   const getGeneralWeightAnalyticsUseCase = new GetGeneralWeightAnalyticsUseCase(
-    weightLogsRepository,
+    weightLogsRepository
   )
 
   return getGeneralWeightAnalyticsUseCase

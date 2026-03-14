@@ -1,8 +1,8 @@
-import { Prisma, WorkoutSchedule } from '@prisma/client'
+import type { Prisma, WorkoutSchedule } from '@prisma/client'
 
 import { prisma } from '@/lib/prisma'
 
-import {
+import type {
   WorkoutSchedulesRepository,
   WorkoutScheduleWithWorkout,
 } from '../workout-schedules.repository'
@@ -11,7 +11,7 @@ export class PrismaWorkoutSchedulesRepository
   implements WorkoutSchedulesRepository
 {
   async assignDaysToWorkout(
-    data: Prisma.WorkoutScheduleCreateManyInput[],
+    data: Prisma.WorkoutScheduleCreateManyInput[]
   ): Promise<void> {
     await prisma.workoutSchedule.createMany({
       data,
@@ -30,7 +30,7 @@ export class PrismaWorkoutSchedulesRepository
 
   async findByUserAndDay(
     userId: string,
-    dayOfWeek: number,
+    dayOfWeek: number
   ): Promise<WorkoutScheduleWithWorkout | null> {
     return prisma.workoutSchedule.findFirst({
       where: {

@@ -1,4 +1,4 @@
-import { ExerciseSessionsRepository } from '@/modules/session/repositories/exercise-sessions.repository'
+import type { ExerciseSessionsRepository } from '@/modules/session/repositories/exercise-sessions.repository'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
 interface CompleteExerciseSessionUseCaseRequest {
@@ -20,7 +20,7 @@ export class CompleteExerciseSessionUseCase {
       exerciseSessionId,
       {
         completed: true,
-      },
+      }
     )
 
     return { exerciseSession: updated }

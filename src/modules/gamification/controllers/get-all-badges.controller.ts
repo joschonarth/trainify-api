@@ -1,5 +1,5 @@
 import { BadgeType } from '@prisma/client'
-import { FastifyReply, FastifyRequest } from 'fastify'
+import type { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
 import { makeGetAllBadgesUseCase } from '@/modules/gamification/use-cases/factories/make-get-all-badges-use-case'
@@ -15,7 +15,7 @@ const getAllBadgesQuerySchema = z.object({
 
 export async function getAllBadgesController(
   request: FastifyRequest,
-  reply: FastifyReply,
+  reply: FastifyReply
 ) {
   const { type, unlocked } = getAllBadgesQuerySchema.parse(request.query)
   const userId = request.user?.sub

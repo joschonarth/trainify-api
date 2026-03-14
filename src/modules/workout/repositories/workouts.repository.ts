@@ -1,4 +1,4 @@
-import { Prisma, Workout } from '@prisma/client'
+import type { Prisma, Workout } from '@prisma/client'
 
 export type WorkoutWithDetails = Prisma.WorkoutGetPayload<{
   include: {
@@ -45,7 +45,7 @@ export interface WorkoutsRepository {
   >
   update(
     id: string,
-    data: { name?: string; description?: string | null },
+    data: { name?: string; description?: string | null }
   ): Promise<Workout>
   delete(id: string): Promise<void>
 }

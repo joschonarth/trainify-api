@@ -12,7 +12,7 @@ export function makeCreateOrAttachExerciseToWorkoutUseCase() {
   const useCase = new CreateOrAttachExerciseToWorkoutUseCase(
     exercisesRepository,
     workoutsRepository,
-    workoutExercisesRepository,
+    workoutExercisesRepository
   )
 
   return useCase

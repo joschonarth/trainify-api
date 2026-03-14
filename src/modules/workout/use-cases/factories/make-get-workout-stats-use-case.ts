@@ -9,7 +9,7 @@ export function makeGetWorkoutStatsUseCase() {
 
   const getWorkoutStatsUseCase = new GetWorkoutStatsUseCase(
     workoutsRepository,
-    workoutSessionsRepository,
+    workoutSessionsRepository
   )
 
   return getWorkoutStatsUseCase

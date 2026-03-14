@@ -1,8 +1,8 @@
-import { WeightGoal } from '@prisma/client'
+import type { WeightGoal } from '@prisma/client'
 
 import { prisma } from '@/lib/prisma'
 
-import {
+import type {
   CreateWeightGoalData,
   WeightGoalsRepository,
 } from '../weight-goals.repository'
@@ -16,7 +16,7 @@ export class PrismaWeightGoalsRepository implements WeightGoalsRepository {
 
   async findAllByUserId(
     userId: string,
-    filters?: { status?: 'active' | 'completed' },
+    filters?: { status?: 'active' | 'completed' }
   ): Promise<WeightGoal[]> {
     return prisma.weightGoal.findMany({
       where: {
@@ -83,7 +83,7 @@ export class PrismaWeightGoalsRepository implements WeightGoalsRepository {
       description?: string | null
       endDate?: Date | null
       startWeight?: number | null
-    },
+    }
   ): Promise<WeightGoal> {
     return prisma.weightGoal.update({
       where: { id },

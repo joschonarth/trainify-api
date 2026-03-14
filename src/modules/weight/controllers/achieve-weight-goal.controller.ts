@@ -1,4 +1,4 @@
-import { FastifyReply, FastifyRequest } from 'fastify'
+import type { FastifyReply, FastifyRequest } from 'fastify'
 
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
@@ -7,7 +7,7 @@ import { makeAchieveWeightGoalUseCase } from '../use-cases/factories/make-achiev
 
 export async function achieveWeightGoalController(
   request: FastifyRequest<{ Params: { goalId: string } }>,
-  reply: FastifyReply,
+  reply: FastifyReply
 ) {
   const userId = request.user.sub
   const { goalId } = request.params

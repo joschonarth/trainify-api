@@ -1,4 +1,4 @@
-import { WeightLogsRepository } from '../repositories/weight-logs.repository'
+import type { WeightLogsRepository } from '../repositories/weight-logs.repository'
 
 interface GetGeneralWeightAnalyticsRequest {
   userId: string
@@ -35,7 +35,7 @@ export class GetGeneralWeightAnalyticsUseCase {
 
     const logs = await this.weightLogsRepository.findManyByUserId(
       userId,
-      filters,
+      filters
     )
 
     if (logs.length < 2) {
@@ -47,7 +47,7 @@ export class GetGeneralWeightAnalyticsUseCase {
     }
 
     const sorted = logs.sort(
-      (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
+      (a, b) => a.createdAt.getTime() - b.createdAt.getTime()
     )
 
     const dataPoints = sorted.map((l) => ({

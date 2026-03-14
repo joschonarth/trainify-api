@@ -1,6 +1,6 @@
-import { ExerciseCategory, ExerciseType } from '@prisma/client'
+import type { ExerciseCategory, ExerciseType } from '@prisma/client'
 
-import { ExerciseLogsRepository } from '../repositories/exercise-logs.repository'
+import type { ExerciseLogsRepository } from '../repositories/exercise-logs.repository'
 
 interface FetchExerciseLogsUseCaseResponse {
   logs: {

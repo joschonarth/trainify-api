@@ -5,7 +5,7 @@ export function makeGetActiveWeightGoalUseCase() {
   const weightGoalsRepository = new PrismaWeightGoalsRepository()
 
   const getActiveWeightGoalUseCase = new GetActiveWeightGoalUseCase(
-    weightGoalsRepository,
+    weightGoalsRepository
   )
 
   return getActiveWeightGoalUseCase

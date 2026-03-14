@@ -5,7 +5,7 @@ import { CreateExerciseLogUseCase } from '../create-exercise-log.use-case'
 export function makeCreateExerciseLogUseCase() {
   const exerciseLogsRepository = new PrismaExerciseLogsRepository()
   const createExerciseLogUseCase = new CreateExerciseLogUseCase(
-    exerciseLogsRepository,
+    exerciseLogsRepository
   )
 
   return createExerciseLogUseCase

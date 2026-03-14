@@ -1,4 +1,4 @@
-import { FastifyReply, FastifyRequest } from 'fastify'
+import type { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
 import { makeUpdateUserProfileUseCase } from '@/modules/user/use-cases/factories/make-update-user-profile-use-case'
@@ -6,7 +6,7 @@ import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
 export async function updateUserProfileController(
   request: FastifyRequest,
-  reply: FastifyReply,
+  reply: FastifyReply
 ) {
   const updateProfileBodySchema = z.object({
     name: z.string().optional(),

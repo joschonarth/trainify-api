@@ -1,5 +1,5 @@
 import { ExerciseCategory, ExerciseType } from '@prisma/client'
-import { FastifyReply, FastifyRequest } from 'fastify'
+import type { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
 import { ResourceAlreadyExistsError } from '@/shared/errors/resource-already-exists.error'
@@ -8,7 +8,7 @@ import { makeCreateExerciseUseCase } from '../use-cases/factories/make-create-ex
 
 export async function createExerciseController(
   request: FastifyRequest,
-  reply: FastifyReply,
+  reply: FastifyReply
 ) {
   const createExerciseBodySchema = z.object({
     name: z.string(),
@@ -18,7 +18,7 @@ export async function createExerciseController(
 
   try {
     const { name, category, type } = createExerciseBodySchema.parse(
-      request.body,
+      request.body
     )
 
     const userId = request.user.sub

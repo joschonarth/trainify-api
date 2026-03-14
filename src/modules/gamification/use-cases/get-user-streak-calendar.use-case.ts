@@ -1,6 +1,6 @@
 import dayjs from 'dayjs'
 
-import { UserStreakLogsRepository } from '../repositories/user-streak-logs.repository'
+import type { UserStreakLogsRepository } from '../repositories/user-streak-logs.repository'
 
 interface CalendarDayStatus {
   date: string
@@ -35,12 +35,12 @@ export class GetUserStreakCalendarUseCase {
     const logs = await this.userStreakLogsRepository.findByUserAndDateRange(
       userId,
       startOfMonth.toDate(),
-      endOfMonth.toDate(),
+      endOfMonth.toDate()
     )
 
     const totalDays = endOfMonth.date()
     const daysArray = Array.from({ length: totalDays }, (_, i) =>
-      startOfMonth.add(i, 'day'),
+      startOfMonth.add(i, 'day')
     )
 
     const days: CalendarDayStatus[] = daysArray.map((date) => {

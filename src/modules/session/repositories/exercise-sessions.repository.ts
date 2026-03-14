@@ -1,4 +1,4 @@
-import { ExerciseSession, Prisma } from '@prisma/client'
+import type { ExerciseSession, Prisma } from '@prisma/client'
 
 export type ExerciseSessionWithLogs = ExerciseSession & {
   exercise: {
@@ -24,7 +24,7 @@ export interface ExerciseSessionsRepository {
   findBySessionId(sessionId: string): Promise<ExerciseSessionWithLogs[]>
 
   findByWorkoutSessionId(
-    workoutSessionId: string,
+    workoutSessionId: string
   ): Promise<ExerciseSessionWithLogs[]>
 
   findByIdWithLogs(id: string): Promise<ExerciseSessionWithLogs | null>
@@ -32,16 +32,16 @@ export interface ExerciseSessionsRepository {
   findManyByUserAndExercise(
     userId: string,
     exerciseId: string,
-    fromDate?: Date,
+    fromDate?: Date
   ): Promise<ExerciseSessionWithLogs[]>
 
   create(
-    data: Prisma.ExerciseSessionUncheckedCreateInput,
+    data: Prisma.ExerciseSessionUncheckedCreateInput
   ): Promise<ExerciseSession>
 
   update(
     id: string,
-    data: Prisma.ExerciseSessionUncheckedUpdateInput,
+    data: Prisma.ExerciseSessionUncheckedUpdateInput
   ): Promise<ExerciseSession>
 
   delete(id: string): Promise<void>

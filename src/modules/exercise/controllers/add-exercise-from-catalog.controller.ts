@@ -1,4 +1,4 @@
-import { FastifyReply, FastifyRequest } from 'fastify'
+import type { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
 import { ResourceAlreadyExistsError } from '@/shared/errors/resource-already-exists.error'
@@ -8,7 +8,7 @@ import { makeAddExerciseFromCatalog } from '../use-cases/factories/make-add-exer
 
 export async function addExerciseFromCatalogController(
   request: FastifyRequest,
-  reply: FastifyReply,
+  reply: FastifyReply
 ) {
   const paramsSchema = z.object({
     id: z.cuid(),

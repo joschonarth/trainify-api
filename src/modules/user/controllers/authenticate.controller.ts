@@ -1,4 +1,4 @@
-import { FastifyReply, FastifyRequest } from 'fastify'
+import type { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
 import { env } from '@/env'
@@ -7,7 +7,7 @@ import { makeAuthenticateUseCase } from '@/modules/user/use-cases/factories/make
 
 export async function authenticateController(
   request: FastifyRequest,
-  reply: FastifyReply,
+  reply: FastifyReply
 ) {
   const authenticateBodySchema = z.object({
     email: z.email(),
@@ -33,7 +33,7 @@ export async function authenticateController(
         sign: {
           sub: user.id,
         },
-      },
+      }
     )
 
     reply.setCookie('token', token, {

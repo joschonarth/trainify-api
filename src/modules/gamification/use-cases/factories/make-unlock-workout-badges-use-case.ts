@@ -9,7 +9,7 @@ export function makeUnlockWorkoutBadgesUseCase() {
 
   const unlockWorkoutBadgesUseCase = new UnlockWorkoutBadgesUseCase(
     badgesRepository,
-    workoutSessionRepository,
+    workoutSessionRepository
   )
 
   return unlockWorkoutBadgesUseCase

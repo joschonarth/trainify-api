@@ -1,6 +1,6 @@
-import { GoalType, WeightGoal } from '@prisma/client'
+import type { GoalType, WeightGoal } from '@prisma/client'
 
-import { WeightGoalsRepository } from '../repositories/weight-goals.repository'
+import type { WeightGoalsRepository } from '../repositories/weight-goals.repository'
 
 interface CreateWeightGoalUseCaseRequest {
   userId: string

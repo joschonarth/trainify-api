@@ -1,8 +1,8 @@
-import { WeightGoal } from '@prisma/client'
+import type { WeightGoal } from '@prisma/client'
 
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
-import { WeightGoalsRepository } from '../repositories/weight-goals.repository'
+import type { WeightGoalsRepository } from '../repositories/weight-goals.repository'
 
 export class GetActiveWeightGoalUseCase {
   constructor(private weightGoalsRepository: WeightGoalsRepository) {}
@@ -13,7 +13,7 @@ export class GetActiveWeightGoalUseCase {
 
     if (!activeGoal) {
       throw new ResourceNotFoundError(
-        'No active weight goal found for this user.',
+        'No active weight goal found for this user.'
       )
     }
 

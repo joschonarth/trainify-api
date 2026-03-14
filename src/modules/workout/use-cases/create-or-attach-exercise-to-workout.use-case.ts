@@ -1,15 +1,15 @@
-import {
+import type {
   Exercise,
   ExerciseCategory,
   ExerciseType,
   WorkoutExercise,
 } from '@prisma/client'
 
-import { ExercisesRepository } from '@/modules/exercise/repositories/exercises.repository'
+import type { ExercisesRepository } from '@/modules/exercise/repositories/exercises.repository'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
-import { WorkoutExercisesRepository } from '../repositories/workout-exercises.repository'
-import { WorkoutsRepository } from '../repositories/workouts.repository'
+import type { WorkoutExercisesRepository } from '../repositories/workout-exercises.repository'
+import type { WorkoutsRepository } from '../repositories/workouts.repository'
 
 interface CreateOrAttachExerciseToWorkoutUseCaseRequest {
   userId: string
@@ -31,7 +31,7 @@ export class CreateOrAttachExerciseToWorkoutUseCase {
   constructor(
     private exercisesRepository: ExercisesRepository,
     private workoutsRepository: WorkoutsRepository,
-    private workoutExercisesRepository: WorkoutExercisesRepository,
+    private workoutExercisesRepository: WorkoutExercisesRepository
   ) {}
 
   async execute({
@@ -51,7 +51,7 @@ export class CreateOrAttachExerciseToWorkoutUseCase {
 
     let exercise = await this.exercisesRepository.findByNameAndUser(
       name,
-      userId,
+      userId
     )
 
     if (!exercise) {

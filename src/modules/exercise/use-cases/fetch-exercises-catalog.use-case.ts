@@ -1,6 +1,6 @@
-import { Exercise, ExerciseCategory } from '@prisma/client'
+import type { Exercise, ExerciseCategory } from '@prisma/client'
 
-import { ExercisesRepository } from '../repositories/exercises.repository'
+import type { ExercisesRepository } from '../repositories/exercises.repository'
 
 interface FetchExercisesCatalogUseCaseRequest {
   query: string
@@ -23,7 +23,7 @@ export class FetchExercisesCatalogUseCase {
     const exercises = await this.exercisesRepository.findAllGlobals(
       query,
       category,
-      page,
+      page
     )
 
     return { exercises }

@@ -1,8 +1,8 @@
-import { Prisma, UserStreak } from '@prisma/client'
+import type { Prisma, UserStreak } from '@prisma/client'
 
 import { prisma } from '@/lib/prisma'
 
-import { UserStreaksRepository } from '../user-streaks.repository'
+import type { UserStreaksRepository } from '../user-streaks.repository'
 
 export class PrismaUserStreaksRepository implements UserStreaksRepository {
   async findByUserId(userId: string): Promise<UserStreak | null> {
@@ -19,7 +19,7 @@ export class PrismaUserStreaksRepository implements UserStreaksRepository {
 
   async update(
     id: string,
-    data: Prisma.UserStreakUpdateInput,
+    data: Prisma.UserStreakUpdateInput
   ): Promise<UserStreak> {
     return prisma.userStreak.update({
       where: { id },

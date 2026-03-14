@@ -5,7 +5,7 @@ import { GetWorkoutSessionsHistoryUseCase } from '../get-workout-sessions-histor
 export function makeGetWorkoutSessionsHistoryUseCase() {
   const workoutSessionsRepository = new PrismaWorkoutSessionsRepository()
   const getWorkoutSessionsHistoryUseCase = new GetWorkoutSessionsHistoryUseCase(
-    workoutSessionsRepository,
+    workoutSessionsRepository
   )
 
   return getWorkoutSessionsHistoryUseCase

@@ -9,7 +9,7 @@ export function makeDeleteWeightLogUseCase() {
 
   const deleteWeightLogUseCase = new DeleteWeightLogUseCase(
     weightLogsRepository,
-    calculateWeightGoalProgressUseCase,
+    calculateWeightGoalProgressUseCase
   )
 
   return deleteWeightLogUseCase

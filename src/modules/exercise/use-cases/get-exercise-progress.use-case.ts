@@ -1,6 +1,6 @@
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
-import { ExerciseLogsRepository } from '../repositories/exercise-logs.repository'
+import type { ExerciseLogsRepository } from '../repositories/exercise-logs.repository'
 
 interface GetExerciseProgressRequest {
   userId: string
@@ -13,7 +13,7 @@ export class GetExerciseProgressUseCase {
   async execute({ userId, exerciseId }: GetExerciseProgressRequest) {
     const logs = await this.exerciseLogsRepository.findManyByExerciseAndUser(
       userId,
-      exerciseId,
+      exerciseId
     )
 
     if (!logs || logs.length === 0) {
@@ -38,7 +38,7 @@ export class GetExerciseProgressUseCase {
     const maxVolumeData =
       await this.exerciseLogsRepository.findMaxVolumeByExerciseAndUser(
         userId,
-        exerciseId,
+        exerciseId
       )
 
     return {

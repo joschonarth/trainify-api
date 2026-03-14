@@ -1,6 +1,6 @@
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
-import { WorkoutSessionsRepository } from '../repositories/workout-sessions.repository'
+import type { WorkoutSessionsRepository } from '../repositories/workout-sessions.repository'
 
 interface GetWorkoutSessionsByWorkoutRequest {
   userId: string
@@ -13,12 +13,12 @@ export class GetWorkoutSessionsByWorkoutUseCase {
   async execute({ userId, workoutId }: GetWorkoutSessionsByWorkoutRequest) {
     const sessions = await this.workoutSessionsRepository.findManyByWorkoutId(
       workoutId,
-      userId,
+      userId
     )
 
     if (!sessions || sessions.length === 0) {
       throw new ResourceNotFoundError(
-        'No workout sessions found for this workout.',
+        'No workout sessions found for this workout.'
       )
     }
 
@@ -42,7 +42,7 @@ export class GetWorkoutSessionsByWorkoutUseCase {
 
       const totalVolume = exerciseSessions.reduce(
         (acc, es) => acc + es.volume,
-        0,
+        0
       )
 
       return {

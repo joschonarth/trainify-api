@@ -1,6 +1,6 @@
-import { ExerciseCategory, ExerciseType } from '@prisma/client'
+import type { ExerciseCategory, ExerciseType } from '@prisma/client'
 
-import { MyExercisesRepository } from '../repositories/my-exercises.repository'
+import type { MyExercisesRepository } from '../repositories/my-exercises.repository'
 
 interface ExerciseDTO {
   myExerciseId: string
@@ -40,7 +40,7 @@ export class FetchMyExercisesUseCase {
       userId,
       query,
       category,
-      page,
+      page
     )
 
     const exercises = myExercises.map(({ id: myExerciseId, exercise }) => ({

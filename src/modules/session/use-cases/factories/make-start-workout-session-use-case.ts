@@ -4,7 +4,7 @@ import { StartWorkoutSessionUseCase } from '../start-workout-session.use-case'
 export function makeStartWorkoutSessionUseCase() {
   const workoutSessionsRepository = new PrismaWorkoutSessionsRepository()
   const startWorkoutSessionUseCase = new StartWorkoutSessionUseCase(
-    workoutSessionsRepository,
+    workoutSessionsRepository
   )
 
   return startWorkoutSessionUseCase

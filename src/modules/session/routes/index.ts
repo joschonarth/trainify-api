@@ -1,4 +1,4 @@
-import { FastifyInstance } from 'fastify'
+import type { FastifyInstance } from 'fastify'
 
 import { verifyJwt } from '@/shared/middlewares/verify-jwt'
 
@@ -43,19 +43,19 @@ export async function sessionsRoutes(app: FastifyInstance) {
   app.get('/sessions/:workoutId/comparison', compareWorkoutSessionsController)
   app.get(
     '/sessions/:workoutId/exercises/comparison',
-    compareWorkoutExercisesController,
+    compareWorkoutExercisesController
   )
 
   app.get(
     '/workouts/:workoutId/sessions',
-    getWorkoutSessionsByWorkoutController,
+    getWorkoutSessionsByWorkoutController
   )
 
   app.get('/sessions/workouts/compare', compareWorkoutsController)
   app.get('/sessions/workouts/compare/weekly', compareWeeklyWorkoutsController)
   app.get(
     '/sessions/workouts/compare/monthly',
-    compareMonthlyWorkoutsController,
+    compareMonthlyWorkoutsController
   )
 
   app.post('/sessions/:sessionId/start', startWorkoutSessionController)
@@ -63,25 +63,25 @@ export async function sessionsRoutes(app: FastifyInstance) {
 
   app.post(
     '/sessions/exercises/:exerciseSessionId/start',
-    startExerciseTimerController,
+    startExerciseTimerController
   )
   app.post(
     '/sessions/exercises/:exerciseSessionId/stop',
-    stopExerciseTimerController,
+    stopExerciseTimerController
   )
 
   app.get(
     '/sessions/exercises/:exerciseSessionId',
-    getExerciseSessionDetailsController,
+    getExerciseSessionDetailsController
   )
 
   app.patch(
     '/sessions/exercises/:exerciseSessionId/complete',
-    completeExerciseSessionController,
+    completeExerciseSessionController
   )
 
   app.get(
     '/sessions/exercises/:exerciseId/progress',
-    getExerciseSessionProgressController,
+    getExerciseSessionProgressController
   )
 }

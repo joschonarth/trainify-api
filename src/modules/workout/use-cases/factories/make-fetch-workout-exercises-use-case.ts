@@ -7,7 +7,7 @@ export function makeFetchWorkoutExercisesUseCase() {
   const workoutExercisesRepository = new PrismaWorkoutExercisesRepository()
   const fetchWorkoutExercisesUseCase = new FetchWorkoutExercisesUseCase(
     workoutsRepository,
-    workoutExercisesRepository,
+    workoutExercisesRepository
   )
 
   return fetchWorkoutExercisesUseCase

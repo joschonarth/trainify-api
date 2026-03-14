@@ -4,7 +4,7 @@ import { DeactivateWeightGoalUseCase } from '../deactivate-weight-goal.use-case'
 export function makeDeactivateWeightGoalUseCase() {
   const weightGoalsRepository = new PrismaWeightGoalsRepository()
   const deactivateWeightGoalUseCase = new DeactivateWeightGoalUseCase(
-    weightGoalsRepository,
+    weightGoalsRepository
   )
 
   return deactivateWeightGoalUseCase

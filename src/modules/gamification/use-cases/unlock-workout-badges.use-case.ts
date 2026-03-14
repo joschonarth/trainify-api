@@ -1,7 +1,7 @@
-import { Badge } from '@prisma/client'
+import type { Badge } from '@prisma/client'
 
-import { BadgesRepository } from '@/modules/gamification/repositories/badges.repository'
-import { PrismaWorkoutSessionsRepository } from '@/modules/session/repositories/prisma/prisma-workout-sessions.repository'
+import type { BadgesRepository } from '@/modules/gamification/repositories/badges.repository'
+import type { PrismaWorkoutSessionsRepository } from '@/modules/session/repositories/prisma/prisma-workout-sessions.repository'
 
 interface UnlockWorkoutBadgesRequest {
   userId: string
@@ -14,7 +14,7 @@ interface UnlockWorkoutBadgesResponse {
 export class UnlockWorkoutBadgesUseCase {
   constructor(
     private badgesRepository: BadgesRepository,
-    private workoutSessionRepository: PrismaWorkoutSessionsRepository,
+    private workoutSessionRepository: PrismaWorkoutSessionsRepository
   ) {}
 
   async execute({

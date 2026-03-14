@@ -1,6 +1,6 @@
-import { User } from '@prisma/client'
+import type { User } from '@prisma/client'
 
-import { UsersRepository } from '@/modules/user/repositories/users.repository'
+import type { UsersRepository } from '@/modules/user/repositories/users.repository'
 
 import { InvalidGoogleTokenError } from '../errors/invalid-google-token.error'
 
@@ -24,12 +24,12 @@ export class SignInWithGoogleUseCase {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      },
+      }
     )
 
     if (!response.ok) {
       throw new InvalidGoogleTokenError(
-        'Could not verify Google authentication.',
+        'Could not verify Google authentication.'
       )
     }
 
@@ -39,20 +39,13 @@ export class SignInWithGoogleUseCase {
 
     if (!email) {
       throw new InvalidGoogleTokenError(
-        'Google account email could not be retrieved.',
+        'Google account email could not be retrieved.'
       )
     }
 
     let user = await this.usersRepository.findByEmail(email)
 
-    if (!user) {
-      user = await this.usersRepository.create({
-        email,
-        name: name ?? 'Google User',
-        password: null,
-        avatarUrl: picture ?? null,
-      })
-    } else {
+    if (user) {
       const needsUpdate =
         (!user.name && name) ||
         (!user.avatarUrl && picture) ||
@@ -65,6 +58,13 @@ export class SignInWithGoogleUseCase {
           avatarUrl: picture ?? user.avatarUrl,
         })
       }
+    } else {
+      user = await this.usersRepository.create({
+        email,
+        name: name ?? 'Google User',
+        password: null,
+        avatarUrl: picture ?? null,
+      })
     }
 
     return { user }

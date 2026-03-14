@@ -1,6 +1,6 @@
-import { Prisma, User } from '@prisma/client'
+import type { Prisma, User } from '@prisma/client'
 
-import { UsersRepository } from '../users.repository'
+import type { UsersRepository } from '../users.repository'
 
 export class InMemoryUsersRepository implements UsersRepository {
   public items: User[] = []

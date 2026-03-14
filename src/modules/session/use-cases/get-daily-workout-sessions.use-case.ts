@@ -1,8 +1,8 @@
-import {
+import type {
   WorkoutSessionsRepository,
   WorkoutSessionWithWorkout,
 } from '@/modules/session/repositories/workout-sessions.repository'
-import { WorkoutSchedulesRepository } from '@/modules/workout/repositories/workout-schedules.repository'
+import type { WorkoutSchedulesRepository } from '@/modules/workout/repositories/workout-schedules.repository'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
 interface GetDailyWorkoutSessionRequest {
@@ -16,7 +16,7 @@ interface GetDailyWorkoutSessionResponse {
 export class GetDailyWorkoutSessionUseCase {
   constructor(
     private workoutSessionsRepository: WorkoutSessionsRepository,
-    private workoutSchedulesRepository: WorkoutSchedulesRepository,
+    private workoutSchedulesRepository: WorkoutSchedulesRepository
   ) {}
 
   async execute({
@@ -30,12 +30,12 @@ export class GetDailyWorkoutSessionUseCase {
     if (existingSession) {
       const detailedSession =
         await this.workoutSessionsRepository.findByIdWithWorkout(
-          existingSession.id,
+          existingSession.id
         )
 
       if (!detailedSession) {
         throw new ResourceNotFoundError(
-          'Session found but workout details missing.',
+          'Session found but workout details missing.'
         )
       }
 
@@ -46,7 +46,7 @@ export class GetDailyWorkoutSessionUseCase {
 
     const schedule = await this.workoutSchedulesRepository.findByUserAndDay(
       userId,
-      dayOfWeek,
+      dayOfWeek
     )
 
     if (!schedule) {
@@ -67,7 +67,7 @@ export class GetDailyWorkoutSessionUseCase {
 
     if (!detailedSession) {
       throw new ResourceNotFoundError(
-        'New session created but workout details missing.',
+        'New session created but workout details missing.'
       )
     }
 

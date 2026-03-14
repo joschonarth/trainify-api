@@ -1,8 +1,8 @@
-import { Badge } from '@prisma/client'
+import type { Badge } from '@prisma/client'
 
-import { UnlockExerciseBadgesUseCase } from './unlock-exercise-badges.use-case'
-import { UnlockStreakBadgesUseCase } from './unlock-streak-badges.use-case'
-import { UnlockWorkoutBadgesUseCase } from './unlock-workout-badges.use-case'
+import type { UnlockExerciseBadgesUseCase } from './unlock-exercise-badges.use-case'
+import type { UnlockStreakBadgesUseCase } from './unlock-streak-badges.use-case'
+import type { UnlockWorkoutBadgesUseCase } from './unlock-workout-badges.use-case'
 
 interface UnlockAllBadgesRequest {
   userId: string
@@ -16,7 +16,7 @@ export class UnlockAllBadgesUseCase {
   constructor(
     private unlockWorkoutBadgesUseCase: UnlockWorkoutBadgesUseCase,
     private unlockExerciseBadgesUseCase: UnlockExerciseBadgesUseCase,
-    private unlockStreakBadgesUseCase: UnlockStreakBadgesUseCase,
+    private unlockStreakBadgesUseCase: UnlockStreakBadgesUseCase
   ) {}
 
   async execute({

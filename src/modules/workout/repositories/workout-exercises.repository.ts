@@ -1,4 +1,4 @@
-import { Prisma, WorkoutExercise } from '@prisma/client'
+import type { Prisma, WorkoutExercise } from '@prisma/client'
 
 export interface WorkoutExercisesRepository {
   findById(id: string): Promise<WorkoutExercise | null>
@@ -16,11 +16,11 @@ export interface WorkoutExercisesRepository {
 
   findByWorkoutAndExercise(
     workoutId: string,
-    exerciseId: string,
+    exerciseId: string
   ): Promise<WorkoutExercise | null>
 
   addExerciseToWorkout(
-    data: Prisma.WorkoutExerciseCreateInput,
+    data: Prisma.WorkoutExerciseCreateInput
   ): Promise<WorkoutExercise>
 
   updateDefaults(
@@ -29,7 +29,7 @@ export interface WorkoutExercisesRepository {
       defaultSets: number | null
       defaultReps: number | null
       defaultWeight: number | null
-    },
+    }
   ): Promise<WorkoutExercise>
 
   removeExerciseFromWorkout(workoutExerciseId: string): Promise<void>

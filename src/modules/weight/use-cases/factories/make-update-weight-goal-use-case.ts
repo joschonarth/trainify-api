@@ -8,7 +8,7 @@ export function makeUpdateWeightGoalUseCase() {
 
   const updateWeightGoalUseCase = new UpdateWeightGoalUseCase(
     weightGoalsRepository,
-    weightLogsRepository,
+    weightLogsRepository
   )
 
   return updateWeightGoalUseCase

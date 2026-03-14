@@ -11,7 +11,7 @@ export function makeUnlockAllBadgesUseCase() {
   const unlockAllBadgesUseCase = new UnlockAllBadgesUseCase(
     unlockWorkoutBadgesUseCase,
     unlockExerciseBadgesUseCase,
-    unlockStreakBadgesUseCase,
+    unlockStreakBadgesUseCase
   )
 
   return unlockAllBadgesUseCase

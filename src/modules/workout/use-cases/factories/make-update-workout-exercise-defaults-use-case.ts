@@ -8,7 +8,7 @@ export function makeUpdateWorkoutExerciseDefaultsUseCase() {
   const updateWorkoutExerciseDefaultsUseCase =
     new UpdateWorkoutExerciseDefaultsUseCase(
       workoutsRepository,
-      workoutExercisesRepository,
+      workoutExercisesRepository
     )
 
   return updateWorkoutExerciseDefaultsUseCase

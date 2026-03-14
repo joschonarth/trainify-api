@@ -1,6 +1,6 @@
-import { UserStreakLog } from '@prisma/client'
+import type { UserStreakLog } from '@prisma/client'
 
-import { UserStreakLogsRepository } from '../repositories/user-streak-logs.repository'
+import type { UserStreakLogsRepository } from '../repositories/user-streak-logs.repository'
 
 interface GetUserStreakLogsRequest {
   userId: string
@@ -25,7 +25,7 @@ export class GetUserStreakLogsUseCase {
         ? await this.userStreakLogsRepository.findByUserAndDateRange(
             userId,
             startDate,
-            endDate,
+            endDate
           )
         : await this.userStreakLogsRepository.findAllByUser(userId)
 

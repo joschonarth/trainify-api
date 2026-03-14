@@ -1,12 +1,12 @@
 import { ExerciseCategory } from '@prisma/client'
-import { FastifyReply, FastifyRequest } from 'fastify'
+import type { FastifyReply, FastifyRequest } from 'fastify'
 import z from 'zod'
 
 import { makeFetchMyExercisesUseCase } from '../use-cases/factories/make-fetch-my-exercises-use-case'
 
 export async function fetchMyExercisesController(
   request: FastifyRequest,
-  reply: FastifyReply,
+  reply: FastifyReply
 ) {
   const fetchMyExercisesSchema = z.object({
     query: z.string().optional().default(''),

@@ -1,5 +1,5 @@
-import { WeightGoalsRepository } from '../repositories/weight-goals.repository'
-import { WeightLogsRepository } from '../repositories/weight-logs.repository'
+import type { WeightGoalsRepository } from '../repositories/weight-goals.repository'
+import type { WeightLogsRepository } from '../repositories/weight-logs.repository'
 
 interface GetActiveWeightGoalAnalyticsRequest {
   userId: string
@@ -19,7 +19,7 @@ interface GetActiveWeightGoalAnalyticsResponse {
 export class GetActiveWeightGoalAnalyticsUseCase {
   constructor(
     private weightLogsRepository: WeightLogsRepository,
-    private weightGoalsRepository: WeightGoalsRepository,
+    private weightGoalsRepository: WeightGoalsRepository
   ) {}
 
   async execute({
@@ -37,7 +37,7 @@ export class GetActiveWeightGoalAnalyticsUseCase {
     }
 
     const sorted = logs.sort(
-      (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
+      (a, b) => a.createdAt.getTime() - b.createdAt.getTime()
     )
 
     const dataPoints = sorted.map((l) => ({

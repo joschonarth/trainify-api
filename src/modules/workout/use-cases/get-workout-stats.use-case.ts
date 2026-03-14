@@ -1,7 +1,7 @@
-import { WorkoutSessionsRepository } from '@/modules/session/repositories/workout-sessions.repository'
+import type { WorkoutSessionsRepository } from '@/modules/session/repositories/workout-sessions.repository'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
-import { WorkoutsRepository } from '../repositories/workouts.repository'
+import type { WorkoutsRepository } from '../repositories/workouts.repository'
 
 interface GetWorkoutStatsRequest {
   userId: string
@@ -11,7 +11,7 @@ interface GetWorkoutStatsRequest {
 export class GetWorkoutStatsUseCase {
   constructor(
     private workoutsRepository: WorkoutsRepository,
-    private workoutSessionsRepository: WorkoutSessionsRepository,
+    private workoutSessionsRepository: WorkoutSessionsRepository
   ) {}
 
   async execute({ userId, workoutId }: GetWorkoutStatsRequest) {
@@ -23,7 +23,7 @@ export class GetWorkoutStatsUseCase {
     const sessions =
       await this.workoutSessionsRepository.findManyByWorkoutAndUser(
         userId,
-        workoutId,
+        workoutId
       )
 
     if (!sessions || sessions.length === 0) {
@@ -36,7 +36,7 @@ export class GetWorkoutStatsUseCase {
       const totalVolume = session.exerciseSessions.reduce((sum, ex) => {
         const exerciseVolume = ex.logs.reduce(
           (acc, log) => acc + log.sets * log.reps * (log.weight ?? 0),
-          0,
+          0
         )
         return sum + exerciseVolume
       }, 0)
@@ -55,11 +55,11 @@ export class GetWorkoutStatsUseCase {
     const avgVolume = totalVolume / totalSessions
     const totalExercises = sessionsStats.reduce(
       (sum, s) => sum + s.totalExercises,
-      0,
+      0
     )
 
     const highestVolumeSession = sessionsStats.reduce((prev, curr) =>
-      curr.totalVolume > prev.totalVolume ? curr : prev,
+      curr.totalVolume > prev.totalVolume ? curr : prev
     )
 
     return {

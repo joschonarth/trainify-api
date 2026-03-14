@@ -1,6 +1,6 @@
 import { BadgeType } from '@prisma/client'
 
-import { BadgesRepository } from '@/modules/gamification/repositories/badges.repository'
+import type { BadgesRepository } from '@/modules/gamification/repositories/badges.repository'
 
 interface GetBadgesStatsUseCaseRequest {
   userId: string
@@ -40,7 +40,7 @@ export class GetBadgesStatsUseCase {
       (acc, type) => {
         const badgesOfType = allBadges.filter((b) => b.type === type)
         const unlockedOfType = badgesOfType.filter((b) =>
-          unlockedIds.includes(b.id),
+          unlockedIds.includes(b.id)
         ).length
 
         acc[type] = {
@@ -57,7 +57,7 @@ export class GetBadgesStatsUseCase {
       {} as Record<
         BadgeType,
         { total: number; unlocked: number; progress: number }
-      >,
+      >
     )
 
     return {

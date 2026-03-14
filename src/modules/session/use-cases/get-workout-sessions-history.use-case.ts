@@ -1,6 +1,6 @@
-import { WorkoutSessionStatus } from '@prisma/client'
+import type { WorkoutSessionStatus } from '@prisma/client'
 
-import {
+import type {
   WorkoutSessionsRepository,
   WorkoutSessionWithWorkout,
 } from '@/modules/session/repositories/workout-sessions.repository'

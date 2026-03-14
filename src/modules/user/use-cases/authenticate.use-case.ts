@@ -1,8 +1,8 @@
-import { User } from '@prisma/client'
+import type { User } from '@prisma/client'
 import { compare } from 'bcrypt'
 
 import { InvalidCredentialsError } from '@/modules/user/errors/invalid-credentials.error'
-import { UsersRepository } from '@/modules/user/repositories/users.repository'
+import type { UsersRepository } from '@/modules/user/repositories/users.repository'
 
 interface AuthenticateUseCaseRequest {
   email: string
@@ -28,7 +28,7 @@ export class AuthenticateUseCase {
 
     if (!user.password) {
       throw new InvalidCredentialsError(
-        'Use Google login to log into this account.',
+        'Use Google login to log into this account.'
       )
     }
 

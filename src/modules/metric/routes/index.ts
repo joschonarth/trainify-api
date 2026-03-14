@@ -1,4 +1,4 @@
-import { FastifyInstance } from 'fastify'
+import type { FastifyInstance } from 'fastify'
 
 import { verifyJwt } from '@/shared/middlewares/verify-jwt'
 

@@ -2,7 +2,7 @@ import dayjs from 'dayjs'
 
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
-import { ExerciseSessionsRepository } from '../repositories/exercise-sessions.repository'
+import type { ExerciseSessionsRepository } from '../repositories/exercise-sessions.repository'
 
 interface GetExerciseSessionProgressRequest {
   userId: string
@@ -19,14 +19,17 @@ export class GetExerciseSessionProgressUseCase {
     period,
   }: GetExerciseSessionProgressRequest) {
     let fromDate: Date | undefined
-    if (period === 'WEEK') fromDate = dayjs().subtract(7, 'day').toDate()
-    else if (period === 'MONTH') fromDate = dayjs().subtract(30, 'day').toDate()
+    if (period === 'WEEK') {
+      fromDate = dayjs().subtract(7, 'day').toDate()
+    } else if (period === 'MONTH') {
+      fromDate = dayjs().subtract(30, 'day').toDate()
+    }
 
     const sessions =
       await this.exerciseSessionsRepository.findManyByUserAndExercise(
         userId,
         exerciseId,
-        fromDate,
+        fromDate
       )
 
     if (!sessions || sessions.length === 0) {
@@ -37,13 +40,13 @@ export class GetExerciseSessionProgressUseCase {
       const totalVolume = session.logs.reduce(
         (sum, log) =>
           sum + (log.volume ?? log.sets * log.reps * (log.weight ?? 0)),
-        0,
+        0
       )
       const totalSets = session.logs.reduce((sum, log) => sum + log.sets, 0)
       const totalReps = session.logs.reduce((sum, log) => sum + log.reps, 0)
       const totalWeight = session.logs.reduce(
         (sum, log) => sum + (log.weight ?? 0),
-        0,
+        0
       )
 
       return {

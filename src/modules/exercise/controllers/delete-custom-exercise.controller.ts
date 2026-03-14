@@ -1,4 +1,4 @@
-import { FastifyReply, FastifyRequest } from 'fastify'
+import type { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
 import { NotAllowedError } from '@/shared/errors/not-allowed.error'
@@ -8,7 +8,7 @@ import { makeDeleteCustomExerciseUseCase } from '../use-cases/factories/make-del
 
 export async function deleteCustomExerciseController(
   request: FastifyRequest,
-  reply: FastifyReply,
+  reply: FastifyReply
 ) {
   const paramsSchema = z.object({
     exerciseId: z.string(),

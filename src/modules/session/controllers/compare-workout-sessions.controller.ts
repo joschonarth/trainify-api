@@ -1,4 +1,4 @@
-import { FastifyReply, FastifyRequest } from 'fastify'
+import type { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
@@ -7,7 +7,7 @@ import { makeCompareWorkoutSessionsUseCase } from '../use-cases/factories/make-c
 
 export async function compareWorkoutSessionsController(
   request: FastifyRequest,
-  reply: FastifyReply,
+  reply: FastifyReply
 ) {
   const compareWorkoutParamsSchema = z.object({
     workoutId: z.cuid(),

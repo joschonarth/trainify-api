@@ -1,6 +1,6 @@
 import dayjs from 'dayjs'
 
-import { WorkoutSessionsRepository } from '@/modules/session/repositories/workout-sessions.repository'
+import type { WorkoutSessionsRepository } from '@/modules/session/repositories/workout-sessions.repository'
 
 interface CalendarDayStatus {
   date: string
@@ -37,12 +37,12 @@ export class GetWorkoutCalendarUseCase {
       await this.workoutSessionsRepository.findByUserAndDateRange(
         userId,
         startOfMonth.toDate(),
-        endOfMonth.toDate(),
+        endOfMonth.toDate()
       )
 
     const totalDays = endOfMonth.date()
     const daysArray = Array.from({ length: totalDays }, (_, i) =>
-      startOfMonth.add(i, 'day'),
+      startOfMonth.add(i, 'day')
     )
 
     const days: CalendarDayStatus[] = daysArray.map((date) => {

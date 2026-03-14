@@ -4,7 +4,7 @@ import { RemoveWorkoutScheduleDayUseCase } from '../remove-workout-schedule-day.
 export function makeRemoveWorkoutScheduleDayUseCase() {
   const workoutSchedulesRepository = new PrismaWorkoutSchedulesRepository()
   const removeWorkoutScheduleDayUseCase = new RemoveWorkoutScheduleDayUseCase(
-    workoutSchedulesRepository,
+    workoutSchedulesRepository
   )
 
   return removeWorkoutScheduleDayUseCase

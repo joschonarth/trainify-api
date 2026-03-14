@@ -1,4 +1,4 @@
-import { FastifyReply, FastifyRequest } from 'fastify'
+import type { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
 import { makeCompleteWorkoutSessionUseCase } from '@/modules/session/use-cases/factories/make-complete-workout-session-use-case'
@@ -6,7 +6,7 @@ import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
 export async function completeWorkoutSessionController(
   request: FastifyRequest,
-  reply: FastifyReply,
+  reply: FastifyReply
 ) {
   const paramsSchema = z.object({
     sessionId: z.cuid(),
@@ -22,7 +22,7 @@ export async function completeWorkoutSessionController(
           weight: z.number().optional().default(0),
           completed: z.boolean(),
           note: z.string().optional(),
-        }),
+        })
       )
       .min(1, 'At least one exercise is required'),
   })

@@ -50,11 +50,11 @@ export async function seedWorkoutSessions() {
       const endedAt = new Date(startedAt)
       endedAt.setMinutes(endedAt.getMinutes() + 40)
       const duration = Math.floor(
-        (endedAt.getTime() - startedAt.getTime()) / 1000,
+        (endedAt.getTime() - startedAt.getTime()) / 1000
       )
 
       console.log(
-        `📌 Creating COMPLETED session for workout "${workout.name}" on ${sessionDate.toDateString()}`,
+        `📌 Creating COMPLETED session for workout "${workout.name}" on ${sessionDate.toDateString()}`
       )
 
       await prisma.workoutSession.create({
@@ -102,7 +102,7 @@ export async function seedWorkoutSessions() {
                 startedAt: exStart,
                 endedAt: exEnd,
                 duration: Math.floor(
-                  (exEnd.getTime() - exStart.getTime()) / 1000,
+                  (exEnd.getTime() - exStart.getTime()) / 1000
                 ),
                 logs: {
                   create: {
@@ -156,7 +156,9 @@ export async function seedWorkoutSessions() {
         currentStreak = 1
       }
 
-      if (currentStreak > bestStreak) bestStreak = currentStreak
+      if (currentStreak > bestStreak) {
+        bestStreak = currentStreak
+      }
 
       lastDate = sessionDate
 
@@ -186,7 +188,7 @@ export async function seedWorkoutSessions() {
     })
 
     console.log(
-      `✅ User streaks seeded! Current: ${currentStreak}, Best: ${bestStreak}`,
+      `✅ User streaks seeded! Current: ${currentStreak}, Best: ${bestStreak}`
     )
   }
 }

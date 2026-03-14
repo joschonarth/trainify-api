@@ -8,7 +8,7 @@ export function makeDeleteWeightGoalUseCase() {
 
   const deleteWeightGoalUseCase = new DeleteWeightGoalUseCase(
     weightGoalsRepository,
-    weightLogsRepository,
+    weightLogsRepository
   )
 
   return deleteWeightGoalUseCase

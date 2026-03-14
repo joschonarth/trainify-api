@@ -1,8 +1,8 @@
-import { WeightGoal } from '@prisma/client'
+import type { WeightGoal } from '@prisma/client'
 
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
-import { WeightGoalsRepository } from '../repositories/weight-goals.repository'
+import type { WeightGoalsRepository } from '../repositories/weight-goals.repository'
 
 interface GetWeightGoalUseCaseRequest {
   goalId: string

@@ -3,7 +3,7 @@ import isoWeek from 'dayjs/plugin/isoWeek'
 
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
-import {
+import type {
   WorkoutSessionsRepository,
   WorkoutSessionWithWorkout,
 } from '../repositories/workout-sessions.repository'
@@ -54,21 +54,21 @@ export class CompareWeeklyWorkoutsUseCase {
       await this.workoutSessionsRepository.findDetailedByUserAndDateRange(
         userId,
         startDate,
-        endDate,
+        endDate
       )
     const previousWeekSessions =
       await this.workoutSessionsRepository.findDetailedByUserAndDateRange(
         userId,
         prevStart,
-        prevEnd,
+        prevEnd
       )
 
-    if (!currentWeekSessions.length || !previousWeekSessions.length) {
+    if (!(currentWeekSessions.length && previousWeekSessions.length)) {
       throw new ResourceNotFoundError('Not enough sessions to compare weeks.')
     }
 
     const calculateMetrics = (
-      sessions: WorkoutSessionWithWorkout[],
+      sessions: WorkoutSessionWithWorkout[]
     ): Omit<WeekSummary, 'start' | 'end' | 'totalWorkouts'> => {
       let totalSets = 0
       let totalReps = 0

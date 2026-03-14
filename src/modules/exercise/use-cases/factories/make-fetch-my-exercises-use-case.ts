@@ -5,7 +5,7 @@ import { FetchMyExercisesUseCase } from '../fetch-my-exercises.use-case'
 export function makeFetchMyExercisesUseCase() {
   const myExercisesRepository = new PrismaMyExercisesRepository()
   const fetchMyExercisesUseCase = new FetchMyExercisesUseCase(
-    myExercisesRepository,
+    myExercisesRepository
   )
 
   return fetchMyExercisesUseCase

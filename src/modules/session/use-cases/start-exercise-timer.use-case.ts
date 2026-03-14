@@ -2,8 +2,8 @@ import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
 import { AnotherExerciseTimerRunningError } from '../errors/another-exercise-timer-running.error'
 import { ExerciseTimerAlreadyRunningError } from '../errors/exercise-timer-already-running.error'
-import { ExerciseSessionsRepository } from '../repositories/exercise-sessions.repository'
-import { WorkoutSessionsRepository } from '../repositories/workout-sessions.repository'
+import type { ExerciseSessionsRepository } from '../repositories/exercise-sessions.repository'
+import type { WorkoutSessionsRepository } from '../repositories/workout-sessions.repository'
 
 interface StartExerciseTimerRequest {
   userId: string
@@ -13,7 +13,7 @@ interface StartExerciseTimerRequest {
 export class StartExerciseTimerUseCase {
   constructor(
     private exerciseSessionsRepository: ExerciseSessionsRepository,
-    private workoutSessionsRepository: WorkoutSessionsRepository,
+    private workoutSessionsRepository: WorkoutSessionsRepository
   ) {}
 
   async execute({ userId, exerciseSessionId }: StartExerciseTimerRequest) {
@@ -25,7 +25,7 @@ export class StartExerciseTimerUseCase {
     }
 
     const workoutSession = await this.workoutSessionsRepository.findById(
-      exerciseSession.workoutSessionId,
+      exerciseSession.workoutSessionId
     )
 
     if (!workoutSession || workoutSession.userId !== userId) {
@@ -38,11 +38,11 @@ export class StartExerciseTimerUseCase {
 
     const exercisesInSession =
       await this.exerciseSessionsRepository.findByWorkoutSessionId(
-        workoutSession.id,
+        workoutSession.id
       )
 
     const exerciseRunning = exercisesInSession.some(
-      (ex) => ex.startedAt && !ex.endedAt,
+      (ex) => ex.startedAt && !ex.endedAt
     )
 
     if (exerciseRunning) {
@@ -56,7 +56,7 @@ export class StartExerciseTimerUseCase {
       {
         startedAt: now,
         endedAt: null,
-      },
+      }
     )
 
     return { exerciseSession: updated }

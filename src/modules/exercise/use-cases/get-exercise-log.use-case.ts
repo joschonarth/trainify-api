@@ -1,8 +1,8 @@
-import { ExerciseCategory, ExerciseLog } from '@prisma/client'
+import type { ExerciseCategory, ExerciseLog } from '@prisma/client'
 
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
-import { ExerciseLogsRepository } from '../repositories/exercise-logs.repository'
+import type { ExerciseLogsRepository } from '../repositories/exercise-logs.repository'
 
 interface GetExerciseLogUseCaseRequest {
   logId: string

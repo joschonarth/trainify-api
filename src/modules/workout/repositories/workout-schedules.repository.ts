@@ -1,4 +1,4 @@
-import { Prisma, WorkoutSchedule } from '@prisma/client'
+import type { Prisma, WorkoutSchedule } from '@prisma/client'
 
 export interface WorkoutScheduleWithWorkout extends WorkoutSchedule {
   workout: {
@@ -21,13 +21,13 @@ export interface WorkoutScheduleWithWorkout extends WorkoutSchedule {
 
 export interface WorkoutSchedulesRepository {
   assignDaysToWorkout(
-    data: Prisma.WorkoutScheduleCreateManyInput[],
+    data: Prisma.WorkoutScheduleCreateManyInput[]
   ): Promise<void>
   findDaysByWorkout(workoutId: string): Promise<WorkoutSchedule[]>
   findById(id: string): Promise<WorkoutSchedule | null>
   findByUserAndDay(
     userId: string,
-    dayOfWeek: number,
+    dayOfWeek: number
   ): Promise<WorkoutScheduleWithWorkout | null>
   updateDay(id: string, dayOfWeek: number): Promise<WorkoutSchedule>
   delete(id: string): Promise<void>

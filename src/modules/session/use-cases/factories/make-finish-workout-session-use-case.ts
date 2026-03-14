@@ -4,7 +4,7 @@ import { FinishWorkoutSessionUseCase } from '../finish-workout-session.use-case'
 export function makeFinishWorkoutSessionUseCase() {
   const workoutSessionsRepository = new PrismaWorkoutSessionsRepository()
   const finishWorkoutSessionUseCase = new FinishWorkoutSessionUseCase(
-    workoutSessionsRepository,
+    workoutSessionsRepository
   )
 
   return finishWorkoutSessionUseCase

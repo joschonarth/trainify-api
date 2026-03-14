@@ -2,7 +2,7 @@ import dayjs from 'dayjs'
 
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
-import {
+import type {
   WorkoutSessionsRepository,
   WorkoutSessionWithWorkout,
 } from '../repositories/workout-sessions.repository'
@@ -73,23 +73,23 @@ export class CompareWorkoutsUseCase {
       await this.workoutSessionsRepository.findDetailedByUserAndDateRange(
         userId,
         startDate,
-        endDate,
+        endDate
       )
     const previousSessions =
       await this.workoutSessionsRepository.findDetailedByUserAndDateRange(
         userId,
         prevStart,
-        prevEnd,
+        prevEnd
       )
 
-    if (!currentSessions.length || !previousSessions.length) {
+    if (!(currentSessions.length && previousSessions.length)) {
       throw new ResourceNotFoundError(
-        `Not enough sessions to compare ${period}s.`,
+        `Not enough sessions to compare ${period}s.`
       )
     }
 
     const calculateMetrics = (
-      sessions: WorkoutSessionWithWorkout[],
+      sessions: WorkoutSessionWithWorkout[]
     ): Omit<PeriodSummary, 'start' | 'end' | 'totalWorkouts'> => {
       let totalSets = 0
       let totalReps = 0

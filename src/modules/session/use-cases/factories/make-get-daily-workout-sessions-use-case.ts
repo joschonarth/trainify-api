@@ -8,7 +8,7 @@ export function makeGetDailyWorkoutSessionUseCase() {
   const workoutSchedulesRepository = new PrismaWorkoutSchedulesRepository()
   const getDailyWorkoutSessionUseCase = new GetDailyWorkoutSessionUseCase(
     workoutSessionsRepository,
-    workoutSchedulesRepository,
+    workoutSchedulesRepository
   )
 
   return getDailyWorkoutSessionUseCase
