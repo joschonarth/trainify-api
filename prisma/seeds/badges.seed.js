@@ -1,4 +1,4 @@
-import { BadgeType, PrismaClient } from '@prisma/client'
+import { BadgeType, PrismaClient } from 'generated/prisma'
 
 const prisma = new PrismaClient()
 

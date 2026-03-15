@@ -8,7 +8,9 @@ interface GetExerciseProgressRequest {
 }
 
 export class GetExerciseProgressUseCase {
-  constructor(private exerciseLogsRepository: ExerciseLogsRepository) {}
+  constructor(
+    private readonly exerciseLogsRepository: ExerciseLogsRepository
+  ) {}
 
   async execute({ userId, exerciseId }: GetExerciseProgressRequest) {
     const logs = await this.exerciseLogsRepository.findManyByExerciseAndUser(

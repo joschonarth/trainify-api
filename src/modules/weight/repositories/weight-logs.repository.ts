@@ -1,4 +1,4 @@
-import type { WeightLog } from '@prisma/client'
+import type { WeightLog } from 'generated/prisma'
 
 export interface CreateWeightLogData {
   userId: string

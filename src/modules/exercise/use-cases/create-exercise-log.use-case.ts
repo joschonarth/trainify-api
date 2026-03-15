@@ -1,5 +1,5 @@
-import type { ExerciseLog } from '@prisma/client'
 import dayjs from 'dayjs'
+import type { ExerciseLog } from 'generated/prisma'
 
 import { ResourceAlreadyExistsError } from '@/shared/errors/resource-already-exists.error'
 
@@ -20,7 +20,9 @@ interface CreateExerciseLogUseCaseResponse {
 }
 
 export class CreateExerciseLogUseCase {
-  constructor(private exerciseLogsRepository: ExerciseLogsRepository) {}
+  constructor(
+    private readonly exerciseLogsRepository: ExerciseLogsRepository
+  ) {}
 
   async execute({
     userId,

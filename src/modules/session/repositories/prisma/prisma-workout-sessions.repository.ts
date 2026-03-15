@@ -2,7 +2,7 @@ import type {
   Prisma,
   WorkoutSession,
   WorkoutSessionStatus,
-} from '@prisma/client'
+} from 'generated/prisma'
 
 import { prisma } from '@/lib/prisma'
 
@@ -17,7 +17,7 @@ export class PrismaWorkoutSessionsRepository
   implements WorkoutSessionsRepository
 {
   async findById(id: string): Promise<WorkoutSession | null> {
-    return prisma.workoutSession.findUnique({
+    return await prisma.workoutSession.findUnique({
       where: { id },
     })
   }
@@ -32,7 +32,7 @@ export class PrismaWorkoutSessionsRepository
     const endOfDay = new Date(date)
     endOfDay.setHours(23, 59, 59, 999)
 
-    return prisma.workoutSession.findFirst({
+    return await prisma.workoutSession.findFirst({
       where: {
         userId,
         date: {
@@ -80,7 +80,7 @@ export class PrismaWorkoutSessionsRepository
     startDate: Date,
     endDate: Date
   ): Promise<{ id: string; date: Date; status: WorkoutSessionStatus }[]> {
-    return prisma.workoutSession.findMany({
+    return await prisma.workoutSession.findMany({
       where: {
         userId,
         date: { gte: startDate, lte: endDate },
@@ -108,7 +108,7 @@ export class PrismaWorkoutSessionsRepository
   }
 
   async findManyByWorkoutId(workoutId: string, userId: string) {
-    return prisma.workoutSession.findMany({
+    return await prisma.workoutSession.findMany({
       where: {
         workoutId,
         userId,
@@ -154,7 +154,7 @@ export class PrismaWorkoutSessionsRepository
       throw new Error('Workout not found')
     }
 
-    return prisma.workoutSession.create({
+    return await prisma.workoutSession.create({
       data: {
         ...data,
         exerciseSessions: {
@@ -173,7 +173,7 @@ export class PrismaWorkoutSessionsRepository
     id: string,
     data: Prisma.WorkoutSessionUpdateInput
   ): Promise<WorkoutSession> {
-    return prisma.workoutSession.update({
+    return await prisma.workoutSession.update({
       where: { id },
       data,
     })
@@ -183,7 +183,7 @@ export class PrismaWorkoutSessionsRepository
     id: string,
     status: WorkoutSessionStatus
   ): Promise<WorkoutSession> {
-    return prisma.workoutSession.update({
+    return await prisma.workoutSession.update({
       where: { id },
       data: { status },
     })
@@ -234,7 +234,7 @@ export class PrismaWorkoutSessionsRepository
   }
 
   async countCompletedByUser(userId: string): Promise<number> {
-    return prisma.workoutSession.count({
+    return await prisma.workoutSession.count({
       where: {
         userId,
         status: 'COMPLETED',

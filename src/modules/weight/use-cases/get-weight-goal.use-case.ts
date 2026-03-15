@@ -1,4 +1,4 @@
-import type { WeightGoal } from '@prisma/client'
+import type { WeightGoal } from 'generated/prisma'
 
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
@@ -14,7 +14,7 @@ interface GetWeightGoalUseCaseResponse {
 }
 
 export class GetWeightGoalUseCase {
-  constructor(private weightGoalsRepository: WeightGoalsRepository) {}
+  constructor(private readonly weightGoalsRepository: WeightGoalsRepository) {}
 
   async execute({
     goalId,

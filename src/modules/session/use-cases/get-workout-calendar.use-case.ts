@@ -19,7 +19,9 @@ interface GetWorkoutCalendarResponse {
 }
 
 export class GetWorkoutCalendarUseCase {
-  constructor(private workoutSessionsRepository: WorkoutSessionsRepository) {}
+  constructor(
+    private readonly workoutSessionsRepository: WorkoutSessionsRepository
+  ) {}
 
   async execute({
     userId,

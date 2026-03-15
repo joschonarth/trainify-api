@@ -1,4 +1,4 @@
-import type { Badge } from '@prisma/client'
+import type { Badge } from 'generated/prisma'
 
 import type { UnlockExerciseBadgesUseCase } from './unlock-exercise-badges.use-case'
 import type { UnlockStreakBadgesUseCase } from './unlock-streak-badges.use-case'
@@ -14,9 +14,9 @@ interface UnlockAllBadgesResponse {
 
 export class UnlockAllBadgesUseCase {
   constructor(
-    private unlockWorkoutBadgesUseCase: UnlockWorkoutBadgesUseCase,
-    private unlockExerciseBadgesUseCase: UnlockExerciseBadgesUseCase,
-    private unlockStreakBadgesUseCase: UnlockStreakBadgesUseCase
+    private readonly unlockWorkoutBadgesUseCase: UnlockWorkoutBadgesUseCase,
+    private readonly unlockExerciseBadgesUseCase: UnlockExerciseBadgesUseCase,
+    private readonly unlockStreakBadgesUseCase: UnlockStreakBadgesUseCase
   ) {}
 
   async execute({

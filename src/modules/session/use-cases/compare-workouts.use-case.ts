@@ -40,7 +40,9 @@ interface CompareWorkoutsResult {
 }
 
 export class CompareWorkoutsUseCase {
-  constructor(private workoutSessionsRepository: WorkoutSessionsRepository) {}
+  constructor(
+    private readonly workoutSessionsRepository: WorkoutSessionsRepository
+  ) {}
 
   async execute({
     userId,

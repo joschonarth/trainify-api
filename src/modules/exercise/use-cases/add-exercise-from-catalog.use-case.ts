@@ -1,4 +1,4 @@
-import type { MyExercise } from '@prisma/client'
+import type { MyExercise } from 'generated/prisma'
 
 import { ResourceAlreadyExistsError } from '@/shared/errors/resource-already-exists.error'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
@@ -17,8 +17,8 @@ interface AddExerciseFromCatalogUseCaseResponse {
 
 export class AddExerciseFromCatalogUseCase {
   constructor(
-    private exercisesRepository: ExercisesRepository,
-    private myExercisesRepository: MyExercisesRepository
+    private readonly exercisesRepository: ExercisesRepository,
+    private readonly myExercisesRepository: MyExercisesRepository
   ) {}
 
   async execute({

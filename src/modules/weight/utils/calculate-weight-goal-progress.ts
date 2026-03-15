@@ -1,4 +1,4 @@
-import type { WeightGoal, WeightLog } from '@prisma/client'
+import type { WeightGoal, WeightLog } from 'generated/prisma'
 
 /**
  * Calculates the progress of a weight goal as a percentage (0-100%).

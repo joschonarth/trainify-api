@@ -12,7 +12,9 @@ interface GetWeeklyWorkoutCalendarResponse {
 }
 
 export class GetWeeklyWorkoutCalendarUseCase {
-  constructor(private workoutSessionsRepository: WorkoutSessionsRepository) {}
+  constructor(
+    private readonly workoutSessionsRepository: WorkoutSessionsRepository
+  ) {}
 
   async execute(userId: string): Promise<GetWeeklyWorkoutCalendarResponse> {
     const sessions = await this.workoutSessionsRepository.findAllByUser(userId)

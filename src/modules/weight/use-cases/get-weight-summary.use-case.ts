@@ -13,7 +13,7 @@ interface WeightSummaryResponse {
 }
 
 export class GetWeightSummaryUseCase {
-  constructor(private weightLogsRepository: WeightLogsRepository) {}
+  constructor(private readonly weightLogsRepository: WeightLogsRepository) {}
 
   async execute(userId: string): Promise<WeightSummaryResponse> {
     const latestLog = await this.weightLogsRepository.findLatestByUserId(userId)

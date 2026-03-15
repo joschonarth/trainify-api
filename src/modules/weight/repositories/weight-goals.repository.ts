@@ -1,4 +1,4 @@
-import type { GoalType, WeightGoal } from '@prisma/client'
+import type { GoalType, WeightGoal } from 'generated/prisma'
 
 export interface CreateWeightGoalData {
   userId: string

@@ -1,4 +1,4 @@
-import type { Prisma, WorkoutSchedule } from '@prisma/client'
+import type { Prisma, WorkoutSchedule } from 'generated/prisma'
 
 export interface WorkoutScheduleWithWorkout extends WorkoutSchedule {
   workout: {

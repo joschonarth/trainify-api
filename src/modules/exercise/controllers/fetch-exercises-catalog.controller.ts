@@ -1,7 +1,6 @@
-import { ExerciseCategory } from '@prisma/client'
 import type { FastifyReply, FastifyRequest } from 'fastify'
+import { ExerciseCategory } from 'generated/prisma'
 import z from 'zod'
-
 import { makeFetchExercisesCatalogUseCase } from '../use-cases/factories/make-fetch-exercises-catalog-use-case'
 
 export async function fetchExercisesCatalogController(

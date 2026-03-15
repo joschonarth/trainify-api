@@ -28,7 +28,9 @@ interface GetExerciseSessionDetailsResponse {
 }
 
 export class GetExerciseSessionDetailsUseCase {
-  constructor(private exerciseSessionsRepository: ExerciseSessionsRepository) {}
+  constructor(
+    private readonly exerciseSessionsRepository: ExerciseSessionsRepository
+  ) {}
 
   async execute({
     exerciseSessionId,

@@ -1,4 +1,4 @@
-import type { UserStreakLog } from '@prisma/client'
+import type { UserStreakLog } from 'generated/prisma'
 
 import { prisma } from '@/lib/prisma'
 
@@ -17,7 +17,7 @@ export class PrismaUserStreakLogsRepository
     const endOfDay = new Date(date)
     endOfDay.setHours(23, 59, 59, 999)
 
-    return prisma.userStreakLog.findFirst({
+    return await prisma.userStreakLog.findFirst({
       where: {
         userId,
         date: {
@@ -33,7 +33,7 @@ export class PrismaUserStreakLogsRepository
     startDate: Date,
     endDate: Date
   ): Promise<UserStreakLog[]> {
-    return prisma.userStreakLog.findMany({
+    return await prisma.userStreakLog.findMany({
       where: {
         userId,
         date: {
@@ -46,14 +46,14 @@ export class PrismaUserStreakLogsRepository
   }
 
   async findAllByUser(userId: string): Promise<UserStreakLog[]> {
-    return prisma.userStreakLog.findMany({
+    return await prisma.userStreakLog.findMany({
       where: { userId },
       orderBy: { date: 'asc' },
     })
   }
 
   async create(data: { userId: string; date: Date }): Promise<UserStreakLog> {
-    return prisma.userStreakLog.create({
+    return await prisma.userStreakLog.create({
       data,
     })
   }

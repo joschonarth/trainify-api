@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from 'generated/prisma'
 
 import { seedBadges } from './badges.seed.js'
 import { seedUser } from './user.seed.js'

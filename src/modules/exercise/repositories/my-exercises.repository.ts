@@ -1,4 +1,4 @@
-import type { Exercise, MyExercise } from '@prisma/client'
+import type { Exercise, MyExercise } from 'generated/prisma'
 
 export interface MyExercisesRepository {
   addExercise(userId: string, exerciseId: string): Promise<MyExercise>

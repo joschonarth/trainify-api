@@ -1,4 +1,4 @@
-import type { UserStreakLog } from '@prisma/client'
+import type { UserStreakLog } from 'generated/prisma'
 
 import type { UserStreakLogsRepository } from '../repositories/user-streak-logs.repository'
 
@@ -13,7 +13,9 @@ interface GetUserStreakLogsResponse {
 }
 
 export class GetUserStreakLogsUseCase {
-  constructor(private userStreakLogsRepository: UserStreakLogsRepository) {}
+  constructor(
+    private readonly userStreakLogsRepository: UserStreakLogsRepository
+  ) {}
 
   async execute({
     userId,

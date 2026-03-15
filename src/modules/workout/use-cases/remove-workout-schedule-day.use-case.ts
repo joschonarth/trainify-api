@@ -8,7 +8,9 @@ interface RemoveWorkoutScheduleDayUseCaseRequest {
 }
 
 export class RemoveWorkoutScheduleDayUseCase {
-  constructor(private workoutSchedulesRepository: WorkoutSchedulesRepository) {}
+  constructor(
+    private readonly workoutSchedulesRepository: WorkoutSchedulesRepository
+  ) {}
 
   async execute({
     workoutId,

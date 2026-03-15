@@ -9,7 +9,7 @@ interface DeleteCustomExerciseUseCaseRequest {
 }
 
 export class DeleteCustomExerciseUseCase {
-  constructor(private exercisesRepository: ExercisesRepository) {}
+  constructor(private readonly exercisesRepository: ExercisesRepository) {}
 
   async execute({
     userId,

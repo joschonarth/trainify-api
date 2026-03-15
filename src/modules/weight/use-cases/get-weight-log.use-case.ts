@@ -18,7 +18,7 @@ interface GetWeightLogResponse {
 }
 
 export class GetWeightLogUseCase {
-  constructor(private weightLogsRepository: WeightLogsRepository) {}
+  constructor(private readonly weightLogsRepository: WeightLogsRepository) {}
 
   async execute({
     logId,

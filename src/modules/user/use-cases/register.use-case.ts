@@ -1,5 +1,5 @@
-import type { User } from '@prisma/client'
 import { hash } from 'bcrypt'
+import type { User } from 'generated/prisma'
 
 import { PasswordsDoNotMatchError } from '@/modules/user/errors/passwords-do-not-match.error'
 import { UserAlreadyExistsError } from '@/modules/user/errors/user-already-exists.error'
@@ -17,7 +17,7 @@ interface RegisterUseCaseResponse {
 }
 
 export class RegisterUseCase {
-  constructor(private usersRepository: UsersRepository) {}
+  constructor(private readonly usersRepository: UsersRepository) {}
 
   async execute({
     name,

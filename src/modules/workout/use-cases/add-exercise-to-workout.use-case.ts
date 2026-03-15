@@ -1,4 +1,4 @@
-import type { WorkoutExercise } from '@prisma/client'
+import type { WorkoutExercise } from 'generated/prisma'
 
 import type { ExercisesRepository } from '@/modules/exercise/repositories/exercises.repository'
 import { ResourceAlreadyExistsError } from '@/shared/errors/resource-already-exists.error'
@@ -21,9 +21,9 @@ interface AddExerciseToWorkoutUseCaseResponse {
 
 export class AddExerciseToWorkoutUseCase {
   constructor(
-    private workoutExercisesRepository: WorkoutExercisesRepository,
-    private workoutsRepository: WorkoutsRepository,
-    private exercisesRepository: ExercisesRepository
+    private readonly workoutExercisesRepository: WorkoutExercisesRepository,
+    private readonly workoutsRepository: WorkoutsRepository,
+    private readonly exercisesRepository: ExercisesRepository
   ) {}
 
   async execute({

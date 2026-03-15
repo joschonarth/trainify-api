@@ -16,8 +16,8 @@ interface UpdateUserStreakUseCaseResponse {
 
 export class UpdateUserStreakUseCase {
   constructor(
-    private userStreaksRepository: UserStreaksRepository,
-    private userStreakLogsRepository: UserStreakLogsRepository
+    private readonly userStreaksRepository: UserStreaksRepository,
+    private readonly userStreakLogsRepository: UserStreakLogsRepository
   ) {}
 
   async execute({

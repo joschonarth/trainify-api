@@ -1,4 +1,4 @@
-import { BadgeType } from '@prisma/client'
+import { BadgeType } from 'generated/prisma'
 
 import type { BadgesRepository } from '@/modules/gamification/repositories/badges.repository'
 
@@ -23,7 +23,7 @@ interface GetBadgesStatsUseCaseResponse {
 }
 
 export class GetBadgesStatsUseCase {
-  constructor(private badgesRepository: BadgesRepository) {}
+  constructor(private readonly badgesRepository: BadgesRepository) {}
 
   async execute({
     userId,

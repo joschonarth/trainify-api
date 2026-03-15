@@ -18,7 +18,9 @@ interface UpdateWorkoutScheduleDayUseCaseResponse {
 }
 
 export class UpdateWorkoutScheduleDayUseCase {
-  constructor(private workoutSchedulesRepository: WorkoutSchedulesRepository) {}
+  constructor(
+    private readonly workoutSchedulesRepository: WorkoutSchedulesRepository
+  ) {}
 
   async execute({
     workoutId,

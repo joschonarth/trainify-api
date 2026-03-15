@@ -1,4 +1,4 @@
-import type { WorkoutSessionStatus } from '@prisma/client'
+import type { WorkoutSessionStatus } from 'generated/prisma'
 
 import type { WorkoutSessionsRepository } from '@/modules/session/repositories/workout-sessions.repository'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
@@ -34,7 +34,9 @@ interface GetWorkoutSessionDetailsResponse {
 }
 
 export class GetWorkoutSessionDetailsUseCase {
-  constructor(private workoutSessionsRepository: WorkoutSessionsRepository) {}
+  constructor(
+    private readonly workoutSessionsRepository: WorkoutSessionsRepository
+  ) {}
 
   async execute({
     sessionId,

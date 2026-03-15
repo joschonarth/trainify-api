@@ -1,4 +1,4 @@
-import type { ExerciseSession, Prisma } from '@prisma/client'
+import type { ExerciseSession, Prisma } from 'generated/prisma'
 
 import { prisma } from '@/lib/prisma'
 
@@ -11,39 +11,39 @@ export class PrismaExerciseSessionsRepository
   implements ExerciseSessionsRepository
 {
   async findById(id: string): Promise<ExerciseSession | null> {
-    return prisma.exerciseSession.findUnique({ where: { id } })
+    return await prisma.exerciseSession.findUnique({ where: { id } })
   }
 
   async findBySessionId(sessionId: string): Promise<ExerciseSessionWithLogs[]> {
-    return prisma.exerciseSession.findMany({
+    return (await prisma.exerciseSession.findMany({
       where: { workoutSessionId: sessionId },
       include: {
         exercise: true,
         logs: true,
       },
-    }) as unknown as ExerciseSessionWithLogs[]
+    })) as unknown as ExerciseSessionWithLogs[]
   }
 
   async findByWorkoutSessionId(
     workoutSessionId: string
   ): Promise<ExerciseSessionWithLogs[]> {
-    return prisma.exerciseSession.findMany({
+    return (await prisma.exerciseSession.findMany({
       where: { workoutSessionId },
       include: {
         exercise: true,
         logs: true,
       },
-    }) as unknown as ExerciseSessionWithLogs[]
+    })) as unknown as ExerciseSessionWithLogs[]
   }
 
   async findByIdWithLogs(id: string): Promise<ExerciseSessionWithLogs | null> {
-    return prisma.exerciseSession.findUnique({
+    return (await prisma.exerciseSession.findUnique({
       where: { id },
       include: {
         exercise: true,
         logs: true,
       },
-    }) as unknown as ExerciseSessionWithLogs | null
+    })) as unknown as ExerciseSessionWithLogs | null
   }
 
   async findManyByUserAndExercise(
@@ -51,7 +51,7 @@ export class PrismaExerciseSessionsRepository
     exerciseId: string,
     fromDate: Date
   ): Promise<ExerciseSessionWithLogs[]> {
-    return prisma.exerciseSession.findMany({
+    return (await prisma.exerciseSession.findMany({
       where: {
         exerciseId,
         logs: {
@@ -65,20 +65,20 @@ export class PrismaExerciseSessionsRepository
         exercise: true,
         logs: true,
       },
-    }) as unknown as ExerciseSessionWithLogs[]
+    })) as unknown as ExerciseSessionWithLogs[]
   }
 
   async create(
     data: Prisma.ExerciseSessionUncheckedCreateInput
   ): Promise<ExerciseSession> {
-    return prisma.exerciseSession.create({ data })
+    return await prisma.exerciseSession.create({ data })
   }
 
   async update(
     id: string,
     data: Prisma.ExerciseSessionUncheckedUpdateInput
   ): Promise<ExerciseSession> {
-    return prisma.exerciseSession.update({
+    return await prisma.exerciseSession.update({
       where: { id },
       data,
     })

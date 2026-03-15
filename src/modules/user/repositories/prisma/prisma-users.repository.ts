@@ -1,4 +1,4 @@
-import type { Prisma } from '@prisma/client'
+import type { Prisma } from 'generated/prisma'
 
 import { prisma } from '@/lib/prisma'
 
@@ -37,7 +37,7 @@ export class PrismaUsersRepository implements UsersRepository {
   }
 
   async update(id: string, data: Prisma.UserUpdateInput) {
-    return prisma.user.update({
+    return await prisma.user.update({
       where: { id },
       data,
     })

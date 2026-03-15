@@ -1,4 +1,4 @@
-import type { Exercise } from '@prisma/client'
+import type { Exercise } from 'generated/prisma'
 
 import { NotAllowedError } from '@/shared/errors/not-allowed.error'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
@@ -15,7 +15,7 @@ interface GetExerciseDetailsUseCaseResponse {
 }
 
 export class GetExerciseDetailsUseCase {
-  constructor(private exercisesRepository: ExercisesRepository) {}
+  constructor(private readonly exercisesRepository: ExercisesRepository) {}
 
   async execute({
     exerciseId,

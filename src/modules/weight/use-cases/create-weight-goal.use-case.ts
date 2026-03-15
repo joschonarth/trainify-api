@@ -1,4 +1,4 @@
-import type { GoalType, WeightGoal } from '@prisma/client'
+import type { GoalType, WeightGoal } from 'generated/prisma'
 
 import type { WeightGoalsRepository } from '../repositories/weight-goals.repository'
 
@@ -17,7 +17,7 @@ interface CreateWeightGoalUseCaseResponse {
 }
 
 export class CreateWeightGoalUseCase {
-  constructor(private weightGoalsRepository: WeightGoalsRepository) {}
+  constructor(private readonly weightGoalsRepository: WeightGoalsRepository) {}
 
   async execute({
     userId,

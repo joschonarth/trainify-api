@@ -1,4 +1,4 @@
-import type { WeightGoal } from '@prisma/client'
+import type { WeightGoal } from 'generated/prisma'
 
 import { prisma } from '@/lib/prisma'
 

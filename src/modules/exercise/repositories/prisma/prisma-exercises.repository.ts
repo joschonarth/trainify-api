@@ -3,7 +3,7 @@ import type {
   ExerciseCategory,
   ExerciseType,
   Prisma,
-} from '@prisma/client'
+} from 'generated/prisma'
 
 import { prisma } from '@/lib/prisma'
 
@@ -11,11 +11,11 @@ import type { ExercisesRepository } from '../exercises.repository'
 
 export class PrismaExercisesRepository implements ExercisesRepository {
   async create(data: Prisma.ExerciseCreateInput): Promise<Exercise> {
-    return prisma.exercise.create({ data })
+    return await prisma.exercise.create({ data })
   }
 
   async findById(id: string): Promise<Exercise | null> {
-    return prisma.exercise.findUnique({
+    return await prisma.exercise.findUnique({
       where: { id },
     })
   }
@@ -27,7 +27,7 @@ export class PrismaExercisesRepository implements ExercisesRepository {
   ): Promise<Exercise[]> {
     const ITEMS_PER_PAGE = 10
 
-    return prisma.exercise.findMany({
+    return await prisma.exercise.findMany({
       where: {
         isCustom: false,
         ...(query && {
@@ -51,7 +51,7 @@ export class PrismaExercisesRepository implements ExercisesRepository {
     name: string,
     userId: string
   ): Promise<Exercise | null> {
-    return prisma.exercise.findFirst({
+    return await prisma.exercise.findFirst({
       where: {
         name,
         userId,
@@ -66,7 +66,7 @@ export class PrismaExercisesRepository implements ExercisesRepository {
     category?: ExerciseCategory | null,
     type?: ExerciseType | null
   ): Promise<Exercise[]> {
-    return prisma.exercise.findMany({
+    return await prisma.exercise.findMany({
       where: {
         userId,
         ...(query && { query }),
@@ -97,7 +97,7 @@ export class PrismaExercisesRepository implements ExercisesRepository {
       prismaData.type = data.type
     }
 
-    return prisma.exercise.update({
+    return await prisma.exercise.update({
       where: { id: exerciseId },
       data: prismaData,
     })

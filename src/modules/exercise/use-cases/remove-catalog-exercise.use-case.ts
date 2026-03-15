@@ -8,7 +8,7 @@ interface RemoveCatalogExerciseUseCaseRequest {
 }
 
 export class RemoveCatalogExerciseUseCase {
-  constructor(private myExercisesRepository: MyExercisesRepository) {}
+  constructor(private readonly myExercisesRepository: MyExercisesRepository) {}
 
   async execute({
     userId,

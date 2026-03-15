@@ -1,4 +1,4 @@
-import { WorkoutSessionStatus } from '@prisma/client'
+import { WorkoutSessionStatus } from 'generated/prisma'
 
 import type { ExerciseLogsRepository } from '@/modules/exercise/repositories/exercise-logs.repository'
 import type { UnlockAllBadgesUseCase } from '@/modules/gamification/use-cases/unlock-all-badges.use-case'
@@ -27,12 +27,12 @@ interface CompleteWorkoutSessionResponse {
 
 export class CompleteWorkoutSessionUseCase {
   constructor(
-    private workoutSessionsRepository: WorkoutSessionsRepository,
-    private exerciseSessionsRepository: ExerciseSessionsRepository,
-    private exerciseLogsRepository: ExerciseLogsRepository,
+    private readonly workoutSessionsRepository: WorkoutSessionsRepository,
+    private readonly exerciseSessionsRepository: ExerciseSessionsRepository,
+    private readonly exerciseLogsRepository: ExerciseLogsRepository,
 
-    private updateUserStreakUseCase: UpdateUserStreakUseCase,
-    private unlockAllBadgesUseCase: UnlockAllBadgesUseCase
+    private readonly updateUserStreakUseCase: UpdateUserStreakUseCase,
+    private readonly unlockAllBadgesUseCase: UnlockAllBadgesUseCase
   ) {}
 
   private deriveSessionStatus(

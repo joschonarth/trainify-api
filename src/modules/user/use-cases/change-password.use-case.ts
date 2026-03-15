@@ -13,7 +13,7 @@ interface ChangePasswordUseCaseRequest {
 }
 
 export class ChangePasswordUseCase {
-  constructor(private usersRepository: UsersRepository) {}
+  constructor(private readonly usersRepository: UsersRepository) {}
 
   async execute({
     userId,

@@ -1,4 +1,4 @@
-import type { WorkoutExercise } from '@prisma/client'
+import type { WorkoutExercise } from 'generated/prisma'
 
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
@@ -19,8 +19,8 @@ interface UpdateWorkoutExerciseDefaultsUseCaseResponse {
 
 export class UpdateWorkoutExerciseDefaultsUseCase {
   constructor(
-    private workoutsRepository: WorkoutsRepository,
-    private workoutExercisesRepository: WorkoutExercisesRepository
+    private readonly workoutsRepository: WorkoutsRepository,
+    private readonly workoutExercisesRepository: WorkoutExercisesRepository
   ) {}
 
   async execute({

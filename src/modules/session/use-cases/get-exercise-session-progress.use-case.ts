@@ -11,7 +11,9 @@ interface GetExerciseSessionProgressRequest {
 }
 
 export class GetExerciseSessionProgressUseCase {
-  constructor(private exerciseSessionsRepository: ExerciseSessionsRepository) {}
+  constructor(
+    private readonly exerciseSessionsRepository: ExerciseSessionsRepository
+  ) {}
 
   async execute({
     userId,

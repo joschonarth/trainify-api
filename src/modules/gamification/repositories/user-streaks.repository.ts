@@ -1,4 +1,4 @@
-import type { Prisma, UserStreak } from '@prisma/client'
+import type { Prisma, UserStreak } from 'generated/prisma'
 
 export interface UserStreaksRepository {
   findByUserId(userId: string): Promise<UserStreak | null>

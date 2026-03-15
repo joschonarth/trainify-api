@@ -1,4 +1,4 @@
-import { WorkoutSessionStatus } from '@prisma/client'
+import { WorkoutSessionStatus } from 'generated/prisma'
 
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
@@ -12,7 +12,9 @@ interface StartWorkoutSessionRequest {
 }
 
 export class StartWorkoutSessionUseCase {
-  constructor(private workoutSessionsRepository: WorkoutSessionsRepository) {}
+  constructor(
+    private readonly workoutSessionsRepository: WorkoutSessionsRepository
+  ) {}
 
   async execute({ sessionId, userId }: StartWorkoutSessionRequest) {
     const session = await this.workoutSessionsRepository.findById(sessionId)

@@ -1,4 +1,4 @@
-import type { Badge, BadgeType, UserBadge } from '@prisma/client'
+import type { Badge, BadgeType, UserBadge } from 'generated/prisma'
 
 export interface BadgesRepository {
   findAll(): Promise<Badge[]>

@@ -1,4 +1,4 @@
-import type { ExerciseCategory, ExerciseType } from '@prisma/client'
+import type { ExerciseCategory, ExerciseType } from 'generated/prisma'
 
 import type { ExerciseLogsRepository } from '../repositories/exercise-logs.repository'
 
@@ -18,7 +18,9 @@ interface FetchExerciseLogsUseCaseResponse {
 }
 
 export class FetchExerciseLogsUseCase {
-  constructor(private exerciseLogsRepository: ExerciseLogsRepository) {}
+  constructor(
+    private readonly exerciseLogsRepository: ExerciseLogsRepository
+  ) {}
 
   async execute(userId: string): Promise<FetchExerciseLogsUseCaseResponse> {
     const logs = await this.exerciseLogsRepository.findAllByUser(userId)

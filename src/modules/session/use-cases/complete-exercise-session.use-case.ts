@@ -6,7 +6,9 @@ interface CompleteExerciseSessionUseCaseRequest {
 }
 
 export class CompleteExerciseSessionUseCase {
-  constructor(private exerciseSessionsRepository: ExerciseSessionsRepository) {}
+  constructor(
+    private readonly exerciseSessionsRepository: ExerciseSessionsRepository
+  ) {}
 
   async execute({ exerciseSessionId }: CompleteExerciseSessionUseCaseRequest) {
     const exerciseSession =

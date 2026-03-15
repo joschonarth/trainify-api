@@ -12,7 +12,9 @@ interface GetMonthlyWorkoutCalendarResponse {
 }
 
 export class GetMonthlyWorkoutCalendarUseCase {
-  constructor(private workoutSessionsRepository: WorkoutSessionsRepository) {}
+  constructor(
+    private readonly workoutSessionsRepository: WorkoutSessionsRepository
+  ) {}
 
   async execute(
     userId: string,

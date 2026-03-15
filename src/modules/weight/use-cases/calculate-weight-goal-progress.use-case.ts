@@ -18,9 +18,9 @@ interface CalculateWeightGoalProgressResponse {
 
 export class CalculateWeightGoalProgressUseCase {
   constructor(
-    private weightGoalsRepository: WeightGoalsRepository,
-    private weightLogsRepository: WeightLogsRepository,
-    private achieveWeightGoalUseCase: AchieveWeightGoalUseCase
+    private readonly weightGoalsRepository: WeightGoalsRepository,
+    private readonly weightLogsRepository: WeightLogsRepository,
+    private readonly achieveWeightGoalUseCase: AchieveWeightGoalUseCase
   ) {}
 
   async execute({
