@@ -1,0 +1,7 @@
+model SeedState {
+  id        String   @id @default(cuid())
+  executed  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@map("seed_state")
+}

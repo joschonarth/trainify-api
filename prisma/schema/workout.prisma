@@ -1,0 +1,44 @@
+model Workout {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  userId      String
+
+  user      User              @relation(fields: [userId], references: [id])
+  exercises WorkoutExercise[]
+  schedules WorkoutSchedule[]
+  sessions  WorkoutSession[]
+
+  @@unique([name, userId])
+  @@map("workouts")
+}
+
+model WorkoutExercise {
+  id        String @id @default(cuid())
+  workoutId String
+
+  exerciseId    String
+  defaultSets   Int?
+  defaultReps   Int?
+  defaultWeight Float?
+
+  workout  Workout  @relation(fields: [workoutId], references: [id], onDelete: Cascade)
+  exercise Exercise @relation(fields: [exerciseId], references: [id])
+
+  @@unique([workoutId, exerciseId])
+  @@map("workout_exercises")
+}
+
+model WorkoutSchedule {
+  id        String @id @default(cuid())
+  dayOfWeek Int
+  userId    String
+  workoutId String
+
+  user    User    @relation(fields: [userId], references: [id])
+  workout Workout @relation(fields: [workoutId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, dayOfWeek])
+  @@map("workout_schedule")
+}

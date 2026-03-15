@@ -1,0 +1,69 @@
+enum WorkoutSessionStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  INCOMPLETE
+  SKIPPED
+}
+
+model WorkoutSession {
+  id     String               @id @default(cuid())
+  date   DateTime             @default(now())
+  status WorkoutSessionStatus @default(PENDING)
+
+  startedAt DateTime? @map("started_at")
+  endedAt   DateTime? @map("ended_at")
+  duration  Int?
+
+  userId    String
+  workoutId String
+
+  user             User              @relation(fields: [userId], references: [id])
+  workout          Workout           @relation(fields: [workoutId], references: [id], onDelete: Cascade)
+  exerciseSessions ExerciseSession[]
+
+  @@map("workout_sessions")
+}
+
+model ExerciseSession {
+  id        String  @id @default(cuid())
+  completed Boolean @default(false)
+
+  plannedSets   Int?
+  plannedReps   Int?
+  plannedWeight Float?
+
+  startedAt DateTime? @map("started_at")
+  endedAt   DateTime? @map("ended_at")
+  duration  Int?
+
+  workoutSessionId String
+  exerciseId       String
+
+  workoutSession WorkoutSession @relation(fields: [workoutSessionId], references: [id], onDelete: Cascade)
+  exercise       Exercise       @relation(fields: [exerciseId], references: [id])
+  logs           ExerciseLog[]
+
+  @@unique([workoutSessionId, exerciseId])
+  @@map("exercise_sessions")
+}
+
+model ExerciseLog {
+  id          String   @id @default(cuid())
+  sets        Int
+  reps        Int
+  weight      Float?
+  volume      Float?
+  description String?
+  date        DateTime @default(now())
+
+  exerciseSessionId String
+  userId            String
+  exerciseId        String
+
+  exerciseSession ExerciseSession @relation(fields: [exerciseSessionId], references: [id], onDelete: Cascade)
+  user            User            @relation(fields: [userId], references: [id])
+  exercise        Exercise        @relation(fields: [exerciseId], references: [id])
+
+  @@map("exercise_logs")
+}

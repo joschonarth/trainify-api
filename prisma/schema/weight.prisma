@@ -1,0 +1,47 @@
+enum GoalType {
+  LOSE
+  GAIN
+  MAINTAIN
+}
+
+model WeightGoal {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  name        String
+  description String?
+
+  goalType     GoalType
+  startWeight  Float?
+  targetWeight Float
+  startDate    DateTime  @default(now())
+  endDate      DateTime?
+  achievedAt   DateTime?
+  isActive     Boolean   @default(true)
+  progress     Float     @default(0)
+
+  logs WeightLog[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("weight_goals")
+}
+
+model WeightLog {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  goalId String?
+  goal   WeightGoal? @relation(fields: [goalId], references: [id])
+
+  date   DateTime @default(now())
+  weight Float
+  note   String?
+
+  createdAt DateTime @default(now())
+
+  @@map("weight_logs")
+}
