@@ -37,14 +37,14 @@
   },
   "dependencies": {
     "@fastify/cookie": "11.0.2",
-    "@fastify/cors": "11.1.0",
+    "@fastify/cors": "11.2.0",
     "@fastify/jwt": "10.0.0",
     "@prisma/adapter-pg": "7.5.0",
     "@prisma/client": "7.5.0",
     "bcrypt": "6.0.0",
     "dayjs": "1.11.17",
     "dotenv": "17.2.1",
-    "fastify": "5.5.0",
+    "fastify": "5.8.2",
     "tsup": "8.5.0",
     "zod": "4.0.17"
   }
