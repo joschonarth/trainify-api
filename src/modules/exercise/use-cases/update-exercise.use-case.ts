@@ -1,4 +1,4 @@
-import type { Exercise, ExerciseCategory, ExerciseType } from '@prisma/client'
+import type { Exercise, ExerciseCategory, ExerciseType } from 'generated/prisma'
 
 import { NotAllowedError } from '@/shared/errors/not-allowed.error'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
@@ -18,7 +18,7 @@ interface UpdateExerciseUseCaseResponse {
 }
 
 export class UpdateExerciseUseCase {
-  constructor(private exercisesRepository: ExercisesRepository) {}
+  constructor(private readonly exercisesRepository: ExercisesRepository) {}
 
   async execute({
     userId,

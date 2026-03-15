@@ -1,4 +1,4 @@
-import { GoalType, PrismaClient } from '@prisma/client'
+import { GoalType, PrismaClient } from 'generated/prisma'
 
 const prisma = new PrismaClient()
 

@@ -1,4 +1,4 @@
-import type { Exercise, MyExercise } from '@prisma/client'
+import type { Exercise, MyExercise } from 'generated/prisma'
 
 import { prisma } from '@/lib/prisma'
 
@@ -72,7 +72,7 @@ export class PrismaMyExercisesRepository implements MyExercisesRepository {
   }
 
   async findById(id: string): Promise<MyExercise | null> {
-    return prisma.myExercise.findUnique({
+    return await prisma.myExercise.findUnique({
       where: { id },
       include: { exercise: true },
     })

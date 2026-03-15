@@ -18,7 +18,9 @@ interface GetUserStreakCalendarResponse {
 }
 
 export class GetUserStreakCalendarUseCase {
-  constructor(private userStreakLogsRepository: UserStreakLogsRepository) {}
+  constructor(
+    private readonly userStreakLogsRepository: UserStreakLogsRepository
+  ) {}
 
   async execute({
     userId,

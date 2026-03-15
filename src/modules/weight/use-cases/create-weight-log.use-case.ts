@@ -1,4 +1,4 @@
-import type { WeightLog } from '@prisma/client'
+import type { WeightLog } from 'generated/prisma'
 
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
@@ -21,9 +21,9 @@ interface CreateWeightLogUseCaseResponse {
 
 export class CreateWeightLogUseCase {
   constructor(
-    private weightLogsRepository: WeightLogsRepository,
-    private weightGoalsRepository: WeightGoalsRepository,
-    private achieveWeightGoalUseCase: AchieveWeightGoalUseCase
+    private readonly weightLogsRepository: WeightLogsRepository,
+    private readonly weightGoalsRepository: WeightGoalsRepository,
+    private readonly achieveWeightGoalUseCase: AchieveWeightGoalUseCase
   ) {}
 
   async execute({

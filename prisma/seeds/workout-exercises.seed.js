@@ -1,4 +1,4 @@
-import { ExerciseCategory, ExerciseType, PrismaClient } from '@prisma/client'
+import { ExerciseCategory, ExerciseType, PrismaClient } from 'generated/prisma'
 
 export const prisma = new PrismaClient()
 

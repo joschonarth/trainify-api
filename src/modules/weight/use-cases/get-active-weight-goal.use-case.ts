@@ -1,11 +1,11 @@
-import type { WeightGoal } from '@prisma/client'
+import type { WeightGoal } from 'generated/prisma'
 
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
 import type { WeightGoalsRepository } from '../repositories/weight-goals.repository'
 
 export class GetActiveWeightGoalUseCase {
-  constructor(private weightGoalsRepository: WeightGoalsRepository) {}
+  constructor(private readonly weightGoalsRepository: WeightGoalsRepository) {}
 
   async execute(userId: string): Promise<WeightGoal | null> {
     const activeGoal =

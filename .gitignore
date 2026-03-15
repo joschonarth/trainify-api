@@ -12,3 +12,6 @@ coverage
 
 # Build
 build
+
+# Prisma
+/generated/prisma

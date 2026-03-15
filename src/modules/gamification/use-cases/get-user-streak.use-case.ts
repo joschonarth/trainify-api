@@ -8,7 +8,7 @@ interface GetUserStreakUseCaseResponse {
 }
 
 export class GetUserStreakUseCase {
-  constructor(private userStreaksRepository: UserStreaksRepository) {}
+  constructor(private readonly userStreaksRepository: UserStreaksRepository) {}
 
   async execute(userId: string): Promise<GetUserStreakUseCaseResponse> {
     const streak = await this.userStreaksRepository.findByUserId(userId)

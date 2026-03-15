@@ -1,4 +1,4 @@
-import type { ExerciseCategory, ExerciseLog } from '@prisma/client'
+import type { ExerciseCategory, ExerciseLog } from 'generated/prisma'
 
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
@@ -20,7 +20,9 @@ interface GetExerciseLogUseCaseResponse {
 }
 
 export class GetExerciseLogUseCase {
-  constructor(private exerciseLogsRepository: ExerciseLogsRepository) {}
+  constructor(
+    private readonly exerciseLogsRepository: ExerciseLogsRepository
+  ) {}
 
   async execute({
     logId,

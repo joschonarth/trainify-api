@@ -8,7 +8,9 @@ interface GetWorkoutSessionsByWorkoutRequest {
 }
 
 export class GetWorkoutSessionsByWorkoutUseCase {
-  constructor(private workoutSessionsRepository: WorkoutSessionsRepository) {}
+  constructor(
+    private readonly workoutSessionsRepository: WorkoutSessionsRepository
+  ) {}
 
   async execute({ userId, workoutId }: GetWorkoutSessionsByWorkoutRequest) {
     const sessions = await this.workoutSessionsRepository.findManyByWorkoutId(

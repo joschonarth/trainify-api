@@ -1,4 +1,4 @@
-import type { Workout } from '@prisma/client'
+import type { Workout } from 'generated/prisma'
 
 import type { WorkoutsRepository } from '../repositories/workouts.repository'
 
@@ -13,7 +13,7 @@ interface CreateWorkoutUseCaseResponse {
 }
 
 export class CreateWorkoutUseCase {
-  constructor(private workoutsRepository: WorkoutsRepository) {}
+  constructor(private readonly workoutsRepository: WorkoutsRepository) {}
 
   async execute({
     name,

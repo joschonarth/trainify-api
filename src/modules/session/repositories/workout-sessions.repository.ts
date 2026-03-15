@@ -6,7 +6,7 @@ import type {
   Workout,
   WorkoutSession,
   WorkoutSessionStatus,
-} from '@prisma/client'
+} from 'generated/prisma'
 
 export interface WorkoutSessionWithWorkout extends WorkoutSession {
   workout: {

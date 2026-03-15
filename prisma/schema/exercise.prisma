@@ -1,0 +1,52 @@
+enum ExerciseCategory {
+  CHEST
+  TRICEPS
+  BICEPS
+  BACK
+  LEGS
+  SHOULDERS
+  ARMS
+  ABS
+  FULL_BODY
+}
+
+enum ExerciseType {
+  STRENGTH
+  CARDIO
+  MOBILITY
+  FLEXIBILITY
+}
+
+model Exercise {
+  id       String            @id @default(cuid())
+  name     String
+  category ExerciseCategory?
+  type     ExerciseType?
+
+  isCustom  Boolean  @default(true) @map("is_custom")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  userId          String?           @map("user_id")
+  user            User?             @relation(fields: [userId], references: [id])
+  myExercise      MyExercise[]
+  exerciseLog     ExerciseLog[]
+  workoutExercise WorkoutExercise[]
+  sessions        ExerciseSession[]
+
+  @@unique([name, userId])
+  @@map("exercises")
+}
+
+model MyExercise {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  userId     String
+  exerciseId String
+
+  user     User     @relation(fields: [userId], references: [id])
+  exercise Exercise @relation(fields: [exerciseId], references: [id])
+
+  @@unique([userId, exerciseId])
+  @@map("my_exercises")
+}

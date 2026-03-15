@@ -18,7 +18,7 @@ interface GetGeneralWeightAnalyticsResponse {
 }
 
 export class GetGeneralWeightAnalyticsUseCase {
-  constructor(private weightLogsRepository: WeightLogsRepository) {}
+  constructor(private readonly weightLogsRepository: WeightLogsRepository) {}
 
   async execute({
     userId,

@@ -1,5 +1,5 @@
-import { BadgeType } from '@prisma/client'
 import type { FastifyReply, FastifyRequest } from 'fastify'
+import { BadgeType } from 'generated/prisma'
 import { z } from 'zod'
 
 import { makeGetAllBadgesUseCase } from '@/modules/gamification/use-cases/factories/make-get-all-badges-use-case'

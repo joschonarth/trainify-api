@@ -1,4 +1,4 @@
-import type { Exercise, ExerciseLog, Prisma } from '@prisma/client'
+import type { Exercise, ExerciseLog, Prisma } from 'generated/prisma'
 
 export interface ExerciseLogsRepository {
   create(data: Prisma.ExerciseLogCreateInput): Promise<ExerciseLog>

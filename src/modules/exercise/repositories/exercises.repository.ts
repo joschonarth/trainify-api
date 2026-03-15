@@ -3,7 +3,7 @@ import type {
   ExerciseCategory,
   ExerciseType,
   Prisma,
-} from '@prisma/client'
+} from 'generated/prisma'
 
 export interface ExercisesRepository {
   create(data: Prisma.ExerciseCreateInput): Promise<Exercise>

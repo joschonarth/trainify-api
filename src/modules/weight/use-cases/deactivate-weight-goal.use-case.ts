@@ -8,7 +8,7 @@ interface DeactivateWeightGoalRequest {
 }
 
 export class DeactivateWeightGoalUseCase {
-  constructor(private weightGoalsRepository: WeightGoalsRepository) {}
+  constructor(private readonly weightGoalsRepository: WeightGoalsRepository) {}
 
   async execute({
     goalId,

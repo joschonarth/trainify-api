@@ -1,4 +1,4 @@
-import type { User } from '@prisma/client'
+import type { User } from 'generated/prisma'
 
 import type { UsersRepository } from '@/modules/user/repositories/users.repository'
 
@@ -13,7 +13,7 @@ interface SignInWithGoogleUseCaseResponse {
 }
 
 export class SignInWithGoogleUseCase {
-  constructor(private usersRepository: UsersRepository) {}
+  constructor(private readonly usersRepository: UsersRepository) {}
 
   async execute({
     token,

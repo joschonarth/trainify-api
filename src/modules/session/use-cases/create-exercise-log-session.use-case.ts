@@ -1,4 +1,4 @@
-import type { ExerciseLog } from '@prisma/client'
+import type { ExerciseLog } from 'generated/prisma'
 
 import type { ExerciseLogsRepository } from '@/modules/exercise/repositories/exercise-logs.repository'
 import type { WorkoutSessionsRepository } from '@/modules/session/repositories/workout-sessions.repository'
@@ -20,8 +20,8 @@ interface CreateExerciseLogSessionUseCaseResponse {
 
 export class CreateExerciseLogSessionUseCase {
   constructor(
-    private exerciseLogsRepository: ExerciseLogsRepository,
-    private workoutSessionsRepository: WorkoutSessionsRepository
+    private readonly exerciseLogsRepository: ExerciseLogsRepository,
+    private readonly workoutSessionsRepository: WorkoutSessionsRepository
   ) {}
 
   async execute({

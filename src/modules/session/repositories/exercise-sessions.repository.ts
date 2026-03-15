@@ -1,4 +1,4 @@
-import type { ExerciseSession, Prisma } from '@prisma/client'
+import type { ExerciseSession, Prisma } from 'generated/prisma'
 
 export type ExerciseSessionWithLogs = ExerciseSession & {
   exercise: {

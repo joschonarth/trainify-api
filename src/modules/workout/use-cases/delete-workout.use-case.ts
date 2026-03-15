@@ -11,7 +11,7 @@ interface DeleteWorkoutUseCaseResponse {
 }
 
 export class DeleteWorkoutUseCase {
-  constructor(private workoutsRepository: WorkoutsRepository) {}
+  constructor(private readonly workoutsRepository: WorkoutsRepository) {}
 
   async execute({
     workoutId,

@@ -1,9 +1,7 @@
-import { ExerciseCategory, ExerciseType } from '@prisma/client'
 import type { FastifyReply, FastifyRequest } from 'fastify'
+import { ExerciseCategory, ExerciseType } from 'generated/prisma'
 import { z } from 'zod'
-
 import { ResourceAlreadyExistsError } from '@/shared/errors/resource-already-exists.error'
-
 import { makeCreateExerciseUseCase } from '../use-cases/factories/make-create-exercise-use-case'
 
 export async function createExerciseController(

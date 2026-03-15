@@ -14,7 +14,7 @@ interface GetWorkoutDetailsUseCaseResponse {
 }
 
 export class GetWorkoutDetailsUseCase {
-  constructor(private workoutsRepository: WorkoutsRepository) {}
+  constructor(private readonly workoutsRepository: WorkoutsRepository) {}
 
   async execute({
     workoutId,

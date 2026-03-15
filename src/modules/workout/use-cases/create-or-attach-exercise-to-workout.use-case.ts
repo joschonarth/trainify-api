@@ -3,7 +3,7 @@ import type {
   ExerciseCategory,
   ExerciseType,
   WorkoutExercise,
-} from '@prisma/client'
+} from 'generated/prisma'
 
 import type { ExercisesRepository } from '@/modules/exercise/repositories/exercises.repository'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
@@ -29,9 +29,9 @@ interface CreateOrAttachExerciseToWorkoutUseCaseResponse {
 
 export class CreateOrAttachExerciseToWorkoutUseCase {
   constructor(
-    private exercisesRepository: ExercisesRepository,
-    private workoutsRepository: WorkoutsRepository,
-    private workoutExercisesRepository: WorkoutExercisesRepository
+    private readonly exercisesRepository: ExercisesRepository,
+    private readonly workoutsRepository: WorkoutsRepository,
+    private readonly workoutExercisesRepository: WorkoutExercisesRepository
   ) {}
 
   async execute({

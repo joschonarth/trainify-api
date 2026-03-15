@@ -1,0 +1,30 @@
+model User {
+  id        String  @id @default(uuid())
+  name      String
+  email     String  @unique
+  password  String?
+  avatarUrl String?
+
+  height    Int?
+  weight    Float?
+  gender    String?
+  birthdate DateTime?
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  exercise    Exercise[]
+  myExercise  MyExercise[]
+  exerciseLog ExerciseLog[]
+  workout     Workout[]
+  sessions    WorkoutSession[]
+
+  streak UserStreak?
+
+  WeightGoal       WeightGoal[]
+  WeightLog        WeightLog[]
+  UserBadge        UserBadge[]
+  UserStreakLog    UserStreakLog[]
+  workoutSchedules WorkoutSchedule[]
+
+  @@map("users")
+}

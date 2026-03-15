@@ -1,5 +1,5 @@
-import { GoalType } from '@prisma/client'
 import type { FastifyReply, FastifyRequest } from 'fastify'
+import { GoalType } from 'generated/prisma'
 import { z } from 'zod'
 
 import { makeCreateWeightGoalUseCase } from '../use-cases/factories/make-create-weight-goal-use-case'

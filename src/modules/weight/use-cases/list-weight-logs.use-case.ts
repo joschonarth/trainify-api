@@ -1,4 +1,4 @@
-import type { WeightLog } from '@prisma/client'
+import type { WeightLog } from 'generated/prisma'
 
 import type { WeightLogsRepository } from '../repositories/weight-logs.repository'
 
@@ -11,7 +11,7 @@ interface ListWeightLogsUseCaseResponse {
 }
 
 export class ListWeightLogsUseCase {
-  constructor(private weightLogsRepository: WeightLogsRepository) {}
+  constructor(private readonly weightLogsRepository: WeightLogsRepository) {}
 
   async execute({
     userId,

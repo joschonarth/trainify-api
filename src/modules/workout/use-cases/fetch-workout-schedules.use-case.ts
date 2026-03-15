@@ -1,4 +1,4 @@
-import type { WorkoutSchedule } from '@prisma/client'
+import type { WorkoutSchedule } from 'generated/prisma'
 
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
@@ -15,8 +15,8 @@ interface FetchWorkoutSchedulesUseCaseResponse {
 
 export class FetchWorkoutSchedulesUseCase {
   constructor(
-    private workoutsRepository: WorkoutsRepository,
-    private workoutSchedulesRepository: WorkoutSchedulesRepository
+    private readonly workoutsRepository: WorkoutsRepository,
+    private readonly workoutSchedulesRepository: WorkoutSchedulesRepository
   ) {}
 
   async execute({

@@ -1,4 +1,4 @@
-import type { WorkoutSessionStatus } from '@prisma/client'
+import type { WorkoutSessionStatus } from 'generated/prisma'
 
 import type {
   WorkoutSessionsRepository,
@@ -37,7 +37,9 @@ interface GetWorkoutSessionsHistoryResponse {
 }
 
 export class GetWorkoutSessionsHistoryUseCase {
-  constructor(private workoutSessionsRepository: WorkoutSessionsRepository) {}
+  constructor(
+    private readonly workoutSessionsRepository: WorkoutSessionsRepository
+  ) {}
 
   async execute({
     userId,

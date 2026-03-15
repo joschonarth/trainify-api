@@ -1,0 +1,31 @@
+enum BadgeType {
+  WORKOUT
+  EXERCISE
+  STREAK
+}
+
+model Badge {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  description String
+  type        BadgeType
+  milestone   Int?
+  createdAt   DateTime  @default(now())
+
+  userBadges UserBadge[]
+
+  @@map("badges")
+}
+
+model UserBadge {
+  id         String   @id @default(cuid())
+  userId     String
+  badgeId    String
+  unlockedAt DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id])
+  badge Badge @relation(fields: [badgeId], references: [id])
+
+  @@unique([userId, badgeId])
+  @@map("user_badges")
+}

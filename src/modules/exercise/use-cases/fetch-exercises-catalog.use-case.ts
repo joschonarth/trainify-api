@@ -1,4 +1,4 @@
-import type { Exercise, ExerciseCategory } from '@prisma/client'
+import type { Exercise, ExerciseCategory } from 'generated/prisma'
 
 import type { ExercisesRepository } from '../repositories/exercises.repository'
 
@@ -13,7 +13,7 @@ interface FetchExercisesCatalogUseCaseResponse {
 }
 
 export class FetchExercisesCatalogUseCase {
-  constructor(private exercisesRepository: ExercisesRepository) {}
+  constructor(private readonly exercisesRepository: ExercisesRepository) {}
 
   async execute({
     query,
