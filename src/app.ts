@@ -8,9 +8,9 @@ import {
   type ZodTypeProvider,
 } from 'fastify-type-provider-zod'
 import z, { ZodError } from 'zod'
-import { appRoutes } from './app.routes'
 import { env } from './env'
 import { registerSwagger } from './lib/swagger'
+import { appRoutes } from './routes'
 
 export const app = fastify().withTypeProvider<ZodTypeProvider>()
 
