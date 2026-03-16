@@ -7,3 +7,26 @@
 GET {{baseUrl}}/health
 
 ###
+
+# @name register
+POST {{baseUrl}}/users
+Content-Type: application/json
+
+{
+  "name": "John Doe",
+  "email": "johndoe@example.com",
+  "password": "123456",
+  "passwordConfirmation": "123456"
+}
+
+###
+
+# @name auth
+POST {{baseUrl}}/auth
+Content-Type: application/json
+Authorization: Bearer {{register.response.body.token}}
+
+{
+  "email": "johndoe@example.com",
+  "password": "123456"
+}
