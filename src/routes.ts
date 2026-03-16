@@ -9,6 +9,13 @@ import { weightRoutes } from '@/modules/weight/routes'
 import { workoutsRoutes } from '@/modules/workout/routes'
 
 export function appRoutes(app: FastifyInstance) {
+  app.get('/health', () => {
+    return {
+      status: 'ok',
+      timestamp: new Date().toISOString(),
+    }
+  })
+
   app.register(usersRoutes)
   app.register(exercisesRoutes)
   app.register(workoutsRoutes)

@@ -2,12 +2,20 @@ import fastifyCookie from '@fastify/cookie'
 import cors from '@fastify/cors'
 import fastifyJwt from '@fastify/jwt'
 import fastify from 'fastify'
+import {
+  serializerCompiler,
+  validatorCompiler,
+  type ZodTypeProvider,
+} from 'fastify-type-provider-zod'
 import z, { ZodError } from 'zod'
-
-import { appRoutes } from './app.routes'
 import { env } from './env'
+import { registerSwagger } from './lib/swagger'
+import { appRoutes } from './routes'
 
-export const app = fastify()
+export const app = fastify().withTypeProvider<ZodTypeProvider>()
+
+app.setSerializerCompiler(serializerCompiler)
+app.setValidatorCompiler(validatorCompiler)
 
 app.register(cors, {
   origin:
@@ -33,6 +41,8 @@ app.register(fastifyJwt, {
     signed: false,
   },
 })
+
+registerSwagger(app)
 
 app.register(appRoutes)
 
