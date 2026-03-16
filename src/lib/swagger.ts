@@ -10,6 +10,15 @@ export async function registerSwagger(app: FastifyInstance) {
         description: 'API documentation for Trainify',
         version: '1.0.0',
       },
+      components: {
+        securitySchemes: {
+          bearerAuth: {
+            type: 'http',
+            scheme: 'bearer',
+            bearerFormat: 'JWT',
+          },
+        },
+      },
     },
   })
 
