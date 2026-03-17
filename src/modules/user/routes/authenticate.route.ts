@@ -1,5 +1,7 @@
 import type { FastifyInstance } from 'fastify'
+import z from 'zod'
 import { authenticateController } from '@/modules/user/controllers/authenticate.controller'
+import { authenticateBodySchema } from '../schemas/authenticate.schema'
 
 export function authenticateRoute(app: FastifyInstance) {
   app.post(
@@ -10,41 +12,20 @@ export function authenticateRoute(app: FastifyInstance) {
         summary: 'Authenticate a user',
         description:
           'Authenticates a user with email and password, returning a JWT token and setting an HTTP-only cookie.',
-        body: {
-          type: 'object',
-          required: ['email', 'password'],
-          properties: {
-            email: {
-              type: 'string',
-              format: 'email',
-              example: 'john@example.com',
-            },
-            password: {
-              type: 'string',
-              minLength: 6,
-              example: '123456',
-            },
-          },
-        },
+        body: authenticateBodySchema,
         response: {
-          200: {
-            description: 'User authenticated successfully.',
-            type: 'object',
-            properties: {
-              token: {
-                type: 'string',
-                description: 'JWT token for the authenticated user.',
-                example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
-              },
-            },
-          },
-          400: {
-            description: 'Invalid credentials.',
-            type: 'object',
-            properties: {
-              message: { type: 'string', example: 'Invalid credentials.' },
-            },
-          },
+          200: z
+            .object({
+              token: z
+                .string()
+                .describe('JWT token for the authenticated user.'),
+            })
+            .describe('User authenticated successfully.'),
+          400: z
+            .object({
+              message: z.string(),
+            })
+            .describe('Invalid credentials.'),
         },
       },
     },

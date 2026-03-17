@@ -1,20 +1,15 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
-import { z } from 'zod'
 
 import { env } from '@/env'
 import { InvalidCredentialsError } from '@/modules/user/errors/invalid-credentials.error'
 import { makeAuthenticateUseCase } from '@/modules/user/use-cases/factories/make-authenticate-use-case'
+import type { AuthenticateBody } from '../schemas/authenticate.schema'
 
 export async function authenticateController(
-  request: FastifyRequest,
+  request: FastifyRequest<{ Body: AuthenticateBody }>,
   reply: FastifyReply
 ) {
-  const authenticateBodySchema = z.object({
-    email: z.email(),
-    password: z.string().min(6),
-  })
-
-  const { email, password } = authenticateBodySchema.parse(request.body)
+  const { email, password } = request.body
 
   try {
     const authenticateUseCase = makeAuthenticateUseCase()
