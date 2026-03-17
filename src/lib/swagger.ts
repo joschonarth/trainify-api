@@ -1,9 +1,10 @@
-import swagger from '@fastify/swagger'
-import swaggerUI from '@fastify/swagger-ui'
+import fastifySwagger from '@fastify/swagger'
+import fastifySwaggerUi from '@fastify/swagger-ui'
 import type { FastifyInstance } from 'fastify'
+import { jsonSchemaTransform } from 'fastify-type-provider-zod'
 
 export async function registerSwagger(app: FastifyInstance) {
-  await app.register(swagger, {
+  await app.register(fastifySwagger, {
     openapi: {
       info: {
         title: 'Trainify API',
@@ -20,9 +21,10 @@ export async function registerSwagger(app: FastifyInstance) {
         },
       },
     },
+    transform: jsonSchemaTransform,
   })
 
-  await app.register(swaggerUI, {
+  await app.register(fastifySwaggerUi, {
     routePrefix: '/docs',
   })
 }
