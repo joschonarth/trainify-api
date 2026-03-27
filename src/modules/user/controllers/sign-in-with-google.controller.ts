@@ -1,16 +1,15 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
-import { z } from 'zod'
 
 import { env } from '@/env'
 import { InvalidGoogleTokenError } from '@/modules/user/errors/invalid-google-token.error'
 import { makeSignInWithGoogleUseCase } from '@/modules/user/use-cases/factories/make-sign-in-with-google-use-case'
+import type { SignInWithGoogleBody } from '../schemas/sign-in-with-google.schema'
 
 export async function signInWithGoogleController(
   request: FastifyRequest,
   reply: FastifyReply
 ) {
-  const bodySchema = z.object({ token: z.string() })
-  const { token } = bodySchema.parse(request.body)
+  const { token } = request.body as SignInWithGoogleBody
 
   try {
     const signInWithGoogleUseCase = makeSignInWithGoogleUseCase()

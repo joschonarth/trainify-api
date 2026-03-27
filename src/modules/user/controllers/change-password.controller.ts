@@ -1,24 +1,17 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
-import { z } from 'zod'
 
 import { InvalidCredentialsError } from '@/modules/user/errors/invalid-credentials.error'
 import { PasswordsDoNotMatchError } from '@/modules/user/errors/passwords-do-not-match.error'
 import { makeChangePasswordUseCase } from '@/modules/user/use-cases/factories/make-change-password-use-case'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
+import type { ChangePasswordBody } from '../schemas/change-password.schema'
 
 export async function changePasswordController(
   request: FastifyRequest,
   reply: FastifyReply
 ) {
-  const schema = z.object({
-    currentPassword: z.string().min(6),
-    newPassword: z.string().min(6),
-    passwordConfirmation: z.string().min(6),
-  })
-
-  const { currentPassword, newPassword, passwordConfirmation } = schema.parse(
-    request.body
-  )
+  const { currentPassword, newPassword, passwordConfirmation } =
+    request.body as ChangePasswordBody
 
   try {
     const changePasswordUseCase = makeChangePasswordUseCase()

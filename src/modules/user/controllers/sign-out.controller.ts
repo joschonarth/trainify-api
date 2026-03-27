@@ -3,7 +3,7 @@ import type { FastifyReply, FastifyRequest } from 'fastify'
 import { makeSignOutUseCase } from '@/modules/user/use-cases/factories/make-sign-out-use-case'
 
 export async function signOutController(
-  request: FastifyRequest,
+  _: FastifyRequest,
   reply: FastifyReply
 ) {
   const signOutUseCase = makeSignOutUseCase()

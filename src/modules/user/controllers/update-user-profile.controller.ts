@@ -1,23 +1,15 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
-import { z } from 'zod'
 
 import { makeUpdateUserProfileUseCase } from '@/modules/user/use-cases/factories/make-update-user-profile-use-case'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
+import type { UpdateUserProfileBody } from '../schemas/update-user-profile.schema'
 
 export async function updateUserProfileController(
   request: FastifyRequest,
   reply: FastifyReply
 ) {
-  const updateProfileBodySchema = z.object({
-    name: z.string().optional(),
-    height: z.number().int().positive().optional(),
-    weight: z.number().positive().optional(),
-    gender: z.enum(['male', 'female', 'other']).optional(),
-    birthdate: z.string().optional(),
-  })
-
   const { name, height, weight, gender, birthdate } =
-    updateProfileBodySchema.parse(request.body)
+    request.body as UpdateUserProfileBody
 
   try {
     const updateUserProfile = makeUpdateUserProfileUseCase()
