@@ -1,5 +1,5 @@
 import type { FastifyInstance } from 'fastify'
-import z from 'zod'
+import { z } from 'zod'
 import { authenticateController } from '@/modules/user/controllers/authenticate.controller'
 import { authenticateBodySchema } from '../schemas/authenticate.schema'
 

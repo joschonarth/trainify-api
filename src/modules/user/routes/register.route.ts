@@ -1,5 +1,5 @@
 import type { FastifyInstance } from 'fastify'
-import z from 'zod'
+import { z } from 'zod'
 import { registerController } from '@/modules/user/controllers/register.controller'
 import { registerBodySchema } from '../schemas/register.schema'
 
