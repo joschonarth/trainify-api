@@ -7,10 +7,11 @@ import { makeRegisterUseCase } from '@/modules/user/use-cases/factories/make-reg
 import type { RegisterBody } from '../schemas/register.schema'
 
 export async function registerController(
-  request: FastifyRequest<{ Body: RegisterBody }>,
+  request: FastifyRequest,
   reply: FastifyReply
 ) {
-  const { name, email, password, passwordConfirmation } = request.body
+  const { name, email, password, passwordConfirmation } =
+    request.body as RegisterBody
 
   try {
     const registerUseCase = makeRegisterUseCase()

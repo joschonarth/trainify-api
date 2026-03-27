@@ -6,10 +6,10 @@ import { makeSignInWithGoogleUseCase } from '@/modules/user/use-cases/factories/
 import type { SignInWithGoogleBody } from '../schemas/sign-in-with-google.schema'
 
 export async function signInWithGoogleController(
-  request: FastifyRequest<{ Body: SignInWithGoogleBody }>,
+  request: FastifyRequest,
   reply: FastifyReply
 ) {
-  const { token } = request.body
+  const { token } = request.body as SignInWithGoogleBody
 
   try {
     const signInWithGoogleUseCase = makeSignInWithGoogleUseCase()

@@ -6,10 +6,10 @@ import { makeAuthenticateUseCase } from '@/modules/user/use-cases/factories/make
 import type { AuthenticateBody } from '../schemas/authenticate.schema'
 
 export async function authenticateController(
-  request: FastifyRequest<{ Body: AuthenticateBody }>,
+  request: FastifyRequest,
   reply: FastifyReply
 ) {
-  const { email, password } = request.body
+  const { email, password } = request.body as AuthenticateBody
 
   try {
     const authenticateUseCase = makeAuthenticateUseCase()
