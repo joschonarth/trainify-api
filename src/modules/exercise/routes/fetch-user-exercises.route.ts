@@ -1,9 +1,9 @@
 import type { FastifyInstance } from 'fastify'
-import { ExerciseCategory, ExerciseType } from 'generated/prisma'
 import { z } from 'zod'
 
 import { verifyJwt } from '@/shared/middlewares/verify-jwt'
 import { fetchUserExercisesController } from '../controllers/fetch-user-exercises.controller'
+import { exerciseSchema } from '../schemas/exercise.schema'
 import { fetchUserExercisesQuerySchema } from '../schemas/fetch-user-exercises.schema'
 
 export function fetchUserExercisesRoute(app: FastifyInstance) {
@@ -20,23 +20,7 @@ export function fetchUserExercisesRoute(app: FastifyInstance) {
         response: {
           200: z
             .object({
-              exercises: z.array(
-                z.object({
-                  id: z.string().describe('Exercise ID.'),
-                  name: z.string().describe('Exercise name.'),
-                  category: z
-                    .enum(ExerciseCategory)
-                    .describe('Exercise category.'),
-                  type: z.enum(ExerciseType).describe('Exercise type.'),
-                  description: z
-                    .string()
-                    .nullable()
-                    .describe('Exercise description.'),
-                  isCustom: z
-                    .boolean()
-                    .describe('Whether the exercise was created by the user.'),
-                })
-              ),
+              exercises: z.array(exerciseSchema),
             })
             .describe('Exercises fetched successfully.'),
         },

@@ -1,22 +1,17 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
-import { z } from 'zod'
 
 import { NotAllowedError } from '@/shared/errors/not-allowed.error'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
-
+import type { GetExerciseDetailsParams } from '../schemas/get-exercise-details.schema'
 import { makeGetExerciseDetailsUseCase } from '../use-cases/factories/make-get-exercise-details-use-case'
 
 export async function getExerciseDetailsController(
   request: FastifyRequest,
   reply: FastifyReply
 ) {
-  const paramsSchema = z.object({
-    id: z.cuid(),
-  })
+  const { id } = request.params as GetExerciseDetailsParams
 
   try {
-    const { id } = paramsSchema.parse(request.params)
-
     const getExerciseDetailsUseCase = makeGetExerciseDetailsUseCase()
 
     const { exercise } = await getExerciseDetailsUseCase.execute({
