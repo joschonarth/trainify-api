@@ -46,7 +46,7 @@
     "bcrypt": "6.0.0",
     "dayjs": "1.11.17",
     "dotenv": "17.2.1",
-    "fastify": "5.8.2",
+    "fastify": "5.8.4",
     "fastify-type-provider-zod": "6.1.0",
     "tsup": "8.5.0",
     "zod": "4.3.6"
