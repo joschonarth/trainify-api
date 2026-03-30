@@ -1,20 +1,16 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
-import { z } from 'zod'
 
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
-
+import type { RemoveCatalogExerciseParams } from '../schemas/remove-catalog-exercise.schema'
 import { makeRemoveCatalogExerciseUseCase } from '../use-cases/factories/make-remove-catalog-exercise-use-case'
 
 export async function removeCatalogExerciseController(
   request: FastifyRequest,
   reply: FastifyReply
 ) {
-  const paramsSchema = z.object({
-    id: z.string(),
-  })
+  const { id } = request.params as RemoveCatalogExerciseParams
 
   try {
-    const { id } = paramsSchema.parse(request.params)
     const removeCatalogExerciseUseCase = makeRemoveCatalogExerciseUseCase()
 
     await removeCatalogExerciseUseCase.execute({
