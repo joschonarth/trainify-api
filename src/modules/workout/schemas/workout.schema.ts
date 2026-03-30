@@ -1,12 +1,15 @@
 import { ExerciseCategory, ExerciseType } from 'generated/prisma'
 import { z } from 'zod'
 
-export const workoutSchema = z.object({
+export const baseWorkoutSchema = z.object({
   id: z.string().describe('Workout ID.'),
   name: z.string().describe('Workout name.'),
   description: z.string().nullable().describe('Workout description.'),
   createdAt: z.date().describe('Workout creation date.'),
   userId: z.string().describe('ID of the user who owns the workout.'),
+})
+
+export const workoutSchema = baseWorkoutSchema.extend({
   exercises: z.array(
     z.object({
       id: z.string().describe('Workout exercise relation ID.'),
