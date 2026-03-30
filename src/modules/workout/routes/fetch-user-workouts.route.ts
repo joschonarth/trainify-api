@@ -5,6 +5,18 @@ import { verifyJwt } from '@/shared/middlewares/verify-jwt'
 import { fetchUserWorkoutsController } from '../controllers/fetch-user-workouts.controller'
 import { workoutSchema } from '../schemas/workout.schema'
 
+const fetchWorkoutSchema = workoutSchema.extend({
+  exercises: z.array(
+    workoutSchema.shape.exercises.element.omit({ workoutId: true })
+  ),
+  schedules: z.array(
+    workoutSchema.shape.schedules.element.omit({
+      userId: true,
+      workoutId: true,
+    })
+  ),
+})
+
 export function fetchUserWorkoutsRoute(app: FastifyInstance) {
   app.get(
     '/workouts',
@@ -18,7 +30,7 @@ export function fetchUserWorkoutsRoute(app: FastifyInstance) {
         response: {
           200: z
             .object({
-              workouts: z.array(workoutSchema),
+              workouts: z.array(fetchWorkoutSchema),
             })
             .describe('Workouts fetched successfully.'),
         },

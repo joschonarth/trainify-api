@@ -1,18 +1,12 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
-import { z } from 'zod'
-
+import type { CreateWorkoutBody } from '../schemas/create-workout.schema'
 import { makeCreateWorkoutUseCase } from '../use-cases/factories/make-create-workout-use-case'
 
 export async function createWorkoutController(
   request: FastifyRequest,
   reply: FastifyReply
 ) {
-  const createWorkoutBodySchema = z.object({
-    name: z.string(),
-    description: z.string().nullable(),
-  })
-
-  const { name, description } = createWorkoutBodySchema.parse(request.body)
+  const { name, description } = request.body as CreateWorkoutBody
 
   const userId = request.user.sub
 
