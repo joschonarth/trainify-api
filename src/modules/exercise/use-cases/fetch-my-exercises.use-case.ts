@@ -8,9 +8,6 @@ interface ExerciseDTO {
   name: string
   category: ExerciseCategory | null
   type: ExerciseType | null
-  sets: number | null
-  reps: number | null
-  weight: number | null
   isCustom: boolean
   createdAt: Date
   userId: string | null
@@ -19,7 +16,7 @@ interface ExerciseDTO {
 interface FetchMyExercisesUseCaseRequest {
   userId: string
   query: string
-  category: ExerciseCategory
+  category: ExerciseCategory | null
   page: number
 }
 
@@ -49,9 +46,6 @@ export class FetchMyExercisesUseCase {
       name: exercise.name,
       category: exercise.category,
       type: exercise.type,
-      sets: exercise.sets,
-      reps: exercise.reps,
-      weight: exercise.weight,
       isCustom: exercise.isCustom,
       createdAt: exercise.createdAt,
       userId: exercise.userId,

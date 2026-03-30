@@ -4,7 +4,7 @@ import type { ExercisesRepository } from '../repositories/exercises.repository'
 
 interface FetchExercisesCatalogUseCaseRequest {
   query: string
-  category: ExerciseCategory
+  category: ExerciseCategory | null
   page: number
 }
 

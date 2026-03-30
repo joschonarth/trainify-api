@@ -6,14 +6,10 @@ export async function fetchExerciseLogsController(
   request: FastifyRequest,
   reply: FastifyReply
 ) {
-  try {
-    const userId = request.user.sub
-    const fetchExerciseLogsUseCase = makeFetchExerciseLogsUseCase()
-    const { logs } = await fetchExerciseLogsUseCase.execute(userId)
+  const userId = request.user.sub
 
-    return reply.status(200).send({ logs })
-  } catch (error) {
-    console.error(error)
-    return reply.status(500).send({ message: 'Internal server error.' })
-  }
+  const fetchExerciseLogsUseCase = makeFetchExerciseLogsUseCase()
+  const { logs } = await fetchExerciseLogsUseCase.execute(userId)
+
+  return reply.status(200).send({ logs })
 }

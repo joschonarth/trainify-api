@@ -1,20 +1,12 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
-import { ExerciseCategory } from 'generated/prisma'
-import z from 'zod'
-
+import type { FetchMyExercisesQuery } from '../schemas/fetch-my-exercises.schema'
 import { makeFetchMyExercisesUseCase } from '../use-cases/factories/make-fetch-my-exercises-use-case'
 
 export async function fetchMyExercisesController(
   request: FastifyRequest,
   reply: FastifyReply
 ) {
-  const fetchMyExercisesSchema = z.object({
-    query: z.string().optional().default(''),
-    category: z.enum(ExerciseCategory).optional().default(undefined),
-    page: z.coerce.number().min(1).default(1),
-  })
-
-  const { query, category, page } = fetchMyExercisesSchema.parse(request.query)
+  const { query, category, page } = request.query as FetchMyExercisesQuery
 
   const userId = request.user.sub
 
@@ -23,7 +15,7 @@ export async function fetchMyExercisesController(
   const { myExercises } = await fetchMyExercisesUseCase.execute({
     userId,
     query,
-    category,
+    category: category ?? null,
     page,
   })
 
