@@ -9,37 +9,32 @@ export const baseWorkoutSchema = z.object({
   userId: z.string().describe('ID of the user who owns the workout.'),
 })
 
+export const workoutExerciseSchema = z.object({
+  id: z.string().describe('Workout exercise relation ID.'),
+  exerciseId: z.string().describe('Exercise ID.'),
+  workoutId: z.string().describe('Workout ID.'),
+  defaultSets: z.number().nullable().describe('Default number of sets.'),
+  defaultReps: z.number().nullable().describe('Default number of reps.'),
+  defaultWeight: z.number().nullable().describe('Default weight in kilograms.'),
+  exercise: z.object({
+    id: z.string().describe('Exercise ID.'),
+    name: z.string().describe('Exercise name.'),
+    category: z
+      .enum(ExerciseCategory)
+      .nullable()
+      .describe('Exercise category.'),
+    type: z.enum(ExerciseType).nullable().describe('Exercise type.'),
+  }),
+})
+
+export const workoutScheduleSchema = z.object({
+  id: z.string().describe('Schedule ID.'),
+  userId: z.string().describe('User ID.'),
+  workoutId: z.string().describe('Workout ID.'),
+  dayOfWeek: z.number().describe('Day of the week (0 = Sunday, 6 = Saturday).'),
+})
+
 export const workoutSchema = baseWorkoutSchema.extend({
-  exercises: z.array(
-    z.object({
-      id: z.string().describe('Workout exercise relation ID.'),
-      exerciseId: z.string().describe('Exercise ID.'),
-      workoutId: z.string().describe('Workout ID.'),
-      defaultSets: z.number().nullable().describe('Default number of sets.'),
-      defaultReps: z.number().nullable().describe('Default number of reps.'),
-      defaultWeight: z
-        .number()
-        .nullable()
-        .describe('Default weight in kilograms.'),
-      exercise: z.object({
-        id: z.string().describe('Exercise ID.'),
-        name: z.string().describe('Exercise name.'),
-        category: z
-          .enum(ExerciseCategory)
-          .nullable()
-          .describe('Exercise category.'),
-        type: z.enum(ExerciseType).nullable().describe('Exercise type.'),
-      }),
-    })
-  ),
-  schedules: z.array(
-    z.object({
-      id: z.string().describe('Schedule ID.'),
-      userId: z.string().describe('User ID.'),
-      workoutId: z.string().describe('Workout ID.'),
-      dayOfWeek: z
-        .number()
-        .describe('Day of the week (0 = Sunday, 6 = Saturday).'),
-    })
-  ),
+  exercises: z.array(workoutExerciseSchema),
+  schedules: z.array(workoutScheduleSchema),
 })
