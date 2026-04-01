@@ -1,21 +1,16 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
-import { z } from 'zod'
 
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
-
+import type { FetchWorkoutSchedulesParams } from '../schemas/fetch-workout-schedules.schema'
 import { makeFetchWorkoutSchedulesUseCase } from '../use-cases/factories/make-fetch-workout-schedules-use-case'
 
 export async function fetchWorkoutSchedulesController(
   request: FastifyRequest,
   reply: FastifyReply
 ) {
-  const paramsSchema = z.object({
-    workoutId: z.string(),
-  })
+  const { workoutId } = request.params as FetchWorkoutSchedulesParams
 
   try {
-    const { workoutId } = paramsSchema.parse(request.params)
-
     const fetchWorkoutSchedulesUseCase = makeFetchWorkoutSchedulesUseCase()
     const { schedules } = await fetchWorkoutSchedulesUseCase.execute({
       workoutId,
