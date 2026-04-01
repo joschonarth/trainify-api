@@ -1,19 +1,14 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
-import { z } from 'zod'
 
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
-
+import type { GetWorkoutStatsParams } from '../schemas/get-workout-stats.schema'
 import { makeGetWorkoutStatsUseCase } from '../use-cases/factories/make-get-workout-stats-use-case'
 
 export async function getWorkoutStatsController(
   request: FastifyRequest,
   reply: FastifyReply
 ) {
-  const getWorkoutStatsParams = z.object({
-    workoutId: z.cuid(),
-  })
-
-  const { workoutId } = getWorkoutStatsParams.parse(request.params)
+  const { workoutId } = request.params as GetWorkoutStatsParams
 
   const userId = request.user.sub
 

@@ -1,33 +1,26 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
-import { z } from 'zod'
 
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
-
+import type {
+  UpdateWorkoutExerciseDefaultsBody,
+  UpdateWorkoutExerciseDefaultsParams,
+} from '../schemas/update-workout-exercise-defaults.schema'
 import { makeUpdateWorkoutExerciseDefaultsUseCase } from '../use-cases/factories/make-update-workout-exercise-defaults-use-case'
 
 export async function updateWorkoutExerciseDefaultsController(
   request: FastifyRequest,
   reply: FastifyReply
 ) {
-  const bodySchema = z.object({
-    defaultSets: z.number().nullable(),
-    defaultReps: z.number().nullable(),
-    defaultWeight: z.number().nullable(),
-  })
+  const { defaultSets, defaultReps, defaultWeight } =
+    request.body as UpdateWorkoutExerciseDefaultsBody
 
-  const paramsSchema = z.object({
-    workoutId: z.string(),
-    exerciseId: z.string(),
-  })
+  const { workoutId, exerciseId } =
+    request.params as UpdateWorkoutExerciseDefaultsParams
 
   try {
-    const { defaultSets, defaultReps, defaultWeight } = bodySchema.parse(
-      request.body
-    )
-    const { workoutId, exerciseId } = paramsSchema.parse(request.params)
-
     const updateWorkoutExerciseDefaultsUseCase =
       makeUpdateWorkoutExerciseDefaultsUseCase()
+
     const { workoutExercise } =
       await updateWorkoutExerciseDefaultsUseCase.execute({
         workoutId,

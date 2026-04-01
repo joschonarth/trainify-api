@@ -1,24 +1,20 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
-import { z } from 'zod'
 
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
-
+import type { RemoveWorkoutScheduleDayParams } from '../schemas/remove-workout-schedule-day.schema'
 import { makeRemoveWorkoutScheduleDayUseCase } from '../use-cases/factories/make-remove-workout-schedule-day-use-case'
 
 export async function removeWorkoutScheduleDayController(
   request: FastifyRequest,
   reply: FastifyReply
 ) {
-  const paramsSchema = z.object({
-    workoutId: z.string(),
-    scheduleId: z.string(),
-  })
+  const { workoutId, scheduleId } =
+    request.params as RemoveWorkoutScheduleDayParams
 
   try {
-    const { workoutId, scheduleId } = paramsSchema.parse(request.params)
-
     const removeWorkoutScheduleDayUseCase =
       makeRemoveWorkoutScheduleDayUseCase()
+
     await removeWorkoutScheduleDayUseCase.execute({
       workoutId,
       scheduleId,

@@ -1,27 +1,20 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
-import { z } from 'zod'
 
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
-
+import type {
+  UpdateWorkoutBody,
+  UpdateWorkoutParams,
+} from '../schemas/update-workout.schema'
 import { makeUpdateWorkoutUseCase } from '../use-cases/factories/make-update-workout-use-case'
 
 export async function updateWorkoutController(
   request: FastifyRequest,
   reply: FastifyReply
 ) {
-  const paramsSchema = z.object({
-    workoutId: z.string(),
-  })
-
-  const bodySchema = z.object({
-    name: z.string().min(1).optional(),
-    description: z.string().nullable().optional(),
-  })
+  const { workoutId } = request.params as UpdateWorkoutParams
+  const { name, description } = request.body as UpdateWorkoutBody
 
   try {
-    const { workoutId } = paramsSchema.parse(request.params)
-    const { name, description } = bodySchema.parse(request.body)
-
     const updateWorkoutUseCase = makeUpdateWorkoutUseCase()
 
     const updateData: Partial<{
@@ -46,6 +39,6 @@ export async function updateWorkoutController(
       return reply.status(404).send({ message: error.message })
     }
 
-    return reply.status(500).send({ message: 'Internal server error.' })
+    throw error
   }
 }
