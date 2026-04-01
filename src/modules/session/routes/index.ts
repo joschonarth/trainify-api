@@ -1,87 +1,47 @@
 import type { FastifyInstance } from 'fastify'
 
-import { verifyJwt } from '@/shared/middlewares/verify-jwt'
+import { compareMonthlyWorkoutsRoute } from './compare-monthly-workouts.route'
+import { compareWeeklyWorkoutsRoute } from './compare-weekly-workouts.route'
+import { compareWorkoutExercisesRoute } from './compare-workout-exercises.route'
+import { compareWorkoutSessionsRoute } from './compare-workout-sessions.route'
+import { compareWorkoutsRoute } from './compare-workouts.route'
+import { completeExerciseSessionRoute } from './complete-exercise-session.route'
+import { completeWorkoutSessionRoute } from './complete-workout-session.route'
+import { createExerciseLogSessionRoute } from './create-exercise-log-session.route'
+import { finishWorkoutSessionRoute } from './finish-workout-session.route'
+import { getDailyWorkoutSessionRoute } from './get-daily-workout-session.route'
+import { getExerciseSessionDetailsRoute } from './get-exercise-session-details.route'
+import { getExerciseSessionProgressRoute } from './get-exercise-session-progress.route'
+import { getMonthlyWorkoutCalendarRoute } from './get-monthly-workout-calendar.route'
+import { getWeeklyWorkoutCalendarRoute } from './get-weekly-workout-calendar.route'
+import { getWorkoutCalendarRoute } from './get-workout-calendar.route'
+import { getWorkoutSessionDetailsRoute } from './get-workout-session-details.route'
+import { getWorkoutSessionsByWorkoutRoute } from './get-workout-sessions-by-workout.route'
+import { getWorkoutSessionsHistoryRoute } from './get-workout-sessions-history.route'
+import { startExerciseTimerRoute } from './start-exercise-timer.route'
+import { startWorkoutSessionRoute } from './start-workout-session.route'
+import { stopExerciseTimerRoute } from './stop-exercise-timer.route'
 
-import { compareMonthlyWorkoutsController } from '../controllers/compare-monthly-workouts.controller'
-import { compareWeeklyWorkoutsController } from '../controllers/compare-weekly-workouts.controller'
-import { compareWorkoutExercisesController } from '../controllers/compare-workout-exercises.controller'
-import { compareWorkoutSessionsController } from '../controllers/compare-workout-sessions.controller'
-import { compareWorkoutsController } from '../controllers/compare-workouts.controller'
-import { completeExerciseSessionController } from '../controllers/complete-exercise-session.controller'
-import { completeWorkoutSessionController } from '../controllers/complete-workout-session.controller'
-import { createExerciseLogSessionController } from '../controllers/create-exercise-log-session.controller'
-import { finishWorkoutSessionController } from '../controllers/finish-workout-session.controller'
-import { getDailyWorkoutSessionController } from '../controllers/get-daily-workout-sessions.controller'
-import { getExerciseSessionDetailsController } from '../controllers/get-exercise-session-details.controller'
-import { getExerciseSessionProgressController } from '../controllers/get-exercise-session-progress.controller'
-import { getMonthlyWorkoutCalendarController } from '../controllers/get-monthly-workout-calendar.controller'
-import { getWeeklyWorkoutCalendarController } from '../controllers/get-weekly-workout-calendar.controller'
-import { getWorkoutCalendarController } from '../controllers/get-workout-calendar.controller'
-import { getWorkoutSessionDetailsController } from '../controllers/get-workout-session-details.controller'
-import { getWorkoutSessionsByWorkoutController } from '../controllers/get-workout-sessions-by-workout.controller'
-import { getWorkoutSessionsHistoryController } from '../controllers/get-workout-sessions-history.controller'
-import { startExerciseTimerController } from '../controllers/start-exercise-timer.controller'
-import { startWorkoutSessionController } from '../controllers/start-workout-session.controller'
-import { stopExerciseTimerController } from '../controllers/stop-exercise-timer.controller'
-
-export async function sessionsRoutes(app: FastifyInstance) {
-  app.addHook('onRequest', verifyJwt)
-
-  app.get('/sessions/today', getDailyWorkoutSessionController)
-  app.get('/sessions/:sessionId', getWorkoutSessionDetailsController)
-
-  app.get('/sessions/calendar/weekly', getWeeklyWorkoutCalendarController)
-  app.get('/sessions/calendar/monthly', getMonthlyWorkoutCalendarController)
-  app.get('/sessions/calendar', getWorkoutCalendarController)
-
-  app.get('/sessions/history', getWorkoutSessionsHistoryController)
-
-  app.post('/sessions/:sessionId/logs', createExerciseLogSessionController)
-
-  app.post('/sessions/:sessionId/complete', completeWorkoutSessionController)
-
-  app.get('/sessions/:workoutId/comparison', compareWorkoutSessionsController)
-  app.get(
-    '/sessions/:workoutId/exercises/comparison',
-    compareWorkoutExercisesController
-  )
-
-  app.get(
-    '/workouts/:workoutId/sessions',
-    getWorkoutSessionsByWorkoutController
-  )
-
-  app.get('/sessions/workouts/compare', compareWorkoutsController)
-  app.get('/sessions/workouts/compare/weekly', compareWeeklyWorkoutsController)
-  app.get(
-    '/sessions/workouts/compare/monthly',
-    compareMonthlyWorkoutsController
-  )
-
-  app.post('/sessions/:sessionId/start', startWorkoutSessionController)
-  app.post('/sessions/:sessionId/finish', finishWorkoutSessionController)
-
-  app.post(
-    '/sessions/exercises/:exerciseSessionId/start',
-    startExerciseTimerController
-  )
-  app.post(
-    '/sessions/exercises/:exerciseSessionId/stop',
-    stopExerciseTimerController
-  )
-
-  app.get(
-    '/sessions/exercises/:exerciseSessionId',
-    getExerciseSessionDetailsController
-  )
-
-  app.patch(
-    '/sessions/exercises/:exerciseSessionId/complete',
-    completeExerciseSessionController
-  )
-
-  app.get(
-    '/sessions/exercises/:exerciseId/progress',
-    getExerciseSessionProgressController
-  )
+export function sessionsRoutes(app: FastifyInstance) {
+  app.register(getDailyWorkoutSessionRoute)
+  app.register(getWorkoutSessionDetailsRoute)
+  app.register(getWeeklyWorkoutCalendarRoute)
+  app.register(getMonthlyWorkoutCalendarRoute)
+  app.register(getWorkoutCalendarRoute)
+  app.register(getWorkoutSessionsHistoryRoute)
+  app.register(createExerciseLogSessionRoute)
+  app.register(completeWorkoutSessionRoute)
+  app.register(compareWorkoutSessionsRoute)
+  app.register(compareWorkoutExercisesRoute)
+  app.register(getWorkoutSessionsByWorkoutRoute)
+  app.register(compareWorkoutsRoute)
+  app.register(compareWeeklyWorkoutsRoute)
+  app.register(compareMonthlyWorkoutsRoute)
+  app.register(startWorkoutSessionRoute)
+  app.register(finishWorkoutSessionRoute)
+  app.register(startExerciseTimerRoute)
+  app.register(stopExerciseTimerRoute)
+  app.register(getExerciseSessionDetailsRoute)
+  app.register(completeExerciseSessionRoute)
+  app.register(getExerciseSessionProgressRoute)
 }
