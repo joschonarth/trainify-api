@@ -1,6 +1,5 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
-import { z } from 'zod'
-
+import type { GetUserStreakLogsQuery } from '../schemas/get-user-streak-logs.schema'
 import { makeGetUserStreakLogsUseCase } from '../use-cases/factories/make-get-user-streak-logs-use-case'
 
 export async function getUserStreakLogsController(
@@ -11,12 +10,7 @@ export async function getUserStreakLogsController(
 ) {
   const userId = request.user.sub
 
-  const querySchema = z.object({
-    startDate: z.string().optional(),
-    endDate: z.string().optional(),
-  })
-
-  const { startDate, endDate } = querySchema.parse(request.query)
+  const { startDate, endDate } = request.query as GetUserStreakLogsQuery
 
   const getUserStreakLogsUseCase = makeGetUserStreakLogsUseCase()
 
