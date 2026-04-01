@@ -1,28 +1,23 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
-import { z } from 'zod'
 
 import { ResourceAlreadyExistsError } from '@/shared/errors/resource-already-exists.error'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
-
+import type {
+  UpdateWorkoutScheduleDayBody,
+  UpdateWorkoutScheduleDayParams,
+} from '../schemas/update-workout-schedule-day.schema'
 import { makeUpdateWorkoutScheduleDayUseCase } from '../use-cases/factories/make-update-workout-schedule-day-use-case'
 
 export async function updateWorkoutScheduleDayController(
   request: FastifyRequest,
   reply: FastifyReply
 ) {
-  const bodySchema = z.object({
-    newDayOfWeek: z.number().min(0).max(6),
-  })
+  const { workoutId, scheduleId } =
+    request.params as UpdateWorkoutScheduleDayParams
 
-  const paramsSchema = z.object({
-    workoutId: z.string(),
-    scheduleId: z.string(),
-  })
+  const { newDayOfWeek } = request.body as UpdateWorkoutScheduleDayBody
 
   try {
-    const { newDayOfWeek } = bodySchema.parse(request.body)
-    const { workoutId, scheduleId } = paramsSchema.parse(request.params)
-
     const updateWorkoutScheduleDayUseCase =
       makeUpdateWorkoutScheduleDayUseCase()
     const { schedule } = await updateWorkoutScheduleDayUseCase.execute({
