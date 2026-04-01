@@ -4,8 +4,8 @@ import type { BadgesRepository } from '@/modules/gamification/repositories/badge
 
 interface GetAllBadgesUseCaseRequest {
   userId: string
-  type?: BadgeType
-  unlocked?: boolean
+  type?: BadgeType | null
+  unlocked?: boolean | null
 }
 
 interface BadgeWithStatus extends Badge {
