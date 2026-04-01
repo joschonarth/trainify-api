@@ -1,7 +1,7 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
-import { z } from 'zod'
 
 import { makeGetWorkoutCalendarUseCase } from '@/modules/session/use-cases/factories/make-get-workout-calendar-use-case'
+import type { GetWorkoutCalendarQuery } from '../schemas/get-workout-calendar.schema'
 
 export async function getWorkoutCalendarController(
   request: FastifyRequest,
@@ -9,22 +9,7 @@ export async function getWorkoutCalendarController(
 ) {
   const userId = request.user.sub
 
-  const querySchema = z.object({
-    month: z.coerce
-      .number()
-      .min(1)
-      .max(12)
-      .optional()
-      .default(new Date().getMonth() + 1),
-    year: z.coerce
-      .number()
-      .min(1970)
-      .max(2100)
-      .optional()
-      .default(new Date().getFullYear()),
-  })
-
-  const { month, year } = querySchema.parse(request.query)
+  const { month, year } = request.query as GetWorkoutCalendarQuery
 
   const getWorkoutCalendarUseCase = makeGetWorkoutCalendarUseCase()
 

@@ -4,6 +4,7 @@ import { z } from 'zod'
 import { verifyJwt } from '@/shared/middlewares/verify-jwt'
 import { getMonthlyWorkoutCalendarController } from '../controllers/get-monthly-workout-calendar.controller'
 import { getMonthlyWorkoutCalendarQuerySchema } from '../schemas/get-monthly-workout-calendar.schema'
+import { calendarDaySchema } from '../schemas/session.schema'
 
 export function getMonthlyWorkoutCalendarRoute(app: FastifyInstance) {
   app.get(
@@ -19,14 +20,7 @@ export function getMonthlyWorkoutCalendarRoute(app: FastifyInstance) {
         response: {
           200: z
             .object({
-              days: z.array(
-                z.object({
-                  date: z.string().describe('Date in YYYY-MM-DD format.'),
-                  completed: z
-                    .boolean()
-                    .describe('Whether a workout was completed on this day.'),
-                })
-              ),
+              days: z.array(calendarDaySchema),
             })
             .describe('Monthly workout calendar fetched successfully.'),
         },
