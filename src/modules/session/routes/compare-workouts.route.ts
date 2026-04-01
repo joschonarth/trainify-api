@@ -4,16 +4,10 @@ import { z } from 'zod'
 import { verifyJwt } from '@/shared/middlewares/verify-jwt'
 import { compareWorkoutsController } from '../controllers/compare-workouts.controller'
 import { compareWorkoutsQuerySchema } from '../schemas/compare-workouts.schema'
-
-const periodSummarySchema = z.object({
-  start: z.string().describe('Start date of the period.'),
-  end: z.string().describe('End date of the period.'),
-  totalWorkouts: z.number().describe('Total workouts completed in the period.'),
-  totalSets: z.number().describe('Total sets performed in the period.'),
-  totalReps: z.number().describe('Total reps performed in the period.'),
-  totalWeight: z.number().describe('Total weight used in the period.'),
-  totalVolume: z.number().describe('Total volume in the period.'),
-})
+import {
+  periodDifferencesSchema,
+  periodSummarySchema,
+} from '../schemas/session.schema'
 
 export function compareWorkoutsRoute(app: FastifyInstance) {
   app.get(
@@ -37,25 +31,9 @@ export function compareWorkoutsRoute(app: FastifyInstance) {
                 previousPeriod: periodSummarySchema.describe(
                   'Previous period summary.'
                 ),
-                differences: z
-                  .object({
-                    setsDiff: z
-                      .number()
-                      .describe('Difference in total sets between periods.'),
-                    repsDiff: z
-                      .number()
-                      .describe('Difference in total reps between periods.'),
-                    weightDiff: z
-                      .number()
-                      .describe('Difference in total weight between periods.'),
-                    volumeDiff: z
-                      .number()
-                      .describe('Difference in total volume between periods.'),
-                    percentageVolumeChange: z
-                      .number()
-                      .describe('Percentage change in volume between periods.'),
-                  })
-                  .describe('Differences between current and previous period.'),
+                differences: periodDifferencesSchema.describe(
+                  'Differences between periods.'
+                ),
               }),
             })
             .describe('Workouts comparison fetched successfully.'),
