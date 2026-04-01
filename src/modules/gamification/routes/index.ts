@@ -1,26 +1,19 @@
 import type { FastifyInstance } from 'fastify'
 
-import { verifyJwt } from '@/shared/middlewares/verify-jwt'
+import { getAllBadgesRoute } from './get-all-badges.route'
+import { getBadgesStatsRoute } from './get-badges-stats.route'
+import { getUnlockedBadgesRoute } from './get-unlocked-badges.route'
+import { getUserStreakRoute } from './get-user-streak.route'
+import { getUserStreakCalendarRoute } from './get-user-streak-calendar.route'
+import { getUserStreakLogsRoute } from './get-user-streak-logs.route'
+import { refreshUserStreakRoute } from './refresh-user-streak.route'
 
-import { getAllBadgesController } from '../controllers/get-all-badges.controller'
-import { getBadgesStatsController } from '../controllers/get-badges-stats.controller'
-import { getUnlockedBadgesController } from '../controllers/get-unlocked-badges.controller'
-import { getUserStreakController } from '../controllers/get-user-streak.controller'
-import { getUserStreakCalendarController } from '../controllers/get-user-streak-calendar.controller'
-import { getUserStreakLogsController } from '../controllers/get-user-streak-logs.controller'
-import { refreshUserStreakController } from '../controllers/refresh-user-streak.controller'
-
-export async function gamificationRoutes(app: FastifyInstance) {
-  app.addHook('onRequest', verifyJwt)
-
-  /** Streaks */
-  app.get('/streak', getUserStreakController)
-  app.get('/streak/refresh', refreshUserStreakController)
-  app.get('/streak/calendar', getUserStreakCalendarController)
-  app.get('/streak/logs', getUserStreakLogsController)
-
-  /** Badges */
-  app.get('/badges', getAllBadgesController)
-  app.get('/badges/unlocked', getUnlockedBadgesController)
-  app.get('/badges/stats', getBadgesStatsController)
+export function gamificationRoutes(app: FastifyInstance) {
+  app.register(getUserStreakRoute)
+  app.register(refreshUserStreakRoute)
+  app.register(getUserStreakCalendarRoute)
+  app.register(getUserStreakLogsRoute)
+  app.register(getAllBadgesRoute)
+  app.register(getUnlockedBadgesRoute)
+  app.register(getBadgesStatsRoute)
 }
