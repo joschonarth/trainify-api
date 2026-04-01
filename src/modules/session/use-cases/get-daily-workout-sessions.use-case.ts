@@ -15,8 +15,8 @@ interface GetDailyWorkoutSessionResponse {
 
 export class GetDailyWorkoutSessionUseCase {
   constructor(
-    private workoutSessionsRepository: WorkoutSessionsRepository,
-    private workoutSchedulesRepository: WorkoutSchedulesRepository
+    private readonly workoutSessionsRepository: WorkoutSessionsRepository,
+    private readonly workoutSchedulesRepository: WorkoutSchedulesRepository
   ) {}
 
   async execute({
