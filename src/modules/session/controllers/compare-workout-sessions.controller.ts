@@ -1,19 +1,14 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
-import { z } from 'zod'
 
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
-
+import type { CompareWorkoutSessionsParams } from '../schemas/compare-workout-sessions.schema'
 import { makeCompareWorkoutSessionsUseCase } from '../use-cases/factories/make-compare-workout-sessions-use-case'
 
 export async function compareWorkoutSessionsController(
   request: FastifyRequest,
   reply: FastifyReply
 ) {
-  const compareWorkoutParamsSchema = z.object({
-    workoutId: z.cuid(),
-  })
-
-  const { workoutId } = compareWorkoutParamsSchema.parse(request.params)
+  const { workoutId } = request.params as CompareWorkoutSessionsParams
 
   const userId = request.user.sub
 
