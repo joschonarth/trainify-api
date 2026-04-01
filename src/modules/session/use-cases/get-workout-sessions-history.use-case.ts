@@ -62,7 +62,7 @@ export class GetWorkoutSessionsHistoryUseCase {
       startedAt: session.startedAt ?? null,
       endedAt: session.endedAt ?? null,
       exercises: (session.exerciseSessions ?? []).map((ex) => {
-        const lastLog = ex.logs.length > 0 ? ex.logs[ex.logs.length - 1] : null
+        const lastLog = ex.logs.at(-1) ?? null
 
         return {
           name: ex.exercise.name,
