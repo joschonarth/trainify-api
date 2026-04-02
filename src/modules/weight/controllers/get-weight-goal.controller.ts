@@ -1,19 +1,14 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
-import { z } from 'zod'
 
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
-
+import type { GetWeightGoalParams } from '../schemas/get-weight-goal.schema'
 import { makeGetWeightGoalUseCase } from '../use-cases/factories/make-get-weight-goal-use-case'
 
 export async function getWeightGoalController(
   request: FastifyRequest,
   reply: FastifyReply
 ) {
-  const paramsSchema = z.object({
-    goalId: z.string(),
-  })
-
-  const { goalId } = paramsSchema.parse(request.params)
+  const { goalId } = request.params as GetWeightGoalParams
   const userId = request.user.sub
 
   try {
