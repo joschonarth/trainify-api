@@ -1,6 +1,8 @@
 import { WorkoutSessionStatus } from 'generated/prisma'
 import { z } from 'zod'
 
+// --- Exercise Session ---
+
 export const sessionExerciseItemSchema = z.object({
   id: z.string().describe('Exercise ID.'),
   name: z.string().describe('Exercise name.'),
@@ -35,6 +37,26 @@ export const exerciseSessionSchema = z.object({
   logs: z.array(sessionExerciseLogSchema),
 })
 
+export const exerciseTimerSessionSchema = z.object({
+  id: z.string().describe('Exercise session ID.'),
+  startedAt: z.date().nullable().describe('Exercise session start time.'),
+  endedAt: z.date().nullable().describe('Exercise session end time.'),
+  duration: z
+    .number()
+    .nullable()
+    .describe('Exercise session duration in seconds.'),
+  completed: z
+    .boolean()
+    .describe('Whether the exercise session was completed.'),
+  plannedSets: z.number().nullable().describe('Planned number of sets.'),
+  plannedReps: z.number().nullable().describe('Planned number of reps.'),
+  plannedWeight: z.number().nullable().describe('Planned weight in kilograms.'),
+  workoutSessionId: z.string().describe('Workout session ID.'),
+  exerciseId: z.string().describe('Exercise ID.'),
+})
+
+// --- Workout Session ---
+
 export const baseSessionSchema = z.object({
   id: z.string().describe('Session ID.'),
   userId: z.string().describe('User ID.'),
@@ -66,12 +88,16 @@ export const sessionWithWorkoutSchema = baseSessionSchema.extend({
   exerciseSessions: z.array(exerciseSessionSchema),
 })
 
+// --- Calendar ---
+
 export const calendarDaySchema = z.object({
   date: z.string().describe('Date in YYYY-MM-DD format.'),
   completed: z
     .boolean()
     .describe('Whether a workout was completed on this day.'),
 })
+
+// --- Comparison ---
 
 export const periodSummarySchema = z.object({
   start: z.string().describe('Start date of the period.'),

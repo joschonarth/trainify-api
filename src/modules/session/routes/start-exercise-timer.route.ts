@@ -3,25 +3,8 @@ import { z } from 'zod'
 
 import { verifyJwt } from '@/shared/middlewares/verify-jwt'
 import { startExerciseTimerController } from '../controllers/start-exercise-timer.controller'
+import { exerciseTimerSessionSchema } from '../schemas/session.schema'
 import { startExerciseTimerParamsSchema } from '../schemas/start-exercise-timer.schema'
-
-const exerciseSessionSchema = z.object({
-  id: z.string().describe('Exercise session ID.'),
-  startedAt: z.date().nullable().describe('Exercise session start time.'),
-  endedAt: z.date().nullable().describe('Exercise session end time.'),
-  duration: z
-    .number()
-    .nullable()
-    .describe('Exercise session duration in seconds.'),
-  completed: z
-    .boolean()
-    .describe('Whether the exercise session was completed.'),
-  plannedSets: z.number().nullable().describe('Planned number of sets.'),
-  plannedReps: z.number().nullable().describe('Planned number of reps.'),
-  plannedWeight: z.number().nullable().describe('Planned weight in kilograms.'),
-  workoutSessionId: z.string().describe('Workout session ID.'),
-  exerciseId: z.string().describe('Exercise ID.'),
-})
 
 export function startExerciseTimerRoute(app: FastifyInstance) {
   app.post(
@@ -36,7 +19,7 @@ export function startExerciseTimerRoute(app: FastifyInstance) {
         response: {
           200: z
             .object({
-              exerciseSession: exerciseSessionSchema,
+              exerciseSession: exerciseTimerSessionSchema,
             })
             .describe('Exercise timer started successfully.'),
           404: z
