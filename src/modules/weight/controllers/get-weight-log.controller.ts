@@ -1,22 +1,18 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
-import { z } from 'zod'
 
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
-
+import type { GetWeightLogParams } from '../schemas/get-weight-log.schema'
 import { makeGetWeightLogUseCase } from '../use-cases/factories/make-get-weight-log-use-case'
 
 export async function getWeightLogController(
   request: FastifyRequest,
   reply: FastifyReply
 ) {
+  const userId = request.user.sub
+
+  const { logId } = request.params as GetWeightLogParams
+
   try {
-    const paramsSchema = z.object({
-      logId: z.string(),
-    })
-
-    const userId = request.user.sub
-
-    const { logId } = paramsSchema.parse(request.params)
     const getWeightLogUseCase = makeGetWeightLogUseCase()
 
     const log = await getWeightLogUseCase.execute({ logId, userId })
