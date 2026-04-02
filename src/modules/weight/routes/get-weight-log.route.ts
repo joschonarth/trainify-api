@@ -17,7 +17,11 @@ export function getWeightLogRoute(app: FastifyInstance) {
         description: 'Returns a specific weight log by ID.',
         params: getWeightLogParamsSchema,
         response: {
-          200: weightLogSchema.describe('Weight log fetched successfully.'),
+          200: z
+            .object({
+              log: z.array(weightLogSchema),
+            })
+            .describe('Weight log fetched successfully.'),
           404: z
             .object({ message: z.string() })
             .describe('Weight log not found.'),

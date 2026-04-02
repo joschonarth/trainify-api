@@ -17,7 +17,7 @@ export async function getWeightLogController(
 
     const log = await getWeightLogUseCase.execute({ logId, userId })
 
-    return reply.status(200).send(log)
+    return reply.status(200).send({ log })
   } catch (error) {
     if (error instanceof ResourceNotFoundError) {
       return reply.status(404).send({ message: error.message })
