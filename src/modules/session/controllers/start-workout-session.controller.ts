@@ -1,24 +1,20 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
-import { z } from 'zod'
 
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
 import { WorkoutSessionAlreadyCompletedError } from '../errors/workout-session-already-completed.error'
 import { WorkoutSessionAlreadyInProgressError } from '../errors/workout-session-already-in-progress.error'
+import type { StartWorkoutSessionParams } from '../schemas/start-workout-session.schema'
 import { makeStartWorkoutSessionUseCase } from '../use-cases/factories/make-start-workout-session-use-case'
 
 export async function startWorkoutSessionController(
   request: FastifyRequest,
   reply: FastifyReply
 ) {
-  const paramsSchema = z.object({
-    sessionId: z.cuid(),
-  })
+  const { sessionId } = request.params as StartWorkoutSessionParams
+  const userId = request.user.sub
 
   try {
-    const { sessionId } = paramsSchema.parse(request.params)
-    const userId = request.user.sub
-
     const startWorkoutSessionUseCase = makeStartWorkoutSessionUseCase()
 
     const { session } = await startWorkoutSessionUseCase.execute({
