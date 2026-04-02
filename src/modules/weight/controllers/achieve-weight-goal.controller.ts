@@ -3,14 +3,15 @@ import type { FastifyReply, FastifyRequest } from 'fastify'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
 import { WeightGoalNotAchievedError } from '../errors/weight-goal-not-achieved.error'
+import type { AchieveWeightGoalParams } from '../schemas/achieve-weight-goal.schema'
 import { makeAchieveWeightGoalUseCase } from '../use-cases/factories/make-achieve-weight-goal-use-case'
 
 export async function achieveWeightGoalController(
-  request: FastifyRequest<{ Params: { goalId: string } }>,
+  request: FastifyRequest,
   reply: FastifyReply
 ) {
+  const { goalId } = request.params as AchieveWeightGoalParams
   const userId = request.user.sub
-  const { goalId } = request.params
 
   try {
     const achieveWeightGoalUseCase = makeAchieveWeightGoalUseCase()
