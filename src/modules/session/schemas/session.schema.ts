@@ -55,6 +55,53 @@ export const exerciseTimerSessionSchema = z.object({
   exerciseId: z.string().describe('Exercise ID.'),
 })
 
+// --- Exercise Session Details ---
+
+export const exerciseSessionDetailsSchema = z.object({
+  id: z.string().describe('Exercise session ID.'),
+  exerciseId: z.string().describe('Exercise ID.'),
+  exerciseName: z.string().describe('Exercise name.'),
+  category: z.string().nullable().describe('Exercise category.'),
+  type: z.string().nullable().describe('Exercise type.'),
+  plannedSets: z.number().nullable().describe('Planned number of sets.'),
+  plannedReps: z.number().nullable().describe('Planned number of reps.'),
+  plannedWeight: z.number().nullable().describe('Planned weight in kilograms.'),
+  completed: z
+    .boolean()
+    .describe('Whether the exercise session was completed.'),
+  startedAt: z
+    .date()
+    .nullable()
+    .optional()
+    .describe('Exercise session start time.'),
+  endedAt: z
+    .date()
+    .nullable()
+    .optional()
+    .describe('Exercise session end time.'),
+  duration: z
+    .number()
+    .nullable()
+    .optional()
+    .describe('Exercise session duration in seconds.'),
+  loggedSets: z
+    .number()
+    .nullable()
+    .optional()
+    .describe('Logged number of sets.'),
+  loggedReps: z
+    .number()
+    .nullable()
+    .optional()
+    .describe('Logged number of reps.'),
+  loggedWeight: z
+    .number()
+    .nullable()
+    .optional()
+    .describe('Logged weight in kilograms.'),
+  description: z.string().nullable().optional().describe('Log notes.'),
+})
+
 // --- Workout Session ---
 
 export const baseSessionSchema = z.object({
