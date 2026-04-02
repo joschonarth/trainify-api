@@ -1,23 +1,19 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
-import { z } from 'zod'
 
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
 import { ExerciseTimerNotStartedError } from '../errors/exercise-timer-not-started.error'
+import type { StopExerciseTimerParams } from '../schemas/stop-exercise-timer.schema'
 import { makeStopExerciseTimerUseCase } from '../use-cases/factories/make-stop-exercise-timer-use-case'
 
 export async function stopExerciseTimerController(
   request: FastifyRequest,
   reply: FastifyReply
 ) {
-  const paramsSchema = z.object({
-    exerciseSessionId: z.cuid(),
-  })
+  const { exerciseSessionId } = request.params as StopExerciseTimerParams
+  const userId = request.user.sub
 
   try {
-    const { exerciseSessionId } = paramsSchema.parse(request.params)
-    const userId = request.user.sub
-
     const stopExerciseTimerUseCase = makeStopExerciseTimerUseCase()
 
     const { exerciseSession, elapsed } = await stopExerciseTimerUseCase.execute(

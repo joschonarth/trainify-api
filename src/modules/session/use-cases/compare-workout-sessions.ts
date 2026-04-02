@@ -64,18 +64,17 @@ export class CompareWorkoutSessionsUseCase {
         workoutId
       )
 
-    if (!sessions || sessions.length < 2) {
-      throw new ResourceNotFoundError(
-        'Not enough sessions to compare this workout.'
-      )
-    }
-
     const sorted = [...sessions].sort(
       (a, b) => b.date.getTime() - a.date.getTime()
     )
 
-    const last = sorted[0]!
-    const previous = sorted[1]!
+    const [last, previous] = sorted
+
+    if (!(last && previous)) {
+      throw new ResourceNotFoundError(
+        'Not enough sessions to compare this workout.'
+      )
+    }
 
     const mapToWorkoutSessionData = (
       session: WorkoutSessionWithWorkout

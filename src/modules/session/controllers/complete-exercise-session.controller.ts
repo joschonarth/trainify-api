@@ -1,17 +1,12 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
-import { z } from 'zod'
-
+import type { CompleteExerciseSessionParams } from '../schemas/complete-exercise-session.schema'
 import { makeCompleteExerciseSessionUseCase } from '../use-cases/factories/make-complete-exercise-session-use-case'
 
 export async function completeExerciseSessionController(
   request: FastifyRequest,
   reply: FastifyReply
 ) {
-  const paramsSchema = z.object({
-    exerciseSessionId: z.cuid(),
-  })
-
-  const { exerciseSessionId } = paramsSchema.parse(request.params)
+  const { exerciseSessionId } = request.params as CompleteExerciseSessionParams
 
   const completeExerciseSession = makeCompleteExerciseSessionUseCase()
 

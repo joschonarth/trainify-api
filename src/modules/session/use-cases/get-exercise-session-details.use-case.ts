@@ -44,8 +44,8 @@ export class GetExerciseSessionDetailsUseCase {
       throw new ResourceNotFoundError('Exercise session not found.')
     }
 
-    const lastLog = exerciseSession.logs.length
-      ? exerciseSession.logs[exerciseSession.logs.length - 1]
+    const lastLog = exerciseSession?.logs?.length
+      ? exerciseSession.logs.at(-1)
       : null
 
     const sessionDetail: ExerciseSessionDetails = {

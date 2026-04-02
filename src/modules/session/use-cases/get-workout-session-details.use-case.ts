@@ -3,7 +3,7 @@ import type { WorkoutSessionStatus } from 'generated/prisma'
 import type { WorkoutSessionsRepository } from '@/modules/session/repositories/workout-sessions.repository'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
-interface ExerciseDetail {
+interface ExerciseDetails {
   name: string
   plannedSets: number | null
   plannedReps: number | null
@@ -18,7 +18,7 @@ interface ExerciseDetail {
   duration?: number | null
 }
 
-interface WorkoutSessionDetail {
+interface WorkoutSessionDetails {
   id: string
   date: Date
   status: WorkoutSessionStatus
@@ -26,11 +26,11 @@ interface WorkoutSessionDetail {
   startedAt?: Date | null
   endedAt?: Date | null
   duration?: number | null
-  exercises: ExerciseDetail[]
+  exercises: ExerciseDetails[]
 }
 
 interface GetWorkoutSessionDetailsResponse {
-  session: WorkoutSessionDetail
+  session: WorkoutSessionDetails
 }
 
 export class GetWorkoutSessionDetailsUseCase {
@@ -52,7 +52,7 @@ export class GetWorkoutSessionDetailsUseCase {
       throw new ResourceNotFoundError('Workout session not found.')
     }
 
-    const sessionDetail: WorkoutSessionDetail = {
+    const sessionDetail: WorkoutSessionDetails = {
       id: session.id,
       date: session.date,
       status: session.status,
@@ -66,7 +66,7 @@ export class GetWorkoutSessionDetailsUseCase {
         )
 
         const lastLog = exerciseSession?.logs?.length
-          ? exerciseSession.logs[exerciseSession.logs.length - 1]
+          ? exerciseSession.logs.at(-1)
           : null
 
         return {
