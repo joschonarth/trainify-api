@@ -1,21 +1,17 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
-import z from 'zod'
 
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
-
+import type { DeactivateWeightGoalParams } from '../schemas/deactivate-weight-goal.schema'
 import { makeDeactivateWeightGoalUseCase } from '../use-cases/factories/make-deactivate-weight-goal-use-case'
 
 export async function deactivateWeightGoalController(
   request: FastifyRequest,
   reply: FastifyReply
 ) {
-  try {
-    const paramsSchema = z.object({
-      goalId: z.string(),
-    })
-    const { goalId } = paramsSchema.parse(request.params)
-    const userId = request.user.sub
+  const { goalId } = request.params as DeactivateWeightGoalParams
+  const userId = request.user.sub
 
+  try {
     const deactivateGoalUseCase = makeDeactivateWeightGoalUseCase()
     await deactivateGoalUseCase.execute({ goalId, userId })
 
