@@ -1,4 +1,4 @@
-import type { WeightLog } from 'generated/prisma'
+import type { WeightGoal, WeightLog } from 'generated/prisma'
 
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
@@ -32,7 +32,7 @@ export class CreateWeightLogUseCase {
     note,
     goalId,
   }: CreateWeightLogUseCaseRequest): Promise<CreateWeightLogUseCaseResponse> {
-    let goal = null
+    let goal: WeightGoal | null = null
 
     if (goalId) {
       goal = await this.weightGoalsRepository.findById(goalId)

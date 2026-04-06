@@ -20,8 +20,8 @@ interface GetWeightGoalLogsUseCaseResponse {
 
 export class GetWeightGoalLogsUseCase {
   constructor(
-    private weightGoalsRepository: WeightGoalsRepository,
-    private weightLogsRepository: WeightLogsRepository
+    private readonly weightGoalsRepository: WeightGoalsRepository,
+    private readonly weightLogsRepository: WeightLogsRepository
   ) {}
 
   async execute({
