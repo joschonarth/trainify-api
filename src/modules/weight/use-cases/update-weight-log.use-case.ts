@@ -22,8 +22,8 @@ interface UpdateWeightLogResponse {
 
 export class UpdateWeightLogUseCase {
   constructor(
-    private weightLogsRepository: WeightLogsRepository,
-    private calculateWeightGoalProgressUseCase: CalculateWeightGoalProgressUseCase
+    private readonly weightLogsRepository: WeightLogsRepository,
+    private readonly calculateWeightGoalProgressUseCase: CalculateWeightGoalProgressUseCase
   ) {}
 
   async execute({

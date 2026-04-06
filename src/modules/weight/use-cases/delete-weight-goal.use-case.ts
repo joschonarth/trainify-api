@@ -10,8 +10,8 @@ interface DeleteWeightGoalRequest {
 
 export class DeleteWeightGoalUseCase {
   constructor(
-    private weightGoalsRepository: WeightGoalsRepository,
-    private weightLogsRepository: WeightLogsRepository
+    private readonly weightGoalsRepository: WeightGoalsRepository,
+    private readonly weightLogsRepository: WeightLogsRepository
   ) {}
 
   async execute({ goalId, userId }: DeleteWeightGoalRequest): Promise<void> {

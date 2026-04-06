@@ -8,8 +8,9 @@ export async function getWeightSummaryController(
   request: FastifyRequest,
   reply: FastifyReply
 ) {
+  const userId = request.user.sub
+
   try {
-    const userId = request.user.sub
     const getWeightSummaryUseCase = makeGetWeightSummaryUseCase()
     const summary = await getWeightSummaryUseCase.execute(userId)
 

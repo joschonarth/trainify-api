@@ -8,8 +8,9 @@ export async function getActiveWeightGoalController(
   request: FastifyRequest,
   reply: FastifyReply
 ) {
+  const userId = request.user.sub
+
   try {
-    const userId = request.user.sub
     const getActiveWeightGoalUseCase = makeGetActiveWeightGoalUseCase()
     const activeGoal = await getActiveWeightGoalUseCase.execute(userId)
 

@@ -1,39 +1,32 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
-import { z } from 'zod'
 
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
 import { InvalidWeightGoalError } from '../errors/invalid-weight-goal.error'
+import type {
+  UpdateWeightGoalBody,
+  UpdateWeightGoalParams,
+} from '../schemas/update-weight-goal.schema'
 import { makeUpdateWeightGoalUseCase } from '../use-cases/factories/make-update-weight-goal-use-case'
 
 export async function updateWeightGoalController(
   request: FastifyRequest,
   reply: FastifyReply
 ) {
-  const paramsSchema = z.object({
-    goalId: z.string(),
-  })
+  const { goalId } = request.params as UpdateWeightGoalParams
+  const { name, description, endDate } = request.body as UpdateWeightGoalBody
 
-  const updateGoalBodySchema = z.object({
-    name: z.string().optional(),
-    description: z.string().nullable().optional(),
-    endDate: z.date().nullable().optional(),
-  })
+  const userId = request.user.sub
 
   try {
-    const { goalId } = paramsSchema.parse(request.params)
-    const data = updateGoalBodySchema.parse(request.body)
-
-    const userId = request.user.sub
-
     const updateWeightGoalUseCase = makeUpdateWeightGoalUseCase()
 
     const { weightGoal } = await updateWeightGoalUseCase.execute({
       goalId,
       userId,
-      name: data.name,
-      description: data.description ?? null,
-      endDate: data.endDate ?? null,
+      name,
+      description: description ?? null,
+      endDate: endDate ?? null,
     })
 
     return reply.status(200).send({ weightGoal })

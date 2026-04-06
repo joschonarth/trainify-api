@@ -1,26 +1,13 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
-import { GoalType } from 'generated/prisma'
-import { z } from 'zod'
-
+import type { CreateWeightGoalBody } from '../schemas/create-weight-goal.schema'
 import { makeCreateWeightGoalUseCase } from '../use-cases/factories/make-create-weight-goal-use-case'
 
 export async function createWeightGoalController(
   request: FastifyRequest,
   reply: FastifyReply
 ) {
-  const createGoalBodySchema = z.object({
-    name: z.string().min(1, 'Name is required'),
-    description: z.string().nullable().default(null),
-    goalType: z.enum(GoalType),
-    targetWeight: z.number(),
-    startDate: z.date().default(() => new Date()),
-    endDate: z.date().nullable().default(null),
-  })
-
-  const parsedBody = createGoalBodySchema.parse(request.body)
-
   const { name, description, goalType, targetWeight, startDate, endDate } =
-    parsedBody
+    request.body as CreateWeightGoalBody
 
   const userId = request.user.sub
 

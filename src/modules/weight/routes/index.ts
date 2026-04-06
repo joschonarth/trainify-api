@@ -1,48 +1,39 @@
 import type { FastifyInstance } from 'fastify'
 
-import { verifyJwt } from '@/shared/middlewares/verify-jwt'
+import { achieveWeightGoalRoute } from './achieve-weight-goal.route'
+import { createWeightGoalRoute } from './create-weight-goal.route'
+import { createWeightLogRoute } from './create-weight-log.route'
+import { deactivateWeightGoalRoute } from './deactivate-weight-goal.route'
+import { deleteWeightGoalRoute } from './delete-weight-goal.route'
+import { deleteWeightLogRoute } from './delete-weight-log.route'
+import { getActiveWeightGoalRoute } from './get-active-weight-goal.route'
+import { getActiveWeightGoalAnalyticsRoute } from './get-active-weight-goal-analytics.route'
+import { getGeneralWeightAnalyticsRoute } from './get-general-weight-analytics.route'
+import { getWeightGoalRoute } from './get-weight-goal.route'
+import { getWeightGoalLogsRoute } from './get-weight-goal-logs.route'
+import { getWeightLogRoute } from './get-weight-log.route'
+import { getWeightSummaryRoute } from './get-weight-summary.route'
+import { listWeightGoalsRoute } from './list-weight-goals.route'
+import { listWeightLogsRoute } from './list-weight-logs.route'
+import { updateWeightGoalRoute } from './update-weight-goal.route'
+import { updateWeightLogRoute } from './update-weight-log.route'
 
-import { achieveWeightGoalController } from '../controllers/achieve-weight-goal.controller'
-import { createWeightGoalController } from '../controllers/create-weight-goal.controller'
-import { createWeightLogController } from '../controllers/create-weight-log.controller'
-import { deactivateWeightGoalController } from '../controllers/deactivate-weight-goal.controller'
-import { deleteWeightGoalController } from '../controllers/delete-weight-goal.controller'
-import { deleteWeightLogController } from '../controllers/delete-weight-log.controller'
-import { getActiveWeightGoalController } from '../controllers/get-active-weight-goal.controller'
-import { getActiveWeightGoalAnalyticsController } from '../controllers/get-active-weight-goal-analytics.controller'
-import { getGeneralWeightAnalyticsController } from '../controllers/get-general-weight-analytics.controller'
-import { getWeightGoalController } from '../controllers/get-weight-goal.controller'
-import { getWeightGoalLogsController } from '../controllers/get-weight-goal-logs.controller'
-import { getWeightLogController } from '../controllers/get-weight-log.controller'
-import { getWeightSummaryController } from '../controllers/get-weight-summary.controller'
-import { listWeightGoalsController } from '../controllers/list-weight-goals.controller'
-import { listWeightLogsController } from '../controllers/list-weight-logs.controller'
-import { updateWeightGoalController } from '../controllers/update-weight-goal.controller'
-import { updateWeightLogController } from '../controllers/update-weight-log.controller'
-
-export async function weightRoutes(app: FastifyInstance) {
-  app.addHook('onRequest', verifyJwt)
-
-  /** Weight Logs */
-  app.get('/weight/logs', listWeightLogsController)
-  app.get('/weight/logs/:logId', getWeightLogController)
-  app.post('/weight/logs', createWeightLogController)
-  app.put('/weight/logs/:logId', updateWeightLogController)
-  app.delete('/weight/logs/:logId', deleteWeightLogController)
-
-  /** Weight Goals */
-  app.get('/weight/goals/:goalId', getWeightGoalController)
-  app.get('/weight/goals/:goalId/logs', getWeightGoalLogsController)
-  app.get('/weight/goals/active', getActiveWeightGoalController)
-  app.get('/weight/goals', listWeightGoalsController)
-  app.post('/weight/goals', createWeightGoalController)
-  app.patch('/weight/goals/:goalId/achieve', achieveWeightGoalController)
-  app.patch('/weight/goals/:goalId/deactivate', deactivateWeightGoalController)
-  app.put('/weight/goals/:goalId', updateWeightGoalController)
-  app.delete('/weight/goals/:goalId', deleteWeightGoalController)
-
-  /** Metrics */
-  app.get('/weight/summary', getWeightSummaryController)
-  app.get('/weight/analytics/general', getGeneralWeightAnalyticsController)
-  app.get('/weight/analytics/goal', getActiveWeightGoalAnalyticsController)
+export function weightRoutes(app: FastifyInstance) {
+  app.register(listWeightLogsRoute)
+  app.register(getWeightLogRoute)
+  app.register(createWeightLogRoute)
+  app.register(updateWeightLogRoute)
+  app.register(deleteWeightLogRoute)
+  app.register(getWeightGoalRoute)
+  app.register(getWeightGoalLogsRoute)
+  app.register(getActiveWeightGoalRoute)
+  app.register(listWeightGoalsRoute)
+  app.register(createWeightGoalRoute)
+  app.register(achieveWeightGoalRoute)
+  app.register(deactivateWeightGoalRoute)
+  app.register(updateWeightGoalRoute)
+  app.register(deleteWeightGoalRoute)
+  app.register(getWeightSummaryRoute)
+  app.register(getGeneralWeightAnalyticsRoute)
+  app.register(getActiveWeightGoalAnalyticsRoute)
 }

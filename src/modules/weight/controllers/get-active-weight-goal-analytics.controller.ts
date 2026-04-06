@@ -13,5 +13,5 @@ export async function getActiveWeightGoalAnalyticsController(
 
   const analytics = await getActiveGoalAnalyticsUseCase.execute({ userId })
 
-  return reply.status(200).send(analytics)
+  return reply.status(200).send({ analytics })
 }
