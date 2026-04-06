@@ -13,8 +13,8 @@ interface GetUserMetricsResponse {
 
 export class GetUserMetricsUseCase {
   constructor(
-    private workoutSessionsRepository: WorkoutSessionsRepository,
-    private exerciseLogsRepository: ExerciseLogsRepository
+    private readonly workoutSessionsRepository: WorkoutSessionsRepository,
+    private readonly exerciseLogsRepository: ExerciseLogsRepository
   ) {}
 
   async execute({
