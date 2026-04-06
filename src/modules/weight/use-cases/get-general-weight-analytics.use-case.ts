@@ -55,8 +55,16 @@ export class GetGeneralWeightAnalyticsUseCase {
       weight: l.weight,
     }))
 
-    const start = sorted.at(0)!
-    const end = sorted.at(-1)!
+    const start = sorted.at(0)
+    const end = sorted.at(-1)
+
+    if (!(start && end)) {
+      return {
+        dataPoints: [],
+        avgChangePerWeek: 0,
+        trendDirection: 'stable',
+      }
+    }
 
     const daysDiff =
       (end.createdAt.getTime() - start.createdAt.getTime()) /
@@ -66,12 +74,11 @@ export class GetGeneralWeightAnalyticsUseCase {
 
     const avgChangePerWeek = (end.weight - start.weight) / weeksDiff
 
-    const trendDirection =
-      Math.abs(avgChangePerWeek) < 0.1
-        ? 'stable'
-        : avgChangePerWeek > 0
-          ? 'increasing'
-          : 'decreasing'
+    let trendDirection: 'increasing' | 'decreasing' | 'stable' = 'stable'
+
+    if (Math.abs(avgChangePerWeek) >= 0.1) {
+      trendDirection = avgChangePerWeek > 0 ? 'increasing' : 'decreasing'
+    }
 
     return {
       dataPoints,
