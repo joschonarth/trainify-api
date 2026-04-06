@@ -1,11 +1,7 @@
 import type { FastifyInstance } from 'fastify'
 
-import { verifyJwt } from '@/shared/middlewares/verify-jwt'
+import { getUserMetricsRoute } from './get-user-metrics.route'
 
-import { getUserMetricsController } from '../controllers/get-user-metrics.controller'
-
-export async function metricsRoutes(app: FastifyInstance) {
-  app.addHook('onRequest', verifyJwt)
-
-  app.get('/metrics', getUserMetricsController)
+export function metricsRoutes(app: FastifyInstance) {
+  app.register(getUserMetricsRoute)
 }
