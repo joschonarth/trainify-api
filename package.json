@@ -43,6 +43,7 @@
     "@fastify/swagger-ui": "5.2.5",
     "@prisma/adapter-pg": "7.5.0",
     "@prisma/client": "7.5.0",
+    "@scalar/fastify-api-reference": "1.62.0",
     "bcrypt": "6.0.0",
     "dayjs": "1.11.17",
     "dotenv": "17.2.1",
