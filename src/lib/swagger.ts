@@ -1,5 +1,5 @@
 import fastifySwagger from '@fastify/swagger'
-import fastifySwaggerUi from '@fastify/swagger-ui'
+import ScalarApiReference from '@scalar/fastify-api-reference'
 import type { FastifyInstance } from 'fastify'
 import { jsonSchemaTransform } from 'fastify-type-provider-zod'
 
@@ -41,7 +41,20 @@ export async function registerSwagger(app: FastifyInstance) {
     transform: jsonSchemaTransform,
   })
 
-  await app.register(fastifySwaggerUi, {
+  await app.register(ScalarApiReference, {
     routePrefix: '/docs',
+    configuration: {
+      theme: 'saturn',
+      darkMode: true,
+      authentication: {
+        preferredSecurityScheme: 'bearerAuth',
+        http: {
+          bearer: {
+            token: '',
+          },
+        },
+      },
+      defaultOpenAllTags: false,
+    },
   })
 }
