@@ -35,7 +35,7 @@ export class RegisterUseCase {
       throw new UserAlreadyExistsError()
     }
 
-    const passwordHash = await hash(password, 6)
+    const passwordHash = await hash(password, 12)
 
     const user = await this.usersRepository.create({
       name,
