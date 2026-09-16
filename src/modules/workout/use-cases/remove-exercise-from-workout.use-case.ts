@@ -10,8 +10,8 @@ interface RemoveExerciseFromWorkoutUseCaseRequest {
 
 export class RemoveExerciseFromWorkoutUseCase {
   constructor(
-    private workoutsRepository: WorkoutsRepository,
-    private workoutExercisesRepository: WorkoutExercisesRepository
+    private readonly workoutsRepository: WorkoutsRepository,
+    private readonly workoutExercisesRepository: WorkoutExercisesRepository
   ) {}
 
   async execute({

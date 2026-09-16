@@ -10,8 +10,8 @@ interface GetWorkoutStatsRequest {
 
 export class GetWorkoutStatsUseCase {
   constructor(
-    private workoutsRepository: WorkoutsRepository,
-    private workoutSessionsRepository: WorkoutSessionsRepository
+    private readonly workoutsRepository: WorkoutsRepository,
+    private readonly workoutSessionsRepository: WorkoutSessionsRepository
   ) {}
 
   async execute({ userId, workoutId }: GetWorkoutStatsRequest) {

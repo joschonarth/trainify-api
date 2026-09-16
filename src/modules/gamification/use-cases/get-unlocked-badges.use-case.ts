@@ -22,15 +22,22 @@ export class GetUnlockedBadgesUseCase {
   }: GetUnlockedBadgesUseCaseRequest): Promise<GetUnlockedBadgesUseCaseResponse> {
     const userBadges = await this.badgesRepository.findByUser(userId)
 
-    const badges = await Promise.all(
-      userBadges.map(async (userBadge) => {
-        const badge = await this.badgesRepository.findById(userBadge.badgeId)
-        return {
-          ...badge!,
-          unlockedAt: userBadge.unlockedAt,
-        }
-      })
-    )
+    const badges = (
+      await Promise.all(
+        userBadges.map(async (userBadge) => {
+          const badge = await this.badgesRepository.findById(userBadge.badgeId)
+
+          if (!badge) {
+            return null
+          }
+
+          return {
+            ...badge,
+            unlockedAt: userBadge.unlockedAt,
+          }
+        })
+      )
+    ).filter((badge): badge is BadgeWithUnlockedAt => badge !== null)
 
     const sortedBadges = badges.sort(
       (a, b) => b.unlockedAt.getTime() - a.unlockedAt.getTime()

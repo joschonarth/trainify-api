@@ -11,8 +11,8 @@ interface StopExerciseTimerRequest {
 
 export class StopExerciseTimerUseCase {
   constructor(
-    private exerciseSessionsRepository: ExerciseSessionsRepository,
-    private workoutSessionsRepository: WorkoutSessionsRepository
+    private readonly exerciseSessionsRepository: ExerciseSessionsRepository,
+    private readonly workoutSessionsRepository: WorkoutSessionsRepository
   ) {}
 
   async execute({ userId, exerciseSessionId }: StopExerciseTimerRequest) {

@@ -25,8 +25,8 @@ interface FetchUserSchedulesUseCaseResponse {
 
 export class FetchUserSchedulesUseCase {
   constructor(
-    private usersRepository: UsersRepository,
-    private workoutsRepository: WorkoutsRepository
+    private readonly usersRepository: UsersRepository,
+    private readonly workoutsRepository: WorkoutsRepository
   ) {}
 
   async execute({

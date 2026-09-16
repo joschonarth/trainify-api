@@ -27,7 +27,7 @@ export class UnlockExerciseBadgesUseCase {
 
     const exerciseBadges = await this.badgesRepository.findAllByType('EXERCISE')
 
-    const newBadges = []
+    const newBadges: Badge[] = []
 
     for (const badge of exerciseBadges) {
       const alreadyHas = userBadges.some((ub) => ub.badgeId === badge.id)

@@ -1,3 +1,5 @@
 export class SignOutUseCase {
-  async execute(): Promise<void> {}
+  execute(): Promise<void> {
+    return Promise.resolve()
+  }
 }

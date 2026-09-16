@@ -79,9 +79,11 @@ export class GetExerciseSessionProgressUseCase {
     const weightsArr = progress.map((p) => p.totalWeight)
     const durations = progress.map((p) => p.duration)
 
+    const firstSession = sessions[0]
+
     return {
       exerciseId,
-      exerciseName: sessions[0]!.exercise.name,
+      exerciseName: firstSession?.exercise.name ?? 'Unknown exercise',
       totalSessions: sessions.length,
 
       // Volume
