@@ -1,5 +1,6 @@
 import fastifyCookie from '@fastify/cookie'
 import cors from '@fastify/cors'
+import fastifyHelmet from '@fastify/helmet'
 import fastifyJwt from '@fastify/jwt'
 import fastifyRateLimit from '@fastify/rate-limit'
 import fastify, { type FastifyError } from 'fastify'
@@ -29,6 +30,8 @@ app.register(cors, {
   allowedHeaders: ['Content-Type', 'Authorization'],
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
 })
+
+app.register(fastifyHelmet, { contentSecurityPolicy: false })
 
 app.register(fastifyRateLimit, {
   max: 100,
