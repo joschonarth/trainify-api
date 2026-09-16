@@ -7,6 +7,12 @@ export function registerRoute(app: FastifyInstance) {
   app.post(
     '/users',
     {
+      config: {
+        rateLimit: {
+          max: 10,
+          timeWindow: '1 minute',
+        },
+      },
       schema: {
         tags: ['Users'],
         summary: 'Register a new user',

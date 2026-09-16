@@ -7,6 +7,12 @@ export function signInWithGoogleRoute(app: FastifyInstance) {
   app.post(
     '/auth/google',
     {
+      config: {
+        rateLimit: {
+          max: 5,
+          timeWindow: '1 minute',
+        },
+      },
       schema: {
         tags: ['Users'],
         summary: 'Sign in with Google',

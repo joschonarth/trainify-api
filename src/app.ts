@@ -1,7 +1,8 @@
 import fastifyCookie from '@fastify/cookie'
 import cors from '@fastify/cors'
 import fastifyJwt from '@fastify/jwt'
-import fastify from 'fastify'
+import fastifyRateLimit from '@fastify/rate-limit'
+import fastify, { type FastifyError } from 'fastify'
 import {
   serializerCompiler,
   validatorCompiler,
@@ -12,7 +13,9 @@ import { env } from './env'
 import { registerSwagger } from './lib/swagger'
 import { appRoutes } from './routes'
 
-export const app = fastify().withTypeProvider<ZodTypeProvider>()
+export const app = fastify({
+  trustProxy: true,
+}).withTypeProvider<ZodTypeProvider>()
 
 app.setSerializerCompiler(serializerCompiler)
 app.setValidatorCompiler(validatorCompiler)
@@ -25,6 +28,11 @@ app.register(cors, {
   credentials: true,
   allowedHeaders: ['Content-Type', 'Authorization'],
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+})
+
+app.register(fastifyRateLimit, {
+  max: 100,
+  timeWindow: '1 minute',
 })
 
 app.register(fastifyCookie, {
@@ -46,11 +54,17 @@ registerSwagger(app)
 
 app.register(appRoutes)
 
-app.setErrorHandler((error, _, reply) => {
+app.setErrorHandler((error: FastifyError, _, reply) => {
   if (error instanceof ZodError) {
     return reply
       .status(400)
       .send({ message: 'Validation error.', issues: z.treeifyError(error) })
+  }
+
+  if (error.statusCode === 429) {
+    return reply.status(429).send({
+      message: 'Too many requests. Please try again later.',
+    })
   }
 
   if (env.NODE_ENV !== 'production') {

@@ -7,6 +7,12 @@ export function authenticateRoute(app: FastifyInstance) {
   app.post(
     '/auth',
     {
+      config: {
+        rateLimit: {
+          max: 5,
+          timeWindow: '1 minute',
+        },
+      },
       schema: {
         tags: ['Users'],
         summary: 'Authenticate a user',
