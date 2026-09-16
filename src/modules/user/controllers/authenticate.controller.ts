@@ -31,7 +31,20 @@ export async function authenticateController(
       }
     )
 
-    reply.setCookie('token', token, {
+    const refreshToken = await reply.jwtSign(
+      {
+        userId: user.id,
+        email: user.email,
+      },
+      {
+        sign: {
+          sub: user.id,
+          expiresIn: '7d',
+        },
+      }
+    )
+
+    reply.setCookie('refreshToken', refreshToken, {
       path: '/',
       httpOnly: true,
       secure: env.NODE_ENV === 'production',
