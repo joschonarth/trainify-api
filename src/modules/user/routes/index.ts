@@ -3,6 +3,7 @@ import { authenticateRoute } from './authenticate.route'
 import { changePasswordRoute } from './change-password.route'
 import { fetchUserSchedulesRoute } from './fetch-user-schedules.route'
 import { getUserProfileRoute } from './get-user-profile.route'
+import { refreshTokenRoute } from './refresh-token.route'
 import { registerRoute } from './register.route'
 import { signInWithGoogleRoute } from './sign-in-with-google.route'
 import { signOutRoute } from './sign-out.route'
@@ -17,4 +18,5 @@ export function usersRoutes(app: FastifyInstance) {
   app.register(updateUserProfileRoute)
   app.register(changePasswordRoute)
   app.register(signOutRoute)
+  app.register(refreshTokenRoute)
 }
