@@ -8,13 +8,13 @@ import type {
 } from '../weight-goals.repository'
 
 export class PrismaWeightGoalsRepository implements WeightGoalsRepository {
-  async findById(id: string): Promise<WeightGoal | null> {
+  findById(id: string): Promise<WeightGoal | null> {
     return prisma.weightGoal.findUnique({
       where: { id },
     })
   }
 
-  async findAllByUserId(
+  findAllByUserId(
     userId: string,
     filters?: { status?: 'active' | 'completed' }
   ): Promise<WeightGoal[]> {
@@ -32,14 +32,14 @@ export class PrismaWeightGoalsRepository implements WeightGoalsRepository {
     })
   }
 
-  async findActiveGoalByUserId(userId: string): Promise<WeightGoal | null> {
+  findActiveGoalByUserId(userId: string): Promise<WeightGoal | null> {
     return prisma.weightGoal.findFirst({
       where: { userId, isActive: true },
       orderBy: { createdAt: 'desc' },
     })
   }
 
-  async create(data: CreateWeightGoalData): Promise<WeightGoal> {
+  create(data: CreateWeightGoalData): Promise<WeightGoal> {
     return prisma.weightGoal.create({
       data: {
         user: { connect: { id: data.userId } },
@@ -76,7 +76,7 @@ export class PrismaWeightGoalsRepository implements WeightGoalsRepository {
     })
   }
 
-  async update(
+  update(
     id: string,
     data: {
       name?: string

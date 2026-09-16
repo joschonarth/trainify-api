@@ -247,12 +247,12 @@ export async function seedWorkoutExercises(userId, workouts) {
 
   const dataToInsert = []
 
-  workouts.forEach((workout, index) => {
+  for (const [index, workout] of workouts.entries()) {
     const key = ['A', 'B', 'C', 'D', 'E', 'F', 'G'][index]
     const exIndexes = workoutExercisesMap[key]
 
     if (exIndexes) {
-      exIndexes.forEach((i) => {
+      for (const i of exIndexes) {
         const ex = createdExercises[i]
 
         dataToInsert.push({
@@ -262,9 +262,9 @@ export async function seedWorkoutExercises(userId, workouts) {
           defaultReps: ex.defaultReps,
           defaultWeight: ex.defaultWeight,
         })
-      })
+      }
     }
-  })
+  }
 
   for (const data of dataToInsert) {
     const exists = await prisma.workoutExercise.findFirst({

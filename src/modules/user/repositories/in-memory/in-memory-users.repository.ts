@@ -3,9 +3,9 @@ import type { Prisma, User } from 'generated/prisma'
 import type { UsersRepository } from '../users.repository'
 
 export class InMemoryUsersRepository implements UsersRepository {
-  public items: User[] = []
+  items: User[] = []
 
-  async findById(id: string) {
+  findById(id: string) {
     const user = this.items.find((item) => item.id === id)
 
     if (!user) {
@@ -15,7 +15,7 @@ export class InMemoryUsersRepository implements UsersRepository {
     return user
   }
 
-  async findByEmail(email: string) {
+  findByEmail(email: string) {
     const user = this.items.find((item) => item.email === email)
 
     if (!user) {
@@ -25,7 +25,7 @@ export class InMemoryUsersRepository implements UsersRepository {
     return user
   }
 
-  async create(data: Prisma.UserCreateInput) {
+  create(data: Prisma.UserCreateInput) {
     const user = {
       id: 'user-1',
       name: data.name,

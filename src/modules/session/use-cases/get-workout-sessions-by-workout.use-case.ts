@@ -56,7 +56,13 @@ export class GetWorkoutSessionsByWorkoutUseCase {
       }
     })
 
-    const firstSession = sessions[0]!
+    const firstSession = sessions[0]
+
+    if (!firstSession) {
+      throw new ResourceNotFoundError(
+        'No workout sessions found for this workout.'
+      )
+    }
 
     return {
       workoutId,

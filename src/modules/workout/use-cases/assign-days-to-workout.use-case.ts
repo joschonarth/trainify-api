@@ -16,8 +16,8 @@ interface AssignDaysToWorkoutUseCaseResponse {
 
 export class AssignDaysToWorkoutUseCase {
   constructor(
-    private workoutsRepository: WorkoutsRepository,
-    private workoutSchedulesRepository: WorkoutSchedulesRepository
+    private readonly workoutsRepository: WorkoutsRepository,
+    private readonly workoutSchedulesRepository: WorkoutSchedulesRepository
   ) {}
 
   async execute({

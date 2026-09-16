@@ -32,7 +32,7 @@ export class UnlockStreakBadgesUseCase {
 
     const streakBadges = await this.badgesRepository.findAllByType('STREAK')
 
-    const newBadges = []
+    const newBadges: Badge[] = []
 
     for (const badge of streakBadges) {
       const alreadyHas = userBadges.some((ub) => ub.badgeId === badge.id)
