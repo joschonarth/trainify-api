@@ -1,172 +1,182 @@
 <div align="center">
 
-# 🚀 Trainify API
+# 💪 Trainify API
 
-API REST do aplicativo Trainify para gerenciar treinos, exercícios, sessões, métricas e evolução do usuário.
+*A REST API for the Trainify app to manage workouts, exercises, sessions, metrics and user progress.*
 
-![Node.js](https://img.shields.io/badge/Node.js-20%2B-339933?logo=node.js&logoColor=white)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)
-![Fastify](https://img.shields.io/badge/Fastify-5.9-000000?logo=fastify&logoColor=white)
-![Prisma](https://img.shields.io/badge/Prisma-7.5-2D3748?logo=prisma&logoColor=white)
-![Vitest](https://img.shields.io/badge/Vitest-3.2-6E9F18?logo=vitest&logoColor=white)
+<img src="https://img.shields.io/github/last-commit/joschonarth/trainify-api?style=default&logo=git&logoColor=white&color=0080ff&labelColor=2f363d" alt="last-commit">
+<img src="https://img.shields.io/github/languages/top/joschonarth/trainify-api?style=default&color=0080ff&labelColor=2f363d" alt="repo-top-language">
+<img src="https://img.shields.io/github/languages/count/joschonarth/trainify-api?style=default&color=0080ff&labelColor=2f363d" alt="repo-language-count">
 
 ---
 
-📃 [Sobre](#-sobre) •
-🛠️ [Tecnologias](#️-tecnologias) •
-✨ [Funcionalidades](#-funcionalidades) •
-🚀 [Como rodar](#-como-rodar) •
-📖 [Documentação](#-documentação-da-api) •
-🧪 [Testes](#-testes)
+📃 [About](#-about)&nbsp;&nbsp;•&nbsp;&nbsp;
+🛠️ [Tech Stack](#️-tech-stack)&nbsp;&nbsp;•&nbsp;&nbsp;
+✨ [Features](#-features)&nbsp;&nbsp;•&nbsp;&nbsp;
+🚀 [Getting Started](#-getting-started)&nbsp;&nbsp;•&nbsp;&nbsp;
+📖 [API Documentation](#-api-documentation)&nbsp;&nbsp;•&nbsp;&nbsp;
+🧪 [Tests](#-tests)
 
 </div>
 
 ---
 
-## 📃 Sobre
+## 📃 About
 
-A Trainify API é o backend do aplicativo Trainify, responsável por fornecer uma camada REST para cadastro e acompanhamento de treinos. A aplicação permite gerenciar exercícios, criar e finalizar sessões de treino, registrar pesos, acompanhar métricas e consumir dados de progresso com uma estrutura organizada em módulos.
+**Trainify API** is the backend of the Trainify app, responsible for providing a REST layer to register and track workouts. The application allows managing exercises, creating and finishing workout sessions, logging weight, tracking metrics, and consuming progress data through a well-organized modular structure.
 
-O projeto foi construído com Fastify, TypeScript, Prisma ORM e PostgreSQL, com foco em performance, tipagem forte e documentação interativa via Swagger.
-
----
-
-## 🛠️ Tecnologias
-
-- 🟢 [Node.js](https://nodejs.org/) — Ambiente de execução JavaScript server-side.
-- ⚡ [Fastify](https://fastify.dev/) — Framework web rápido e eficiente.
-- 🔷 [TypeScript](https://www.typescriptlang.org/) — Tipagem estática e maior segurança no desenvolvimento.
-- 🗃️ [Prisma ORM](https://www.prisma.io/) — ORM moderno e type-safe para integração com bancos relacionais.
-- 🐘 [PostgreSQL](https://www.postgresql.org/) — Banco de dados relacional robusto.
-- 🐳 [Docker](https://www.docker.com/) — Containerização do banco de dados local.
-- 📖 [Swagger](https://swagger.io/) — Documentação interativa da API.
-- 🧪 [Vitest](https://vitest.dev/) — Testes automatizados.
-- 🧩 [Zod](https://zod.dev/) — Validação de entradas e contratos de dados.
-- 🔍 [Biome](https://biomejs.dev/) — Linting e formatação de código.
+The project was built with Fastify, TypeScript, Prisma ORM and PostgreSQL, with a focus on performance, strong typing, hardened security and interactive documentation via Scalar.
 
 ---
 
-## ✨ Funcionalidades
+## 🛠️ Tech Stack
 
-- [x] 🏋️ Cadastro e gestão de exercícios
-- [x] 🗓️ Criação de treinos e planos de treino
-- [x] ⏱️ Início, pausa e finalização de sessões de treino
-- [x] 📝 Registro de logs de exercícios
-- [x] ⚖️ Acompanhamento de peso e metas de peso
-- [x] 📊 Geração de métricas e progresso do usuário
-- [x] 🏆 Módulo de gamificação e evolução do perfil
-- [x] 🔐 Autenticação via JWT
-- [x] 🛡️ Validação de dados com Zod
-- [x] 📖 Documentação interativa da API com Swagger
-- [x] 🧪 Testes automatizados com Vitest
+- 🟢 **[Node.js](https://nodejs.org/)** — Server-side JavaScript runtime.
+- ⚡ **[Fastify](https://fastify.dev/)** — Fast and efficient web framework.
+- 🔷 **[TypeScript](https://www.typescriptlang.org/)** — Static typing and safer development.
+- 🗃️ **[Prisma ORM](https://www.prisma.io/)** — Modern, type-safe ORM for relational databases.
+- 🐘 **[PostgreSQL](https://www.postgresql.org/)** — Robust relational database.
+- 🐳 **[Docker](https://www.docker.com/)** — Containerization of the local database.
+- 🔐 **[@fastify/jwt](https://github.com/fastify/fastify-jwt)** — JWT authentication.
+- 🍪 **[@fastify/cookie](https://github.com/fastify/fastify-cookie)** — Cookie parsing and management.
+- 🌐 **[@fastify/cors](https://github.com/fastify/fastify-cors)** — CORS handling.
+- 🛡️ **[@fastify/helmet](https://github.com/fastify/fastify-helmet)** — Security headers for HTTP responses.
+- 🚦 **[@fastify/rate-limit](https://github.com/fastify/fastify-rate-limit)** — Request rate limiting.
+- 📖 **[@fastify/swagger](https://github.com/fastify/fastify-swagger)** + **[@scalar/fastify-api-reference](https://scalar.com/)** — Interactive API documentation.
+- 🔑 **[bcrypt](https://github.com/kelektiv/node.bcrypt.js)** — Password hashing.
+- 📅 **[dayjs](https://day.js.org/)** — Lightweight date manipulation.
+- 🧩 **[Zod](https://zod.dev/)** — Runtime schema validation with full type inference.
+- 📦 **[tsup](https://tsup.egoist.dev/)** — Bundler for building the production output.
+- 🧪 **[Vitest](https://vitest.dev/)** — Automated testing.
+- 🔍 **[Biome](https://biomejs.dev/)** — Fast, opinionated linter and formatter.
 
 ---
 
-## 🚀 Como rodar
+## ✨ Features
 
-### 📋 Pré-requisitos
+- [x] 🏋️ Exercise management (catalog and custom exercises)
+- [x] 🗓️ Workout creation, plans and weekly scheduling
+- [x] ⏱️ Starting, pausing and finishing workout sessions
+- [x] 📝 Exercise log tracking and session history
+- [x] 📊 Performance comparisons (weekly, monthly and per exercise)
+- [x] ⚖️ Weight logging, weight goals and analytics
+- [x] 📈 Overall user metrics and progress
+- [x] 🏆 Gamification module: streaks, badges and achievements
+- [x] 🔐 JWT authentication and Google sign-in
+- [x] 🛡️ Security hardening with Helmet and rate limiting
+- [x] 🧩 Data validation with Zod
+- [x] 📖 Interactive API documentation with Scalar
+- [x] 🧪 Automated testing with Vitest
 
-- [Node.js 20+](https://nodejs.org/)
-- [npm](https://www.npmjs.com/)
-- [Docker](https://www.docker.com/)
+---
 
-### 🔧 Instalação
+## 🚀 Getting Started
 
-1. Clone o repositório:
+### 📋 Prerequisites
+
+- 🟩 [Node.js 20+](https://nodejs.org/)
+- 📦 [npm](https://www.npmjs.com/)
+- 🐳 [Docker](https://www.docker.com/)
+
+### 🔧 Installation
+
+1. Clone the repository:
 
    ```bash
-   git clone https://github.com/seu-usuario/trainify-api.git
+   git clone https://github.com/joschonarth/trainify-api.git
    ```
 
-2. Acesse a pasta do projeto:
+2. Navigate into the project:
 
    ```bash
    cd trainify-api
    ```
 
-3. Instale as dependências:
+3. Install dependencies:
 
    ```bash
    npm install
    ```
 
-4. Crie o arquivo de variáveis de ambiente:
+### 🔑 Environment Variables
 
-   ```bash
-   cp .env.example .env
-   ```
+Copy the example env file and fill in your values:
 
-   Exemplo de conteúdo:
+```bash
+cp .env.example .env
+```
 
-   ```env
-   NODE_ENV=dev
-   PORT=3333
-   JWT_SECRET=seu_jwt_secret
-   DATABASE_URL="postgresql://docker:docker@localhost:5432/trainify?schema=public"
-   ```
+Example content:
 
-### 🐳 Banco de dados
+```env
+NODE_ENV=dev
+PORT=3333
+JWT_SECRET=your_jwt_secret
+DATABASE_URL="postgresql://docker:docker@localhost:5432/trainify?schema=public"
+```
 
-Suba o container do PostgreSQL com Docker:
+### 🐳 Database
+
+Start the PostgreSQL container:
 
 ```bash
 docker compose up -d
 ```
 
-Execute as migrations do Prisma:
+Run the Prisma migrations:
 
 ```bash
 npm run migrate
 ```
 
-Opcionalmente, rode os seeds para popular o banco:
+Optionally, seed the database with sample data:
 
 ```bash
 npm run seed
 ```
 
-### ▶️ Execução
+### ▶️ Running
 
-Inicie o servidor em modo de desenvolvimento:
+Start the server in development mode:
 
 ```bash
 npm run dev
 ```
 
-A API ficará disponível em http://localhost:3333.
+API running at **[http://localhost:3333](http://localhost:3333)**
 
 ---
 
-## 📖 Documentação da API
+## 📖 API Documentation
 
-Com o servidor rodando, acesse a documentação interativa do Swagger em:
+With the server running, access the interactive documentation at:
 
-- http://localhost:3333/docs
+- 📚 **[http://localhost:3333/docs](http://localhost:3333/docs)**
 
-Também existe um endpoint de health check disponível em:
+There is also a health check endpoint available at:
 
-- http://localhost:3333/health
+- ❤️ **[http://localhost:3333/health](http://localhost:3333/health)**
 
 ---
 
-## 🧪 Testes
+## 🧪 Tests
 
-Os testes são executados com Vitest e cobrem os principais fluxos da aplicação.
+Tests are run with Vitest and cover the main application flows.
 
 ```bash
-# Executa todos os testes
+# Run all tests
 npm run test
 
-# Executa os testes em modo watch
+# Run tests in watch mode
 npm run test:watch
 
-# Gera relatório de cobertura
+# Generate coverage report
 npm run test:coverage
 ```
 
 ---
 
-## 📁 Estrutura do projeto
+## 📁 Project Structure
 
 ```txt
 src/
@@ -184,21 +194,17 @@ src/
 
 ---
 
-## ⭐ Contribuição
+## ⭐ Contributing
 
-Contribuições são bem-vindas. Caso queira colaborar, abra uma issue ou envie um pull request com as melhorias propostas.
+Contributions are welcome. If you'd like to help, open an issue or submit a pull request with your proposed improvements.
 
----
-
-## ⭐ Apoie este Projeto
-
-Se curtiu o projeto, deixe uma ⭐ aqui no GitHub — isso ajuda muito!
+If you liked this project, consider leaving a ⭐ on GitHub — it really helps!
 
 ---
 
 <div align="center">
 
-Feito com ♥ por **[João Otávio Schonarth](https://github.com/joschonarth)**
+Made with ♥ by **[João Otávio Schonarth](https://github.com/joschonarth)**
 
 [![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/joschonarth)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/in/joschonarth)
