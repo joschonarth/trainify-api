@@ -9,9 +9,9 @@ import {
   validatorCompiler,
   type ZodTypeProvider,
 } from 'fastify-type-provider-zod'
+import { errorHandler } from './config/error-handler'
+import { loggerOptions } from './config/logger'
 import { env } from './env'
-import { errorHandler } from './lib/error-handler'
-import { loggerOptions } from './lib/logger'
 import { registerSwagger } from './lib/swagger'
 import { appRoutes } from './routes'
 
