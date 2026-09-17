@@ -44,7 +44,7 @@ export class ChangePasswordUseCase {
       )
     }
 
-    const hashedPassword = await hash(newPassword, 6)
+    const hashedPassword = await hash(newPassword, 12)
 
     await this.usersRepository.update(userId, {
       password: hashedPassword,
