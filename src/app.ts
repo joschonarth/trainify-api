@@ -3,19 +3,21 @@ import cors from '@fastify/cors'
 import fastifyHelmet from '@fastify/helmet'
 import fastifyJwt from '@fastify/jwt'
 import fastifyRateLimit from '@fastify/rate-limit'
-import fastify, { type FastifyError } from 'fastify'
+import fastify from 'fastify'
 import {
   serializerCompiler,
   validatorCompiler,
   type ZodTypeProvider,
 } from 'fastify-type-provider-zod'
-import z, { ZodError } from 'zod'
 import { env } from './env'
+import { errorHandler } from './lib/error-handler'
+import { loggerOptions } from './lib/logger'
 import { registerSwagger } from './lib/swagger'
 import { appRoutes } from './routes'
 
 export const app = fastify({
   trustProxy: true,
+  logger: loggerOptions,
 }).withTypeProvider<ZodTypeProvider>()
 
 app.setSerializerCompiler(serializerCompiler)
@@ -57,22 +59,8 @@ registerSwagger(app)
 
 app.register(appRoutes)
 
-app.setErrorHandler((error: FastifyError, _, reply) => {
-  if (error instanceof ZodError) {
-    return reply
-      .status(400)
-      .send({ message: 'Validation error.', issues: z.treeifyError(error) })
-  }
-
-  if (error.statusCode === 429) {
-    return reply.status(429).send({
-      message: 'Too many requests. Please try again later.',
-    })
-  }
-
-  if (env.NODE_ENV !== 'production') {
-    console.error(error)
-  }
-
-  return reply.status(500).send({ message: 'Internal server error.' })
+app.setNotFoundHandler((_, reply) => {
+  return reply.status(404).send({ message: 'Route not found.' })
 })
+
+app.setErrorHandler(errorHandler)
