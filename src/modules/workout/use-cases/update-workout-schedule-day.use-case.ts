@@ -30,7 +30,11 @@ export class UpdateWorkoutScheduleDayUseCase {
     newDayOfWeek,
   }: UpdateWorkoutScheduleDayUseCaseRequest): Promise<UpdateWorkoutScheduleDayUseCaseResponse> {
     const schedule = await this.workoutSchedulesRepository.findById(scheduleId)
-    if (!schedule || schedule.workoutId !== workoutId || schedule.userId !== userId) {
+    if (
+      !schedule ||
+      schedule.workoutId !== workoutId ||
+      schedule.userId !== userId
+    ) {
       throw new ResourceNotFoundError('Schedule not found for this workout.')
     }
 
