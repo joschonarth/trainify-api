@@ -13,12 +13,14 @@ export async function addExerciseToWorkoutController(
   reply: FastifyReply
 ) {
   const { workoutId } = request.params as AddExerciseToWorkoutParams
+  const userId = request.user.sub
   const { exerciseId, defaultSets, defaultReps, defaultWeight } =
     request.body as AddExerciseToWorkoutBody
 
   try {
     const addExerciseToWorkoutUseCase = makeAddExerciseToWorkoutUseCase()
     const { workoutExercise } = await addExerciseToWorkoutUseCase.execute({
+      userId,
       workoutId,
       exerciseId,
       defaultSets,

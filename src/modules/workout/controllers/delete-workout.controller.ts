@@ -9,10 +9,11 @@ export async function deleteWorkoutController(
   reply: FastifyReply
 ) {
   const { workoutId } = request.params as DeleteWorkoutParams
+  const userId = request.user.sub
 
   try {
     const deleteWorkoutUseCase = makeDeleteWorkoutUseCase()
-    await deleteWorkoutUseCase.execute({ workoutId })
+    await deleteWorkoutUseCase.execute({ workoutId, userId })
 
     return reply.status(204).send()
   } catch (error) {

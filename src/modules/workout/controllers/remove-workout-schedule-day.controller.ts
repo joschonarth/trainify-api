@@ -10,12 +10,14 @@ export async function removeWorkoutScheduleDayController(
 ) {
   const { workoutId, scheduleId } =
     request.params as RemoveWorkoutScheduleDayParams
+  const userId = request.user.sub
 
   try {
     const removeWorkoutScheduleDayUseCase =
       makeRemoveWorkoutScheduleDayUseCase()
 
     await removeWorkoutScheduleDayUseCase.execute({
+      userId,
       workoutId,
       scheduleId,
     })

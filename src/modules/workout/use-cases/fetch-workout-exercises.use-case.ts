@@ -5,6 +5,7 @@ import type { WorkoutsRepository } from '../repositories/workouts.repository'
 
 interface FetchWorkoutExercisesUseCaseRequest {
   workoutId: string
+  userId: string
 }
 
 interface FetchWorkoutExercisesUseCaseResponse {
@@ -31,9 +32,10 @@ export class FetchWorkoutExercisesUseCase {
 
   async execute({
     workoutId,
+    userId,
   }: FetchWorkoutExercisesUseCaseRequest): Promise<FetchWorkoutExercisesUseCaseResponse> {
     const workout = await this.workoutsRepository.findById(workoutId)
-    if (!workout) {
+    if (!workout || workout.userId !== userId) {
       throw new ResourceNotFoundError('Workout not found.')
     }
 

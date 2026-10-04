@@ -10,12 +10,17 @@ export async function removeExerciseFromWorkoutController(
 ) {
   const { workoutId, exerciseId } =
     request.params as RemoveExerciseFromWorkoutParams
+  const userId = request.user.sub
 
   try {
     const removeExerciseFromWorkoutUseCase =
       makeRemoveExerciseFromWorkoutUseCase()
 
-    await removeExerciseFromWorkoutUseCase.execute({ workoutId, exerciseId })
+    await removeExerciseFromWorkoutUseCase.execute({
+      userId,
+      workoutId,
+      exerciseId,
+    })
 
     return reply.status(204).send()
   } catch (error) {

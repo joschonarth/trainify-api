@@ -10,12 +10,14 @@ export async function getExerciseSessionDetailsController(
 ) {
   const { exerciseSessionId } =
     request.params as GetExerciseSessionDetailsParams
+  const userId = request.user.sub
 
   try {
     const getExerciseSessionDetailsUseCase =
       makeGetExerciseSessionDetailsUseCase()
 
     const { session } = await getExerciseSessionDetailsUseCase.execute({
+      userId,
       exerciseSessionId,
     })
 

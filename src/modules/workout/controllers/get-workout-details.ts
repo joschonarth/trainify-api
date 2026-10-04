@@ -9,12 +9,14 @@ export async function getWorkoutDetailsController(
   reply: FastifyReply
 ) {
   const { workoutId } = request.params as GetWorkoutDetailsParams
+  const userId = request.user.sub
 
   try {
     const getWorkoutDetailsUseCase = makeGetWorkoutDetailsUseCase()
 
     const { workout } = await getWorkoutDetailsUseCase.execute({
       workoutId,
+      userId,
     })
 
     return reply.status(200).send({ workout })

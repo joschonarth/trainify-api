@@ -7,10 +7,12 @@ export async function completeExerciseSessionController(
   reply: FastifyReply
 ) {
   const { exerciseSessionId } = request.params as CompleteExerciseSessionParams
+  const userId = request.user.sub
 
   const completeExerciseSession = makeCompleteExerciseSessionUseCase()
 
   const { exerciseSession } = await completeExerciseSession.execute({
+    userId,
     exerciseSessionId,
   })
 
