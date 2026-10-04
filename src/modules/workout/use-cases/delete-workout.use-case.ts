@@ -4,6 +4,7 @@ import type { WorkoutsRepository } from '../repositories/workouts.repository'
 
 interface DeleteWorkoutUseCaseRequest {
   workoutId: string
+  userId: string
 }
 
 interface DeleteWorkoutUseCaseResponse {
@@ -15,10 +16,11 @@ export class DeleteWorkoutUseCase {
 
   async execute({
     workoutId,
+    userId,
   }: DeleteWorkoutUseCaseRequest): Promise<DeleteWorkoutUseCaseResponse> {
     const workout = await this.workoutsRepository.findById(workoutId)
 
-    if (!workout) {
+    if (!workout || workout.userId !== userId) {
       throw new ResourceNotFoundError('Workout not found.')
     }
 

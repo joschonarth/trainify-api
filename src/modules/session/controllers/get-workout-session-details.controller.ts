@@ -9,12 +9,14 @@ export async function getWorkoutSessionDetailsController(
   reply: FastifyReply
 ) {
   const { sessionId } = request.params as GetWorkoutSessionDetailsParams
+  const userId = request.user.sub
 
   try {
     const getWorkoutSessionDetailsUseCase =
       makeGetWorkoutSessionDetailsUseCase()
 
     const { session } = await getWorkoutSessionDetailsUseCase.execute({
+      userId,
       sessionId,
     })
 

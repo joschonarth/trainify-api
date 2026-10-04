@@ -4,6 +4,7 @@ import type { WorkoutExercisesRepository } from '../repositories/workout-exercis
 import type { WorkoutsRepository } from '../repositories/workouts.repository'
 
 interface RemoveExerciseFromWorkoutUseCaseRequest {
+  userId: string
   workoutId: string
   exerciseId: string
 }
@@ -15,11 +16,12 @@ export class RemoveExerciseFromWorkoutUseCase {
   ) {}
 
   async execute({
+    userId,
     workoutId,
     exerciseId,
   }: RemoveExerciseFromWorkoutUseCaseRequest): Promise<void> {
     const workout = await this.workoutsRepository.findById(workoutId)
-    if (!workout) {
+    if (!workout || workout.userId !== userId) {
       throw new ResourceNotFoundError('Workout not found.')
     }
 

@@ -6,6 +6,7 @@ import type { WorkoutsRepository } from '../repositories/workouts.repository'
 
 interface UpdateWorkoutUseCaseRequest {
   workoutId: string
+  userId: string
   name?: string
   description?: string | null
 }
@@ -19,11 +20,12 @@ export class UpdateWorkoutUseCase {
 
   async execute({
     workoutId,
+    userId,
     name,
     description,
   }: UpdateWorkoutUseCaseRequest): Promise<UpdateWorkoutUseCaseResponse> {
     const workoutExists = await this.workoutsRepository.findById(workoutId)
-    if (!workoutExists) {
+    if (!workoutExists || workoutExists.userId !== userId) {
       throw new ResourceNotFoundError('Workout not found.')
     }
 

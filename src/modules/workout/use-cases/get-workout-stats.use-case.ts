@@ -16,7 +16,7 @@ export class GetWorkoutStatsUseCase {
 
   async execute({ userId, workoutId }: GetWorkoutStatsRequest) {
     const workout = await this.workoutsRepository.findById(workoutId)
-    if (!workout) {
+    if (!workout || workout.userId !== userId) {
       throw new ResourceNotFoundError('Workout not found.')
     }
 

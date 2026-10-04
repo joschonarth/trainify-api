@@ -9,11 +9,13 @@ export async function fetchWorkoutExercisesController(
   reply: FastifyReply
 ) {
   const { workoutId } = request.params as FetchWorkoutExercisesParams
+  const userId = request.user.sub
 
   try {
     const fetchWorkoutExercisesUseCase = makeFetchWorkoutExercisesUseCase()
     const { exercises } = await fetchWorkoutExercisesUseCase.execute({
       workoutId,
+      userId,
     })
 
     return reply.status(200).send({ exercises })

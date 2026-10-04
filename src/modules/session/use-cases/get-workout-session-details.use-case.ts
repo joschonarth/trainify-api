@@ -39,8 +39,10 @@ export class GetWorkoutSessionDetailsUseCase {
   ) {}
 
   async execute({
+    userId,
     sessionId,
   }: {
+    userId: string
     sessionId: string
   }): Promise<GetWorkoutSessionDetailsResponse> {
     const session =
@@ -48,7 +50,7 @@ export class GetWorkoutSessionDetailsUseCase {
         sessionId
       )
 
-    if (!session) {
+    if (!session || session.userId !== userId) {
       throw new ResourceNotFoundError('Workout session not found.')
     }
 

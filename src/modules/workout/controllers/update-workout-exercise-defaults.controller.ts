@@ -16,6 +16,7 @@ export async function updateWorkoutExerciseDefaultsController(
 
   const { workoutId, exerciseId } =
     request.params as UpdateWorkoutExerciseDefaultsParams
+  const userId = request.user.sub
 
   try {
     const updateWorkoutExerciseDefaultsUseCase =
@@ -23,6 +24,7 @@ export async function updateWorkoutExerciseDefaultsController(
 
     const { workoutExercise } =
       await updateWorkoutExerciseDefaultsUseCase.execute({
+        userId,
         workoutId,
         exerciseId,
         defaultSets,

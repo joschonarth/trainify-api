@@ -12,6 +12,7 @@ export async function updateWorkoutController(
   reply: FastifyReply
 ) {
   const { workoutId } = request.params as UpdateWorkoutParams
+  const userId = request.user.sub
   const { name, description } = request.body as UpdateWorkoutBody
 
   try {
@@ -30,6 +31,7 @@ export async function updateWorkoutController(
 
     const { workout } = await updateWorkoutUseCase.execute({
       workoutId,
+      userId,
       ...updateData,
     })
 

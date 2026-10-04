@@ -14,6 +14,7 @@ export async function updateWorkoutScheduleDayController(
 ) {
   const { workoutId, scheduleId } =
     request.params as UpdateWorkoutScheduleDayParams
+  const userId = request.user.sub
 
   const { newDayOfWeek } = request.body as UpdateWorkoutScheduleDayBody
 
@@ -21,6 +22,7 @@ export async function updateWorkoutScheduleDayController(
     const updateWorkoutScheduleDayUseCase =
       makeUpdateWorkoutScheduleDayUseCase()
     const { schedule } = await updateWorkoutScheduleDayUseCase.execute({
+      userId,
       workoutId,
       scheduleId,
       newDayOfWeek,
