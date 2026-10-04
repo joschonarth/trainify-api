@@ -1,5 +1,8 @@
 import type { FastifyError, FastifyReply, FastifyRequest } from 'fastify'
 import z, { ZodError } from 'zod'
+import { NotAllowedError } from '../shared/errors/not-allowed.error'
+import { ResourceAlreadyExistsError } from '../shared/errors/resource-already-exists.error'
+import { ResourceNotFoundError } from '../shared/errors/resource-not-found.error'
 
 export function errorHandler(
   error: FastifyError,
@@ -16,6 +19,18 @@ export function errorHandler(
     return reply.status(429).send({
       message: 'Too many requests. Please try again later.',
     })
+  }
+
+  if (error instanceof NotAllowedError) {
+    return reply.status(403).send({ message: error.message })
+  }
+
+  if (error instanceof ResourceNotFoundError) {
+    return reply.status(404).send({ message: error.message })
+  }
+
+  if (error instanceof ResourceAlreadyExistsError) {
+    return reply.status(409).send({ message: error.message })
   }
 
   request.log.error({ err: error }, 'Unhandled error')
