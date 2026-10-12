@@ -1,10 +1,11 @@
 import { z } from 'zod'
+import { passwordSchema } from './password.schema'
 
 export const registerBodySchema = z.object({
-  name: z.string(),
+  name: z.string().trim().min(1).max(100),
   email: z.email().transform((email) => email.trim().toLowerCase()),
-  password: z.string().min(10),
-  passwordConfirmation: z.string().min(10),
+  password: passwordSchema,
+  passwordConfirmation: passwordSchema,
 })
 
 export type RegisterBody = z.infer<typeof registerBodySchema>
