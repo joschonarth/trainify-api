@@ -1,14 +1,12 @@
 export type GoogleAuthProviderStatus = 502 | 503
 
-export class GoogleAuthProviderError extends Error {
-  readonly statusCode: GoogleAuthProviderStatus
+import { AppError } from '@/shared/errors/app.error'
 
+export class GoogleAuthProviderError extends AppError {
   constructor(
     statusCode: GoogleAuthProviderStatus,
     message = 'Google authentication service is unavailable.'
   ) {
-    super(message)
-    this.name = 'GoogleAuthProviderError'
-    this.statusCode = statusCode
+    super(statusCode, message)
   }
 }

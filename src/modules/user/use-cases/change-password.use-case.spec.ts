@@ -1,7 +1,7 @@
 import { compare } from 'bcrypt'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { InvalidCredentialsError } from '@/modules/user/errors/invalid-credentials.error'
+import { PasswordChangeRejectedError } from '@/modules/user/errors/password-change-rejected.error'
 import { PasswordsDoNotMatchError } from '@/modules/user/errors/passwords-do-not-match.error'
 import { InMemoryUsersRepository } from '@/modules/user/repositories/in-memory/in-memory-users.repository'
 import { makeUser } from '@/modules/user/tests/factories/make-user'
@@ -74,7 +74,7 @@ describe('Change Password Use Case', () => {
         newPassword: 'new-secure-password',
         passwordConfirmation: 'new-secure-password',
       })
-    ).rejects.toBeInstanceOf(InvalidCredentialsError)
+    ).rejects.toBeInstanceOf(PasswordChangeRejectedError)
   })
 
   it('should reject a Google-only user', async () => {
@@ -87,7 +87,7 @@ describe('Change Password Use Case', () => {
         newPassword: 'new-secure-password',
         passwordConfirmation: 'new-secure-password',
       })
-    ).rejects.toBeInstanceOf(InvalidCredentialsError)
+    ).rejects.toBeInstanceOf(PasswordChangeRejectedError)
   })
 
   it('should reject reusing the current password', async () => {
@@ -102,6 +102,6 @@ describe('Change Password Use Case', () => {
         newPassword: 'current-password',
         passwordConfirmation: 'current-password',
       })
-    ).rejects.toBeInstanceOf(InvalidCredentialsError)
+    ).rejects.toBeInstanceOf(PasswordChangeRejectedError)
   })
 })

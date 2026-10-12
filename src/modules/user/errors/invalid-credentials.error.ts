@@ -1,6 +1,7 @@
-export class InvalidCredentialsError extends Error {
+import { AppError } from '@/shared/errors/app.error'
+
+export class InvalidCredentialsError extends AppError {
   constructor(message = 'Invalid credentials.') {
-    super(message)
-    this.name = 'InvalidCredentialsError'
+    super(401, message)
   }
 }

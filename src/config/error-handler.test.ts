@@ -1,6 +1,9 @@
 import fastify from 'fastify'
 import { describe, expect, it } from 'vitest'
 import z from 'zod'
+import { GoogleAuthProviderError } from '../modules/user/errors/google-auth-provider.error'
+import { InvalidCredentialsError } from '../modules/user/errors/invalid-credentials.error'
+import { PasswordChangeRejectedError } from '../modules/user/errors/password-change-rejected.error'
 import { NotAllowedError } from '../shared/errors/not-allowed.error'
 import { ResourceAlreadyExistsError } from '../shared/errors/resource-already-exists.error'
 import { ResourceNotFoundError } from '../shared/errors/resource-not-found.error'
@@ -36,6 +39,22 @@ describe('errorHandler', () => {
       error: () => new ResourceAlreadyExistsError('Workout already exists.'),
       statusCode: 409,
       message: 'Workout already exists.',
+    },
+    {
+      error: () =>
+        new PasswordChangeRejectedError('Current password is incorrect.'),
+      statusCode: 400,
+      message: 'Current password is incorrect.',
+    },
+    {
+      error: () => new InvalidCredentialsError(),
+      statusCode: 401,
+      message: 'Invalid credentials.',
+    },
+    {
+      error: () => new GoogleAuthProviderError(503),
+      statusCode: 503,
+      message: 'Google authentication service is unavailable.',
     },
   ])('maps domain errors to HTTP $statusCode', async ({
     error,

@@ -1,6 +1,7 @@
-export class ResourceAlreadyExistsError extends Error {
+import { AppError } from './app.error'
+
+export class ResourceAlreadyExistsError extends AppError {
   constructor(message = 'Resource already exists.') {
-    super(message)
-    this.name = 'ResourceAlreadyExistsError'
+    super(409, message)
   }
 }

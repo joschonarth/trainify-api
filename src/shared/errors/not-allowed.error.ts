@@ -1,6 +1,7 @@
-export class NotAllowedError extends Error {
+import { AppError } from './app.error'
+
+export class NotAllowedError extends AppError {
   constructor(message = 'Not allowed.') {
-    super(message)
-    this.name = 'NotAllowedError'
+    super(403, message)
   }
 }
