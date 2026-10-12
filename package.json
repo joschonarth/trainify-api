@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "start": "node build/server.cjs",
-    "build": "tsup src --out-dir  build",
+    "build": "tsup",
     "generate": "npx prisma generate",
     "migrate": "npx prisma migrate dev",
     "studio": "npx prisma studio",
