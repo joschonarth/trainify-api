@@ -1,5 +1,5 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
-import { setAuthCookie } from '@/modules/user/utils/auth-cookie'
+import { issueAuthTokens } from '@/modules/user/utils/auth-tokens'
 
 export async function refreshTokenController(
   request: FastifyRequest,
@@ -37,24 +37,7 @@ export async function refreshTokenController(
   }
 
   const { sub, email } = refreshTokenPayload
-
-  const token = await reply.jwtSign(
-    { email, type: 'access' },
-    { sign: { sub, expiresIn: '15m' } }
-  )
-
-  const refreshToken = await reply.jwtSign(
-    { email, type: 'refresh' },
-    {
-      sign: {
-        sub,
-        expiresIn: '7d',
-      },
-    }
-  )
-
-  setAuthCookie(reply, token)
-  setAuthCookie(reply, refreshToken, 'refreshToken', 7 * 24 * 60 * 60)
+  const { token } = await issueAuthTokens(reply, { id: sub, email })
 
   return reply.status(200).send({ token })
 }

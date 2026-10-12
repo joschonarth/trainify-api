@@ -3,7 +3,7 @@ import type { FastifyReply, FastifyRequest } from 'fastify'
 import { PasswordsDoNotMatchError } from '@/modules/user/errors/passwords-do-not-match.error'
 import { UserAlreadyExistsError } from '@/modules/user/errors/user-already-exists.error'
 import { makeRegisterUseCase } from '@/modules/user/use-cases/factories/make-register-use-case'
-import { setAuthCookie } from '@/modules/user/utils/auth-cookie'
+import { issueAuthTokens } from '@/modules/user/utils/auth-tokens'
 import type { RegisterBody } from '../schemas/register.schema'
 
 export async function registerController(
@@ -22,17 +22,7 @@ export async function registerController(
       passwordConfirmation,
     })
 
-    const token = await reply.jwtSign(
-      { email: user.email, type: 'access' },
-      { sign: { sub: user.id, expiresIn: '15m' } }
-    )
-    const refreshToken = await reply.jwtSign(
-      { email: user.email, type: 'refresh' },
-      { sign: { sub: user.id, expiresIn: '7d' } }
-    )
-
-    setAuthCookie(reply, token)
-    setAuthCookie(reply, refreshToken, 'refreshToken', 7 * 24 * 60 * 60)
+    const { token } = await issueAuthTokens(reply, user)
 
     return reply.status(201).send({ token })
   } catch (error) {
