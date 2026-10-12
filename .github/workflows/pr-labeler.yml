@@ -1,0 +1,60 @@
+name: PR Labeler
+
+on:
+  pull_request_target:
+    types:
+      - opened
+      - edited
+      - synchronize
+      - reopened
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  label:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Label PR by conventional commit type
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const pr = context.payload.pull_request;
+
+            const match = pr.title.match(/^(\w+)(\(.+\))?!?:/);
+            if (!match) return;
+
+            const typeToLabel = {
+              feat: "enhancement",
+              fix: "bug",
+              docs: "documentation",
+              test: "test",
+            };
+
+            const label = typeToLabel[match[1].toLowerCase()];
+            if (!label) return;
+
+            const managed = new Set(Object.values(typeToLabel));
+            const current = pr.labels.map((l) => l.name);
+
+            for (const name of current) {
+              if (managed.has(name) && name !== label) {
+                await github.rest.issues.removeLabel({
+                  owner,
+                  repo,
+                  issue_number: pr.number,
+                  name,
+                });
+              }
+            }
+
+            if (!current.includes(label)) {
+              await github.rest.issues.addLabels({
+                owner,
+                repo,
+                issue_number: pr.number,
+                labels: [label],
+              });
+            }
