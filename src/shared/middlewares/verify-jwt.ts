@@ -4,7 +4,7 @@ export async function verifyJwt(request: FastifyRequest, reply: FastifyReply) {
   try {
     await request.jwtVerify()
 
-    if (!request.user?.sub) {
+    if (request.user?.sub == null || request.user.type !== 'access') {
       return reply.status(401).send({ message: 'Unauthorized.' })
     }
   } catch {

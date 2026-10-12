@@ -20,13 +20,14 @@ export async function authenticateController(
     })
 
     const token = await reply.jwtSign(
-      { email: user.email },
+      { email: user.email, type: 'access' },
       { sign: { sub: user.id, expiresIn: '15m' } }
     )
 
     const refreshToken = await reply.jwtSign(
       {
         email: user.email,
+        type: 'refresh',
       },
       {
         sign: {

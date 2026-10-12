@@ -19,6 +19,7 @@ export async function signInWithGoogleController(
     const tokenJwt = await reply.jwtSign(
       {
         email: user.email,
+        type: 'access',
       },
       {
         sign: {
@@ -28,7 +29,7 @@ export async function signInWithGoogleController(
       }
     )
     const refreshToken = await reply.jwtSign(
-      { email: user.email },
+      { email: user.email, type: 'refresh' },
       { sign: { sub: user.id, expiresIn: '7d' } }
     )
 
