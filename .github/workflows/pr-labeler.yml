@@ -31,6 +31,7 @@ jobs:
               fix: "bug",
               docs: "documentation",
               test: "test",
+              refactor: "refactor"
             };
 
             const label = typeToLabel[match[1].toLowerCase()];
