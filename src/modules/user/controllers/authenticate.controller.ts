@@ -1,8 +1,8 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
 
-import { env } from '@/env'
 import { InvalidCredentialsError } from '@/modules/user/errors/invalid-credentials.error'
 import { makeAuthenticateUseCase } from '@/modules/user/use-cases/factories/make-authenticate-use-case'
+import { setAuthCookie } from '@/modules/user/utils/auth-cookie'
 import type { AuthenticateBody } from '../schemas/authenticate.schema'
 
 export async function authenticateController(
@@ -20,20 +20,12 @@ export async function authenticateController(
     })
 
     const token = await reply.jwtSign(
-      {
-        userId: user.id,
-        email: user.email,
-      },
-      {
-        sign: {
-          sub: user.id,
-        },
-      }
+      { email: user.email },
+      { sign: { sub: user.id, expiresIn: '15m' } }
     )
 
     const refreshToken = await reply.jwtSign(
       {
-        userId: user.id,
         email: user.email,
       },
       {
@@ -44,19 +36,15 @@ export async function authenticateController(
       }
     )
 
-    reply.setCookie('refreshToken', refreshToken, {
-      path: '/',
-      httpOnly: true,
-      secure: env.NODE_ENV === 'production',
-      sameSite: env.NODE_ENV === 'production' ? 'none' : 'strict',
-    })
+    setAuthCookie(reply, token)
+    setAuthCookie(reply, refreshToken, 'refreshToken', 7 * 24 * 60 * 60)
 
     return reply.status(200).send({
       token,
     })
   } catch (error) {
     if (error instanceof InvalidCredentialsError) {
-      return reply.status(400).send({
+      return reply.status(401).send({
         message: error.message,
       })
     }

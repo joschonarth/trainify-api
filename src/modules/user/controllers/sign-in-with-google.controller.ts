@@ -1,8 +1,8 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
 
-import { env } from '@/env'
 import { InvalidGoogleTokenError } from '@/modules/user/errors/invalid-google-token.error'
 import { makeSignInWithGoogleUseCase } from '@/modules/user/use-cases/factories/make-sign-in-with-google-use-case'
+import { setAuthCookie } from '@/modules/user/utils/auth-cookie'
 import type { SignInWithGoogleBody } from '../schemas/sign-in-with-google.schema'
 
 export async function signInWithGoogleController(
@@ -18,22 +18,22 @@ export async function signInWithGoogleController(
 
     const tokenJwt = await reply.jwtSign(
       {
-        userId: user.id,
         email: user.email,
       },
       {
         sign: {
           sub: user.id,
+          expiresIn: '15m',
         },
       }
     )
+    const refreshToken = await reply.jwtSign(
+      { email: user.email },
+      { sign: { sub: user.id, expiresIn: '7d' } }
+    )
 
-    reply.setCookie('token', tokenJwt, {
-      path: '/',
-      httpOnly: true,
-      secure: env.NODE_ENV === 'production',
-      sameSite: env.NODE_ENV === 'production' ? 'none' : 'strict',
-    })
+    setAuthCookie(reply, tokenJwt)
+    setAuthCookie(reply, refreshToken, 'refreshToken', 7 * 24 * 60 * 60)
 
     return reply.status(200).send({
       user: {

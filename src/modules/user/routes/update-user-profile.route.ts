@@ -22,6 +22,7 @@ export function updateUserProfileRoute(app: FastifyInstance) {
               id: z.string().describe('User ID.'),
               name: z.string().describe('User name.'),
               email: z.string().describe('User email.'),
+              avatarUrl: z.string().nullable().describe('User avatar URL.'),
               height: z
                 .number()
                 .nullable()

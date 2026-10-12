@@ -27,7 +27,7 @@ export function authenticateRoute(app: FastifyInstance) {
                 .describe('JWT token for the authenticated user.'),
             })
             .describe('User authenticated successfully.'),
-          400: z
+          401: z
             .object({
               message: z.string(),
             })

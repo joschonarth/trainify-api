@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
 export const authenticateBodySchema = z.object({
-  email: z.email(),
+  email: z.email().transform((email) => email.trim().toLowerCase()),
   password: z.string().min(6),
 })
 

@@ -10,9 +10,6 @@ export class PrismaUsersRepository implements UsersRepository {
       where: {
         id,
       },
-      include: {
-        streak: true,
-      },
     })
 
     return user

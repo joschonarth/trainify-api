@@ -1,4 +1,4 @@
-import { compare } from 'bcrypt'
+import { compare, hash } from 'bcrypt'
 import type { User } from 'generated/prisma'
 
 import { InvalidCredentialsError } from '@/modules/user/errors/invalid-credentials.error'
@@ -20,21 +20,18 @@ export class AuthenticateUseCase {
     email,
     password,
   }: AuthenticateUseCaseRequest): Promise<AuthenticateUseCaseResponse> {
-    const user = await this.usersRepository.findByEmail(email)
+    const user = await this.usersRepository.findByEmail(
+      email.trim().toLowerCase()
+    )
 
-    if (!user) {
+    if (!user?.password) {
+      await hash(password, 12)
       throw new InvalidCredentialsError()
     }
 
-    if (!user.password) {
-      throw new InvalidCredentialsError(
-        'Use Google login to log into this account.'
-      )
-    }
+    const doesPasswordMatch = await compare(password, user.password)
 
-    const doestPasswordMatches = await compare(password, user.password)
-
-    if (!doestPasswordMatches) {
+    if (!doesPasswordMatch) {
       throw new InvalidCredentialsError()
     }
 
