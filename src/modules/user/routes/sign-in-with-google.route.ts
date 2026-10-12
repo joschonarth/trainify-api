@@ -36,6 +36,14 @@ export function signInWithGoogleRoute(app: FastifyInstance) {
           401: z
             .object({ message: z.string() })
             .describe('Invalid or expired Google token.'),
+          502: z
+            .object({ message: z.string() })
+            .describe(
+              'Google authentication service returned an invalid response.'
+            ),
+          503: z
+            .object({ message: z.string() })
+            .describe('Google authentication service is unavailable.'),
         },
       },
     },

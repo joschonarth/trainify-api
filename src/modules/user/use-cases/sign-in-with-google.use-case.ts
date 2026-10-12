@@ -24,14 +24,8 @@ export class SignInWithGoogleUseCase {
   async execute({
     token,
   }: SignInWithGoogleUseCaseRequest): Promise<SignInWithGoogleUseCaseResponse> {
-    let googleUser: GoogleUserInfo
-    try {
-      googleUser = await this.googleAuthProvider.getUserInfo(token)
-    } catch {
-      throw new InvalidGoogleTokenError(
-        'Could not verify Google authentication.'
-      )
-    }
+    const googleUser: GoogleUserInfo =
+      await this.googleAuthProvider.getUserInfo(token)
 
     if (!googleUser.verified_email) {
       throw new InvalidGoogleTokenError('Google account email is not verified.')
