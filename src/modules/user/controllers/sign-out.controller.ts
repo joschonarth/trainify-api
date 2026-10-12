@@ -1,6 +1,7 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
 
 import { makeSignOutUseCase } from '@/modules/user/use-cases/factories/make-sign-out-use-case'
+import { clearAuthCookie } from '@/modules/user/utils/auth-cookie'
 
 export async function signOutController(
   _: FastifyRequest,
@@ -10,9 +11,8 @@ export async function signOutController(
 
   await signOutUseCase.execute()
 
-  reply.clearCookie('token', {
-    path: '/',
-  })
+  clearAuthCookie(reply, 'token')
+  clearAuthCookie(reply, 'refreshToken')
 
   return reply.status(200).send()
 }

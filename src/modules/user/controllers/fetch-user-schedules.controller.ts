@@ -11,7 +11,7 @@ export async function fetchUserSchedulesController(
     const fetchUserSchedules = makeFetchUserSchedulesUseCase()
 
     const { schedules } = await fetchUserSchedules.execute({
-      userId: request.user.userId,
+      userId: request.user.sub,
     })
 
     return reply.status(200).send({
