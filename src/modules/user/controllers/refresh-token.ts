@@ -13,7 +13,11 @@ export async function refreshTokenController(
     })
   }
 
-  let refreshTokenPayload: { sub: string; email: string }
+  let refreshTokenPayload: {
+    sub: string
+    email: string
+    type: 'access' | 'refresh'
+  }
   try {
     refreshTokenPayload = request.server.jwt.verify(refreshTokenCookie)
   } catch {
@@ -22,15 +26,25 @@ export async function refreshTokenController(
     })
   }
 
+  if (
+    refreshTokenPayload.type !== 'refresh' ||
+    !refreshTokenPayload.sub ||
+    !refreshTokenPayload.email
+  ) {
+    return reply.status(401).send({
+      message: 'Invalid or expired refresh token.',
+    })
+  }
+
   const { sub, email } = refreshTokenPayload
 
   const token = await reply.jwtSign(
-    { email },
+    { email, type: 'access' },
     { sign: { sub, expiresIn: '15m' } }
   )
 
   const refreshToken = await reply.jwtSign(
-    { email },
+    { email, type: 'refresh' },
     {
       sign: {
         sub,
