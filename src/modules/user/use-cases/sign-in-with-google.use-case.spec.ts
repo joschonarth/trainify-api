@@ -51,6 +51,31 @@ describe('Sign In With Google Use Case', () => {
     ).rejects.toBeInstanceOf(InvalidGoogleTokenError)
   })
 
+  it('should recover when another login creates the user concurrently', async () => {
+    const concurrentUser = await makeUser(usersRepository, {
+      email: 'johndoe@example.com',
+      name: 'Concurrent user',
+    })
+    const findByEmail = vi
+      .spyOn(usersRepository, 'findByEmail')
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce(concurrentUser)
+    vi.spyOn(usersRepository, 'create').mockRejectedValue(
+      Object.assign(new Error('Unique constraint failed.'), { code: 'P2002' })
+    )
+    vi.mocked(googleAuthProvider.getUserInfo).mockResolvedValue({
+      email: 'johndoe@example.com',
+      verified_email: true,
+      name: 'Google name',
+    })
+
+    const { user } = await sut.execute({ token: 'google-access-token' })
+
+    expect(user.id).toBe(concurrentUser.id)
+    expect(user.name).toBe('Concurrent user')
+    expect(findByEmail).toHaveBeenCalledTimes(2)
+  })
+
   it.each([
     502, 503,
   ] as const)('should preserve Google provider errors with status %i', async (statusCode) => {

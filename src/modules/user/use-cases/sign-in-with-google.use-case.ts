@@ -35,22 +35,42 @@ export class SignInWithGoogleUseCase {
     const { name, picture } = googleUser
     let user = await this.usersRepository.findByEmail(email)
 
-    if (user) {
-      const needsUpdate =
-        (!user.name?.trim() && name) || (!user.avatarUrl && picture)
-
-      if (needsUpdate) {
-        user = await this.usersRepository.update(user.id, {
-          ...(!user.name?.trim() && name && { name }),
-          ...(!user.avatarUrl && picture && { avatarUrl: picture }),
+    if (!user) {
+      try {
+        user = await this.usersRepository.create({
+          email,
+          name: name ?? 'Google User',
+          password: null,
+          avatarUrl: picture ?? null,
         })
+      } catch (error) {
+        if (
+          typeof error !== 'object' ||
+          error === null ||
+          !('code' in error) ||
+          error.code !== 'P2002'
+        ) {
+          throw error
+        }
+
+        const userCreatedConcurrently =
+          await this.usersRepository.findByEmail(email)
+
+        if (!userCreatedConcurrently) {
+          throw error
+        }
+
+        user = userCreatedConcurrently
       }
-    } else {
-      user = await this.usersRepository.create({
-        email,
-        name: name ?? 'Google User',
-        password: null,
-        avatarUrl: picture ?? null,
+    }
+
+    const needsUpdate =
+      (!user.name?.trim() && name) || (!user.avatarUrl && picture)
+
+    if (needsUpdate) {
+      user = await this.usersRepository.update(user.id, {
+        ...(!user.name?.trim() && name && { name }),
+        ...(!user.avatarUrl && picture && { avatarUrl: picture }),
       })
     }
 
