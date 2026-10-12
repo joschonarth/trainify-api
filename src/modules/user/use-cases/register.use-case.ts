@@ -29,7 +29,9 @@ export class RegisterUseCase {
       throw new PasswordsDoNotMatchError()
     }
 
-    const userWithSameEmail = await this.usersRepository.findByEmail(email)
+    const normalizedEmail = email.trim().toLowerCase()
+    const userWithSameEmail =
+      await this.usersRepository.findByEmail(normalizedEmail)
 
     if (userWithSameEmail) {
       throw new UserAlreadyExistsError()
@@ -37,11 +39,25 @@ export class RegisterUseCase {
 
     const passwordHash = await hash(password, 12)
 
-    const user = await this.usersRepository.create({
-      name,
-      email,
-      password: passwordHash,
-    })
+    let user: User
+    try {
+      user = await this.usersRepository.create({
+        name,
+        email: normalizedEmail,
+        password: passwordHash,
+      })
+    } catch (error) {
+      if (
+        typeof error === 'object' &&
+        error !== null &&
+        'code' in error &&
+        error.code === 'P2002'
+      ) {
+        throw new UserAlreadyExistsError()
+      }
+
+      throw error
+    }
 
     return { user }
   }

@@ -20,6 +20,9 @@ export function changePasswordRoute(app: FastifyInstance) {
           200: z.null().describe('Password changed successfully.'),
           400: z
             .object({ message: z.string() })
+            .describe('New password and confirmation do not match.'),
+          401: z
+            .object({ message: z.string() })
             .describe('Invalid current password or passwords do not match.'),
           404: z.object({ message: z.string() }).describe('User not found.'),
         },

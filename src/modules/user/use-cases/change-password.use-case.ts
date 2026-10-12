@@ -21,6 +21,12 @@ export class ChangePasswordUseCase {
     newPassword,
     passwordConfirmation,
   }: ChangePasswordUseCaseRequest): Promise<void> {
+    if (newPassword !== passwordConfirmation) {
+      throw new PasswordsDoNotMatchError(
+        'New password and confirmation do not match.'
+      )
+    }
+
     const user = await this.usersRepository.findById(userId)
 
     if (!user) {
@@ -29,7 +35,7 @@ export class ChangePasswordUseCase {
 
     if (!user.password) {
       throw new InvalidCredentialsError(
-        'This user does not have a password set. Please sign in with Google or set a password first.'
+        'Password changes are not available for accounts using Google sign-in.'
       )
     }
 
@@ -38,9 +44,9 @@ export class ChangePasswordUseCase {
       throw new InvalidCredentialsError('Current password is incorrect.')
     }
 
-    if (newPassword !== passwordConfirmation) {
-      throw new PasswordsDoNotMatchError(
-        'New password and confirmation do not match.'
+    if (await compare(newPassword, user.password)) {
+      throw new InvalidCredentialsError(
+        'The new password must be different from the current password.'
       )
     }
 
