@@ -30,7 +30,7 @@ export async function changePasswordController(
     }
 
     if (error instanceof InvalidCredentialsError) {
-      return reply.status(401).send({ message: error.message })
+      return reply.status(400).send({ message: error.message })
     }
 
     if (error instanceof PasswordsDoNotMatchError) {
