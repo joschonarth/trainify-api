@@ -1,11 +1,13 @@
 import type { FastifyInstance } from 'fastify'
 import { z } from 'zod'
+import { verifyCsrfOrigin } from '@/shared/middlewares/verify-csrf-origin'
 import { refreshTokenController } from '../controllers/refresh-token'
 
 export function refreshTokenRoute(app: FastifyInstance) {
   app.patch(
     '/token/refresh',
     {
+      onRequest: [verifyCsrfOrigin],
       config: {
         rateLimit: {
           max: 5,
@@ -28,6 +30,9 @@ export function refreshTokenRoute(app: FastifyInstance) {
               message: z.string(),
             })
             .describe('Invalid or expired refresh token.'),
+          403: z
+            .object({ message: z.string() })
+            .describe('Request origin is not allowed.'),
         },
       },
     },
