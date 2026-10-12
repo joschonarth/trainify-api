@@ -19,7 +19,6 @@ export async function getUserProfileController(
         ...user,
         birthdate: user.birthdate?.toISOString() ?? null,
         createdAt: user.createdAt.toISOString(),
-        password: undefined,
       },
     })
   } catch (error) {
