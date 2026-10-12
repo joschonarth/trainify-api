@@ -4,6 +4,7 @@ import { z } from 'zod'
 import { verifyJwt } from '@/shared/middlewares/verify-jwt'
 import { updateUserProfileController } from '../controllers/update-user-profile.controller'
 import { updateUserProfileBodySchema } from '../schemas/update-user-profile.schema'
+import { userProfileSchema } from '../schemas/user-profile.schema'
 
 export function updateUserProfileRoute(app: FastifyInstance) {
   app.put(
@@ -17,28 +18,7 @@ export function updateUserProfileRoute(app: FastifyInstance) {
           'Updates the authenticated user profile data. All fields are optional — only provided fields will be updated.',
         body: updateUserProfileBodySchema,
         response: {
-          200: z
-            .object({
-              id: z.string().describe('User ID.'),
-              name: z.string().describe('User name.'),
-              email: z.string().describe('User email.'),
-              avatarUrl: z.string().nullable().describe('User avatar URL.'),
-              height: z
-                .number()
-                .nullable()
-                .describe('User height in centimeters.'),
-              weight: z
-                .number()
-                .nullable()
-                .describe('User weight in kilograms.'),
-              gender: z
-                .enum(['male', 'female', 'other'])
-                .nullable()
-                .describe('User gender.'),
-              birthdate: z.string().nullable().describe('User birthdate.'),
-              createdAt: z.string().describe('Account creation date.'),
-            })
-            .describe('Profile updated successfully.'),
+          200: userProfileSchema.describe('Profile updated successfully.'),
           404: z
             .object({
               message: z.string(),
