@@ -1,4 +1,7 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
+
+import { InvalidRefreshTokenError } from '@/modules/user/errors/invalid-refresh-token.error'
+import { makeRefreshTokenUseCase } from '@/modules/user/use-cases/factories/make-refresh-token-use-case'
 import { issueAuthTokens } from '@/modules/user/utils/auth-tokens'
 
 export async function refreshTokenController(
@@ -13,31 +16,21 @@ export async function refreshTokenController(
     })
   }
 
-  let refreshTokenPayload: {
-    sub: string
-    email: string
-    type: 'access' | 'refresh'
-  }
   try {
-    refreshTokenPayload = request.server.jwt.verify(refreshTokenCookie)
-  } catch {
-    return reply.status(401).send({
-      message: 'Invalid or expired refresh token.',
+    const refreshTokenUseCase = makeRefreshTokenUseCase({
+      verify: (token) => request.server.jwt.verify(token),
     })
-  }
-
-  if (
-    refreshTokenPayload.type !== 'refresh' ||
-    !refreshTokenPayload.sub ||
-    !refreshTokenPayload.email
-  ) {
-    return reply.status(401).send({
-      message: 'Invalid or expired refresh token.',
+    const { user } = await refreshTokenUseCase.execute({
+      token: refreshTokenCookie,
     })
+    const { token } = await issueAuthTokens(reply, user)
+
+    return reply.status(200).send({ token })
+  } catch (error) {
+    if (error instanceof InvalidRefreshTokenError) {
+      return reply.status(401).send({ message: error.message })
+    }
+
+    throw error
   }
-
-  const { sub, email } = refreshTokenPayload
-  const { token } = await issueAuthTokens(reply, { id: sub, email })
-
-  return reply.status(200).send({ token })
 }
