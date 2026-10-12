@@ -11,26 +11,16 @@ export async function refreshTokenController(
   const refreshTokenCookie = request.cookies.refreshToken
 
   if (!refreshTokenCookie) {
-    return reply.status(401).send({
-      message: 'Invalid or expired refresh token.',
-    })
+    throw new InvalidRefreshTokenError()
   }
 
-  try {
-    const refreshTokenUseCase = makeRefreshTokenUseCase({
-      verify: (token) => request.server.jwt.verify(token),
-    })
-    const { user } = await refreshTokenUseCase.execute({
-      token: refreshTokenCookie,
-    })
-    const { token } = await issueAuthTokens(reply, user)
+  const refreshTokenUseCase = makeRefreshTokenUseCase({
+    verify: (token) => request.server.jwt.verify(token),
+  })
+  const { user } = await refreshTokenUseCase.execute({
+    token: refreshTokenCookie,
+  })
+  const { token } = await issueAuthTokens(reply, user)
 
-    return reply.status(200).send({ token })
-  } catch (error) {
-    if (error instanceof InvalidRefreshTokenError) {
-      return reply.status(401).send({ message: error.message })
-    }
-
-    throw error
-  }
+  return reply.status(200).send({ token })
 }

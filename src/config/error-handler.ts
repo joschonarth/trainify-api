@@ -1,8 +1,6 @@
 import type { FastifyError, FastifyReply, FastifyRequest } from 'fastify'
 import z, { ZodError } from 'zod'
-import { NotAllowedError } from '../shared/errors/not-allowed.error'
-import { ResourceAlreadyExistsError } from '../shared/errors/resource-already-exists.error'
-import { ResourceNotFoundError } from '../shared/errors/resource-not-found.error'
+import { AppError } from '../shared/errors/app.error'
 
 export function errorHandler(
   error: FastifyError,
@@ -21,16 +19,8 @@ export function errorHandler(
     })
   }
 
-  if (error instanceof NotAllowedError) {
-    return reply.status(403).send({ message: error.message })
-  }
-
-  if (error instanceof ResourceNotFoundError) {
-    return reply.status(404).send({ message: error.message })
-  }
-
-  if (error instanceof ResourceAlreadyExistsError) {
-    return reply.status(409).send({ message: error.message })
+  if (error instanceof AppError) {
+    return reply.status(error.statusCode).send({ message: error.message })
   }
 
   request.log.error({ err: error }, 'Unhandled error')

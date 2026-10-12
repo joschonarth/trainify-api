@@ -1,6 +1,7 @@
-export class InvalidRefreshTokenError extends Error {
+import { AppError } from '@/shared/errors/app.error'
+
+export class InvalidRefreshTokenError extends AppError {
   constructor(message = 'Invalid or expired refresh token.') {
-    super(message)
-    this.name = 'InvalidRefreshTokenError'
+    super(401, message)
   }
 }

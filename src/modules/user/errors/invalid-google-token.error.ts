@@ -1,6 +1,7 @@
-export class InvalidGoogleTokenError extends Error {
+import { AppError } from '@/shared/errors/app.error'
+
+export class InvalidGoogleTokenError extends AppError {
   constructor(message = 'Invalid Google token.') {
-    super(message)
-    this.name = 'InvalidGoogleTokenError'
+    super(401, message)
   }
 }
