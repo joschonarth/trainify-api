@@ -1,6 +1,6 @@
 import type { FastifyReply } from 'fastify'
 
-import { setAuthCookie } from './auth-cookie'
+import { REFRESH_TOKEN_COOKIE_PATH, setAuthCookie } from './auth-cookie'
 
 const ACCESS_TTL = '15m'
 const REFRESH_TTL_SECONDS = 7 * 24 * 60 * 60
@@ -24,7 +24,13 @@ export async function issueAuthTokens(
   )
 
   setAuthCookie(reply, token)
-  setAuthCookie(reply, refreshToken, 'refreshToken', REFRESH_TTL_SECONDS)
+  setAuthCookie(
+    reply,
+    refreshToken,
+    'refreshToken',
+    REFRESH_TTL_SECONDS,
+    REFRESH_TOKEN_COOKIE_PATH
+  )
 
   return { token }
 }

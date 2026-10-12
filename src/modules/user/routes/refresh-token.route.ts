@@ -6,6 +6,12 @@ export function refreshTokenRoute(app: FastifyInstance) {
   app.patch(
     '/token/refresh',
     {
+      config: {
+        rateLimit: {
+          max: 5,
+          timeWindow: '1 minute',
+        },
+      },
       schema: {
         tags: ['Users'],
         summary: 'Refresh the access token',
