@@ -9,6 +9,7 @@ import {
   validatorCompiler,
   type ZodTypeProvider,
 } from 'fastify-type-provider-zod'
+import { allowedOrigin } from './config/allowed-origin'
 import { errorHandler } from './config/error-handler'
 import { loggerOptions } from './config/logger'
 import { env } from './env'
@@ -24,10 +25,7 @@ app.setSerializerCompiler(serializerCompiler)
 app.setValidatorCompiler(validatorCompiler)
 
 app.register(cors, {
-  origin:
-    env.NODE_ENV === 'production'
-      ? 'https://trainify-web.vercel.app'
-      : 'http://localhost:5173',
+  origin: allowedOrigin,
   credentials: true,
   allowedHeaders: ['Content-Type', 'Authorization'],
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
