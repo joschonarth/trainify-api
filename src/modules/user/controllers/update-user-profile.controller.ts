@@ -15,7 +15,7 @@ export async function updateUserProfileController(
     const updateUserProfile = makeUpdateUserProfileUseCase()
 
     const { user } = await updateUserProfile.execute({
-      userId: request.user.userId,
+      userId: request.user.sub,
       ...(name !== undefined && { name }),
       ...(height !== undefined && { height }),
       ...(weight !== undefined && { weight }),
@@ -25,6 +25,8 @@ export async function updateUserProfileController(
 
     return reply.status(200).send({
       ...user,
+      birthdate: user.birthdate?.toISOString() ?? null,
+      createdAt: user.createdAt.toISOString(),
       password: undefined,
     })
   } catch (error) {

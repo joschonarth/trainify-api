@@ -5,7 +5,7 @@ export const updateUserProfileBodySchema = z.object({
   height: z.number().int().positive().optional(),
   weight: z.number().positive().optional(),
   gender: z.enum(['male', 'female', 'other']).optional(),
-  birthdate: z.string().optional(),
+  birthdate: z.iso.date().optional(),
 })
 
 export type UpdateUserProfileBody = z.infer<typeof updateUserProfileBodySchema>
