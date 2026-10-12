@@ -28,6 +28,8 @@ describe('Get User Profile Use Case', () => {
       name: 'John Doe',
       email: 'johndoe@example.com',
     })
+    expect(user).not.toHaveProperty('password')
+    expect(user).not.toHaveProperty('streak')
   })
 
   it('should not return a profile for a non-existent user', async () => {

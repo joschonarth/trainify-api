@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-
+import { GoogleAuthProviderError } from '@/modules/user/errors/google-auth-provider.error'
 import { InvalidGoogleTokenError } from '@/modules/user/errors/invalid-google-token.error'
 import type { GoogleAuthProvider } from '@/modules/user/providers/google-auth.provider'
 import { InMemoryUsersRepository } from '@/modules/user/repositories/in-memory/in-memory-users.repository'
@@ -43,12 +43,48 @@ describe('Sign In With Google Use Case', () => {
 
   it('should reject an invalid Google token', async () => {
     vi.mocked(googleAuthProvider.getUserInfo).mockRejectedValue(
-      new Error('Google request failed.')
+      new InvalidGoogleTokenError('Google token is invalid.')
     )
 
     await expect(
       sut.execute({ token: 'invalid-token' })
     ).rejects.toBeInstanceOf(InvalidGoogleTokenError)
+  })
+
+  it('should recover when another login creates the user concurrently', async () => {
+    const concurrentUser = await makeUser(usersRepository, {
+      email: 'johndoe@example.com',
+      name: 'Concurrent user',
+    })
+    const findByEmail = vi
+      .spyOn(usersRepository, 'findByEmail')
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce(concurrentUser)
+    vi.spyOn(usersRepository, 'create').mockRejectedValue(
+      Object.assign(new Error('Unique constraint failed.'), { code: 'P2002' })
+    )
+    vi.mocked(googleAuthProvider.getUserInfo).mockResolvedValue({
+      email: 'johndoe@example.com',
+      verified_email: true,
+      name: 'Google name',
+    })
+
+    const { user } = await sut.execute({ token: 'google-access-token' })
+
+    expect(user.id).toBe(concurrentUser.id)
+    expect(user.name).toBe('Concurrent user')
+    expect(findByEmail).toHaveBeenCalledTimes(2)
+  })
+
+  it.each([
+    502, 503,
+  ] as const)('should preserve Google provider errors with status %i', async (statusCode) => {
+    const providerError = new GoogleAuthProviderError(statusCode)
+    vi.mocked(googleAuthProvider.getUserInfo).mockRejectedValue(providerError)
+
+    await expect(sut.execute({ token: 'google-access-token' })).rejects.toBe(
+      providerError
+    )
   })
 
   it('should reject an unverified Google email before looking up a user', async () => {

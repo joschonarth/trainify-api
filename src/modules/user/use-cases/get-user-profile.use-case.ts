@@ -1,4 +1,4 @@
-import type { User, UserStreak } from 'generated/prisma'
+import type { User } from 'generated/prisma'
 
 import type { UsersRepository } from '@/modules/user/repositories/users.repository'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
@@ -7,8 +7,10 @@ interface GetUserProfileUseCaseRequest {
   userId: string
 }
 
+export type PublicUserDTO = Omit<User, 'password'>
+
 interface GetUserProfileUseCaseResponse {
-  user: User & { streak?: UserStreak }
+  user: PublicUserDTO
 }
 
 export class GetUserProfileUseCase {
@@ -23,8 +25,8 @@ export class GetUserProfileUseCase {
       throw new ResourceNotFoundError()
     }
 
-    return {
-      user,
-    }
+    const { password: _password, ...publicUser } = user
+
+    return { user: publicUser }
   }
 }

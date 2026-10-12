@@ -1,5 +1,6 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
 
+import { GoogleAuthProviderError } from '@/modules/user/errors/google-auth-provider.error'
 import { InvalidGoogleTokenError } from '@/modules/user/errors/invalid-google-token.error'
 import { makeSignInWithGoogleUseCase } from '@/modules/user/use-cases/factories/make-sign-in-with-google-use-case'
 import { setAuthCookie } from '@/modules/user/utils/auth-cookie'
@@ -48,6 +49,12 @@ export async function signInWithGoogleController(
   } catch (error) {
     if (error instanceof InvalidGoogleTokenError) {
       return reply.status(401).send({
+        message: error.message,
+      })
+    }
+
+    if (error instanceof GoogleAuthProviderError) {
+      return reply.status(error.statusCode).send({
         message: error.message,
       })
     }

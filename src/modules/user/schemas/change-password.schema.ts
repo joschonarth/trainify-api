@@ -1,9 +1,10 @@
 import { z } from 'zod'
+import { currentPasswordSchema, passwordSchema } from './password.schema'
 
 export const changePasswordBodySchema = z.object({
-  currentPassword: z.string().min(6),
-  newPassword: z.string().min(10),
-  passwordConfirmation: z.string().min(10),
+  currentPassword: currentPasswordSchema,
+  newPassword: passwordSchema,
+  passwordConfirmation: passwordSchema,
 })
 
 export type ChangePasswordBody = z.infer<typeof changePasswordBodySchema>

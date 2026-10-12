@@ -17,7 +17,8 @@ export async function getUserProfileController(
     return reply.status(200).send({
       user: {
         ...user,
-        password: undefined,
+        birthdate: user.birthdate?.toISOString() ?? null,
+        createdAt: user.createdAt.toISOString(),
       },
     })
   } catch (error) {
