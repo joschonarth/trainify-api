@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { GoogleAuthProviderError } from '@/modules/user/errors/google-auth-provider.error'
+import { InvalidCredentialsError } from '@/modules/user/errors/invalid-credentials.error'
 import { InvalidGoogleTokenError } from '@/modules/user/errors/invalid-google-token.error'
 import {
   type GoogleAuthProvider,
@@ -8,6 +9,7 @@ import {
 import { InMemoryUsersRepository } from '@/modules/user/repositories/in-memory/in-memory-users.repository'
 import { makeUser } from '@/modules/user/tests/factories/make-user'
 
+import { AuthenticateUseCase } from './authenticate.use-case'
 import { SignInWithGoogleUseCase } from './sign-in-with-google.use-case'
 
 let usersRepository: InMemoryUsersRepository
@@ -178,6 +180,74 @@ describe('Sign In With Google Use Case', () => {
     expect(signedInUser.id).toBe(user.id)
     expect(signedInUser.name).toBe('Customized name')
     expect(signedInUser.avatarUrl).toBe('https://example.com/avatar.png')
+  })
+
+  it('should remove an existing password when linking a verified Google account', async () => {
+    const user = await makeUser(usersRepository, {
+      email: 'johndoe@example.com',
+      name: 'John Doe',
+      avatarUrl: 'https://example.com/avatar.png',
+      rawPassword: 'old-password',
+    })
+    vi.mocked(googleAuthProvider.getUserInfo).mockResolvedValue({
+      email: 'johndoe@example.com',
+      verified_email: true,
+      name: 'John Doe',
+      picture: 'https://example.com/avatar.png',
+    })
+    const update = vi.spyOn(usersRepository, 'update')
+
+    const { user: linkedUser } = await sut.execute({
+      token: 'google-access-token',
+    })
+
+    expect(linkedUser.password).toBeNull()
+    expect(update).toHaveBeenCalledWith(user.id, { password: null })
+  })
+
+  it('should not update an unchanged Google-only account', async () => {
+    await makeUser(usersRepository, {
+      email: 'johndoe@example.com',
+      name: 'John Doe',
+      avatarUrl: 'https://example.com/avatar.png',
+      password: null,
+    })
+    vi.mocked(googleAuthProvider.getUserInfo).mockResolvedValue({
+      email: 'johndoe@example.com',
+      verified_email: true,
+      name: 'John Doe',
+      picture: 'https://example.com/avatar.png',
+    })
+    const update = vi.spyOn(usersRepository, 'update')
+
+    await sut.execute({ token: 'google-access-token' })
+
+    expect(update).not.toHaveBeenCalled()
+  })
+
+  it('should reject the old password after linking a verified Google account', async () => {
+    await makeUser(usersRepository, {
+      email: 'johndoe@example.com',
+      name: 'John Doe',
+      avatarUrl: 'https://example.com/avatar.png',
+      rawPassword: 'old-password',
+    })
+    vi.mocked(googleAuthProvider.getUserInfo).mockResolvedValue({
+      email: 'johndoe@example.com',
+      verified_email: true,
+      name: 'John Doe',
+      picture: 'https://example.com/avatar.png',
+    })
+
+    await sut.execute({ token: 'google-access-token' })
+
+    const authenticate = new AuthenticateUseCase(usersRepository)
+    await expect(
+      authenticate.execute({
+        email: 'johndoe@example.com',
+        password: 'old-password',
+      })
+    ).rejects.toBeInstanceOf(InvalidCredentialsError)
   })
 
   it('should fill an empty name from Google', async () => {

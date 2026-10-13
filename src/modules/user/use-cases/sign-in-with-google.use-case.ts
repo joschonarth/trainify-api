@@ -64,13 +64,17 @@ export class SignInWithGoogleUseCase {
       }
     }
 
-    const needsUpdate =
-      (!user.name?.trim() && name) || (!user.avatarUrl && picture)
+    const updateData = {
+      ...(!user.name?.trim() && name && { name }),
+      ...(!user.avatarUrl && picture && { avatarUrl: picture }),
+      ...(user.password !== null && { password: null }),
+    }
 
-    if (needsUpdate) {
+    if (Object.keys(updateData).length > 0) {
+      // Temporary pre-hijacking mitigation: a verified Google email proves mailbox ownership.
+      // Remove the pre-registered password until the app has its own email verification flow.
       user = await this.usersRepository.update(user.id, {
-        ...(!user.name?.trim() && name && { name }),
-        ...(!user.avatarUrl && picture && { avatarUrl: picture }),
+        ...updateData,
       })
     }
 
