@@ -44,4 +44,5 @@ jobs:
         env:
           NODE_ENV: test
           JWT_SECRET: ${{ vars.JWT_SECRET }}
+          GOOGLE_CLIENT_ID: ${{ vars.GOOGLE_CLIENT_ID }}
           DATABASE_URL: ${{ vars.DATABASE_URL }}

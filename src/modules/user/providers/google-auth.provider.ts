@@ -11,6 +11,7 @@ const googleUserInfoSchema = z.object({
 
 const googleTokenInfoSchema = z.object({
   aud: z.string().optional(),
+  azp: z.string().optional(),
   audience: z.string().optional(),
   issued_to: z.string().optional(),
 })
@@ -34,18 +35,28 @@ export class GoogleUserInfoProvider implements GoogleAuthProvider {
       signal
     )
     const tokenInfo = googleTokenInfoSchema.safeParse(tokenInfoPayload)
-    const audiences = tokenInfo.success
-      ? [
-          tokenInfo.data.aud,
-          tokenInfo.data.audience,
-          tokenInfo.data.issued_to,
-        ].filter((value): value is string => Boolean(value))
-      : []
+    if (!tokenInfo.success) {
+      throw new GoogleAuthProviderError(
+        502,
+        'Google authentication service returned an invalid response.'
+      )
+    }
 
-    if (
-      audiences.length === 0 ||
-      audiences.some((audience) => audience !== this.clientId)
-    ) {
+    const audiences = [
+      tokenInfo.data.aud,
+      tokenInfo.data.azp,
+      tokenInfo.data.audience,
+      tokenInfo.data.issued_to,
+    ].filter((value): value is string => Boolean(value))
+
+    if (audiences.length === 0) {
+      throw new GoogleAuthProviderError(
+        502,
+        'Google authentication service returned an invalid response.'
+      )
+    }
+
+    if (audiences.some((audience) => audience !== this.clientId)) {
       throw new InvalidGoogleTokenError(
         'Google token was not issued for this application.'
       )
