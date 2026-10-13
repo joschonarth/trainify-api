@@ -30,6 +30,7 @@ describe('Get User Profile Use Case', () => {
     })
     expect(user).not.toHaveProperty('password')
     expect(user).not.toHaveProperty('streak')
+    expect(user).not.toHaveProperty('tokenVersion')
   })
 
   it('should not return a profile for a non-existent user', async () => {

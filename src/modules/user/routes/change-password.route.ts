@@ -17,7 +17,9 @@ export function changePasswordRoute(app: FastifyInstance) {
           'Changes the authenticated user password. Requires the current password and confirmation of the new password.',
         body: changePasswordBodySchema,
         response: {
-          200: z.null().describe('Password changed successfully.'),
+          200: z
+            .object({ token: z.string().describe('New access token.') })
+            .describe('Password changed and the current session refreshed.'),
           400: z
             .object({ message: z.string() })
             .describe(

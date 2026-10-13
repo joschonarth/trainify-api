@@ -1,4 +1,5 @@
 import { compare, hash } from 'bcrypt'
+import type { User } from 'generated/prisma'
 import { PasswordChangeRejectedError } from '@/modules/user/errors/password-change-rejected.error'
 import { PasswordsDoNotMatchError } from '@/modules/user/errors/passwords-do-not-match.error'
 import type { UsersRepository } from '@/modules/user/repositories/users.repository'
@@ -11,6 +12,10 @@ interface ChangePasswordUseCaseRequest {
   passwordConfirmation: string
 }
 
+interface ChangePasswordUseCaseResponse {
+  user: User
+}
+
 export class ChangePasswordUseCase {
   constructor(private readonly usersRepository: UsersRepository) {}
 
@@ -19,7 +24,7 @@ export class ChangePasswordUseCase {
     currentPassword,
     newPassword,
     passwordConfirmation,
-  }: ChangePasswordUseCaseRequest): Promise<void> {
+  }: ChangePasswordUseCaseRequest): Promise<ChangePasswordUseCaseResponse> {
     if (newPassword !== passwordConfirmation) {
       throw new PasswordsDoNotMatchError(
         'New password and confirmation do not match.'
@@ -51,8 +56,11 @@ export class ChangePasswordUseCase {
 
     const hashedPassword = await hash(newPassword, 12)
 
-    await this.usersRepository.update(userId, {
+    const updatedUser = await this.usersRepository.update(userId, {
       password: hashedPassword,
+      tokenVersion: { increment: 1 },
     })
+
+    return { user: updatedUser }
   }
 }

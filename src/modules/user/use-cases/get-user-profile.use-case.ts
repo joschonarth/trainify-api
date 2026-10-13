@@ -7,7 +7,7 @@ interface GetUserProfileUseCaseRequest {
   userId: string
 }
 
-export type PublicUserDTO = Omit<User, 'password'>
+export type PublicUserDTO = Omit<User, 'password' | 'tokenVersion'>
 
 interface GetUserProfileUseCaseResponse {
   user: PublicUserDTO
@@ -25,7 +25,11 @@ export class GetUserProfileUseCase {
       throw new ResourceNotFoundError()
     }
 
-    const { password: _password, ...publicUser } = user
+    const {
+      password: _password,
+      tokenVersion: _tokenVersion,
+      ...publicUser
+    } = user
 
     return { user: publicUser }
   }

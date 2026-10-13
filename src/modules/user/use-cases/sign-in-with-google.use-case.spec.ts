@@ -202,7 +202,11 @@ describe('Sign In With Google Use Case', () => {
     })
 
     expect(linkedUser.password).toBeNull()
-    expect(update).toHaveBeenCalledWith(user.id, { password: null })
+    expect(linkedUser.tokenVersion).toBe(user.tokenVersion + 1)
+    expect(update).toHaveBeenCalledWith(user.id, {
+      password: null,
+      tokenVersion: { increment: 1 },
+    })
   })
 
   it('should not update an unchanged Google-only account', async () => {

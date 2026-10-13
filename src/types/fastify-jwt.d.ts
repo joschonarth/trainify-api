@@ -6,6 +6,7 @@ declare module '@fastify/jwt' {
       sub: string
       email: string
       type: 'access' | 'refresh'
+      tokenVersion?: number
     }
   }
 }

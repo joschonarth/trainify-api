@@ -1,6 +1,7 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
 
 import { makeChangePasswordUseCase } from '@/modules/user/use-cases/factories/make-change-password-use-case'
+import { issueAuthTokens } from '@/modules/user/utils/auth-tokens'
 import type { ChangePasswordBody } from '../schemas/change-password.schema'
 
 export async function changePasswordController(
@@ -12,12 +13,13 @@ export async function changePasswordController(
 
   const changePasswordUseCase = makeChangePasswordUseCase()
 
-  await changePasswordUseCase.execute({
+  const { user } = await changePasswordUseCase.execute({
     userId: request.user.sub,
     currentPassword,
     newPassword,
     passwordConfirmation,
   })
+  const { token } = await issueAuthTokens(reply, user)
 
-  return reply.status(200).send()
+  return reply.status(200).send({ token })
 }

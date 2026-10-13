@@ -25,12 +25,17 @@ describe('Refresh Token Use Case', () => {
     vi.mocked(tokenVerifier.verify).mockReturnValue({
       sub: user.id,
       type: 'refresh',
+      tokenVersion: user.tokenVersion,
     })
 
     await expect(
       sut.execute({ token: 'valid-refresh-token' })
     ).resolves.toEqual({
-      user: { id: user.id, email: user.email },
+      user: {
+        id: user.id,
+        email: user.email,
+        tokenVersion: user.tokenVersion,
+      },
     })
   })
 
@@ -59,10 +64,36 @@ describe('Refresh Token Use Case', () => {
     vi.mocked(tokenVerifier.verify).mockReturnValue({
       sub: 'deleted-user',
       type: 'refresh',
+      tokenVersion: 0,
     })
 
     await expect(
       sut.execute({ token: 'orphaned-refresh-token' })
+    ).rejects.toBeInstanceOf(InvalidRefreshTokenError)
+  })
+
+  it('should reject a refresh token with an outdated version', async () => {
+    const user = await makeUser(usersRepository, { tokenVersion: 2 })
+    vi.mocked(tokenVerifier.verify).mockReturnValue({
+      sub: user.id,
+      type: 'refresh',
+      tokenVersion: 1,
+    })
+
+    await expect(
+      sut.execute({ token: 'outdated-refresh-token' })
+    ).rejects.toBeInstanceOf(InvalidRefreshTokenError)
+  })
+
+  it('should reject a refresh token without a tokenVersion claim', async () => {
+    const user = await makeUser(usersRepository)
+    vi.mocked(tokenVerifier.verify).mockReturnValue({
+      sub: user.id,
+      type: 'refresh',
+    })
+
+    await expect(
+      sut.execute({ token: 'refresh-token-without-version' })
     ).rejects.toBeInstanceOf(InvalidRefreshTokenError)
   })
 })

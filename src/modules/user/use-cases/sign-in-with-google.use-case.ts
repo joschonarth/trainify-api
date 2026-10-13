@@ -68,6 +68,9 @@ export class SignInWithGoogleUseCase {
       ...(!user.name?.trim() && name && { name }),
       ...(!user.avatarUrl && picture && { avatarUrl: picture }),
       ...(user.password !== null && { password: null }),
+      ...(user.password !== null && {
+        tokenVersion: { increment: 1 },
+      }),
     }
 
     if (Object.keys(updateData).length > 0) {

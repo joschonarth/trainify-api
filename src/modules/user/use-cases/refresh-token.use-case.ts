@@ -14,12 +14,13 @@ interface RefreshTokenUseCaseResponse {
   user: {
     id: string
     email: string
+    tokenVersion: number
   }
 }
 
 function isRefreshTokenPayload(
   payload: unknown
-): payload is { sub: string; type: 'refresh' } {
+): payload is { sub: string; type: 'refresh'; tokenVersion: number } {
   if (typeof payload !== 'object' || payload === null) {
     return false
   }
@@ -29,7 +30,9 @@ function isRefreshTokenPayload(
     typeof payload.sub === 'string' &&
     payload.sub.length > 0 &&
     'type' in payload &&
-    payload.type === 'refresh'
+    payload.type === 'refresh' &&
+    'tokenVersion' in payload &&
+    typeof payload.tokenVersion === 'number'
   )
 }
 
@@ -54,7 +57,7 @@ export class RefreshTokenUseCase {
     }
 
     const user = await this.usersRepository.findById(payload.sub)
-    if (!user) {
+    if (!user || user.tokenVersion !== payload.tokenVersion) {
       throw new InvalidRefreshTokenError()
     }
 
@@ -62,6 +65,7 @@ export class RefreshTokenUseCase {
       user: {
         id: user.id,
         email: user.email,
+        tokenVersion: user.tokenVersion,
       },
     }
   }
