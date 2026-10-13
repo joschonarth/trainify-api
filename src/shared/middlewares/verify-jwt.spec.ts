@@ -1,7 +1,7 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
 import { describe, expect, it, vi } from 'vitest'
 
-import { allowedOrigin } from '@/config/allowed-origin'
+import { getAllowedOrigin } from '@/config/allowed-origin'
 
 import { verifyCsrfOrigin } from './verify-csrf-origin'
 import { verifyJwt } from './verify-jwt'
@@ -62,7 +62,7 @@ describe('verifyJwt', () => {
   it('accepts a cookie-authenticated mutation from the allowed origin', async () => {
     const request = makeRequest(
       { sub: 'user-1', email: 'user@example.com', type: 'access' },
-      { method: 'POST', origin: allowedOrigin }
+      { method: 'POST', origin: getAllowedOrigin('dev') }
     )
     const reply = makeReply()
 

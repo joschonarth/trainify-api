@@ -1,6 +1,6 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
 
-import { allowedOrigin } from '@/config/allowed-origin'
+import { getAllowedOrigin } from '@/config/allowed-origin'
 
 const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS'])
 const BEARER_AUTHORIZATION_REGEX = /^Bearer\s+\S+$/i
@@ -10,7 +10,7 @@ export function isSafeMethod(method: string) {
 }
 
 export function hasAllowedOrigin(request: FastifyRequest) {
-  return request.headers.origin === allowedOrigin
+  return request.headers.origin === getAllowedOrigin()
 }
 
 export function hasBearerAuthorization(request: FastifyRequest) {
