@@ -112,6 +112,7 @@ Example content:
 NODE_ENV=dev
 PORT=3333
 JWT_SECRET=your_jwt_secret
+GOOGLE_CLIENT_ID=your-google-oauth-client-id.apps.googleusercontent.com
 DATABASE_URL="postgresql://docker:docker@localhost:5432/trainify?schema=public"
 ```
 

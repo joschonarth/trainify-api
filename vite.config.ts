@@ -5,5 +5,8 @@ export default defineConfig({
   plugins: [tsconfigPaths()],
   test: {
     passWithNoTests: true,
+    env: {
+      GOOGLE_CLIENT_ID: 'vitest-google-client-id',
+    },
   },
 })

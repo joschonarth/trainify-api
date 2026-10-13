@@ -1,7 +1,10 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { GoogleAuthProviderError } from '@/modules/user/errors/google-auth-provider.error'
 import { InvalidGoogleTokenError } from '@/modules/user/errors/invalid-google-token.error'
-import type { GoogleAuthProvider } from '@/modules/user/providers/google-auth.provider'
+import {
+  type GoogleAuthProvider,
+  GoogleUserInfoProvider,
+} from '@/modules/user/providers/google-auth.provider'
 import { InMemoryUsersRepository } from '@/modules/user/repositories/in-memory/in-memory-users.repository'
 import { makeUser } from '@/modules/user/tests/factories/make-user'
 
@@ -12,6 +15,10 @@ let googleAuthProvider: GoogleAuthProvider
 let sut: SignInWithGoogleUseCase
 
 describe('Sign In With Google Use Case', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
   beforeEach(() => {
     usersRepository = new InMemoryUsersRepository()
     googleAuthProvider = {
@@ -49,6 +56,55 @@ describe('Sign In With Google Use Case', () => {
     await expect(
       sut.execute({ token: 'invalid-token' })
     ).rejects.toBeInstanceOf(InvalidGoogleTokenError)
+  })
+
+  it('should reject a Google access token issued to another client', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ aud: 'another-client-id' }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      })
+    )
+    vi.stubGlobal('fetch', fetchMock)
+    googleAuthProvider = new GoogleUserInfoProvider('trainify-client-id')
+    sut = new SignInWithGoogleUseCase(usersRepository, googleAuthProvider)
+
+    await expect(
+      sut.execute({ token: 'google-access-token' })
+    ).rejects.toBeInstanceOf(InvalidGoogleTokenError)
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+  })
+
+  it('should accept a Google access token issued to this client', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ aud: 'trainify-client-id' }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        })
+      )
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            email: 'johndoe@example.com',
+            verified_email: true,
+            name: 'John Doe',
+          }),
+          {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' },
+          }
+        )
+      )
+    vi.stubGlobal('fetch', fetchMock)
+    googleAuthProvider = new GoogleUserInfoProvider('trainify-client-id')
+    sut = new SignInWithGoogleUseCase(usersRepository, googleAuthProvider)
+
+    const { user } = await sut.execute({ token: 'google-access-token' })
+
+    expect(user.email).toBe('johndoe@example.com')
+    expect(fetchMock).toHaveBeenCalledTimes(2)
   })
 
   it('should recover when another login creates the user concurrently', async () => {
