@@ -1,3 +1,4 @@
+import { env } from '@/env'
 import { GoogleUserInfoProvider } from '@/modules/user/providers/google-auth.provider'
 import { PrismaUsersRepository } from '@/modules/user/repositories/prisma/prisma-users.repository'
 
@@ -5,7 +6,7 @@ import { SignInWithGoogleUseCase } from '../sign-in-with-google.use-case'
 
 export function makeSignInWithGoogleUseCase() {
   const usersRepository = new PrismaUsersRepository()
-  const googleAuthProvider = new GoogleUserInfoProvider()
+  const googleAuthProvider = new GoogleUserInfoProvider(env.GOOGLE_CLIENT_ID)
   const signInWithGoogleUseCase = new SignInWithGoogleUseCase(
     usersRepository,
     googleAuthProvider
