@@ -18,12 +18,23 @@ function unwrap<T>(value: unknown, current: T): T {
     return set === undefined ? current : set
   }
 
+  if (
+    value !== null &&
+    typeof value === 'object' &&
+    'increment' in value &&
+    typeof current === 'number'
+  ) {
+    const increment = (value as { increment?: number }).increment
+    return increment === undefined ? current : ((current + increment) as T)
+  }
+
   return value as T
 }
 
 function copyUser(user: User): User {
   return {
     ...user,
+    tokenVersion: user.tokenVersion,
     birthdate: user.birthdate ? new Date(user.birthdate) : null,
     createdAt: new Date(user.createdAt),
   }
@@ -59,6 +70,7 @@ export class InMemoryUsersRepository implements UsersRepository {
       name: data.name,
       email: data.email,
       password: data.password ?? null,
+      tokenVersion: data.tokenVersion ?? 0,
       avatarUrl: data.avatarUrl ?? null,
       height: data.height ?? null,
       weight: data.weight ?? null,
@@ -92,6 +104,7 @@ export class InMemoryUsersRepository implements UsersRepository {
       name: unwrap(data.name, current.name),
       email: unwrap(data.email, current.email),
       password: unwrap(data.password, current.password),
+      tokenVersion: unwrap(data.tokenVersion, current.tokenVersion),
       avatarUrl: unwrap(data.avatarUrl, current.avatarUrl),
       height: unwrap(data.height, current.height),
       weight: unwrap(data.weight, current.weight),

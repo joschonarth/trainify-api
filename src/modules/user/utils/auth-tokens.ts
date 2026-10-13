@@ -8,6 +8,7 @@ const REFRESH_TTL_SECONDS = 7 * 24 * 60 * 60
 interface AuthenticatedUser {
   id: string
   email: string
+  tokenVersion: number
 }
 
 export async function issueAuthTokens(
@@ -19,7 +20,11 @@ export async function issueAuthTokens(
     { sign: { sub: user.id, expiresIn: ACCESS_TTL } }
   )
   const refreshToken = await reply.jwtSign(
-    { email: user.email, type: 'refresh' },
+    {
+      email: user.email,
+      type: 'refresh',
+      tokenVersion: user.tokenVersion,
+    },
     { sign: { sub: user.id, expiresIn: REFRESH_TTL_SECONDS } }
   )
 

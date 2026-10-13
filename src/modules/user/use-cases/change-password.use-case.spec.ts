@@ -23,16 +23,16 @@ describe('Change Password Use Case', () => {
       rawPassword: 'current-password',
     })
 
-    await sut.execute({
+    const { user: updatedUser } = await sut.execute({
       userId: user.id,
       currentPassword: 'current-password',
       newPassword: 'new-secure-password',
       passwordConfirmation: 'new-secure-password',
     })
 
-    const updatedUser = await usersRepository.findById(user.id)
+    expect(updatedUser.tokenVersion).toBe(user.tokenVersion + 1)
     await expect(
-      compare('new-secure-password', updatedUser?.password ?? '')
+      compare('new-secure-password', updatedUser.password ?? '')
     ).resolves.toBe(true)
   })
 
