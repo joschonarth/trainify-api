@@ -17,7 +17,7 @@ import { registerSwagger } from './lib/swagger'
 import { appRoutes } from './routes'
 
 export const app = fastify({
-  trustProxy: true,
+  trustProxy: (_address, hop) => hop < env.TRUST_PROXY_HOPS,
   logger: loggerOptions,
 }).withTypeProvider<ZodTypeProvider>()
 

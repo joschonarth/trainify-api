@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify'
 import { z } from 'zod'
 import { verifyCsrfOrigin } from '@/shared/middlewares/verify-csrf-origin'
-import { refreshTokenController } from '../controllers/refresh-token'
+import { refreshTokenController } from '../controllers/refresh-token.controller'
 
 export function refreshTokenRoute(app: FastifyInstance) {
   app.patch(
