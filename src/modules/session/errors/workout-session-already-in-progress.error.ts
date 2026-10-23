@@ -1,6 +1,7 @@
-export class WorkoutSessionAlreadyInProgressError extends Error {
+import { AppError } from '@/shared/errors/app.error'
+
+export class WorkoutSessionAlreadyInProgressError extends AppError {
   constructor(message = 'Workout session already in progress.') {
-    super(message)
-    this.name = 'WorkoutSessionAlreadyInProgressError'
+    super(409, message)
   }
 }

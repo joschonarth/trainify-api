@@ -1,6 +1,4 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
-
-import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 import type { RemoveWorkoutScheduleDayParams } from '../schemas/remove-workout-schedule-day.schema'
 import { makeRemoveWorkoutScheduleDayUseCase } from '../use-cases/factories/make-remove-workout-schedule-day-use-case'
 
@@ -12,22 +10,13 @@ export async function removeWorkoutScheduleDayController(
     request.params as RemoveWorkoutScheduleDayParams
   const userId = request.user.sub
 
-  try {
-    const removeWorkoutScheduleDayUseCase =
-      makeRemoveWorkoutScheduleDayUseCase()
+  const removeWorkoutScheduleDayUseCase = makeRemoveWorkoutScheduleDayUseCase()
 
-    await removeWorkoutScheduleDayUseCase.execute({
-      userId,
-      workoutId,
-      scheduleId,
-    })
+  await removeWorkoutScheduleDayUseCase.execute({
+    userId,
+    workoutId,
+    scheduleId,
+  })
 
-    return reply.status(204).send()
-  } catch (error) {
-    if (error instanceof ResourceNotFoundError) {
-      return reply.status(404).send({ message: error.message })
-    }
-
-    throw error
-  }
+  return reply.status(204).send()
 }

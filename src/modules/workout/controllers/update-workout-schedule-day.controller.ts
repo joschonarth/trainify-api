@@ -1,7 +1,4 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
-
-import { ResourceAlreadyExistsError } from '@/shared/errors/resource-already-exists.error'
-import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 import type {
   UpdateWorkoutScheduleDayBody,
   UpdateWorkoutScheduleDayParams,
@@ -18,26 +15,13 @@ export async function updateWorkoutScheduleDayController(
 
   const { newDayOfWeek } = request.body as UpdateWorkoutScheduleDayBody
 
-  try {
-    const updateWorkoutScheduleDayUseCase =
-      makeUpdateWorkoutScheduleDayUseCase()
-    const { schedule } = await updateWorkoutScheduleDayUseCase.execute({
-      userId,
-      workoutId,
-      scheduleId,
-      newDayOfWeek,
-    })
+  const updateWorkoutScheduleDayUseCase = makeUpdateWorkoutScheduleDayUseCase()
+  const { schedule } = await updateWorkoutScheduleDayUseCase.execute({
+    userId,
+    workoutId,
+    scheduleId,
+    newDayOfWeek,
+  })
 
-    return reply.status(200).send({ schedule })
-  } catch (error) {
-    if (error instanceof ResourceNotFoundError) {
-      return reply.status(404).send({ message: error.message })
-    }
-
-    if (error instanceof ResourceAlreadyExistsError) {
-      return reply.status(409).send({ message: error.message })
-    }
-
-    throw error
-  }
+  return reply.status(200).send({ schedule })
 }

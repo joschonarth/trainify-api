@@ -1,6 +1,7 @@
-export class ExerciseTimerAlreadyRunningError extends Error {
+import { AppError } from '@/shared/errors/app.error'
+
+export class ExerciseTimerAlreadyRunningError extends AppError {
   constructor(message = 'Exercise timer already started.') {
-    super(message)
-    this.name = 'ExerciseTimerAlreadyRunningError'
+    super(409, message)
   }
 }

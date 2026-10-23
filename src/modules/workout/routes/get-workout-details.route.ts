@@ -2,7 +2,7 @@ import type { FastifyInstance } from 'fastify'
 import { z } from 'zod'
 
 import { verifyJwt } from '@/shared/middlewares/verify-jwt'
-import { getWorkoutDetailsController } from '../controllers/get-workout-details'
+import { getWorkoutDetailsController } from '../controllers/get-workout-details.controller'
 import { getWorkoutDetailsParamsSchema } from '../schemas/get-workout-details.schema'
 import { workoutSchema } from '../schemas/workout.schema'
 

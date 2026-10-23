@@ -1,7 +1,6 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
 
 import { makeGetExerciseSessionDetailsUseCase } from '@/modules/session/use-cases/factories/make-get-exercise-session-details-use-case'
-import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 import type { GetExerciseSessionDetailsParams } from '../schemas/get-exercise-session-details.schema'
 
 export async function getExerciseSessionDetailsController(
@@ -12,21 +11,13 @@ export async function getExerciseSessionDetailsController(
     request.params as GetExerciseSessionDetailsParams
   const userId = request.user.sub
 
-  try {
-    const getExerciseSessionDetailsUseCase =
-      makeGetExerciseSessionDetailsUseCase()
+  const getExerciseSessionDetailsUseCase =
+    makeGetExerciseSessionDetailsUseCase()
 
-    const { session } = await getExerciseSessionDetailsUseCase.execute({
-      userId,
-      exerciseSessionId,
-    })
+  const { session } = await getExerciseSessionDetailsUseCase.execute({
+    userId,
+    exerciseSessionId,
+  })
 
-    return reply.status(200).send({ session })
-  } catch (error) {
-    if (error instanceof ResourceNotFoundError) {
-      return reply.status(404).send({ message: error.message })
-    }
-
-    throw error
-  }
+  return reply.status(200).send({ session })
 }
