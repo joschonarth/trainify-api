@@ -34,41 +34,43 @@ export class GetDailyWorkoutSessionUseCase {
         )
 
       if (!detailedSession) {
-        throw new ResourceNotFoundError(
-          'Session found but workout details missing.'
-        )
+        throw new ResourceNotFoundError('Workout session not found.')
       }
 
       return { session: detailedSession }
     }
 
-    const dayOfWeek = today.getDay()
-
     const schedule = await this.workoutSchedulesRepository.findByUserAndDay(
       userId,
-      dayOfWeek
+      today.getDay()
     )
 
     if (!schedule) {
       throw new ResourceNotFoundError('No workout scheduled for today.')
     }
 
-    const workout = schedule.workout
+    const { workout } = schedule
 
     const newSession = await this.workoutSessionsRepository.create({
       userId,
       workoutId: workout.id,
       date: today,
       status: 'PENDING',
+      exerciseSessions: {
+        create: workout.exercises.map((we) => ({
+          exerciseId: we.exercise.id,
+          plannedSets: we.defaultSets,
+          plannedReps: we.defaultReps,
+          plannedWeight: we.defaultWeight,
+        })),
+      },
     })
 
     const detailedSession =
       await this.workoutSessionsRepository.findByIdWithWorkout(newSession.id)
 
     if (!detailedSession) {
-      throw new ResourceNotFoundError(
-        'New session created but workout details missing.'
-      )
+      throw new ResourceNotFoundError('Workout session not found.')
     }
 
     return { session: detailedSession }
