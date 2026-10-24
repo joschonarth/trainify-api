@@ -77,9 +77,6 @@ export function getWorkoutSessionsHistoryRoute(app: FastifyInstance) {
               ),
             })
             .describe('Workout sessions history fetched successfully.'),
-          404: z
-            .object({ message: z.string() })
-            .describe('No sessions found for this user.'),
         },
       },
     },

@@ -18,12 +18,6 @@ export class GetWorkoutSessionsByWorkoutUseCase {
       userId
     )
 
-    if (!sessions || sessions.length === 0) {
-      throw new ResourceNotFoundError(
-        'No workout sessions found for this workout.'
-      )
-    }
-
     const formattedSessions = sessions.map((session) => {
       const exerciseSessions = session.exerciseSessions.map((es) => {
         const plannedSets = es.plannedSets ?? 0
