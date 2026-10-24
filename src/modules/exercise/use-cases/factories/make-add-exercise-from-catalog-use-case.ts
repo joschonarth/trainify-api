@@ -3,7 +3,7 @@ import { PrismaMyExercisesRepository } from '@/modules/exercise/repositories/pri
 
 import { AddExerciseFromCatalogUseCase } from '../add-exercise-from-catalog.use-case'
 
-export function makeAddExerciseFromCatalog() {
+export function makeAddExerciseFromCatalogUseCase() {
   const exercisesRepository = new PrismaExercisesRepository()
   const myExercisesRepository = new PrismaMyExercisesRepository()
   const addExerciseFromCatalogUseCase = new AddExerciseFromCatalogUseCase(

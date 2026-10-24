@@ -22,6 +22,9 @@ export function completeExerciseSessionRoute(app: FastifyInstance) {
               exerciseSession: exerciseTimerSessionSchema,
             })
             .describe('Exercise session completed successfully.'),
+          404: z
+            .object({ message: z.string() })
+            .describe('Exercise session not found.'),
         },
       },
     },

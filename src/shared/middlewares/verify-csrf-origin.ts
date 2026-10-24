@@ -1,6 +1,7 @@
-import type { FastifyReply, FastifyRequest } from 'fastify'
+import type { FastifyRequest } from 'fastify'
 
 import { getAllowedOrigin } from '@/config/allowed-origin'
+import { NotAllowedError } from '../errors/not-allowed.error'
 
 const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS'])
 const BEARER_AUTHORIZATION_REGEX = /^Bearer\s+\S+$/i
@@ -17,14 +18,10 @@ export function hasBearerAuthorization(request: FastifyRequest) {
   return BEARER_AUTHORIZATION_REGEX.test(request.headers.authorization ?? '')
 }
 
-export function verifyCsrfOrigin(
-  request: FastifyRequest,
-  reply: FastifyReply
-): Promise<void> {
+export function verifyCsrfOrigin(request: FastifyRequest): Promise<void> {
   if (isSafeMethod(request.method) || hasAllowedOrigin(request)) {
     return Promise.resolve()
   }
 
-  reply.status(403).send({ message: 'Invalid request origin.' })
-  return Promise.resolve()
+  return Promise.reject(new NotAllowedError('Invalid request origin.'))
 }

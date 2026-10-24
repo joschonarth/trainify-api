@@ -4,7 +4,6 @@ import type {
   WorkoutSessionsRepository,
   WorkoutSessionWithWorkout,
 } from '@/modules/session/repositories/workout-sessions.repository'
-import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
 interface ExerciseHistory {
   name: string
@@ -48,10 +47,6 @@ export class GetWorkoutSessionsHistoryUseCase {
   }): Promise<GetWorkoutSessionsHistoryResponse> {
     const sessions: WorkoutSessionWithWorkout[] =
       await this.workoutSessionsRepository.findAllByUser(userId)
-
-    if (!sessions || sessions.length === 0) {
-      throw new ResourceNotFoundError('No workout sessions found.')
-    }
 
     const sessionsHistory: SessionHistory[] = sessions.map((session) => ({
       id: session.id,

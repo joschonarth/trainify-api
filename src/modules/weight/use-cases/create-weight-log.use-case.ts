@@ -54,7 +54,9 @@ export class CreateWeightLogUseCase {
     }
 
     if (!goal.isActive) {
-      throw new InvalidWeightGoalError()
+      throw new InvalidWeightGoalError(
+        'Cannot log weight for an inactive or already achieved goal.'
+      )
     }
 
     const weightLog = await this.weightLogsRepository.create({

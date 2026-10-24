@@ -1,4 +1,3 @@
-import { NotAllowedError } from '@/shared/errors/not-allowed.error'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
 import type { WorkoutSchedulesRepository } from '../repositories/workout-schedules.repository'
@@ -32,7 +31,7 @@ export class AssignDaysToWorkoutUseCase {
     }
 
     if (workout.userId !== userId) {
-      throw new NotAllowedError()
+      throw new ResourceNotFoundError('Workout not found.')
     }
 
     const existingDays =
