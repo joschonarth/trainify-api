@@ -138,7 +138,7 @@ export class CompleteWorkoutSessionUseCase {
       await this.workoutSessionsRepository.findByIdWithWorkout(sessionId)
 
     if (!updatedSession) {
-      throw new Error('Failed to retrieve updated session.')
+      throw new ResourceNotFoundError('Failed to retrieve updated session.')
     }
 
     return { session: updatedSession }

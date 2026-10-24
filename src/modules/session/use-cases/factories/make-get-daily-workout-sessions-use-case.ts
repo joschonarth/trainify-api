@@ -1,7 +1,7 @@
 import { PrismaWorkoutSessionsRepository } from '@/modules/session/repositories/prisma/prisma-workout-sessions.repository'
 import { PrismaWorkoutSchedulesRepository } from '@/modules/workout/repositories/prisma/prisma-workout-schedules.repository'
 
-import { GetDailyWorkoutSessionUseCase } from '../get-daily-workout-sessions.use-case'
+import { GetDailyWorkoutSessionUseCase } from '../get-daily-workout-session.use-case'
 
 export function makeGetDailyWorkoutSessionUseCase() {
   const workoutSessionsRepository = new PrismaWorkoutSessionsRepository()

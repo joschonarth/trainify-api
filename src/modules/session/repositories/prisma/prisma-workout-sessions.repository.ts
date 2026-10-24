@@ -145,28 +145,7 @@ export class PrismaWorkoutSessionsRepository
   async create(
     data: Prisma.WorkoutSessionUncheckedCreateInput
   ): Promise<WorkoutSession> {
-    const workout = await prisma.workout.findUnique({
-      where: { id: data.workoutId },
-      include: { exercises: true },
-    })
-
-    if (!workout) {
-      throw new Error('Workout not found')
-    }
-
-    return await prisma.workoutSession.create({
-      data: {
-        ...data,
-        exerciseSessions: {
-          create: workout.exercises.map((we) => ({
-            exerciseId: we.exerciseId,
-            plannedSets: we.defaultSets ?? null,
-            plannedReps: we.defaultReps ?? null,
-            plannedWeight: we.defaultWeight ?? null,
-          })),
-        },
-      },
-    })
+    return await prisma.workoutSession.create({ data })
   }
 
   async update(
