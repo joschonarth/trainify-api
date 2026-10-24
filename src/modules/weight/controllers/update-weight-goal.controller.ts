@@ -1,8 +1,4 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
-
-import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
-
-import { InvalidWeightGoalError } from '../errors/invalid-weight-goal.error'
 import type {
   UpdateWeightGoalBody,
   UpdateWeightGoalParams,
@@ -18,27 +14,15 @@ export async function updateWeightGoalController(
 
   const userId = request.user.sub
 
-  try {
-    const updateWeightGoalUseCase = makeUpdateWeightGoalUseCase()
+  const updateWeightGoalUseCase = makeUpdateWeightGoalUseCase()
 
-    const { weightGoal } = await updateWeightGoalUseCase.execute({
-      goalId,
-      userId,
-      name,
-      description: description ?? null,
-      endDate: endDate ?? null,
-    })
+  const { weightGoal } = await updateWeightGoalUseCase.execute({
+    goalId,
+    userId,
+    name,
+    description: description ?? null,
+    endDate: endDate ?? null,
+  })
 
-    return reply.status(200).send({ weightGoal })
-  } catch (error) {
-    if (error instanceof ResourceNotFoundError) {
-      return reply.status(404).send({ message: error.message })
-    }
-
-    if (error instanceof InvalidWeightGoalError) {
-      return reply.status(400).send({ message: error.message })
-    }
-
-    throw error
-  }
+  return reply.status(200).send({ weightGoal })
 }

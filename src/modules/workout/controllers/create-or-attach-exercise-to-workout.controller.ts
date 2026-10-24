@@ -1,6 +1,4 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
-
-import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 import type {
   CreateOrAttachExerciseToWorkoutBody,
   CreateOrAttachExerciseToWorkoutParams,
@@ -18,31 +16,23 @@ export async function createOrAttachExerciseToWorkoutController(
 
   const userId = request.user.sub
 
-  try {
-    const createOrAttachExerciseToWorkoutUseCase =
-      makeCreateOrAttachExerciseToWorkoutUseCase()
+  const createOrAttachExerciseToWorkoutUseCase =
+    makeCreateOrAttachExerciseToWorkoutUseCase()
 
-    const { exercise, workoutExercise } =
-      await createOrAttachExerciseToWorkoutUseCase.execute({
-        userId,
-        workoutId,
-        name,
-        category,
-        type,
-        sets,
-        reps,
-        weight,
-      })
-
-    return reply.status(201).send({
-      exercise,
-      workoutExercise,
+  const { exercise, workoutExercise } =
+    await createOrAttachExerciseToWorkoutUseCase.execute({
+      userId,
+      workoutId,
+      name,
+      category,
+      type,
+      sets,
+      reps,
+      weight,
     })
-  } catch (error) {
-    if (error instanceof ResourceNotFoundError) {
-      return reply.status(404).send({ message: error.message })
-    }
 
-    throw error
-  }
+  return reply.status(201).send({
+    exercise,
+    workoutExercise,
+  })
 }
