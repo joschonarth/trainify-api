@@ -14,6 +14,7 @@
 🛠️ [Tech Stack](#️-tech-stack)&nbsp;&nbsp;•&nbsp;&nbsp;
 ✨ [Features](#-features)&nbsp;&nbsp;•&nbsp;&nbsp;
 🚀 [Getting Started](#-getting-started)&nbsp;&nbsp;•&nbsp;&nbsp;
+🐳 [Docker](#-docker)&nbsp;&nbsp;•&nbsp;&nbsp;
 📖 [API Documentation](#-api-documentation)&nbsp;&nbsp;•&nbsp;&nbsp;
 🧪 [Tests](#-tests)
 
@@ -36,7 +37,7 @@ The project was built with Fastify, TypeScript, Prisma ORM and PostgreSQL, with 
 - 🔷 **[TypeScript](https://www.typescriptlang.org/)** — Static typing and safer development.
 - 🗃️ **[Prisma ORM](https://www.prisma.io/)** — Modern, type-safe ORM for relational databases.
 - 🐘 **[PostgreSQL](https://www.postgresql.org/)** — Robust relational database.
-- 🐳 **[Docker](https://www.docker.com/)** — Containerization of the local database.
+- 🐳 **[Docker](https://www.docker.com/)** — Containerization of the API and the local database.
 - 🔐 **[@fastify/jwt](https://github.com/fastify/fastify-jwt)** — JWT authentication.
 - 🍪 **[@fastify/cookie](https://github.com/fastify/fastify-cookie)** — Cookie parsing and management.
 - 🌐 **[@fastify/cors](https://github.com/fastify/fastify-cors)** — CORS handling.
@@ -65,6 +66,7 @@ The project was built with Fastify, TypeScript, Prisma ORM and PostgreSQL, with 
 - [x] 🔐 JWT authentication and Google sign-in
 - [x] 🛡️ Security hardening with Helmet and rate limiting
 - [x] 🧩 Data validation with Zod
+- [x] 🐳 Docker support with multi-stage build
 - [x] 📖 Interactive API documentation with Scalar
 - [x] 🧪 Automated testing with Vitest
 
@@ -74,9 +76,9 @@ The project was built with Fastify, TypeScript, Prisma ORM and PostgreSQL, with 
 
 ### 📋 Prerequisites
 
-- 🟩 [Node.js 20+](https://nodejs.org/)
+- 🟩 [Node.js 22+](https://nodejs.org/)
 - 📦 [npm](https://www.npmjs.com/)
-- 🐳 [Docker](https://www.docker.com/)
+- 🐳 [Docker](https://www.docker.com/) (optional, for containerized setup)
 
 ### 🔧 Installation
 
@@ -121,7 +123,7 @@ DATABASE_URL="postgresql://docker:docker@localhost:5432/trainify?schema=public"
 Start the PostgreSQL container:
 
 ```bash
-docker compose up -d
+docker compose up -d trainify-pg
 ```
 
 Run the Prisma migrations:
@@ -145,6 +147,63 @@ npm run dev
 ```
 
 API running at **[http://localhost:3333](http://localhost:3333)**
+
+---
+
+## 🐳 Docker
+
+The project includes a multi-stage `Dockerfile` that builds the application and produces a lightweight runtime image containing only the compiled output and production dependencies. The `.dockerignore` keeps secrets, local artifacts and tests out of the image.
+
+### 🏗️ Building the image
+
+```bash
+docker build -t trainify-api .
+```
+
+### ▶️ Running the container
+
+The container does not read `.env` from the image. Pass the environment variables at runtime:
+
+```bash
+docker run --env-file .env \
+  -e DATABASE_URL="postgresql://docker:docker@host.docker.internal:5432/trainify?schema=public" \
+  -p 3333:3333 \
+  trainify-api
+```
+
+> On Linux, `host.docker.internal` may not resolve by default. Add `--add-host=host.docker.internal:host-gateway` to the command, or use the compose setup below.
+
+### 🧩 Running with Docker Compose
+
+To start the API and the database together:
+
+```bash
+docker compose up -d --build
+```
+
+Inside the compose network the database host is `trainify-pg`, which is already set in the `trainify-api` service, so there is no need to change `DATABASE_URL` for this setup.
+
+### 🗃️ Running migrations in the container
+
+Migrations are not executed on container start, to avoid race conditions when running multiple replicas. Run them manually:
+
+```bash
+docker compose exec trainify-api npx prisma migrate deploy
+```
+
+Or, with a standalone container:
+
+```bash
+docker exec -it <container_id> npx prisma migrate deploy
+```
+
+### 🩺 Health check
+
+The image includes a health check that calls `GET /health` every 30 seconds. You can inspect the status with:
+
+```bash
+docker ps
+```
 
 ---
 

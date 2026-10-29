@@ -1,0 +1,38 @@
+# Dependencies and local build outputs
+node_modules
+build
+coverage
+generated
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Local database
+dev.db
+
+# Git and editors
+.git
+.gitignore
+.github
+.vscode
+.idea
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose*.yml
+
+# Tests and documentation
+**/*.spec.ts
+**/*.test.ts
+**/tests
+vite.config.ts
+client.http
+README.md
+LICENSE
+
+# Logs
+npm-debug.log*
+*.log
