@@ -8,6 +8,7 @@ GET {{baseUrl}}/health
 
 ###
 
+# Register a new user
 # @name register
 POST {{baseUrl}}/users
 Content-Type: application/json
@@ -21,6 +22,7 @@ Content-Type: application/json
 
 ###
 
+# Authenticate user and generate access token
 # @name auth
 POST {{baseUrl}}/auth
 Content-Type: application/json
@@ -29,3 +31,21 @@ Content-Type: application/json
   "email": "johndoe@example.com",
   "password": "1234567890"
 }
+
+###
+
+# Get authenticated user profile
+GET {{baseUrl}}/me
+Authorization: Bearer {{auth.response.body.token}}
+
+###
+
+# Refresh the access token
+PATCH {{baseUrl}}/token/refresh
+Origin: http://localhost:5173
+
+###
+
+# Sign out
+POST {{baseUrl}}/logout
+Origin: http://localhost:5173

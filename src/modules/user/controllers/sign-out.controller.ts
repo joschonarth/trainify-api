@@ -7,12 +7,12 @@ import {
 } from '@/modules/user/utils/auth-cookie'
 
 export async function signOutController(
-  _: FastifyRequest,
+  request: FastifyRequest,
   reply: FastifyReply
 ) {
   const signOutUseCase = makeSignOutUseCase()
 
-  await signOutUseCase.execute()
+  await signOutUseCase.execute({ userId: request.user.sub })
 
   clearAuthCookie(reply, 'token')
   clearAuthCookie(reply, 'refreshToken', REFRESH_TOKEN_COOKIE_PATH)
