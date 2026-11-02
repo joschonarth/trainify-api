@@ -2,7 +2,6 @@ import type { FastifyInstance } from 'fastify'
 
 import { addExerciseFromCatalogRoute } from './add-exercise-from-catalog.route'
 import { createExerciseRoute } from './create-exercise.route'
-import { createExerciseLogRoute } from './create-exercise-log.route'
 import { deleteCustomExerciseRoute } from './delete-custom-exercise.route'
 import { fetchExerciseLogsRoute } from './fetch-exercise-logs.route'
 import { fetchExercisesCatalogRoute } from './fetch-exercises-catalog.route'
@@ -26,6 +25,5 @@ export function exercisesRoutes(app: FastifyInstance) {
   app.register(removeCatalogExerciseRoute)
   app.register(fetchExerciseLogsRoute)
   app.register(getExerciseLogRoute)
-  app.register(createExerciseLogRoute)
   app.register(getExerciseProgressRoute)
 }

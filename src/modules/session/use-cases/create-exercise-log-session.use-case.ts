@@ -40,11 +40,11 @@ export class CreateExerciseLogSessionUseCase {
       throw new ResourceNotFoundError('Workout session not found.')
     }
 
-    const exerciseInWorkout = session.workout.exercises.find(
-      (we) => we.exercise.id === exerciseId
+    const exerciseSession = session.exerciseSessions.find(
+      (exerciseSession) => exerciseSession.exercise.id === exerciseId
     )
 
-    if (!exerciseInWorkout) {
+    if (!exerciseSession) {
       throw new ResourceNotFoundError('Exercise not part of this workout.')
     }
 
@@ -56,8 +56,7 @@ export class CreateExerciseLogSessionUseCase {
       date: new Date(),
       user: { connect: { id: userId } },
       exercise: { connect: { id: exerciseId } },
-      workout: { connect: { id: session.workoutId } },
-      workoutSession: { connect: { id: session.id } },
+      exerciseSession: { connect: { id: exerciseSession.id } },
     })
 
     return { exerciseLog }
