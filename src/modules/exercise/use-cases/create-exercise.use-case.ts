@@ -3,6 +3,7 @@ import type { Exercise, ExerciseCategory, ExerciseType } from 'generated/prisma'
 import { ResourceAlreadyExistsError } from '@/shared/errors/resource-already-exists.error'
 
 import type { ExercisesRepository } from '../repositories/exercises.repository'
+import type { MyExercisesRepository } from '../repositories/my-exercises.repository'
 
 interface CreateExerciseUseCaseRequest {
   userId: string
@@ -16,7 +17,10 @@ interface CreateExerciseUseCaseResponse {
 }
 
 export class CreateExerciseUseCase {
-  constructor(private readonly exercisesRepository: ExercisesRepository) {}
+  constructor(
+    private readonly exercisesRepository: ExercisesRepository,
+    _myExercisesRepository: MyExercisesRepository
+  ) {}
 
   async execute({
     userId,
