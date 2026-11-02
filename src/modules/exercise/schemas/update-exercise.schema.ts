@@ -9,9 +9,6 @@ export const updateExerciseBodySchema = z.object({
   name: z.string().optional(),
   category: z.enum(ExerciseCategory).optional(),
   type: z.enum(ExerciseType).optional(),
-  sets: z.number().optional(),
-  reps: z.number().optional(),
-  weight: z.number().optional(),
 })
 
 export type UpdateExerciseParams = z.infer<typeof updateExerciseParamsSchema>

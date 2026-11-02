@@ -11,7 +11,7 @@ export async function createOrAttachExerciseToWorkoutController(
 ) {
   const { workoutId } = request.params as CreateOrAttachExerciseToWorkoutParams
 
-  const { name, category, type, sets, reps, weight } =
+  const { name, category, type, defaultSets, defaultReps, defaultWeight } =
     request.body as CreateOrAttachExerciseToWorkoutBody
 
   const userId = request.user.sub
@@ -26,9 +26,9 @@ export async function createOrAttachExerciseToWorkoutController(
       name,
       category,
       type,
-      sets,
-      reps,
-      weight,
+      defaultSets,
+      defaultReps,
+      defaultWeight,
     })
 
   return reply.status(201).send({

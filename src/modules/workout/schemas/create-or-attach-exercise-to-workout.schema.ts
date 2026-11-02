@@ -9,9 +9,9 @@ export const createOrAttachExerciseToWorkoutBodySchema = z.object({
   name: z.string(),
   category: z.enum(ExerciseCategory).nullable(),
   type: z.enum(ExerciseType).nullable(),
-  sets: z.number().nullable(),
-  reps: z.number().nullable(),
-  weight: z.number().nullable(),
+  defaultSets: z.number().nullable(),
+  defaultReps: z.number().nullable(),
+  defaultWeight: z.number().nullable(),
 })
 
 export type CreateOrAttachExerciseToWorkoutParams = z.infer<

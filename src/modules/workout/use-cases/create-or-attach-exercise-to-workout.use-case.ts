@@ -17,9 +17,9 @@ interface CreateOrAttachExerciseToWorkoutUseCaseRequest {
   name: string
   category: ExerciseCategory | null
   type: ExerciseType | null
-  sets: number | null
-  reps: number | null
-  weight: number | null
+  defaultSets: number | null
+  defaultReps: number | null
+  defaultWeight: number | null
 }
 
 interface CreateOrAttachExerciseToWorkoutUseCaseResponse {
@@ -40,9 +40,9 @@ export class CreateOrAttachExerciseToWorkoutUseCase {
     name,
     category,
     type,
-    sets,
-    reps,
-    weight,
+    defaultSets,
+    defaultReps,
+    defaultWeight,
   }: CreateOrAttachExerciseToWorkoutUseCaseRequest): Promise<CreateOrAttachExerciseToWorkoutUseCaseResponse> {
     const workout = await this.workoutsRepository.findById(workoutId)
     if (!workout || workout.userId !== userId) {
@@ -60,9 +60,6 @@ export class CreateOrAttachExerciseToWorkoutUseCase {
         category,
         type,
         isCustom: true,
-        sets,
-        reps,
-        weight,
         user: { connect: { id: userId } },
       })
     }
@@ -71,9 +68,9 @@ export class CreateOrAttachExerciseToWorkoutUseCase {
       await this.workoutExercisesRepository.addExerciseToWorkout({
         workout: { connect: { id: workoutId } },
         exercise: { connect: { id: exercise.id } },
-        defaultSets: sets ?? exercise.sets ?? null,
-        defaultReps: reps ?? exercise.reps ?? null,
-        defaultWeight: weight ?? exercise.weight ?? null,
+        defaultSets,
+        defaultReps,
+        defaultWeight,
       })
 
     return { exercise, workoutExercise }
