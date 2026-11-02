@@ -1,4 +1,4 @@
-import type { Prisma, WorkoutExercise } from 'generated/prisma'
+import type { Exercise, Prisma, WorkoutExercise } from 'generated/prisma'
 
 export interface WorkoutExercisesRepository {
   findById(id: string): Promise<WorkoutExercise | null>
@@ -8,8 +8,8 @@ export interface WorkoutExercisesRepository {
       exercise: {
         id: string
         name: string
-        category: string | null
-        type: string | null
+        category: Exercise['category'] | null
+        type: Exercise['type'] | null
       }
     })[]
   >
