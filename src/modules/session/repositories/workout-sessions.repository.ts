@@ -108,19 +108,5 @@ export interface WorkoutSessionsRepository {
     status: WorkoutSessionStatus
   ): Promise<WorkoutSession>
 
-  completeWorkoutSession(
-    sessionId: string,
-    updates: {
-      status: WorkoutSessionStatus
-      exerciseSessions: {
-        id: string
-        completed: boolean
-        sets?: number | null
-        reps?: number | null
-        weight?: number | null
-      }[]
-    }
-  ): Promise<WorkoutSessionWithWorkout>
-
   countCompletedByUser(userId: string): Promise<number>
 }
