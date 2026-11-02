@@ -168,50 +168,6 @@ export class PrismaWorkoutSessionsRepository
     })
   }
 
-  async completeWorkoutSession(
-    sessionId: string,
-    updates: {
-      status: WorkoutSessionStatus
-      exerciseSessions: {
-        id: string
-        completed: boolean
-        sets?: number | null
-        reps?: number | null
-        weight?: number | null
-      }[]
-    }
-  ): Promise<WorkoutSessionWithWorkout> {
-    return await prisma.$transaction(async (tx) => {
-      await tx.workoutSession.update({
-        where: { id: sessionId },
-        data: { status: updates.status },
-      })
-
-      for (const ex of updates.exerciseSessions) {
-        await tx.exerciseSession.update({
-          where: { id: ex.id },
-          data: {
-            completed: ex.completed,
-            plannedSets: ex.sets ?? null,
-            plannedReps: ex.reps ?? null,
-            plannedWeight: ex.weight ?? null,
-          },
-        })
-      }
-
-      const updated = await tx.workoutSession.findUnique({
-        where: { id: sessionId },
-        include: workoutSessionInclude,
-      })
-
-      if (!updated) {
-        throw new Error('Workout session not found after update')
-      }
-
-      return mapWorkoutSession(updated)
-    })
-  }
-
   async countCompletedByUser(userId: string): Promise<number> {
     return await prisma.workoutSession.count({
       where: {
