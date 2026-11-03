@@ -108,6 +108,7 @@ export class InMemoryWorkoutExercisesRepository
       id: data.id ?? randomUUID(),
       workoutId,
       exerciseId,
+      position: data.position ?? 0,
       defaultSets: data.defaultSets ?? null,
       defaultReps: data.defaultReps ?? null,
       defaultWeight: data.defaultWeight ?? null,
