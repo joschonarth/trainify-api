@@ -17,6 +17,7 @@ model Workout {
 model WorkoutExercise {
   id        String @id @default(cuid())
   workoutId String
+  position  Int    @default(0)
 
   exerciseId    String
   defaultSets   Int?
@@ -27,6 +28,7 @@ model WorkoutExercise {
   exercise Exercise @relation(fields: [exerciseId], references: [id])
 
   @@unique([workoutId, exerciseId])
+  @@index([workoutId, position])
   @@map("workout_exercises")
 }
 

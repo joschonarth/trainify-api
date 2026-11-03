@@ -1,4 +1,9 @@
-import { ExerciseCategory, ExerciseType, PrismaClient } from 'generated/prisma'
+import {
+  ExerciseCategory,
+  ExerciseType,
+  Measurement,
+  PrismaClient,
+} from 'generated/prisma'
 
 export const prisma = new PrismaClient()
 
@@ -113,6 +118,7 @@ export async function seedWorkoutExercises(userId, workouts) {
       name: 'Prancha',
       category: ExerciseCategory.ABS,
       type: ExerciseType.MOBILITY,
+      measurement: Measurement.DURATION,
       defaultSets: 3,
       defaultReps: 1,
       defaultWeight: 0,
@@ -191,6 +197,7 @@ export async function seedWorkoutExercises(userId, workouts) {
       name: 'Corrida no Lugar',
       category: ExerciseCategory.LEGS,
       type: ExerciseType.CARDIO,
+      measurement: Measurement.DURATION,
       defaultSets: 3,
       defaultReps: 60,
       defaultWeight: 0,
@@ -216,21 +223,28 @@ export async function seedWorkoutExercises(userId, workouts) {
   const createdExercises = []
 
   for (const ex of baseExercises) {
-    const exercise = await prisma.exercise.upsert({
+    const measurement = ex.measurement ?? Measurement.REPS
+    const existingExercise = await prisma.exercise.findFirst({
       where: {
-        name_userId: {
-          name: ex.name,
-          userId,
-        },
-      },
-      update: {},
-      create: {
-        name: ex.name,
-        category: ex.category,
-        type: ex.type,
         userId,
+        name: { equals: ex.name, mode: 'insensitive' },
       },
     })
+
+    const exercise = existingExercise
+      ? await prisma.exercise.update({
+          where: { id: existingExercise.id },
+          data: { measurement },
+        })
+      : await prisma.exercise.create({
+          data: {
+            name: ex.name,
+            category: ex.category,
+            type: ex.type,
+            measurement,
+            userId,
+          },
+        })
 
     createdExercises.push({ ...exercise, ...ex })
   }
