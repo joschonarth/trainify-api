@@ -223,22 +223,28 @@ export async function seedWorkoutExercises(userId, workouts) {
   const createdExercises = []
 
   for (const ex of baseExercises) {
-    const exercise = await prisma.exercise.upsert({
+    const measurement = ex.measurement ?? Measurement.REPS
+    const existingExercise = await prisma.exercise.findFirst({
       where: {
-        name_userId: {
-          name: ex.name,
-          userId,
-        },
-      },
-      update: { measurement: ex.measurement ?? Measurement.REPS },
-      create: {
-        name: ex.name,
-        category: ex.category,
-        type: ex.type,
-        measurement: ex.measurement ?? Measurement.REPS,
         userId,
+        name: { equals: ex.name, mode: 'insensitive' },
       },
     })
+
+    const exercise = existingExercise
+      ? await prisma.exercise.update({
+          where: { id: existingExercise.id },
+          data: { measurement },
+        })
+      : await prisma.exercise.create({
+          data: {
+            name: ex.name,
+            category: ex.category,
+            type: ex.type,
+            measurement,
+            userId,
+          },
+        })
 
     createdExercises.push({ ...exercise, ...ex })
   }

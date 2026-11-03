@@ -41,7 +41,6 @@ model Exercise {
   workoutExercise WorkoutExercise[]
   sessions        ExerciseSession[]
 
-  @@unique([name, userId])
   @@map("exercises")
 }
 

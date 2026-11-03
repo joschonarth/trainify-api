@@ -27,11 +27,15 @@ export class InMemoryExercisesRepository implements ExercisesRepository {
 
   create(data: Prisma.ExerciseCreateInput): Promise<Exercise> {
     const userId = data.user?.connect?.id ?? null
+    const name = data.name.toLowerCase()
     if (
       this.items.some(
         (item) =>
           item.id === data.id ||
-          (userId !== null && item.userId === userId && item.name === data.name)
+          (item.name.toLowerCase() === name &&
+            (userId === null
+              ? item.userId === null
+              : item.userId === userId && item.archivedAt === null))
       )
     ) {
       return Promise.reject(uniqueConstraintError())
@@ -117,6 +121,20 @@ export class InMemoryExercisesRepository implements ExercisesRepository {
     const current = this.items[index]
     if (!current) {
       return Promise.reject(new Error('Record to update not found.'))
+    }
+
+    const name = data.name ?? current.name
+    if (
+      this.items.some(
+        (item) =>
+          item.id !== current.id &&
+          item.name.toLowerCase() === name.toLowerCase() &&
+          (current.userId === null
+            ? item.userId === null
+            : item.userId === current.userId && item.archivedAt === null)
+      )
+    ) {
+      return Promise.reject(uniqueConstraintError())
     }
 
     const updated: Exercise = {
