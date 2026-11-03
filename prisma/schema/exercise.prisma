@@ -17,11 +17,17 @@ enum ExerciseType {
   FLEXIBILITY
 }
 
+enum Measurement {
+  REPS
+  DURATION
+}
+
 model Exercise {
-  id       String            @id @default(cuid())
-  name     String
-  category ExerciseCategory?
-  type     ExerciseType?
+  id          String            @id @default(cuid())
+  name        String
+  category    ExerciseCategory?
+  type        ExerciseType?
+  measurement Measurement       @default(REPS)
 
   isCustom   Boolean   @default(true) @map("is_custom")
   createdAt  DateTime  @default(now()) @map("created_at")

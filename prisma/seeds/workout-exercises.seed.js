@@ -1,4 +1,9 @@
-import { ExerciseCategory, ExerciseType, PrismaClient } from 'generated/prisma'
+import {
+  ExerciseCategory,
+  ExerciseType,
+  Measurement,
+  PrismaClient,
+} from 'generated/prisma'
 
 export const prisma = new PrismaClient()
 
@@ -113,6 +118,7 @@ export async function seedWorkoutExercises(userId, workouts) {
       name: 'Prancha',
       category: ExerciseCategory.ABS,
       type: ExerciseType.MOBILITY,
+      measurement: Measurement.DURATION,
       defaultSets: 3,
       defaultReps: 1,
       defaultWeight: 0,
@@ -191,6 +197,7 @@ export async function seedWorkoutExercises(userId, workouts) {
       name: 'Corrida no Lugar',
       category: ExerciseCategory.LEGS,
       type: ExerciseType.CARDIO,
+      measurement: Measurement.DURATION,
       defaultSets: 3,
       defaultReps: 60,
       defaultWeight: 0,
@@ -223,11 +230,12 @@ export async function seedWorkoutExercises(userId, workouts) {
           userId,
         },
       },
-      update: {},
+      update: { measurement: ex.measurement ?? Measurement.REPS },
       create: {
         name: ex.name,
         category: ex.category,
         type: ex.type,
+        measurement: ex.measurement ?? Measurement.REPS,
         userId,
       },
     })

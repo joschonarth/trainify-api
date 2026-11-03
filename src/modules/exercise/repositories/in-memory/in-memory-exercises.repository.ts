@@ -5,6 +5,7 @@ import type {
   ExerciseType,
   Prisma,
 } from 'generated/prisma'
+import { Measurement } from 'generated/prisma'
 
 import type { ExercisesRepository } from '../exercises.repository'
 
@@ -41,8 +42,11 @@ export class InMemoryExercisesRepository implements ExercisesRepository {
       name: data.name,
       category: data.category ?? null,
       type: data.type ?? null,
+      measurement: data.measurement ?? Measurement.REPS,
       isCustom: data.isCustom ?? true,
       createdAt: data.createdAt ? new Date(data.createdAt) : new Date(),
+      updatedAt: data.updatedAt ? new Date(data.updatedAt) : new Date(),
+      archivedAt: data.archivedAt ? new Date(data.archivedAt) : null,
       userId,
     }
 
