@@ -59,8 +59,8 @@ export class UpdateExerciseUseCase {
     try {
       updatedExercise = await this.exercisesRepository.update(exerciseId, {
         name: name ?? exercise.name,
-        category: category ?? exercise.category,
-        type: type ?? exercise.type,
+        category: category === undefined ? exercise.category : category,
+        type: type === undefined ? exercise.type : type,
       })
     } catch (error) {
       if (

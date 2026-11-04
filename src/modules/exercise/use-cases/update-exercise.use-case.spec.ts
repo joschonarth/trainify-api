@@ -57,6 +57,24 @@ describe('UpdateExerciseUseCase', () => {
     ).rejects.toBeInstanceOf(ResourceAlreadyExistsError)
   })
 
+  it('allows clearing category and type with null', async () => {
+    const exercise = await makeExercise(exercisesRepository, {
+      name: 'Bench Press',
+      isCustom: true,
+      user: { connect: { id: 'user-id' } },
+    })
+
+    const result = await sut.execute({
+      userId: 'user-id',
+      exerciseId: exercise.id,
+      category: null,
+      type: null,
+    })
+
+    expect(result.exercise.category).toBeNull()
+    expect(result.exercise.type).toBeNull()
+  })
+
   it('does not conflict with the exercise itself when its name is unchanged', async () => {
     const exercise = await makeExercise(exercisesRepository, {
       name: 'Bench Press',
