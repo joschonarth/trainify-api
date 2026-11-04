@@ -39,14 +39,30 @@ export class CreateExerciseUseCase {
       )
     }
 
-    const exercise = await this.exercisesRepository.create({
-      name,
-      category,
-      type,
-      isCustom: true,
-      createdAt: new Date(),
-      user: { connect: { id: userId } },
-    })
+    let exercise: Exercise
+    try {
+      exercise = await this.exercisesRepository.create({
+        name,
+        category,
+        type,
+        isCustom: true,
+        createdAt: new Date(),
+        user: { connect: { id: userId } },
+      })
+    } catch (error) {
+      if (
+        typeof error === 'object' &&
+        error !== null &&
+        'code' in error &&
+        error.code === 'P2002'
+      ) {
+        throw new ResourceAlreadyExistsError(
+          'Exercise with this name already exists for this user.'
+        )
+      }
+
+      throw error
+    }
 
     return { exercise }
   }
