@@ -72,7 +72,7 @@ export class InMemoryExercisesRepository implements ExercisesRepository {
       .filter(
         (item) =>
           !item.isCustom &&
-          (!query || item.name.includes(query)) &&
+          (!query || item.name.toLowerCase().includes(query.toLowerCase())) &&
           (!category || item.category === category)
       )
       .sort((left, right) => left.name.localeCompare(right.name))
@@ -81,9 +81,18 @@ export class InMemoryExercisesRepository implements ExercisesRepository {
     return Promise.resolve(exercises.map(copyExercise))
   }
 
-  findByNameAndUser(name: string, userId: string): Promise<Exercise | null> {
+  findByNameAndUser(
+    name: string,
+    userId: string,
+    excludeExerciseId?: string
+  ): Promise<Exercise | null> {
     const exercise = this.items.find(
-      (item) => item.name === name && item.userId === userId && item.isCustom
+      (item) =>
+        item.id !== excludeExerciseId &&
+        item.name.toLowerCase() === name.toLowerCase() &&
+        item.userId === userId &&
+        item.isCustom &&
+        item.archivedAt === null
     )
     return Promise.resolve(exercise ? copyExercise(exercise) : null)
   }
@@ -98,7 +107,8 @@ export class InMemoryExercisesRepository implements ExercisesRepository {
       .filter(
         (item) =>
           item.userId === userId &&
-          (!query || item.name.includes(query)) &&
+          item.archivedAt === null &&
+          (!query || item.name.toLowerCase().includes(query.toLowerCase())) &&
           (!category || item.category === category) &&
           (!type || item.type === type)
       )

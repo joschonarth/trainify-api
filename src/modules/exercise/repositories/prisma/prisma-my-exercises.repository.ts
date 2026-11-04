@@ -47,13 +47,12 @@ export class PrismaMyExercisesRepository implements MyExercisesRepository {
           ...(query && {
             name: {
               contains: query,
-              // TODO: add mode: 'insensitive' when migrating DB
+              mode: 'insensitive',
             },
           }),
           ...(category && {
             category: {
               equals: category,
-              // TODO: add mode: 'insensitive' when migrating DB
             },
           }),
         },

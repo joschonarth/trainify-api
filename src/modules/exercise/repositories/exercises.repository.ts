@@ -13,7 +13,11 @@ export interface ExercisesRepository {
     category: ExerciseCategory | null,
     page: number
   ): Promise<Exercise[]>
-  findByNameAndUser(name: string, userId: string): Promise<Exercise | null>
+  findByNameAndUser(
+    name: string,
+    userId: string,
+    excludeExerciseId?: string
+  ): Promise<Exercise | null>
   findManyByUser(
     userId: string,
     query?: string | null,

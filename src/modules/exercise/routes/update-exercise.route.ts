@@ -33,6 +33,9 @@ export function updateExerciseRoute(app: FastifyInstance) {
           404: z
             .object({ message: z.string() })
             .describe('Exercise not found.'),
+          409: z
+            .object({ message: z.string() })
+            .describe('An exercise with this name already exists.'),
         },
       },
     },

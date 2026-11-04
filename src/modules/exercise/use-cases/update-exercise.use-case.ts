@@ -1,6 +1,7 @@
 import type { Exercise, ExerciseCategory, ExerciseType } from 'generated/prisma'
 
 import { NotAllowedError } from '@/shared/errors/not-allowed.error'
+import { ResourceAlreadyExistsError } from '@/shared/errors/resource-already-exists.error'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
 import type { ExercisesRepository } from '../repositories/exercises.repository'
@@ -8,7 +9,7 @@ import type { ExercisesRepository } from '../repositories/exercises.repository'
 interface UpdateExerciseUseCaseRequest {
   userId: string
   exerciseId: string
-  name?: string | null | undefined
+  name?: string | undefined
   category?: ExerciseCategory | null | undefined
   type?: ExerciseType | null | undefined
 }
@@ -41,11 +42,40 @@ export class UpdateExerciseUseCase {
       throw new NotAllowedError('You can only update your own exercises.')
     }
 
-    const updatedExercise = await this.exercisesRepository.update(exerciseId, {
-      name: name ?? exercise.name,
-      category: category ?? exercise.category,
-      type: type ?? exercise.type,
-    })
+    if (
+      name !== undefined &&
+      (await this.exercisesRepository.findByNameAndUser(
+        name,
+        userId,
+        exerciseId
+      ))
+    ) {
+      throw new ResourceAlreadyExistsError(
+        'Exercise with this name already exists for this user.'
+      )
+    }
+
+    let updatedExercise: Exercise
+    try {
+      updatedExercise = await this.exercisesRepository.update(exerciseId, {
+        name: name ?? exercise.name,
+        category: category === undefined ? exercise.category : category,
+        type: type === undefined ? exercise.type : type,
+      })
+    } catch (error) {
+      if (
+        typeof error === 'object' &&
+        error !== null &&
+        'code' in error &&
+        error.code === 'P2002'
+      ) {
+        throw new ResourceAlreadyExistsError(
+          'Exercise with this name already exists for this user.'
+        )
+      }
+
+      throw error
+    }
 
     return { exercise: updatedExercise }
   }

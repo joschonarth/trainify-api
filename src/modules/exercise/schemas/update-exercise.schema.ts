@@ -7,8 +7,8 @@ export const updateExerciseParamsSchema = z.object({
 
 export const updateExerciseBodySchema = z.object({
   name: z.string().optional(),
-  category: z.enum(ExerciseCategory).optional(),
-  type: z.enum(ExerciseType).optional(),
+  category: z.enum(ExerciseCategory).nullable().optional(),
+  type: z.enum(ExerciseType).nullable().optional(),
 })
 
 export type UpdateExerciseParams = z.infer<typeof updateExerciseParamsSchema>
