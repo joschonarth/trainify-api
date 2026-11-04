@@ -33,12 +33,11 @@ export class PrismaExercisesRepository implements ExercisesRepository {
         ...(query && {
           name: {
             contains: query,
-            // TODO: add mode: 'insensitive' when migrating DB
+            mode: 'insensitive',
           },
         }),
         ...(category && {
           category,
-          // TODO: add mode: 'insensitive' when migrating DB
         }),
       },
       take: ITEMS_PER_PAGE,
@@ -69,9 +68,15 @@ export class PrismaExercisesRepository implements ExercisesRepository {
     return await prisma.exercise.findMany({
       where: {
         userId,
-        ...(query && { query }),
+        ...(query && {
+          name: {
+            contains: query,
+            mode: 'insensitive',
+          },
+        }),
         ...(category && { category }),
         ...(type && { type }),
+        archivedAt: null,
       },
       orderBy: { createdAt: 'desc' },
     })

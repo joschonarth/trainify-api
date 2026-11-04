@@ -67,7 +67,7 @@ export class InMemoryMyExercisesRepository implements MyExercisesRepository {
       )
       if (
         exercise &&
-        (!query || exercise.name.includes(query)) &&
+        (!query || exercise.name.toLowerCase().includes(query.toLowerCase())) &&
         (!category || exercise.category === category)
       ) {
         matches.push({
