@@ -6,6 +6,7 @@ import type {
 } from 'generated/prisma'
 
 import type { ExercisesRepository } from '@/modules/exercise/repositories/exercises.repository'
+import type { MyExercisesRepository } from '@/modules/exercise/repositories/my-exercises.repository'
 import { ResourceAlreadyExistsError } from '@/shared/errors/resource-already-exists.error'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
@@ -31,6 +32,7 @@ interface CreateOrAttachExerciseToWorkoutUseCaseResponse {
 export class CreateOrAttachExerciseToWorkoutUseCase {
   constructor(
     private readonly exercisesRepository: ExercisesRepository,
+    private readonly myExercisesRepository: MyExercisesRepository,
     private readonly workoutsRepository: WorkoutsRepository,
     private readonly workoutExercisesRepository: WorkoutExercisesRepository
   ) {}
@@ -56,13 +58,15 @@ export class CreateOrAttachExerciseToWorkoutUseCase {
     )
 
     if (!exercise) {
-      exercise = await this.exercisesRepository.create({
-        name,
-        category,
-        type,
-        isCustom: true,
-        user: { connect: { id: userId } },
-      })
+      exercise =
+        await this.myExercisesRepository.createCustomExerciseWithLibraryEntry(
+          userId,
+          {
+            name,
+            category,
+            type,
+          }
+        )
     }
 
     const existingWorkoutExercise =
@@ -75,6 +79,15 @@ export class CreateOrAttachExerciseToWorkoutUseCase {
       throw new ResourceAlreadyExistsError(
         'Exercise is already added to this workout.'
       )
+    }
+
+    const libraryEntry = await this.myExercisesRepository.findByUserAndExercise(
+      userId,
+      exercise.id
+    )
+
+    if (!libraryEntry) {
+      await this.myExercisesRepository.addExercise(userId, exercise.id)
     }
 
     const workoutExercise =
