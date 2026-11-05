@@ -244,6 +244,28 @@ describe('CompleteWorkoutSessionUseCase', () => {
     expect(exerciseLogsRepository.create).not.toHaveBeenCalled()
   })
 
+  it('persists zero volume when a completed exercise has no weight', async () => {
+    await sut.execute({
+      userId,
+      sessionId,
+      exercises: [
+        {
+          exerciseSessionId: 'exercise-session-id',
+          sets: 3,
+          reps: 10,
+          completed: true,
+        },
+      ],
+    })
+
+    expect(exerciseLogsRepository.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        weight: null,
+        volume: 0,
+      })
+    )
+  })
+
   it('rejects completing an already completed workout session before any writes', async () => {
     workoutSession.status = WorkoutSessionStatus.COMPLETED
 
