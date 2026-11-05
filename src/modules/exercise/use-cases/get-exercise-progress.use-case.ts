@@ -1,6 +1,7 @@
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
 import type { ExerciseLogsRepository } from '../repositories/exercise-logs.repository'
+import type { GetExerciseDetailsUseCase } from './get-exercise-details.use-case'
 
 interface GetExerciseProgressRequest {
   userId: string
@@ -9,18 +10,30 @@ interface GetExerciseProgressRequest {
 
 export class GetExerciseProgressUseCase {
   constructor(
-    private readonly exerciseLogsRepository: ExerciseLogsRepository
+    private readonly exerciseLogsRepository: Pick<
+      ExerciseLogsRepository,
+      'findManyByExerciseAndUser' | 'findMaxVolumeByExerciseAndUser'
+    >,
+    private readonly getExerciseDetailsUseCase: Pick<
+      GetExerciseDetailsUseCase,
+      'execute'
+    >
   ) {}
 
   async execute({ userId, exerciseId }: GetExerciseProgressRequest) {
+    const { exercise } = await this.getExerciseDetailsUseCase.execute({
+      userId,
+      exerciseId,
+    })
+
+    if (!exercise) {
+      throw new ResourceNotFoundError('Exercise not found.')
+    }
+
     const logs = await this.exerciseLogsRepository.findManyByExerciseAndUser(
       userId,
       exerciseId
     )
-
-    if (!logs || logs.length === 0) {
-      throw new ResourceNotFoundError('No logs found for this exercise.')
-    }
 
     const orderedLogs = logs.sort((a, b) => a.date.getTime() - b.date.getTime())
 
@@ -33,19 +46,19 @@ export class GetExerciseProgressUseCase {
     }))
 
     const totalVolume = progress.reduce((sum, log) => sum + log.volume, 0)
-    const avgVolume = totalVolume / progress.length
-
-    const firstLog = orderedLogs[0] ?? null
+    const avgVolume = progress.length > 0 ? totalVolume / progress.length : 0
 
     const maxVolumeData =
-      await this.exerciseLogsRepository.findMaxVolumeByExerciseAndUser(
-        userId,
-        exerciseId
-      )
+      orderedLogs.length > 0
+        ? await this.exerciseLogsRepository.findMaxVolumeByExerciseAndUser(
+            userId,
+            exerciseId
+          )
+        : null
 
     return {
       exerciseId,
-      exerciseName: firstLog?.exercise?.name ?? null,
+      exerciseName: exercise.name,
       totalLogs: orderedLogs.length,
       totalVolume,
       avgVolume,

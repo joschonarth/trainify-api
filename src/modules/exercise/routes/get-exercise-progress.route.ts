@@ -20,7 +20,7 @@ export function getExerciseProgressRoute(app: FastifyInstance) {
           200: z
             .object({
               exerciseId: z.string().describe('Exercise ID.'),
-              exerciseName: z.string().nullable().describe('Exercise name.'),
+              exerciseName: z.string().describe('Exercise name.'),
               totalLogs: z.number().describe('Total number of logs recorded.'),
               totalVolume: z
                 .number()
