@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto'
-import type { Exercise, MyExercise } from 'generated/prisma'
+import type { Exercise, MyExercise, Prisma } from 'generated/prisma'
 
 import type { ExercisesRepository } from '../exercises.repository'
 import type { MyExercisesRepository } from '../my-exercises.repository'
@@ -19,6 +19,26 @@ export class InMemoryMyExercisesRepository implements MyExercisesRepository {
   items: MyExercise[] = []
 
   constructor(private readonly exercisesRepository: ExercisesRepository) {}
+
+  async createCustomExerciseWithLibraryEntry(
+    userId: string,
+    data: Omit<Prisma.ExerciseCreateInput, 'user'>
+  ): Promise<Exercise> {
+    const exercise = await this.exercisesRepository.create({
+      ...data,
+      isCustom: true,
+      user: { connect: { id: userId } },
+    })
+
+    try {
+      await this.addExercise(userId, exercise.id)
+    } catch (error) {
+      await this.exercisesRepository.delete(exercise.id)
+      throw error
+    }
+
+    return exercise
+  }
 
   addExercise(userId: string, exerciseId: string): Promise<MyExercise> {
     if (

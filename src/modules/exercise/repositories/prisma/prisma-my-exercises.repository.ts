@@ -1,10 +1,34 @@
-import type { Exercise, MyExercise } from 'generated/prisma'
+import type { Exercise, MyExercise, Prisma } from 'generated/prisma'
 
 import { prisma } from '@/lib/prisma'
 
 import type { MyExercisesRepository } from '../my-exercises.repository'
 
 export class PrismaMyExercisesRepository implements MyExercisesRepository {
+  async createCustomExerciseWithLibraryEntry(
+    userId: string,
+    data: Omit<Prisma.ExerciseCreateInput, 'user'>
+  ): Promise<Exercise> {
+    return await prisma.$transaction(async (transaction) => {
+      const exercise = await transaction.exercise.create({
+        data: {
+          ...data,
+          isCustom: true,
+          user: { connect: { id: userId } },
+        },
+      })
+
+      await transaction.myExercise.create({
+        data: {
+          userId,
+          exerciseId: exercise.id,
+        },
+      })
+
+      return exercise
+    })
+  }
+
   async addExercise(userId: string, exerciseId: string): Promise<MyExercise> {
     const myExercise = await prisma.myExercise.create({
       data: {

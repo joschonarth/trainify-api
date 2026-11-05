@@ -19,9 +19,16 @@ describe('CreateExerciseUseCase', () => {
   })
 
   it('maps a unique constraint race to ResourceAlreadyExistsError', async () => {
-    vi.spyOn(exercisesRepository, 'create').mockRejectedValue(
+    const myExercisesRepository = new InMemoryMyExercisesRepository(
+      exercisesRepository
+    )
+    vi.spyOn(
+      myExercisesRepository,
+      'createCustomExerciseWithLibraryEntry'
+    ).mockRejectedValue(
       Object.assign(new Error('Unique constraint failed.'), { code: 'P2002' })
     )
+    sut = new CreateExerciseUseCase(exercisesRepository, myExercisesRepository)
 
     await expect(
       sut.execute({
@@ -33,9 +40,62 @@ describe('CreateExerciseUseCase', () => {
     ).rejects.toBeInstanceOf(ResourceAlreadyExistsError)
   })
 
+  it('adds a created custom exercise to the user library', async () => {
+    const myExercisesRepository = new InMemoryMyExercisesRepository(
+      exercisesRepository
+    )
+    sut = new CreateExerciseUseCase(exercisesRepository, myExercisesRepository)
+
+    const { exercise } = await sut.execute({
+      userId: 'user-id',
+      name: 'Bench Press',
+      category: 'CHEST',
+      type: 'STRENGTH',
+    })
+
+    const libraryEntries = await myExercisesRepository.findAllByUser(
+      'user-id',
+      '',
+      null,
+      1
+    )
+
+    expect(libraryEntries).toHaveLength(1)
+    expect(libraryEntries[0]?.exercise.id).toBe(exercise.id)
+  })
+
+  it('rolls back a custom exercise when its library entry cannot be created', async () => {
+    const myExercisesRepository = new InMemoryMyExercisesRepository(
+      exercisesRepository
+    )
+    vi.spyOn(myExercisesRepository, 'addExercise').mockRejectedValue(
+      new Error('Library insert failed.')
+    )
+    sut = new CreateExerciseUseCase(exercisesRepository, myExercisesRepository)
+
+    await expect(
+      sut.execute({
+        userId: 'user-id',
+        name: 'Bench Press',
+        category: 'CHEST',
+        type: 'STRENGTH',
+      })
+    ).rejects.toThrow('Library insert failed.')
+
+    expect(exercisesRepository.items).toHaveLength(0)
+    expect(myExercisesRepository.items).toHaveLength(0)
+  })
+
   it('preserves unexpected repository errors', async () => {
+    const myExercisesRepository = new InMemoryMyExercisesRepository(
+      exercisesRepository
+    )
     const error = new Error('Database unavailable.')
-    vi.spyOn(exercisesRepository, 'create').mockRejectedValue(error)
+    vi.spyOn(
+      myExercisesRepository,
+      'createCustomExerciseWithLibraryEntry'
+    ).mockRejectedValue(error)
+    sut = new CreateExerciseUseCase(exercisesRepository, myExercisesRepository)
 
     await expect(
       sut.execute({
