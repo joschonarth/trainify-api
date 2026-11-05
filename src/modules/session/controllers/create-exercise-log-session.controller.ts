@@ -12,7 +12,7 @@ export async function createExerciseLogSessionController(
 ) {
   const { sessionId } = request.params as CreateExerciseLogSessionParams
 
-  const { exerciseId, sets, reps, weight, description } =
+  const { exerciseId, sets, reps, weight, description, date } =
     request.body as CreateExerciseLogSessionBody
 
   const userId = request.user.sub
@@ -27,6 +27,7 @@ export async function createExerciseLogSessionController(
     reps,
     weight,
     description,
+    ...(date && { date: new Date(date) }),
   })
 
   return reply.status(201).send({ exerciseLog })

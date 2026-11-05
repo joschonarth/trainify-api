@@ -12,6 +12,7 @@ interface CreateExerciseLogSessionUseCaseRequest {
   reps: number
   weight?: number | null
   description?: string | null
+  date?: Date
 }
 
 interface CreateExerciseLogSessionUseCaseResponse {
@@ -20,8 +21,14 @@ interface CreateExerciseLogSessionUseCaseResponse {
 
 export class CreateExerciseLogSessionUseCase {
   constructor(
-    private readonly exerciseLogsRepository: ExerciseLogsRepository,
-    private readonly workoutSessionsRepository: WorkoutSessionsRepository
+    private readonly exerciseLogsRepository: Pick<
+      ExerciseLogsRepository,
+      'create'
+    >,
+    private readonly workoutSessionsRepository: Pick<
+      WorkoutSessionsRepository,
+      'findByIdWithWorkout'
+    >
   ) {}
 
   async execute({
@@ -32,6 +39,7 @@ export class CreateExerciseLogSessionUseCase {
     reps,
     weight,
     description,
+    date,
   }: CreateExerciseLogSessionUseCaseRequest): Promise<CreateExerciseLogSessionUseCaseResponse> {
     const session =
       await this.workoutSessionsRepository.findByIdWithWorkout(sessionId)
@@ -53,7 +61,7 @@ export class CreateExerciseLogSessionUseCase {
       reps,
       weight: weight ?? null,
       description: description ?? null,
-      date: new Date(),
+      date: date ?? new Date(),
       user: { connect: { id: userId } },
       exercise: { connect: { id: exerciseId } },
       exerciseSession: { connect: { id: exerciseSession.id } },
