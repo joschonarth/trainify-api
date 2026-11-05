@@ -6,7 +6,6 @@ import type { UpdateUserStreakUseCase } from '@/modules/gamification/use-cases/u
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
 import { WorkoutSessionAlreadyCompletedError } from '../errors/workout-session-already-completed.error'
-
 import type { ExerciseSessionsRepository } from '../repositories/exercise-sessions.repository'
 import type { WorkoutSessionsRepository } from '../repositories/workout-sessions.repository'
 
@@ -28,11 +27,16 @@ interface CompleteWorkoutSessionResponse {
   session: Awaited<ReturnType<WorkoutSessionsRepository['findByIdWithWorkout']>>
 }
 
+type CompletionExercise = CompleteWorkoutSessionRequest['exercises'][number]
+type ExerciseSessionRecord = Awaited<
+  ReturnType<ExerciseSessionsRepository['findByWorkoutSessionId']>
+>[number]
+
 export class CompleteWorkoutSessionUseCase {
   constructor(
     private readonly workoutSessionsRepository: Pick<
       WorkoutSessionsRepository,
-      'findByIdWithWorkout' | 'update' | 'updateStatus'
+      'findByIdWithWorkout' | 'update'
     >,
     private readonly exerciseSessionsRepository: Pick<
       ExerciseSessionsRepository,
@@ -67,6 +71,66 @@ export class CompleteWorkoutSessionUseCase {
     return WorkoutSessionStatus.COMPLETED
   }
 
+  private assertSessionCanBeCompleted(
+    session: NonNullable<
+      Awaited<ReturnType<WorkoutSessionsRepository['findByIdWithWorkout']>>
+    >
+  ): void {
+    if (
+      session.status === WorkoutSessionStatus.COMPLETED ||
+      session.status === WorkoutSessionStatus.INCOMPLETE ||
+      session.status === WorkoutSessionStatus.SKIPPED ||
+      (session.status === WorkoutSessionStatus.PENDING && session.endedAt)
+    ) {
+      throw new WorkoutSessionAlreadyCompletedError()
+    }
+  }
+
+  private async completeExercise(
+    userId: string,
+    exercise: CompletionExercise,
+    exerciseSession: ExerciseSessionRecord | undefined,
+    now: Date,
+    exerciseSessionIdsWithLogs: Set<string>,
+    processedExerciseSessionIds: Set<string>
+  ): Promise<boolean> {
+    if (
+      !exerciseSession ||
+      processedExerciseSessionIds.has(exerciseSession.id)
+    ) {
+      return false
+    }
+    processedExerciseSessionIds.add(exerciseSession.id)
+
+    if (
+      exercise.completed &&
+      !exerciseSessionIdsWithLogs.has(exerciseSession.id)
+    ) {
+      const weight = exercise.weight ?? 0
+      const volume = exercise.sets * exercise.reps * weight
+
+      await this.exerciseLogsRepository.create({
+        sets: exercise.sets,
+        reps: exercise.reps,
+        weight: exercise.weight ?? null,
+        volume,
+        description: exercise.note ?? null,
+        date: now,
+        user: { connect: { id: userId } },
+        exercise: { connect: { id: exerciseSession.exercise.id } },
+        exerciseSession: { connect: { id: exercise.exerciseSessionId } },
+      })
+      exerciseSessionIdsWithLogs.add(exerciseSession.id)
+    }
+
+    await this.exerciseSessionsRepository.update(exercise.exerciseSessionId, {
+      completed: exercise.completed,
+      skipReason: exercise.completed ? null : (exercise.skipReason ?? null),
+    })
+
+    return exercise.completed
+  }
+
   async execute({
     userId,
     sessionId,
@@ -81,21 +145,7 @@ export class CompleteWorkoutSessionUseCase {
       )
     }
 
-    if (session.status === WorkoutSessionStatus.COMPLETED) {
-      throw new WorkoutSessionAlreadyCompletedError()
-    }
-
-    if (!session.endedAt && session.startedAt) {
-      const now = new Date()
-
-      const duration = Math.floor(
-        (now.getTime() - session.startedAt.getTime()) / 1000
-      )
-      await this.workoutSessionsRepository.update(sessionId, {
-        endedAt: now,
-        duration,
-      })
-    }
+    this.assertSessionCanBeCompleted(session)
 
     const exerciseSessions =
       await this.exerciseSessionsRepository.findByWorkoutSessionId(sessionId)
@@ -104,51 +154,28 @@ export class CompleteWorkoutSessionUseCase {
       throw new ResourceNotFoundError('No exercises found for this session.')
     }
 
-    let anyExerciseCompleted = false
     const now = new Date()
+    const processedExerciseSessionIds = new Set<string>()
     const exerciseSessionIdsWithLogs = new Set(
       exerciseSessions
-        .filter((item) => item.logs.length > 0)
-        .map((item) => item.id)
+        .filter((exerciseSession) => exerciseSession.logs.length > 0)
+        .map((exerciseSession) => exerciseSession.id)
     )
 
+    let anyExerciseCompleted = false
     for (const exercise of exercises) {
       const exerciseSession = exerciseSessions.find(
-        (ex) => ex.id === exercise.exerciseSessionId
+        (item) => item.id === exercise.exerciseSessionId
       )
-      if (!exerciseSession) {
-        continue
-      }
-
-      if (
-        exercise.completed &&
-        !exerciseSessionIdsWithLogs.has(exerciseSession.id)
-      ) {
-        const weight = exercise.weight ?? 0
-        const volume = exercise.sets * exercise.reps * weight
-
-        await this.exerciseLogsRepository.create({
-          sets: exercise.sets,
-          reps: exercise.reps,
-          weight: exercise.weight ?? null,
-          volume,
-          description: exercise.note ?? null,
-          date: now,
-          user: { connect: { id: userId } },
-          exercise: { connect: { id: exerciseSession.exercise.id } },
-          exerciseSession: { connect: { id: exercise.exerciseSessionId } },
-        })
-        exerciseSessionIdsWithLogs.add(exerciseSession.id)
-      }
-
-      await this.exerciseSessionsRepository.update(exercise.exerciseSessionId, {
-        completed: exercise.completed,
-        skipReason: exercise.completed ? null : (exercise.skipReason ?? null),
-      })
-
-      if (exercise.completed) {
-        anyExerciseCompleted = true
-      }
+      const completed = await this.completeExercise(
+        userId,
+        exercise,
+        exerciseSession,
+        now,
+        exerciseSessionIdsWithLogs,
+        processedExerciseSessionIds
+      )
+      anyExerciseCompleted ||= completed
     }
 
     const updatedExerciseSessions =
@@ -156,7 +183,17 @@ export class CompleteWorkoutSessionUseCase {
 
     const newStatus = this.deriveSessionStatus(updatedExerciseSessions)
 
-    await this.workoutSessionsRepository.updateStatus(sessionId, newStatus)
+    const endedAt = session.endedAt ?? now
+    const duration =
+      session.duration ??
+      Math.floor(
+        (endedAt.getTime() - (session.startedAt ?? endedAt).getTime()) / 1000
+      )
+    await this.workoutSessionsRepository.update(sessionId, {
+      endedAt,
+      duration,
+      status: newStatus,
+    })
 
     if (anyExerciseCompleted) {
       await this.updateUserStreakUseCase.execute({

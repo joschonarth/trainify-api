@@ -24,7 +24,7 @@ let exerciseSessions: ExerciseSessionWithLogs[]
 let workoutSession: WorkoutSessionWithWorkout
 let workoutSessionsRepository: Pick<
   WorkoutSessionsRepository,
-  'findByIdWithWorkout' | 'update' | 'updateStatus'
+  'findByIdWithWorkout' | 'update'
 >
 let exerciseSessionsRepository: Pick<
   ExerciseSessionsRepository,
@@ -122,16 +122,10 @@ describe('CompleteWorkoutSessionUseCase', () => {
       }
       return Promise.resolve(workoutSession)
     }
-    const updateWorkoutSessionStatus: WorkoutSessionsRepository['updateStatus'] =
-      (_id, status) => {
-        workoutSession.status = status
-        return Promise.resolve(workoutSession)
-      }
 
     workoutSessionsRepository = {
       findByIdWithWorkout: vi.fn(findByIdWithWorkout),
       update: vi.fn(updateWorkoutSession),
-      updateStatus: vi.fn(updateWorkoutSessionStatus),
     }
 
     const findByWorkoutSessionId: ExerciseSessionsRepository['findByWorkoutSessionId'] =
@@ -146,6 +140,9 @@ describe('CompleteWorkoutSessionUseCase', () => {
       }
       if (typeof data.completed === 'boolean') {
         exerciseSession.completed = data.completed
+      }
+      if (typeof data.skipReason === 'string' || data.skipReason === null) {
+        exerciseSession.skipReason = data.skipReason
       }
       return Promise.resolve(exerciseSession)
     }
@@ -268,7 +265,38 @@ describe('CompleteWorkoutSessionUseCase', () => {
     )
   })
 
-  it('persists skip reason when an exercise is not completed', async () => {
+  it('creates a log and completes an exercise even when it misses planned reps', async () => {
+    getFirstExerciseSession().plannedReps = 20
+
+    await sut.execute({
+      userId,
+      sessionId,
+      exercises: [
+        {
+          exerciseSessionId: 'exercise-session-id',
+          sets: 3,
+          reps: 15,
+          weight: 20,
+          completed: true,
+        },
+      ],
+    })
+
+    expect(exerciseLogsRepository.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sets: 3,
+        reps: 15,
+        weight: 20,
+        volume: 900,
+      })
+    )
+    expect(exerciseSessionsRepository.update).toHaveBeenCalledWith(
+      'exercise-session-id',
+      { completed: true, skipReason: null }
+    )
+  })
+
+  it('persists skip reason only for exercises that were not completed', async () => {
     await sut.execute({
       userId,
       sessionId,
@@ -299,10 +327,56 @@ describe('CompleteWorkoutSessionUseCase', () => {
     expect(exerciseLogsRepository.create).not.toHaveBeenCalled()
     expect(exerciseSessionsRepository.update).not.toHaveBeenCalled()
     expect(workoutSessionsRepository.update).not.toHaveBeenCalled()
-    expect(workoutSessionsRepository.updateStatus).not.toHaveBeenCalled()
   })
 
-  it('trims and limits skip reason and rejects it for completed exercises', () => {
+  it('allows completion after the timer is finished without overwriting timing', async () => {
+    const endedAt = new Date('2026-01-01T01:00:00.000Z')
+    workoutSession.startedAt = new Date('2026-01-01T00:00:00.000Z')
+    workoutSession.endedAt = endedAt
+    workoutSession.duration = 3600
+
+    await sut.execute({
+      userId,
+      sessionId,
+      exercises: [
+        {
+          exerciseSessionId: 'exercise-session-id',
+          sets: 3,
+          reps: 10,
+          completed: false,
+        },
+      ],
+    })
+
+    expect(workoutSessionsRepository.update).toHaveBeenCalledWith(sessionId, {
+      endedAt,
+      duration: 3600,
+      status: WorkoutSessionStatus.PENDING,
+    })
+  })
+
+  it('rejects a repeated completion after all exercises were skipped', async () => {
+    const request = {
+      userId,
+      sessionId,
+      exercises: [
+        {
+          exerciseSessionId: 'exercise-session-id',
+          sets: 3,
+          reps: 10,
+          completed: false,
+        },
+      ],
+    }
+
+    await sut.execute(request)
+
+    await expect(sut.execute(request)).rejects.toBeInstanceOf(
+      WorkoutSessionAlreadyCompletedError
+    )
+  })
+
+  it('trims and limits skip reason in the request schema', () => {
     const parsed = completeWorkoutSessionBodySchema.parse({
       exercises: [
         {
@@ -314,32 +388,33 @@ describe('CompleteWorkoutSessionUseCase', () => {
         },
       ],
     })
+
     expect(parsed.exercises.at(0)?.skipReason).toBe('pain')
-
-    const tooLong = completeWorkoutSessionBodySchema.safeParse({
-      exercises: [
-        {
-          exerciseSessionId: `c${'a'.repeat(24)}`,
-          sets: 3,
-          reps: 10,
-          completed: false,
-          skipReason: 'x'.repeat(256),
-        },
-      ],
-    })
-    expect(tooLong.success).toBe(false)
-
-    const completedWithSkipReason = completeWorkoutSessionBodySchema.safeParse({
-      exercises: [
-        {
-          exerciseSessionId: `c${'a'.repeat(24)}`,
-          sets: 3,
-          reps: 10,
-          completed: true,
-          skipReason: 'not skipped',
-        },
-      ],
-    })
-    expect(completedWithSkipReason.success).toBe(false)
+    expect(
+      completeWorkoutSessionBodySchema.safeParse({
+        exercises: [
+          {
+            exerciseSessionId: `c${'a'.repeat(24)}`,
+            sets: 3,
+            reps: 10,
+            completed: false,
+            skipReason: 'x'.repeat(256),
+          },
+        ],
+      }).success
+    ).toBe(false)
+    expect(
+      completeWorkoutSessionBodySchema.safeParse({
+        exercises: [
+          {
+            exerciseSessionId: `c${'a'.repeat(24)}`,
+            sets: 3,
+            reps: 10,
+            completed: true,
+            skipReason: 'not skipped',
+          },
+        ],
+      }).success
+    ).toBe(false)
   })
 })
