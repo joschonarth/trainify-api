@@ -10,6 +10,7 @@ export const createExerciseLogSessionBodySchema = z.object({
   reps: z.number(),
   weight: z.number().nullable(),
   description: z.string().nullable(),
+  date: z.iso.datetime().optional(),
 })
 
 export type CreateExerciseLogSessionParams = z.infer<
