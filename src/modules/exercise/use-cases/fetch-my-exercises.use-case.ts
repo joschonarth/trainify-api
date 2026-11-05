@@ -25,7 +25,12 @@ interface FetchMyExercisesUseCaseResponse {
 }
 
 export class FetchMyExercisesUseCase {
-  constructor(private readonly myExercisesRepository: MyExercisesRepository) {}
+  constructor(
+    private readonly myExercisesRepository: Pick<
+      MyExercisesRepository,
+      'findAllByUser'
+    >
+  ) {}
 
   async execute({
     userId,
@@ -40,16 +45,18 @@ export class FetchMyExercisesUseCase {
       page
     )
 
-    const exercises = myExercises.map(({ id: myExerciseId, exercise }) => ({
-      myExerciseId,
-      exerciseId: exercise.id,
-      name: exercise.name,
-      category: exercise.category,
-      type: exercise.type,
-      isCustom: exercise.isCustom,
-      createdAt: exercise.createdAt,
-      userId: exercise.userId,
-    }))
+    const exercises = myExercises.map(
+      ({ id: myExerciseId, createdAt, exercise }) => ({
+        myExerciseId,
+        exerciseId: exercise.id,
+        name: exercise.name,
+        category: exercise.category,
+        type: exercise.type,
+        isCustom: exercise.isCustom,
+        createdAt,
+        userId: exercise.userId,
+      })
+    )
 
     return { myExercises: exercises }
   }

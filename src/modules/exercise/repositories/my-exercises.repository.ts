@@ -1,6 +1,10 @@
-import type { Exercise, MyExercise } from 'generated/prisma'
+import type { Exercise, MyExercise, Prisma } from 'generated/prisma'
 
 export interface MyExercisesRepository {
+  createCustomExerciseWithLibraryEntry(
+    userId: string,
+    data: Omit<Prisma.ExerciseCreateInput, 'user'>
+  ): Promise<Exercise>
   addExercise(userId: string, exerciseId: string): Promise<MyExercise>
   findByUserAndExercise(
     userId: string,

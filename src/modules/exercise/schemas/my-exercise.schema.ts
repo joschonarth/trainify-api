@@ -10,7 +10,7 @@ export const myExerciseSchema = z.object({
   isCustom: z
     .boolean()
     .describe('Whether the exercise was created by the user.'),
-  createdAt: z.date().describe('Exercise creation date.'),
+  createdAt: z.date().describe('Date the exercise was added to the library.'),
   userId: z
     .string()
     .nullable()

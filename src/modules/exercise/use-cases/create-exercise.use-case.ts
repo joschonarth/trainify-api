@@ -19,7 +19,7 @@ interface CreateExerciseUseCaseResponse {
 export class CreateExerciseUseCase {
   constructor(
     private readonly exercisesRepository: ExercisesRepository,
-    _myExercisesRepository: MyExercisesRepository
+    private readonly myExercisesRepository: MyExercisesRepository
   ) {}
 
   async execute({
@@ -41,14 +41,17 @@ export class CreateExerciseUseCase {
 
     let exercise: Exercise
     try {
-      exercise = await this.exercisesRepository.create({
-        name,
-        category,
-        type,
-        isCustom: true,
-        createdAt: new Date(),
-        user: { connect: { id: userId } },
-      })
+      exercise =
+        await this.myExercisesRepository.createCustomExerciseWithLibraryEntry(
+          userId,
+          {
+            name,
+            category,
+            type,
+            isCustom: true,
+            createdAt: new Date(),
+          }
+        )
     } catch (error) {
       if (
         typeof error === 'object' &&
