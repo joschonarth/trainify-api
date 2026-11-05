@@ -13,6 +13,7 @@ import type {
   WorkoutSessionWithWorkout,
 } from '@/modules/session/repositories/workout-sessions.repository'
 
+import { WorkoutSessionAlreadyCompletedError } from '../errors/workout-session-already-completed.error'
 import { CompleteWorkoutSessionUseCase } from './complete-workout-session.use-case'
 
 const userId = 'user-id'
@@ -22,7 +23,7 @@ let exerciseSessions: ExerciseSessionWithLogs[]
 let workoutSession: WorkoutSessionWithWorkout
 let workoutSessionsRepository: Pick<
   WorkoutSessionsRepository,
-  'findByIdWithWorkout' | 'update'
+  'findByIdWithWorkout' | 'update' | 'updateStatus'
 >
 let exerciseSessionsRepository: Pick<
   ExerciseSessionsRepository,
@@ -39,7 +40,6 @@ function makeExerciseSession(
   return {
     id: 'exercise-session-id',
     completed: false,
-    skipReason: null,
     plannedSets: null,
     plannedReps: null,
     plannedWeight: null,
@@ -120,10 +120,16 @@ describe('CompleteWorkoutSessionUseCase', () => {
       }
       return Promise.resolve(workoutSession)
     }
+    const updateWorkoutSessionStatus: WorkoutSessionsRepository['updateStatus'] =
+      (_id, status) => {
+        workoutSession.status = status
+        return Promise.resolve(workoutSession)
+      }
 
     workoutSessionsRepository = {
       findByIdWithWorkout: vi.fn(findByIdWithWorkout),
       update: vi.fn(updateWorkoutSession),
+      updateStatus: vi.fn(updateWorkoutSessionStatus),
     }
 
     const findByWorkoutSessionId: ExerciseSessionsRepository['findByWorkoutSessionId'] =
@@ -138,9 +144,6 @@ describe('CompleteWorkoutSessionUseCase', () => {
       }
       if (typeof data.completed === 'boolean') {
         exerciseSession.completed = data.completed
-      }
-      if (typeof data.skipReason === 'string' || data.skipReason === null) {
-        exerciseSession.skipReason = data.skipReason
       }
       return Promise.resolve(exerciseSession)
     }
@@ -199,7 +202,7 @@ describe('CompleteWorkoutSessionUseCase', () => {
     expect(exerciseLogsRepository.create).not.toHaveBeenCalled()
     expect(exerciseSessionsRepository.update).toHaveBeenCalledWith(
       'exercise-session-id',
-      { completed: false, skipReason: null }
+      { completed: false }
     )
   })
 
@@ -241,4 +244,16 @@ describe('CompleteWorkoutSessionUseCase', () => {
     expect(exerciseLogsRepository.create).not.toHaveBeenCalled()
   })
 
+  it('rejects completing an already completed workout session before any writes', async () => {
+    workoutSession.status = WorkoutSessionStatus.COMPLETED
+
+    await expect(
+      sut.execute({ userId, sessionId, exercises: [] })
+    ).rejects.toBeInstanceOf(WorkoutSessionAlreadyCompletedError)
+
+    expect(exerciseLogsRepository.create).not.toHaveBeenCalled()
+    expect(exerciseSessionsRepository.update).not.toHaveBeenCalled()
+    expect(workoutSessionsRepository.update).not.toHaveBeenCalled()
+    expect(workoutSessionsRepository.updateStatus).not.toHaveBeenCalled()
+  })
 })

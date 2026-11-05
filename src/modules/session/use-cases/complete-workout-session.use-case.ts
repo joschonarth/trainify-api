@@ -5,6 +5,8 @@ import type { UnlockAllBadgesUseCase } from '@/modules/gamification/use-cases/un
 import type { UpdateUserStreakUseCase } from '@/modules/gamification/use-cases/update-user-streak.use-case'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
+import { WorkoutSessionAlreadyCompletedError } from '../errors/workout-session-already-completed.error'
+
 import type { ExerciseSessionsRepository } from '../repositories/exercise-sessions.repository'
 import type { WorkoutSessionsRepository } from '../repositories/workout-sessions.repository'
 
@@ -27,12 +29,26 @@ interface CompleteWorkoutSessionResponse {
 
 export class CompleteWorkoutSessionUseCase {
   constructor(
-    private readonly workoutSessionsRepository: WorkoutSessionsRepository,
-    private readonly exerciseSessionsRepository: ExerciseSessionsRepository,
-    private readonly exerciseLogsRepository: ExerciseLogsRepository,
-
-    private readonly updateUserStreakUseCase: UpdateUserStreakUseCase,
-    private readonly unlockAllBadgesUseCase: UnlockAllBadgesUseCase
+    private readonly workoutSessionsRepository: Pick<
+      WorkoutSessionsRepository,
+      'findByIdWithWorkout' | 'update' | 'updateStatus'
+    >,
+    private readonly exerciseSessionsRepository: Pick<
+      ExerciseSessionsRepository,
+      'findByWorkoutSessionId' | 'update'
+    >,
+    private readonly exerciseLogsRepository: Pick<
+      ExerciseLogsRepository,
+      'create'
+    >,
+    private readonly updateUserStreakUseCase: Pick<
+      UpdateUserStreakUseCase,
+      'execute'
+    >,
+    private readonly unlockAllBadgesUseCase: Pick<
+      UnlockAllBadgesUseCase,
+      'execute'
+    >
   ) {}
 
   private deriveSessionStatus(
@@ -62,6 +78,10 @@ export class CompleteWorkoutSessionUseCase {
       throw new ResourceNotFoundError(
         'Workout session not found or does not belong to user.'
       )
+    }
+
+    if (session.status === WorkoutSessionStatus.COMPLETED) {
+      throw new WorkoutSessionAlreadyCompletedError()
     }
 
     if (!session.endedAt && session.startedAt) {
