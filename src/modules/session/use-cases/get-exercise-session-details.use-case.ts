@@ -1,6 +1,10 @@
 import type { ExerciseSessionsRepository } from '@/modules/session/repositories/exercise-sessions.repository'
 import type { WorkoutSessionsRepository } from '@/modules/session/repositories/workout-sessions.repository'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
+import {
+  getExerciseSessionState,
+  getRepsComparison,
+} from '../utils/exercise-session-state'
 
 interface ExerciseSessionDetails {
   id: string
@@ -14,6 +18,8 @@ interface ExerciseSessionDetails {
   plannedWeight: number | null
 
   completed: boolean
+  skipReason: string | null
+  state: 'COMPLETED' | 'SKIPPED' | 'PENDING'
   startedAt?: Date | null
   endedAt?: Date | null
   duration?: number | null
@@ -22,6 +28,7 @@ interface ExerciseSessionDetails {
   loggedReps?: number | null
   loggedWeight?: number | null
   description?: string | null
+  repsComparison: ReturnType<typeof getRepsComparison>
 }
 
 interface GetExerciseSessionDetailsResponse {
@@ -72,6 +79,12 @@ export class GetExerciseSessionDetailsUseCase {
       plannedWeight: exerciseSession.plannedWeight,
 
       completed: exerciseSession.completed,
+      skipReason: exerciseSession.skipReason,
+      state: getExerciseSessionState(
+        exerciseSession.completed,
+        workoutSession.endedAt,
+        workoutSession.status
+      ),
       startedAt: exerciseSession.startedAt ?? null,
       endedAt: exerciseSession.endedAt ?? null,
       duration: exerciseSession.duration ?? null,
@@ -80,6 +93,10 @@ export class GetExerciseSessionDetailsUseCase {
       loggedReps: lastLog?.reps ?? null,
       loggedWeight: lastLog?.weight ?? null,
       description: lastLog?.description ?? null,
+      repsComparison: getRepsComparison(
+        exerciseSession.plannedReps,
+        lastLog?.reps ?? null
+      ),
     }
 
     return { session: sessionDetail }

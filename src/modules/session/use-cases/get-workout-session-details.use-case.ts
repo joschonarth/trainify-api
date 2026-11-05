@@ -1,6 +1,7 @@
 import type { WorkoutSessionStatus } from 'generated/prisma'
 
 import type { WorkoutSessionsRepository } from '@/modules/session/repositories/workout-sessions.repository'
+import { getRepsComparison } from '@/modules/session/utils/exercise-session-state'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
 interface ExerciseDetails {
@@ -9,13 +10,16 @@ interface ExerciseDetails {
   plannedReps: number | null
   plannedWeight: number | null
   completed: boolean
-  loggedSets?: number | null
-  loggedReps?: number | null
-  loggedWeight?: number | null
-  description?: string | null
-  startedAt?: Date | null
-  endedAt?: Date | null
-  duration?: number | null
+  skipReason: string | null
+  state: 'COMPLETED' | 'SKIPPED' | 'PENDING'
+  loggedSets: number | null
+  loggedReps: number | null
+  loggedWeight: number | null
+  description: string | null
+  repsComparison: ReturnType<typeof getRepsComparison>
+  startedAt: Date | null
+  endedAt: Date | null
+  duration: number | null
 }
 
 interface WorkoutSessionDetails {
@@ -35,7 +39,10 @@ interface GetWorkoutSessionDetailsResponse {
 
 export class GetWorkoutSessionDetailsUseCase {
   constructor(
-    private readonly workoutSessionsRepository: WorkoutSessionsRepository
+    private readonly workoutSessionsRepository: Pick<
+      WorkoutSessionsRepository,
+      'findByIdWithWorkoutAndExerciseSessions'
+    >
   ) {}
 
   async execute({
@@ -62,28 +69,27 @@ export class GetWorkoutSessionDetailsUseCase {
       startedAt: session.startedAt ?? null,
       endedAt: session.endedAt ?? null,
       duration: session.duration ?? null,
-      exercises: session.workout.exercises.map((we) => {
-        const exerciseSession = session.exerciseSessions.find(
-          (es) => es.exercise.id === we.exercise.id
-        )
-
-        const lastLog = exerciseSession?.logs?.length
-          ? exerciseSession.logs.at(-1)
-          : null
+      exercises: session.exerciseSessions.map((exerciseSession) => {
+        const lastLog = exerciseSession.logs.at(-1) ?? null
+        const plannedReps = exerciseSession.plannedReps
+        const loggedReps = lastLog?.reps ?? null
 
         return {
-          name: we.exercise.name,
-          plannedSets: we.defaultSets,
-          plannedReps: we.defaultReps,
-          plannedWeight: we.defaultWeight,
-          completed: exerciseSession?.completed ?? false,
+          name: exerciseSession.exercise.name,
+          plannedSets: exerciseSession.plannedSets,
+          plannedReps,
+          plannedWeight: exerciseSession.plannedWeight,
+          completed: exerciseSession.completed,
+          skipReason: exerciseSession.skipReason,
+          state: exerciseSession.state,
           loggedSets: lastLog?.sets ?? null,
-          loggedReps: lastLog?.reps ?? null,
+          loggedReps,
           loggedWeight: lastLog?.weight ?? null,
           description: lastLog?.description ?? null,
-          startedAt: exerciseSession?.startedAt ?? null,
-          endedAt: exerciseSession?.endedAt ?? null,
-          duration: exerciseSession?.duration ?? null,
+          repsComparison: getRepsComparison(plannedReps, loggedReps),
+          startedAt: exerciseSession.startedAt,
+          endedAt: exerciseSession.endedAt,
+          duration: exerciseSession.duration,
         }
       }),
     }

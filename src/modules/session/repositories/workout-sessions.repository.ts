@@ -8,6 +8,8 @@ import type {
   WorkoutSessionStatus,
 } from 'generated/prisma'
 
+import type { ExerciseSessionState } from '../utils/exercise-session-state'
+
 export interface WorkoutSessionWithWorkout extends WorkoutSession {
   workout: {
     id: string
@@ -27,10 +29,12 @@ export interface WorkoutSessionWithWorkout extends WorkoutSession {
   }
   exerciseSessions: {
     id: string
-    sets: number
-    reps: number
-    weight: number | null
+    plannedSets: number | null
+    plannedReps: number | null
+    plannedWeight: number | null
     completed: boolean
+    skipReason: string | null
+    state: ExerciseSessionState
     startedAt: Date | null
     endedAt: Date | null
     duration: number | null

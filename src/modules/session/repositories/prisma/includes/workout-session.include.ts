@@ -13,7 +13,7 @@ export const workoutSessionInclude = {
   exerciseSessions: {
     include: {
       exercise: true,
-      logs: true,
+      logs: { orderBy: { date: 'asc' } },
     },
   },
 } satisfies Prisma.WorkoutSessionInclude

@@ -177,12 +177,6 @@ export class InMemoryExerciseLogsRepository implements ExerciseLogsRepository {
     )
   }
 
-  countCompletedByUser(userId: string): Promise<number> {
-    return Promise.resolve(
-      this.items.filter((item) => item.userId === userId).length
-    )
-  }
-
   findMaxVolumeByExerciseAndUser(
     userId: string,
     exerciseId: string

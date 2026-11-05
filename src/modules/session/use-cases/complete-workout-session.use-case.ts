@@ -5,6 +5,7 @@ import type { UnlockAllBadgesUseCase } from '@/modules/gamification/use-cases/un
 import type { UpdateUserStreakUseCase } from '@/modules/gamification/use-cases/update-user-streak.use-case'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
+import { WorkoutSessionAlreadyCompletedError } from '../errors/workout-session-already-completed.error'
 import type { ExerciseSessionsRepository } from '../repositories/exercise-sessions.repository'
 import type { WorkoutSessionsRepository } from '../repositories/workout-sessions.repository'
 
@@ -18,6 +19,7 @@ interface CompleteWorkoutSessionRequest {
     weight?: number | undefined
     note?: string | undefined
     completed: boolean
+    skipReason?: string | undefined
   }[]
 }
 
@@ -25,14 +27,33 @@ interface CompleteWorkoutSessionResponse {
   session: Awaited<ReturnType<WorkoutSessionsRepository['findByIdWithWorkout']>>
 }
 
+type CompletionExercise = CompleteWorkoutSessionRequest['exercises'][number]
+type ExerciseSessionRecord = Awaited<
+  ReturnType<ExerciseSessionsRepository['findByWorkoutSessionId']>
+>[number]
+
 export class CompleteWorkoutSessionUseCase {
   constructor(
-    private readonly workoutSessionsRepository: WorkoutSessionsRepository,
-    private readonly exerciseSessionsRepository: ExerciseSessionsRepository,
-    private readonly exerciseLogsRepository: ExerciseLogsRepository,
-
-    private readonly updateUserStreakUseCase: UpdateUserStreakUseCase,
-    private readonly unlockAllBadgesUseCase: UnlockAllBadgesUseCase
+    private readonly workoutSessionsRepository: Pick<
+      WorkoutSessionsRepository,
+      'findByIdWithWorkout' | 'update'
+    >,
+    private readonly exerciseSessionsRepository: Pick<
+      ExerciseSessionsRepository,
+      'findByWorkoutSessionId' | 'update'
+    >,
+    private readonly exerciseLogsRepository: Pick<
+      ExerciseLogsRepository,
+      'create'
+    >,
+    private readonly updateUserStreakUseCase: Pick<
+      UpdateUserStreakUseCase,
+      'execute'
+    >,
+    private readonly unlockAllBadgesUseCase: Pick<
+      UnlockAllBadgesUseCase,
+      'execute'
+    >
   ) {}
 
   private deriveSessionStatus(
@@ -50,50 +71,41 @@ export class CompleteWorkoutSessionUseCase {
     return WorkoutSessionStatus.COMPLETED
   }
 
-  async execute({
-    userId,
-    sessionId,
-    exercises,
-  }: CompleteWorkoutSessionRequest): Promise<CompleteWorkoutSessionResponse> {
-    const session =
-      await this.workoutSessionsRepository.findByIdWithWorkout(sessionId)
-
-    if (!session || session.userId !== userId) {
-      throw new ResourceNotFoundError(
-        'Workout session not found or does not belong to user.'
-      )
+  private assertSessionCanBeCompleted(
+    session: NonNullable<
+      Awaited<ReturnType<WorkoutSessionsRepository['findByIdWithWorkout']>>
+    >
+  ): void {
+    if (
+      session.status === WorkoutSessionStatus.COMPLETED ||
+      session.status === WorkoutSessionStatus.INCOMPLETE ||
+      session.status === WorkoutSessionStatus.SKIPPED ||
+      (session.status === WorkoutSessionStatus.PENDING && session.endedAt)
+    ) {
+      throw new WorkoutSessionAlreadyCompletedError()
     }
+  }
 
-    if (!session.endedAt && session.startedAt) {
-      const now = new Date()
-
-      const duration = Math.floor(
-        (now.getTime() - session.startedAt.getTime()) / 1000
-      )
-      await this.workoutSessionsRepository.update(sessionId, {
-        endedAt: now,
-        duration,
-      })
+  private async completeExercise(
+    userId: string,
+    exercise: CompletionExercise,
+    exerciseSession: ExerciseSessionRecord | undefined,
+    now: Date,
+    exerciseSessionIdsWithLogs: Set<string>,
+    processedExerciseSessionIds: Set<string>
+  ): Promise<boolean> {
+    if (
+      !exerciseSession ||
+      processedExerciseSessionIds.has(exerciseSession.id)
+    ) {
+      return false
     }
+    processedExerciseSessionIds.add(exerciseSession.id)
 
-    const exerciseSessions =
-      await this.exerciseSessionsRepository.findByWorkoutSessionId(sessionId)
-
-    if (!exerciseSessions.length) {
-      throw new ResourceNotFoundError('No exercises found for this session.')
-    }
-
-    let anyExerciseCompleted = false
-    const now = new Date()
-
-    for (const exercise of exercises) {
-      const exerciseSession = exerciseSessions.find(
-        (ex) => ex.id === exercise.exerciseSessionId
-      )
-      if (!exerciseSession) {
-        continue
-      }
-
+    if (
+      exercise.completed &&
+      !exerciseSessionIdsWithLogs.has(exerciseSession.id)
+    ) {
       const weight = exercise.weight ?? 0
       const volume = exercise.sets * exercise.reps * weight
 
@@ -108,14 +120,62 @@ export class CompleteWorkoutSessionUseCase {
         exercise: { connect: { id: exerciseSession.exercise.id } },
         exerciseSession: { connect: { id: exercise.exerciseSessionId } },
       })
+      exerciseSessionIdsWithLogs.add(exerciseSession.id)
+    }
 
-      await this.exerciseSessionsRepository.update(exercise.exerciseSessionId, {
-        completed: exercise.completed,
-      })
+    await this.exerciseSessionsRepository.update(exercise.exerciseSessionId, {
+      completed: exercise.completed,
+      skipReason: exercise.completed ? null : (exercise.skipReason ?? null),
+    })
 
-      if (exercise.completed) {
-        anyExerciseCompleted = true
-      }
+    return exercise.completed
+  }
+
+  async execute({
+    userId,
+    sessionId,
+    exercises,
+  }: CompleteWorkoutSessionRequest): Promise<CompleteWorkoutSessionResponse> {
+    const session =
+      await this.workoutSessionsRepository.findByIdWithWorkout(sessionId)
+
+    if (!session || session.userId !== userId) {
+      throw new ResourceNotFoundError(
+        'Workout session not found or does not belong to user.'
+      )
+    }
+
+    this.assertSessionCanBeCompleted(session)
+
+    const exerciseSessions =
+      await this.exerciseSessionsRepository.findByWorkoutSessionId(sessionId)
+
+    if (!exerciseSessions.length) {
+      throw new ResourceNotFoundError('No exercises found for this session.')
+    }
+
+    const now = new Date()
+    const processedExerciseSessionIds = new Set<string>()
+    const exerciseSessionIdsWithLogs = new Set(
+      exerciseSessions
+        .filter((exerciseSession) => exerciseSession.logs.length > 0)
+        .map((exerciseSession) => exerciseSession.id)
+    )
+
+    let anyExerciseCompleted = false
+    for (const exercise of exercises) {
+      const exerciseSession = exerciseSessions.find(
+        (item) => item.id === exercise.exerciseSessionId
+      )
+      const completed = await this.completeExercise(
+        userId,
+        exercise,
+        exerciseSession,
+        now,
+        exerciseSessionIdsWithLogs,
+        processedExerciseSessionIds
+      )
+      anyExerciseCompleted ||= completed
     }
 
     const updatedExerciseSessions =
@@ -123,7 +183,17 @@ export class CompleteWorkoutSessionUseCase {
 
     const newStatus = this.deriveSessionStatus(updatedExerciseSessions)
 
-    await this.workoutSessionsRepository.updateStatus(sessionId, newStatus)
+    const endedAt = session.endedAt ?? now
+    const duration =
+      session.duration ??
+      Math.floor(
+        (endedAt.getTime() - (session.startedAt ?? endedAt).getTime()) / 1000
+      )
+    await this.workoutSessionsRepository.update(sessionId, {
+      endedAt,
+      duration,
+      status: newStatus,
+    })
 
     if (anyExerciseCompleted) {
       await this.updateUserStreakUseCase.execute({

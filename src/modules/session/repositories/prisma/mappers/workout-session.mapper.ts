@@ -1,5 +1,5 @@
 import type { Prisma } from 'generated/prisma'
-
+import { getExerciseSessionState } from '../../../utils/exercise-session-state'
 import type { WorkoutSessionWithWorkout } from '../../workout-sessions.repository'
 
 type PrismaSession = Prisma.WorkoutSessionGetPayload<{
@@ -24,10 +24,16 @@ export function mapWorkoutSession(
     ...session,
     exerciseSessions: session.exerciseSessions.map((ex) => ({
       id: ex.id,
-      sets: ex.plannedSets ?? 0,
-      reps: ex.plannedReps ?? 0,
-      weight: ex.plannedWeight ?? null,
+      plannedSets: ex.plannedSets,
+      plannedReps: ex.plannedReps,
+      plannedWeight: ex.plannedWeight,
       completed: ex.completed,
+      skipReason: ex.skipReason,
+      state: getExerciseSessionState(
+        ex.completed,
+        session.endedAt,
+        session.status
+      ),
       duration: ex.duration ?? null,
       startedAt: ex.startedAt ?? null,
       endedAt: ex.endedAt ?? null,

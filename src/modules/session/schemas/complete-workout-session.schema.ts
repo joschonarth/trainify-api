@@ -14,9 +14,22 @@ export const completeWorkoutSessionBodySchema = z.object({
         weight: z.number().optional().default(0),
         completed: z.boolean(),
         note: z.string().optional(),
+        skipReason: z.string().trim().max(255).optional(),
       })
     )
-    .min(1, 'At least one exercise is required'),
+    .min(1, 'At least one exercise is required')
+    .superRefine((exercises, context) => {
+      exercises.forEach((exercise, index) => {
+        if (exercise.completed && exercise.skipReason !== undefined) {
+          context.addIssue({
+            code: 'custom',
+            message:
+              'Skip reason can only be provided for uncompleted exercises.',
+            path: [index, 'skipReason'],
+          })
+        }
+      })
+    }),
 })
 
 export type CompleteWorkoutSessionParams = z.infer<

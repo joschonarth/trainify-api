@@ -21,12 +21,19 @@ export const sessionExerciseLogSchema = z.object({
 
 export const exerciseSessionSchema = z.object({
   id: z.string().describe('Exercise session ID.'),
-  sets: z.number().describe('Number of sets.'),
-  reps: z.number().describe('Number of reps.'),
-  weight: z.number().nullable().describe('Weight used in kilograms.'),
+  plannedSets: z.number().nullable().describe('Planned number of sets.'),
+  plannedReps: z.number().nullable().describe('Planned number of reps.'),
+  plannedWeight: z.number().nullable().describe('Planned weight in kilograms.'),
   completed: z
     .boolean()
     .describe('Whether the exercise session was completed.'),
+  skipReason: z
+    .string()
+    .nullable()
+    .describe('Reason the exercise was skipped.'),
+  state: z
+    .enum(['COMPLETED', 'SKIPPED', 'PENDING'])
+    .describe('Derived state of the exercise session.'),
   startedAt: z.date().nullable().describe('Exercise session start time.'),
   endedAt: z.date().nullable().describe('Exercise session end time.'),
   duration: z
@@ -48,6 +55,10 @@ export const exerciseTimerSessionSchema = z.object({
   completed: z
     .boolean()
     .describe('Whether the exercise session was completed.'),
+  skipReason: z
+    .string()
+    .nullable()
+    .describe('Reason the exercise was skipped.'),
   plannedSets: z.number().nullable().describe('Planned number of sets.'),
   plannedReps: z.number().nullable().describe('Planned number of reps.'),
   plannedWeight: z.number().nullable().describe('Planned weight in kilograms.'),
@@ -69,37 +80,28 @@ export const exerciseSessionDetailsSchema = z.object({
   completed: z
     .boolean()
     .describe('Whether the exercise session was completed.'),
-  startedAt: z
-    .date()
+  skipReason: z
+    .string()
     .nullable()
-    .optional()
-    .describe('Exercise session start time.'),
-  endedAt: z
-    .date()
-    .nullable()
-    .optional()
-    .describe('Exercise session end time.'),
+    .describe('Reason the exercise was skipped.'),
+  state: z.enum(['COMPLETED', 'SKIPPED', 'PENDING']),
+  startedAt: z.date().nullable().describe('Exercise session start time.'),
+  endedAt: z.date().nullable().describe('Exercise session end time.'),
   duration: z
     .number()
     .nullable()
-    .optional()
     .describe('Exercise session duration in seconds.'),
-  loggedSets: z
-    .number()
-    .nullable()
-    .optional()
-    .describe('Logged number of sets.'),
-  loggedReps: z
-    .number()
-    .nullable()
-    .optional()
-    .describe('Logged number of reps.'),
-  loggedWeight: z
-    .number()
-    .nullable()
-    .optional()
-    .describe('Logged weight in kilograms.'),
-  description: z.string().nullable().optional().describe('Log notes.'),
+  loggedSets: z.number().nullable().describe('Logged number of sets.'),
+  loggedReps: z.number().nullable().describe('Logged number of reps.'),
+  loggedWeight: z.number().nullable().describe('Logged weight in kilograms.'),
+  description: z.string().nullable().describe('Log notes.'),
+  repsComparison: z
+    .object({
+      plannedReps: z.number().nullable(),
+      loggedReps: z.number(),
+      metPlan: z.boolean().nullable(),
+    })
+    .nullable(),
 })
 
 // --- Workout Session ---

@@ -32,6 +32,7 @@ model ExerciseSession {
   plannedSets   Int?
   plannedReps   Int?
   plannedWeight Float?
+  skipReason    String? @map("skip_reason") @db.VarChar(255)
 
   startedAt DateTime? @map("started_at")
   endedAt   DateTime? @map("ended_at")

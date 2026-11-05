@@ -51,8 +51,6 @@ export interface ExerciseLogsRepository {
     })[]
   >
 
-  countCompletedByUser(userId: string): Promise<number>
-
   findMaxVolumeByExerciseAndUser(
     userId: string,
     exerciseId: string

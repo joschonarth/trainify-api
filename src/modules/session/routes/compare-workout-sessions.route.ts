@@ -12,7 +12,7 @@ const sessionSummarySchema = z.object({
   totalReps: z.number().describe('Total reps performed.'),
   totalWeight: z.number().describe('Total weight used.'),
   totalVolume: z.number().describe('Total volume (sets * reps * weight).'),
-  totalExercises: z.number().describe('Total exercises performed.'),
+  totalExercises: z.number().describe('Total completed exercises.'),
 })
 
 export function compareWorkoutSessionsRoute(app: FastifyInstance) {

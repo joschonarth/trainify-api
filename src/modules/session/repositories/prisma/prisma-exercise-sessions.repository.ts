@@ -10,6 +10,15 @@ import type {
 export class PrismaExerciseSessionsRepository
   implements ExerciseSessionsRepository
 {
+  async countCompletedByUser(userId: string): Promise<number> {
+    return await prisma.exerciseSession.count({
+      where: {
+        completed: true,
+        workoutSession: { userId },
+      },
+    })
+  }
+
   async findById(id: string): Promise<ExerciseSession | null> {
     return await prisma.exerciseSession.findUnique({ where: { id } })
   }
@@ -19,7 +28,7 @@ export class PrismaExerciseSessionsRepository
       where: { workoutSessionId: sessionId },
       include: {
         exercise: true,
-        logs: true,
+        logs: { orderBy: { date: 'asc' } },
       },
     })) as unknown as ExerciseSessionWithLogs[]
   }
@@ -31,7 +40,7 @@ export class PrismaExerciseSessionsRepository
       where: { workoutSessionId },
       include: {
         exercise: true,
-        logs: true,
+        logs: { orderBy: { date: 'asc' } },
       },
     })) as unknown as ExerciseSessionWithLogs[]
   }
@@ -41,7 +50,7 @@ export class PrismaExerciseSessionsRepository
       where: { id },
       include: {
         exercise: true,
-        logs: true,
+        logs: { orderBy: { date: 'asc' } },
       },
     })) as unknown as ExerciseSessionWithLogs | null
   }
@@ -63,7 +72,7 @@ export class PrismaExerciseSessionsRepository
       },
       include: {
         exercise: true,
-        logs: true,
+        logs: { orderBy: { date: 'asc' } },
       },
     })) as unknown as ExerciseSessionWithLogs[]
   }

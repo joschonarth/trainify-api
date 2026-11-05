@@ -10,7 +10,7 @@ const sessionSchema = z.object({
   date: z.string().describe('Session date.'),
   totalExercises: z
     .number()
-    .describe('Total exercises performed in the session.'),
+    .describe('Total completed exercises in the session.'),
   totalVolume: z.number().describe('Total volume in the session.'),
 })
 
@@ -36,7 +36,7 @@ export function getWorkoutStatsRoute(app: FastifyInstance) {
               totalExercises: z
                 .number()
                 .describe(
-                  'Total number of exercises performed across all sessions.'
+                  'Total number of completed exercises across all sessions.'
                 ),
               totalVolume: z
                 .number()

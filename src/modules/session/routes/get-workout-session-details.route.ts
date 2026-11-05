@@ -12,29 +12,25 @@ const exerciseDetailsSchema = z.object({
   plannedReps: z.number().nullable().describe('Planned number of reps.'),
   plannedWeight: z.number().nullable().describe('Planned weight in kilograms.'),
   completed: z.boolean().describe('Whether the exercise was completed.'),
-  loggedSets: z
-    .number()
+  skipReason: z
+    .string()
     .nullable()
-    .optional()
-    .describe('Logged number of sets.'),
-  loggedReps: z
-    .number()
-    .nullable()
-    .optional()
-    .describe('Logged number of reps.'),
-  loggedWeight: z
-    .number()
-    .nullable()
-    .optional()
-    .describe('Logged weight in kilograms.'),
-  description: z.string().nullable().optional().describe('Log notes.'),
-  startedAt: z.date().nullable().optional().describe('Exercise start time.'),
-  endedAt: z.date().nullable().optional().describe('Exercise end time.'),
-  duration: z
-    .number()
-    .nullable()
-    .optional()
-    .describe('Exercise duration in seconds.'),
+    .describe('Reason the exercise was skipped.'),
+  state: z.enum(['COMPLETED', 'SKIPPED', 'PENDING']),
+  loggedSets: z.number().nullable().describe('Logged number of sets.'),
+  loggedReps: z.number().nullable().describe('Logged number of reps.'),
+  loggedWeight: z.number().nullable().describe('Logged weight in kilograms.'),
+  description: z.string().nullable().describe('Log notes.'),
+  repsComparison: z
+    .object({
+      plannedReps: z.number().nullable(),
+      loggedReps: z.number(),
+      metPlan: z.boolean().nullable(),
+    })
+    .nullable(),
+  startedAt: z.date().nullable().describe('Exercise start time.'),
+  endedAt: z.date().nullable().describe('Exercise end time.'),
+  duration: z.number().nullable().describe('Exercise duration in seconds.'),
 })
 
 export function getWorkoutSessionDetailsRoute(app: FastifyInstance) {

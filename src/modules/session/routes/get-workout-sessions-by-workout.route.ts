@@ -42,6 +42,9 @@ export function getWorkoutSessionsByWorkoutRoute(app: FastifyInstance) {
                       volume: z
                         .number()
                         .describe('Volume (sets * reps * weight).'),
+                      completed: z.boolean(),
+                      skipReason: z.string().nullable(),
+                      state: z.enum(['COMPLETED', 'SKIPPED', 'PENDING']),
                     })
                   ),
                 })
