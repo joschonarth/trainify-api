@@ -11,27 +11,32 @@ const exerciseHistorySchema = z.object({
   plannedReps: z.number().nullable().describe('Planned number of reps.'),
   plannedWeight: z.number().nullable().describe('Planned weight in kilograms.'),
   completed: z.boolean().describe('Whether the exercise was completed.'),
-  actualSets: z
+  skipReason: z
+    .string()
+    .nullable()
+    .describe('Reason the exercise was skipped.'),
+  state: z.enum(['COMPLETED', 'SKIPPED', 'PENDING']),
+  loggedSets: z
     .number()
     .nullable()
-    .optional()
     .describe('Actual number of sets performed.'),
-  actualReps: z
+  loggedReps: z
     .number()
     .nullable()
-    .optional()
     .describe('Actual number of reps performed.'),
-  actualWeight: z
+  loggedWeight: z
     .number()
     .nullable()
-    .optional()
     .describe('Actual weight used in kilograms.'),
-  description: z.string().nullable().optional().describe('Log notes.'),
-  duration: z
-    .number()
-    .nullable()
-    .optional()
-    .describe('Exercise duration in seconds.'),
+  description: z.string().nullable().describe('Log notes.'),
+  repsComparison: z
+    .object({
+      plannedReps: z.number().nullable(),
+      loggedReps: z.number(),
+      metPlan: z.boolean().nullable(),
+    })
+    .nullable(),
+  duration: z.number().nullable().describe('Exercise duration in seconds.'),
   startedAt: z.date().nullable().optional().describe('Exercise start time.'),
   endedAt: z.date().nullable().optional().describe('Exercise end time.'),
 })

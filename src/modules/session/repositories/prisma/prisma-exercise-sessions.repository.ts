@@ -28,7 +28,7 @@ export class PrismaExerciseSessionsRepository
       where: { workoutSessionId: sessionId },
       include: {
         exercise: true,
-        logs: true,
+        logs: { orderBy: { date: 'asc' } },
       },
     })) as unknown as ExerciseSessionWithLogs[]
   }
@@ -40,7 +40,7 @@ export class PrismaExerciseSessionsRepository
       where: { workoutSessionId },
       include: {
         exercise: true,
-        logs: true,
+        logs: { orderBy: { date: 'asc' } },
       },
     })) as unknown as ExerciseSessionWithLogs[]
   }
@@ -50,7 +50,7 @@ export class PrismaExerciseSessionsRepository
       where: { id },
       include: {
         exercise: true,
-        logs: true,
+        logs: { orderBy: { date: 'asc' } },
       },
     })) as unknown as ExerciseSessionWithLogs | null
   }
@@ -72,7 +72,7 @@ export class PrismaExerciseSessionsRepository
       },
       include: {
         exercise: true,
-        logs: true,
+        logs: { orderBy: { date: 'asc' } },
       },
     })) as unknown as ExerciseSessionWithLogs[]
   }

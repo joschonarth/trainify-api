@@ -4,6 +4,10 @@ import type {
   WorkoutSessionsRepository,
   WorkoutSessionWithWorkout,
 } from '@/modules/session/repositories/workout-sessions.repository'
+import {
+  getExerciseSessionState,
+  getRepsComparison,
+} from '@/modules/session/utils/exercise-session-state'
 
 interface ExerciseHistory {
   name: string
@@ -11,13 +15,16 @@ interface ExerciseHistory {
   plannedReps: number | null
   plannedWeight: number | null
   completed: boolean
-  actualSets?: number | null
-  actualReps?: number | null
-  actualWeight?: number | null
-  description?: string | null
-  duration?: number | null
-  startedAt?: Date | null
-  endedAt?: Date | null
+  skipReason: string | null
+  state: 'COMPLETED' | 'SKIPPED' | 'PENDING'
+  loggedSets: number | null
+  loggedReps: number | null
+  loggedWeight: number | null
+  description: string | null
+  repsComparison: ReturnType<typeof getRepsComparison>
+  duration: number | null
+  startedAt: Date | null
+  endedAt: Date | null
 }
 
 interface SessionHistory {
@@ -37,7 +44,10 @@ interface GetWorkoutSessionsHistoryResponse {
 
 export class GetWorkoutSessionsHistoryUseCase {
   constructor(
-    private readonly workoutSessionsRepository: WorkoutSessionsRepository
+    private readonly workoutSessionsRepository: Pick<
+      WorkoutSessionsRepository,
+      'findAllByUser'
+    >
   ) {}
 
   async execute({
@@ -58,17 +68,26 @@ export class GetWorkoutSessionsHistoryUseCase {
       endedAt: session.endedAt ?? null,
       exercises: (session.exerciseSessions ?? []).map((ex) => {
         const lastLog = ex.logs.at(-1) ?? null
+        const plannedReps = ex.plannedReps
+        const loggedReps = lastLog?.reps ?? null
 
         return {
           name: ex.exercise.name,
-          plannedSets: ex.sets ?? null,
-          plannedReps: ex.reps ?? null,
-          plannedWeight: ex.weight ?? null,
-          completed: ex.completed ?? false,
+          plannedSets: ex.plannedSets,
+          plannedReps,
+          plannedWeight: ex.plannedWeight,
+          completed: ex.completed,
+          skipReason: ex.skipReason,
+          state: getExerciseSessionState(
+            ex.completed,
+            session.endedAt,
+            session.status
+          ),
           loggedSets: lastLog?.sets ?? null,
-          loggedReps: lastLog?.reps ?? null,
+          loggedReps,
           loggedWeight: lastLog?.weight ?? null,
           description: lastLog?.description ?? null,
+          repsComparison: getRepsComparison(plannedReps, loggedReps),
           duration: ex.duration ?? null,
           startedAt: ex.startedAt ?? null,
           endedAt: ex.endedAt ?? null,

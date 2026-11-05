@@ -1,6 +1,6 @@
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
-
 import type { WorkoutSessionsRepository } from '../repositories/workout-sessions.repository'
+import { getExerciseSessionState } from '../utils/exercise-session-state'
 
 interface GetWorkoutSessionsByWorkoutRequest {
   userId: string
@@ -20,19 +20,25 @@ export class GetWorkoutSessionsByWorkoutUseCase {
 
     const formattedSessions = sessions.map((session) => {
       const exerciseSessions = session.exerciseSessions.map((es) => {
-        const plannedSets = es.plannedSets ?? 0
-        const plannedReps = es.plannedReps ?? 0
-        const plannedWeight = es.plannedWeight ?? 0
-
-        const volume =
-          es.logs?.[0]?.volume ?? plannedSets * plannedReps * plannedWeight
+        const volume = es.logs.reduce(
+          (sum, log) =>
+            sum + (log.volume ?? log.sets * log.reps * (log.weight ?? 0)),
+          0
+        )
 
         return {
           exerciseName: es.exercise.name,
-          sets: plannedSets,
-          reps: plannedReps,
-          weight: plannedWeight,
+          sets: es.logs.reduce((sum, log) => sum + log.sets, 0),
+          reps: es.logs.reduce((sum, log) => sum + log.reps, 0),
+          weight: es.logs.reduce((sum, log) => sum + (log.weight ?? 0), 0),
           volume,
+          completed: es.completed,
+          skipReason: es.skipReason,
+          state: getExerciseSessionState(
+            es.completed,
+            session.endedAt,
+            session.status
+          ),
         }
       })
 
