@@ -18,10 +18,13 @@ export function completeWorkoutSessionRoute(app: FastifyInstance) {
         tags: ['Sessions'],
         summary: 'Complete workout session',
         description:
-          'Marks a workout session as completed and logs the performance data for each exercise.',
+          'Records completed exercise performance and skip reasons before closing the session.',
         params: completeWorkoutSessionParamsSchema,
         body: completeWorkoutSessionBodySchema,
         response: {
+          400: z
+            .object({ message: z.string() })
+            .describe('Invalid completion data.'),
           200: z
             .object({
               session: sessionWithWorkoutSchema.nullable(),
@@ -30,6 +33,9 @@ export function completeWorkoutSessionRoute(app: FastifyInstance) {
           404: z
             .object({ message: z.string() })
             .describe('Workout session not found.'),
+          409: z
+            .object({ message: z.string() })
+            .describe('Workout session was already completed.'),
         },
       },
     },

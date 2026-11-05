@@ -20,6 +20,7 @@ interface CompleteWorkoutSessionRequest {
     weight?: number | undefined
     note?: string | undefined
     completed: boolean
+    skipReason?: string | undefined
   }[]
 }
 
@@ -142,6 +143,7 @@ export class CompleteWorkoutSessionUseCase {
 
       await this.exerciseSessionsRepository.update(exercise.exerciseSessionId, {
         completed: exercise.completed,
+        skipReason: exercise.completed ? null : (exercise.skipReason ?? null),
       })
 
       if (exercise.completed) {
