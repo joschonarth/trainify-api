@@ -40,6 +40,7 @@ interface WorkoutSessionData {
   id: string
   date: Date
   exercises: ExerciseData[]
+  totalExercises: number
 }
 
 interface MetricsResult {
@@ -92,6 +93,9 @@ export class CompareWorkoutSessionsUseCase {
         id: session.id,
         date: session.date,
         exercises,
+        totalExercises: session.exerciseSessions.filter(
+          (exerciseSession) => exerciseSession.completed
+        ).length,
       }
     }
 
@@ -132,7 +136,7 @@ export class CompareWorkoutSessionsUseCase {
       totalReps: current.totalReps,
       totalWeight: current.totalWeight,
       totalVolume: current.totalVolume,
-      totalExercises: currentData.exercises.length,
+      totalExercises: currentData.totalExercises,
     }
 
     const previousSession: SessionSummary = {
@@ -142,7 +146,7 @@ export class CompareWorkoutSessionsUseCase {
       totalReps: prev.totalReps,
       totalWeight: prev.totalWeight,
       totalVolume: prev.totalVolume,
-      totalExercises: prevData.exercises.length,
+      totalExercises: prevData.totalExercises,
     }
 
     return {
