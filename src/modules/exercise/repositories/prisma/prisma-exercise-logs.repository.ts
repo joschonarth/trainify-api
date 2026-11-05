@@ -116,12 +116,6 @@ export class PrismaExerciseLogsRepository implements ExerciseLogsRepository {
     })
   }
 
-  async countCompletedByUser(userId: string) {
-    return await prisma.exerciseLog.count({
-      where: { userId },
-    })
-  }
-
   async findMaxVolumeByExerciseAndUser(
     userId: string,
     exerciseId: string

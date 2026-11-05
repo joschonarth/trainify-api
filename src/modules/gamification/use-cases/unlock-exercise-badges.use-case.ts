@@ -1,7 +1,6 @@
 import type { Badge } from 'generated/prisma'
-
-import type { PrismaExerciseLogsRepository } from '@/modules/exercise/repositories/prisma/prisma-exercise-logs.repository'
 import type { BadgesRepository } from '@/modules/gamification/repositories/badges.repository'
+import type { ExerciseSessionsRepository } from '@/modules/session/repositories/exercise-sessions.repository'
 
 interface UnlockExerciseBadgesRequest {
   userId: string
@@ -13,15 +12,21 @@ interface UnlockExerciseBadgesResponse {
 
 export class UnlockExerciseBadgesUseCase {
   constructor(
-    private readonly badgesRepository: BadgesRepository,
-    private readonly exerciseLogsRepository: PrismaExerciseLogsRepository
+    private readonly badgesRepository: Pick<
+      BadgesRepository,
+      'findByUser' | 'findAllByType' | 'unlockForUser'
+    >,
+    private readonly exerciseSessionsRepository: Pick<
+      ExerciseSessionsRepository,
+      'countCompletedByUser'
+    >
   ) {}
 
   async execute({
     userId,
   }: UnlockExerciseBadgesRequest): Promise<UnlockExerciseBadgesResponse> {
     const completedExercises =
-      await this.exerciseLogsRepository.countCompletedByUser(userId)
+      await this.exerciseSessionsRepository.countCompletedByUser(userId)
 
     const userBadges = await this.badgesRepository.findByUser(userId)
 

@@ -1,4 +1,4 @@
-import type { ExerciseLogsRepository } from '@/modules/exercise/repositories/exercise-logs.repository'
+import type { ExerciseSessionsRepository } from '@/modules/session/repositories/exercise-sessions.repository'
 import type { WorkoutSessionsRepository } from '@/modules/session/repositories/workout-sessions.repository'
 
 interface GetUserMetricsRequest {
@@ -13,8 +13,14 @@ interface GetUserMetricsResponse {
 
 export class GetUserMetricsUseCase {
   constructor(
-    private readonly workoutSessionsRepository: WorkoutSessionsRepository,
-    private readonly exerciseLogsRepository: ExerciseLogsRepository
+    private readonly workoutSessionsRepository: Pick<
+      WorkoutSessionsRepository,
+      'countCompletedByUser' | 'findAllByUser'
+    >,
+    private readonly exerciseSessionsRepository: Pick<
+      ExerciseSessionsRepository,
+      'countCompletedByUser'
+    >
   ) {}
 
   async execute({
@@ -22,7 +28,7 @@ export class GetUserMetricsUseCase {
   }: GetUserMetricsRequest): Promise<GetUserMetricsResponse> {
     const [totalWorkouts, totalExercises, sessions] = await Promise.all([
       this.workoutSessionsRepository.countCompletedByUser(userId),
-      this.exerciseLogsRepository.countCompletedByUser(userId),
+      this.exerciseSessionsRepository.countCompletedByUser(userId),
       this.workoutSessionsRepository.findAllByUser(userId),
     ])
 

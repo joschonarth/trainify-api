@@ -23,7 +23,7 @@ export function getUserMetricsRoute(app: FastifyInstance) {
                   .describe('Total number of completed workout sessions.'),
                 totalExercises: z
                   .number()
-                  .describe('Total number of completed exercise logs.'),
+                  .describe('Total number of completed exercise sessions.'),
                 totalWorkoutDuration: z
                   .number()
                   .describe(

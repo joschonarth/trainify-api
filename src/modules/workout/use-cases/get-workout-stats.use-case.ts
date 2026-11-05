@@ -41,7 +41,9 @@ export class GetWorkoutStatsUseCase {
         return sum + exerciseVolume
       }, 0)
 
-      const totalExercises = session.exerciseSessions.length
+      const totalExercises = session.exerciseSessions.filter(
+        (exerciseSession) => exerciseSession.completed
+      ).length
 
       return {
         id: session.id,

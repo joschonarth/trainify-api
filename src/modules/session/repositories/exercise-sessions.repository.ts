@@ -19,6 +19,8 @@ export type ExerciseSessionWithLogs = ExerciseSession & {
 }
 
 export interface ExerciseSessionsRepository {
+  countCompletedByUser(userId: string): Promise<number>
+
   findById(id: string): Promise<ExerciseSession | null>
 
   findBySessionId(sessionId: string): Promise<ExerciseSessionWithLogs[]>

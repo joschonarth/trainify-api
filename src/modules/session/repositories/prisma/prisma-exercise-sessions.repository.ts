@@ -10,6 +10,15 @@ import type {
 export class PrismaExerciseSessionsRepository
   implements ExerciseSessionsRepository
 {
+  async countCompletedByUser(userId: string): Promise<number> {
+    return await prisma.exerciseSession.count({
+      where: {
+        completed: true,
+        workoutSession: { userId },
+      },
+    })
+  }
+
   async findById(id: string): Promise<ExerciseSession | null> {
     return await prisma.exerciseSession.findUnique({ where: { id } })
   }
