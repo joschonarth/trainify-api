@@ -85,6 +85,11 @@ export class CompleteWorkoutSessionUseCase {
 
     let anyExerciseCompleted = false
     const now = new Date()
+    const exerciseSessionIdsWithLogs = new Set(
+      exerciseSessions
+        .filter((item) => item.logs.length > 0)
+        .map((item) => item.id)
+    )
 
     for (const exercise of exercises) {
       const exerciseSession = exerciseSessions.find(
@@ -94,20 +99,26 @@ export class CompleteWorkoutSessionUseCase {
         continue
       }
 
-      const weight = exercise.weight ?? 0
-      const volume = exercise.sets * exercise.reps * weight
+      if (
+        exercise.completed &&
+        !exerciseSessionIdsWithLogs.has(exerciseSession.id)
+      ) {
+        const weight = exercise.weight ?? 0
+        const volume = exercise.sets * exercise.reps * weight
 
-      await this.exerciseLogsRepository.create({
-        sets: exercise.sets,
-        reps: exercise.reps,
-        weight: exercise.weight ?? null,
-        volume,
-        description: exercise.note ?? null,
-        date: now,
-        user: { connect: { id: userId } },
-        exercise: { connect: { id: exerciseSession.exercise.id } },
-        exerciseSession: { connect: { id: exercise.exerciseSessionId } },
-      })
+        await this.exerciseLogsRepository.create({
+          sets: exercise.sets,
+          reps: exercise.reps,
+          weight: exercise.weight ?? null,
+          volume,
+          description: exercise.note ?? null,
+          date: now,
+          user: { connect: { id: userId } },
+          exercise: { connect: { id: exerciseSession.exercise.id } },
+          exerciseSession: { connect: { id: exercise.exerciseSessionId } },
+        })
+        exerciseSessionIdsWithLogs.add(exerciseSession.id)
+      }
 
       await this.exerciseSessionsRepository.update(exercise.exerciseSessionId, {
         completed: exercise.completed,
