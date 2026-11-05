@@ -29,6 +29,9 @@ export function createOrAttachExerciseToWorkoutRoute(app: FastifyInstance) {
             })
             .describe('Exercise created and attached to workout successfully.'),
           404: z.object({ message: z.string() }).describe('Workout not found.'),
+          409: z
+            .object({ message: z.string() })
+            .describe('Exercise is already added to this workout.'),
         },
       },
     },
