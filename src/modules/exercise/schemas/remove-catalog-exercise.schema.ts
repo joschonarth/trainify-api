@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
 export const removeCatalogExerciseParamsSchema = z.object({
-  id: z.string(),
+  exerciseId: z.string(),
 })
 
 export type RemoveCatalogExerciseParams = z.infer<
