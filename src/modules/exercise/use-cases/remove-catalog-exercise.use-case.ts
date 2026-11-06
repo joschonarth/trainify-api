@@ -4,7 +4,7 @@ import type { MyExercisesRepository } from '../repositories/my-exercises.reposit
 
 interface RemoveCatalogExerciseUseCaseRequest {
   userId: string
-  myExerciseId: string
+  exerciseId: string
 }
 
 export class RemoveCatalogExerciseUseCase {
@@ -12,14 +12,17 @@ export class RemoveCatalogExerciseUseCase {
 
   async execute({
     userId,
-    myExerciseId,
+    exerciseId,
   }: RemoveCatalogExerciseUseCaseRequest): Promise<void> {
-    const myExercise = await this.myExercisesRepository.findById(myExerciseId)
+    const myExercise = await this.myExercisesRepository.findByUserAndExercise(
+      userId,
+      exerciseId
+    )
 
-    if (!myExercise || myExercise.userId !== userId) {
+    if (!myExercise) {
       throw new ResourceNotFoundError('Exercise not found in your list.')
     }
 
-    await this.myExercisesRepository.deleteById(myExerciseId)
+    await this.myExercisesRepository.deleteById(myExercise.id)
   }
 }

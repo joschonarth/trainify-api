@@ -2,19 +2,20 @@ import type { FastifyInstance } from 'fastify'
 import { z } from 'zod'
 
 import { verifyJwt } from '@/shared/middlewares/verify-jwt'
+
 import { removeCatalogExerciseController } from '../controllers/remove-catalog-exercise.controller'
 import { removeCatalogExerciseParamsSchema } from '../schemas/remove-catalog-exercise.schema'
 
 export function removeCatalogExerciseRoute(app: FastifyInstance) {
   app.delete(
-    '/exercises/my/catalog/:id',
+    '/exercises/my/:exerciseId',
     {
       onRequest: [verifyJwt],
       schema: {
         tags: ['Exercises'],
-        summary: 'Remove catalog exercise',
+        summary: 'Remove exercise from library',
         description:
-          'Removes a catalog exercise from the authenticated user library.',
+          'Removes an exercise from the authenticated user library by exercise ID.',
         params: removeCatalogExerciseParamsSchema,
         response: {
           204: z.null().describe('Exercise removed from library successfully.'),

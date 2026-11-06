@@ -6,13 +6,13 @@ export async function removeCatalogExerciseController(
   request: FastifyRequest,
   reply: FastifyReply
 ) {
-  const { id } = request.params as RemoveCatalogExerciseParams
+  const { exerciseId } = request.params as RemoveCatalogExerciseParams
 
   const removeCatalogExerciseUseCase = makeRemoveCatalogExerciseUseCase()
 
   await removeCatalogExerciseUseCase.execute({
     userId: request.user.sub,
-    myExerciseId: id,
+    exerciseId,
   })
 
   return reply.status(204).send()
