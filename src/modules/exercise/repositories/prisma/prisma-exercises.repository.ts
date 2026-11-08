@@ -14,9 +14,15 @@ export class PrismaExercisesRepository implements ExercisesRepository {
     return await prisma.exercise.create({ data })
   }
 
-  async findById(id: string): Promise<Exercise | null> {
+  async findById(
+    id: string,
+    includeArchived = false
+  ): Promise<Exercise | null> {
     return await prisma.exercise.findUnique({
-      where: { id },
+      where: {
+        id,
+        ...(!includeArchived && { archivedAt: null }),
+      },
     })
   }
 
@@ -30,6 +36,7 @@ export class PrismaExercisesRepository implements ExercisesRepository {
     return await prisma.exercise.findMany({
       where: {
         isCustom: false,
+        archivedAt: null,
         ...(query && {
           name: {
             contains: query,
@@ -105,18 +112,20 @@ export class PrismaExercisesRepository implements ExercisesRepository {
     if (data.type !== undefined) {
       prismaData.type = data.type
     }
-
     return await prisma.exercise.update({
       where: { id: exerciseId },
       data: prismaData,
     })
   }
 
-  async delete(exerciseId: string) {
-    await prisma.$transaction([
-      prisma.myExercise.deleteMany({ where: { exerciseId } }),
-      prisma.workoutExercise.deleteMany({ where: { exerciseId } }),
-      prisma.exercise.delete({ where: { id: exerciseId } }),
-    ])
+  async archive(exerciseId: string): Promise<void> {
+    await prisma.exercise.update({
+      where: { id: exerciseId },
+      data: { archivedAt: new Date() },
+    })
+  }
+
+  async deleteUnlinked(exerciseId: string) {
+    await prisma.exercise.delete({ where: { id: exerciseId } })
   }
 }

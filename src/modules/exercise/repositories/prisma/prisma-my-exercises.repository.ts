@@ -29,6 +29,22 @@ export class PrismaMyExercisesRepository implements MyExercisesRepository {
     })
   }
 
+  async archiveCustomExercise(
+    userId: string,
+    exerciseId: string
+  ): Promise<void> {
+    await prisma.$transaction(async (transaction) => {
+      await transaction.exercise.update({
+        where: { id: exerciseId },
+        data: { archivedAt: new Date() },
+      })
+
+      await transaction.myExercise.deleteMany({
+        where: { userId, exerciseId },
+      })
+    })
+  }
+
   async addExercise(userId: string, exerciseId: string): Promise<MyExercise> {
     const myExercise = await prisma.myExercise.create({
       data: {
@@ -68,6 +84,7 @@ export class PrismaMyExercisesRepository implements MyExercisesRepository {
       where: {
         userId,
         exercise: {
+          archivedAt: null,
           ...(query && {
             name: {
               contains: query,

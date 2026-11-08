@@ -12,15 +12,17 @@ export function deleteCustomExerciseRoute(app: FastifyInstance) {
       onRequest: [verifyJwt],
       schema: {
         tags: ['Exercises'],
-        summary: 'Delete custom exercise',
+        summary: 'Archive custom exercise',
         description:
-          'Deletes a custom exercise owned by the authenticated user.',
+          'Archives a custom exercise owned by the authenticated user while preserving its history.',
         params: deleteCustomExerciseParamsSchema,
         response: {
-          204: z.null().describe('Exercise deleted successfully.'),
+          204: z.null().describe('Exercise archived successfully.'),
           403: z
             .object({ message: z.string() })
-            .describe('User does not have permission to delete this exercise.'),
+            .describe(
+              'User does not have permission to archive this exercise.'
+            ),
           404: z
             .object({ message: z.string() })
             .describe('Exercise not found.'),

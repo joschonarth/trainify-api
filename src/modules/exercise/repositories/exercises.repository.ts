@@ -7,7 +7,7 @@ import type {
 
 export interface ExercisesRepository {
   create(data: Prisma.ExerciseCreateInput): Promise<Exercise>
-  findById(id: string): Promise<Exercise | null>
+  findById(id: string, includeArchived?: boolean): Promise<Exercise | null>
   findAllGlobals(
     query: string,
     category: ExerciseCategory | null,
@@ -33,5 +33,6 @@ export interface ExercisesRepository {
       type?: ExerciseType | null
     }>
   ): Promise<Exercise>
-  delete(exerciseId: string): Promise<void>
+  archive(exerciseId: string): Promise<void>
+  deleteUnlinked(exerciseId: string): Promise<void>
 }

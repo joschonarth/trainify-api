@@ -40,7 +40,10 @@ export class PrismaWorkoutSchedulesRepository
       include: {
         workout: {
           include: {
-            exercises: { include: { exercise: true } },
+            exercises: {
+              where: { exercise: { archivedAt: null } },
+              include: { exercise: true },
+            },
           },
         },
       },

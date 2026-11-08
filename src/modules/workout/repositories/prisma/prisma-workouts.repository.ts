@@ -23,6 +23,7 @@ export class PrismaWorkoutsRepository implements WorkoutsRepository {
       where: { id },
       include: {
         exercises: {
+          where: { exercise: { archivedAt: null } },
           include: {
             exercise: {
               select: {
@@ -44,6 +45,7 @@ export class PrismaWorkoutsRepository implements WorkoutsRepository {
       where: { userId },
       include: {
         exercises: {
+          where: { exercise: { archivedAt: null } },
           include: {
             exercise: true,
           },

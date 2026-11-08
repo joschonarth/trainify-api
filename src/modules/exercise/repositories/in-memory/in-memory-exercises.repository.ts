@@ -58,8 +58,10 @@ export class InMemoryExercisesRepository implements ExercisesRepository {
     return Promise.resolve(copyExercise(exercise))
   }
 
-  findById(id: string): Promise<Exercise | null> {
-    const exercise = this.items.find((item) => item.id === id)
+  findById(id: string, includeArchived = false): Promise<Exercise | null> {
+    const exercise = this.items.find(
+      (item) => item.id === id && (includeArchived || item.archivedAt === null)
+    )
     return Promise.resolve(exercise ? copyExercise(exercise) : null)
   }
 
@@ -72,6 +74,7 @@ export class InMemoryExercisesRepository implements ExercisesRepository {
       .filter(
         (item) =>
           !item.isCustom &&
+          item.archivedAt === null &&
           (!query || item.name.toLowerCase().includes(query.toLowerCase())) &&
           (!category || item.category === category)
       )
@@ -158,7 +161,22 @@ export class InMemoryExercisesRepository implements ExercisesRepository {
     return Promise.resolve(copyExercise(updated))
   }
 
-  delete(exerciseId: string): Promise<void> {
+  archive(exerciseId: string): Promise<void> {
+    const index = this.items.findIndex((item) => item.id === exerciseId)
+    const current = this.items[index]
+    if (!current) {
+      return Promise.reject(new Error('Record to archive not found.'))
+    }
+
+    this.items[index] = {
+      ...current,
+      archivedAt: new Date(),
+      updatedAt: new Date(),
+    }
+    return Promise.resolve()
+  }
+
+  deleteUnlinked(exerciseId: string): Promise<void> {
     const index = this.items.findIndex((item) => item.id === exerciseId)
     if (index === -1) {
       return Promise.reject(new Error('Record to delete not found.'))
