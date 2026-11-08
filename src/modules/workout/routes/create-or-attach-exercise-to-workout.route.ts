@@ -18,7 +18,7 @@ export function createOrAttachExerciseToWorkoutRoute(app: FastifyInstance) {
         tags: ['Workouts'],
         summary: 'Create or attach exercise to workout',
         description:
-          'Creates a new custom exercise and attaches it to a workout, or attaches an existing exercise if one with the same name already exists.',
+          'Creates a custom exercise in the user library and attaches it to a workout, or attaches an existing active library exercise with the same name.',
         params: createOrAttachExerciseToWorkoutParamsSchema,
         body: createOrAttachExerciseToWorkoutBodySchema,
         response: {
@@ -28,7 +28,11 @@ export function createOrAttachExerciseToWorkoutRoute(app: FastifyInstance) {
               workoutExercise: workoutExerciseSchema.omit({ exercise: true }),
             })
             .describe('Exercise created and attached to workout successfully.'),
-          404: z.object({ message: z.string() }).describe('Workout not found.'),
+          404: z
+            .object({ message: z.string() })
+            .describe(
+              'Workout not found or exercise is not in the active user library.'
+            ),
           409: z
             .object({ message: z.string() })
             .describe('Exercise is already added to this workout.'),

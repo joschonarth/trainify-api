@@ -84,7 +84,8 @@ export class InMemoryExercisesRepository implements ExercisesRepository {
   findByNameAndUser(
     name: string,
     userId: string,
-    excludeExerciseId?: string
+    excludeExerciseId?: string,
+    includeArchived = false
   ): Promise<Exercise | null> {
     const exercise = this.items.find(
       (item) =>
@@ -92,7 +93,7 @@ export class InMemoryExercisesRepository implements ExercisesRepository {
         item.name.toLowerCase() === name.toLowerCase() &&
         item.userId === userId &&
         item.isCustom &&
-        item.archivedAt === null
+        (includeArchived || item.archivedAt === null)
     )
     return Promise.resolve(exercise ? copyExercise(exercise) : null)
   }

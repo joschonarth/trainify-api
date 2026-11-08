@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { InMemoryExercisesRepository } from '@/modules/exercise/repositories/in-memory/in-memory-exercises.repository'
 import { InMemoryMyExercisesRepository } from '@/modules/exercise/repositories/in-memory/in-memory-my-exercises.repository'
 import { ResourceAlreadyExistsError } from '@/shared/errors/resource-already-exists.error'
+import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 import { InMemoryWorkoutExercisesRepository } from '../repositories/in-memory/in-memory-workout-exercises.repository'
 import { InMemoryWorkoutsRepository } from '../repositories/in-memory/in-memory-workouts.repository'
 import { CreateOrAttachExerciseToWorkoutUseCase } from './create-or-attach-exercise-to-workout.use-case'
@@ -87,7 +88,7 @@ describe('CreateOrAttachExerciseToWorkoutUseCase', () => {
     expect(libraryEntry).not.toBeNull()
   })
 
-  it('adds an existing custom exercise to the library before attaching it', async () => {
+  it('returns not found when an existing custom exercise is outside the library', async () => {
     const exercise = await exercisesRepository.create({
       name: 'Bench Press',
       category: 'CHEST',
@@ -96,22 +97,51 @@ describe('CreateOrAttachExerciseToWorkoutUseCase', () => {
       user: { connect: { id: userId } },
     })
 
-    await sut.execute({
-      userId,
-      workoutId,
-      name: exercise.name,
-      category: exercise.category,
-      type: exercise.type,
-      defaultSets: 3,
-      defaultReps: 10,
-      defaultWeight: 20,
-    })
+    await expect(
+      sut.execute({
+        userId,
+        workoutId,
+        name: exercise.name,
+        category: exercise.category,
+        type: exercise.type,
+        defaultSets: 3,
+        defaultReps: 10,
+        defaultWeight: 20,
+      })
+    ).rejects.toBeInstanceOf(ResourceNotFoundError)
 
     const libraryEntry = await myExercisesRepository.findByUserAndExercise(
       userId,
       exercise.id
     )
 
-    expect(libraryEntry).not.toBeNull()
+    expect(libraryEntry).toBeNull()
+    expect(workoutExercisesRepository.items).toHaveLength(0)
+  })
+
+  it('returns not found for an archived custom exercise', async () => {
+    const exercise = await exercisesRepository.create({
+      name: 'Bench Press',
+      category: 'CHEST',
+      type: 'STRENGTH',
+      isCustom: true,
+      archivedAt: new Date(),
+      user: { connect: { id: userId } },
+    })
+
+    await expect(
+      sut.execute({
+        userId,
+        workoutId,
+        name: exercise.name,
+        category: exercise.category,
+        type: exercise.type,
+        defaultSets: 3,
+        defaultReps: 10,
+        defaultWeight: 20,
+      })
+    ).rejects.toBeInstanceOf(ResourceNotFoundError)
+
+    expect(workoutExercisesRepository.items).toHaveLength(0)
   })
 })

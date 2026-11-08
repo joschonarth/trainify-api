@@ -49,14 +49,15 @@ export class PrismaExercisesRepository implements ExercisesRepository {
   async findByNameAndUser(
     name: string,
     userId: string,
-    excludeExerciseId?: string
+    excludeExerciseId?: string,
+    includeArchived = false
   ): Promise<Exercise | null> {
     return await prisma.exercise.findFirst({
       where: {
         name: { equals: name, mode: 'insensitive' },
         userId,
         isCustom: true,
-        archivedAt: null,
+        ...(!includeArchived && { archivedAt: null }),
         ...(excludeExerciseId && { id: { not: excludeExerciseId } }),
       },
     })

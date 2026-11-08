@@ -16,7 +16,8 @@ export interface ExercisesRepository {
   findByNameAndUser(
     name: string,
     userId: string,
-    excludeExerciseId?: string
+    excludeExerciseId?: string,
+    includeArchived?: boolean
   ): Promise<Exercise | null>
   findManyByUser(
     userId: string,
