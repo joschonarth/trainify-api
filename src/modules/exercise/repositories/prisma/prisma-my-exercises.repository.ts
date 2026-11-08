@@ -39,6 +39,10 @@ export class PrismaMyExercisesRepository implements MyExercisesRepository {
         data: { archivedAt: new Date() },
       })
 
+      await transaction.workoutExercise.deleteMany({
+        where: { exerciseId },
+      })
+
       await transaction.myExercise.deleteMany({
         where: { userId, exerciseId },
       })

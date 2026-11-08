@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 
 import { InMemoryWorkoutExercisesRepository } from '@/modules/workout/repositories/in-memory/in-memory-workout-exercises.repository'
+import { InMemoryWorkoutsRepository } from '@/modules/workout/repositories/in-memory/in-memory-workouts.repository'
 
 import { InMemoryExerciseLogsRepository } from '../repositories/in-memory/in-memory-exercise-logs.repository'
 import { InMemoryExercisesRepository } from '../repositories/in-memory/in-memory-exercises.repository'
@@ -14,17 +15,22 @@ describe('DeleteCustomExerciseUseCase', () => {
   let myExercisesRepository: InMemoryMyExercisesRepository
   let exerciseLogsRepository: InMemoryExerciseLogsRepository
   let workoutExercisesRepository: InMemoryWorkoutExercisesRepository
+  let workoutsRepository: InMemoryWorkoutsRepository
   let sut: DeleteCustomExerciseUseCase
 
   beforeEach(() => {
     exercisesRepository = new InMemoryExercisesRepository()
-    myExercisesRepository = new InMemoryMyExercisesRepository(
+    workoutExercisesRepository = new InMemoryWorkoutExercisesRepository(
       exercisesRepository
+    )
+    workoutsRepository = new InMemoryWorkoutsRepository(
+      workoutExercisesRepository
+    )
+    myExercisesRepository = new InMemoryMyExercisesRepository(
+      exercisesRepository,
+      workoutExercisesRepository
     )
     exerciseLogsRepository = new InMemoryExerciseLogsRepository(
-      exercisesRepository
-    )
-    workoutExercisesRepository = new InMemoryWorkoutExercisesRepository(
       exercisesRepository
     )
     sut = new DeleteCustomExerciseUseCase(
@@ -41,9 +47,26 @@ describe('DeleteCustomExerciseUseCase', () => {
     })
     await myExercisesRepository.addExercise(userId, exercise.id)
     await myExercisesRepository.addExercise('another-user-id', exercise.id)
+    await workoutsRepository.create({
+      id: 'workout-id',
+      name: 'Strength Workout',
+      user: { connect: { id: userId } },
+    })
     await workoutExercisesRepository.addExerciseToWorkout({
       workout: { connect: { id: 'workout-id' } },
       exercise: { connect: { id: exercise.id } },
+      defaultSets: 3,
+      defaultReps: 10,
+      defaultWeight: null,
+    })
+    const otherExercise = await exercisesRepository.create({
+      name: 'Squat',
+      isCustom: true,
+      user: { connect: { id: userId } },
+    })
+    await workoutExercisesRepository.addExerciseToWorkout({
+      workout: { connect: { id: 'workout-id' } },
+      exercise: { connect: { id: otherExercise.id } },
       defaultSets: 3,
       defaultReps: 10,
       defaultWeight: null,
@@ -92,10 +115,17 @@ describe('DeleteCustomExerciseUseCase', () => {
       },
     ])
     expect(workoutExercisesRepository.items).toHaveLength(1)
-    expect(workoutExercisesRepository.items[0]?.exerciseId).toBe(exercise.id)
+    expect(workoutExercisesRepository.items[0]?.exerciseId).toBe(
+      otherExercise.id
+    )
     await expect(
       workoutExercisesRepository.findByWorkout('workout-id')
-    ).resolves.toEqual([])
+    ).resolves.toMatchObject([
+      { exercise: { id: otherExercise.id, name: 'Squat' } },
+    ])
+    await expect(
+      workoutsRepository.findById('workout-id')
+    ).resolves.toMatchObject({ id: 'workout-id', name: 'Strength Workout' })
   })
 
   it('hides archived exercises from catalog and user listings', async () => {

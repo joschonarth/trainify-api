@@ -17,11 +17,12 @@ describe('RemoveCatalogExerciseUseCase', () => {
 
   beforeEach(() => {
     const exercisesRepository = new InMemoryExercisesRepository()
-    myExercisesRepository = new InMemoryMyExercisesRepository(
-      exercisesRepository
-    )
     workoutExercisesRepository = new InMemoryWorkoutExercisesRepository(
       exercisesRepository
+    )
+    myExercisesRepository = new InMemoryMyExercisesRepository(
+      exercisesRepository,
+      workoutExercisesRepository
     )
     workoutsRepository = new InMemoryWorkoutsRepository(
       workoutExercisesRepository

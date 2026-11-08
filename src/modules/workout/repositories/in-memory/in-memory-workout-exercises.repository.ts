@@ -89,6 +89,11 @@ export class InMemoryWorkoutExercisesRepository
     return Promise.resolve(workoutExercise ? { ...workoutExercise } : null)
   }
 
+  removeByExerciseId(exerciseId: string): Promise<void> {
+    this.items = this.items.filter((item) => item.exerciseId !== exerciseId)
+    return Promise.resolve()
+  }
+
   addExerciseToWorkout(
     data: Prisma.WorkoutExerciseCreateInput
   ): Promise<WorkoutExercise> {
