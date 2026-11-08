@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto'
 import type { Exercise, MyExercise, Prisma } from 'generated/prisma'
-
+import type { WorkoutExercisesRepository } from '@/modules/workout/repositories/workout-exercises.repository'
 import type { ExercisesRepository } from '../exercises.repository'
 import type { MyExercisesRepository } from '../my-exercises.repository'
 
@@ -18,7 +18,10 @@ function uniqueConstraintError(): Error & { code: 'P2002' } {
 export class InMemoryMyExercisesRepository implements MyExercisesRepository {
   items: MyExercise[] = []
 
-  constructor(private readonly exercisesRepository: ExercisesRepository) {}
+  constructor(
+    private readonly exercisesRepository: ExercisesRepository,
+    private readonly workoutExercisesRepository: WorkoutExercisesRepository
+  ) {}
 
   async createCustomExerciseWithLibraryEntry(
     userId: string,
@@ -45,6 +48,7 @@ export class InMemoryMyExercisesRepository implements MyExercisesRepository {
     exerciseId: string
   ): Promise<void> {
     await this.exercisesRepository.archive(exerciseId)
+    await this.workoutExercisesRepository.removeByExerciseId(exerciseId)
     this.items = this.items.filter(
       (item) => item.userId !== userId || item.exerciseId !== exerciseId
     )

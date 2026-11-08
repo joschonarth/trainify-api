@@ -14,7 +14,7 @@ export function deleteCustomExerciseRoute(app: FastifyInstance) {
         tags: ['Exercises'],
         summary: 'Archive custom exercise',
         description:
-          'Archives a custom exercise owned by the authenticated user while preserving its history.',
+          'Archives a custom exercise, removes its library and workout links, and preserves its history and workouts.',
         params: deleteCustomExerciseParamsSchema,
         response: {
           204: z.null().describe('Exercise archived successfully.'),

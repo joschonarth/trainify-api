@@ -43,6 +43,12 @@ export class PrismaWorkoutExercisesRepository
     })
   }
 
+  async removeByExerciseId(exerciseId: string): Promise<void> {
+    await prisma.workoutExercise.deleteMany({
+      where: { exerciseId },
+    })
+  }
+
   async addExerciseToWorkout(
     data: Prisma.WorkoutExerciseCreateInput
   ): Promise<WorkoutExercise> {

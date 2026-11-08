@@ -22,6 +22,19 @@ export function removeCatalogExerciseRoute(app: FastifyInstance) {
           404: z
             .object({ message: z.string() })
             .describe('Exercise not found in user library.'),
+          409: z
+            .object({
+              message: z.string(),
+              workouts: z.array(
+                z.object({
+                  id: z.string(),
+                  name: z.string(),
+                })
+              ),
+            })
+            .describe(
+              'Exercise is used by one or more workouts and cannot be removed.'
+            ),
         },
       },
     },

@@ -61,6 +61,29 @@ export class InMemoryWorkoutsRepository implements WorkoutsRepository {
     return Promise.resolve(workout ? copyWorkout(workout) : null)
   }
 
+  async findByUserAndExercise(
+    userId: string,
+    exerciseId: string
+  ): Promise<Pick<Workout, 'id' | 'name'>[]> {
+    if (!this.workoutExercisesRepository) {
+      return []
+    }
+
+    const matches: Pick<Workout, 'id' | 'name'>[] = []
+    for (const workout of this.items) {
+      if (
+        workout.userId === userId &&
+        (await this.workoutExercisesRepository.findByWorkoutAndExercise(
+          workout.id,
+          exerciseId
+        ))
+      ) {
+        matches.push({ id: workout.id, name: workout.name })
+      }
+    }
+    return matches.sort((left, right) => left.name.localeCompare(right.name))
+  }
+
   async findByIdWithDetails(id: string): Promise<WorkoutWithDetails | null> {
     const workout = await this.findById(id)
     if (!workout) {

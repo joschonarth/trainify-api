@@ -19,6 +19,8 @@ export interface WorkoutExercisesRepository {
     exerciseId: string
   ): Promise<WorkoutExercise | null>
 
+  removeByExerciseId(exerciseId: string): Promise<void>
+
   addExerciseToWorkout(
     data: Prisma.WorkoutExerciseCreateInput
   ): Promise<WorkoutExercise>
