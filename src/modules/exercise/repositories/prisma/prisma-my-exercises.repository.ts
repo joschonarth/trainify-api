@@ -84,6 +84,7 @@ export class PrismaMyExercisesRepository implements MyExercisesRepository {
       where: {
         userId,
         exercise: {
+          archivedAt: null,
           ...(query && {
             name: {
               contains: query,

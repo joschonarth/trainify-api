@@ -15,7 +15,10 @@ export class PrismaWorkoutExercisesRepository
 
   async findByWorkout(workoutId: string) {
     return await prisma.workoutExercise.findMany({
-      where: { workoutId },
+      where: {
+        workoutId,
+        exercise: { archivedAt: null },
+      },
       include: {
         exercise: {
           select: {

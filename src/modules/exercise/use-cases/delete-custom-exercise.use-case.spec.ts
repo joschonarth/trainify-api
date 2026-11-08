@@ -60,13 +60,18 @@ describe('DeleteCustomExerciseUseCase', () => {
       sut.execute({ userId, exerciseId: exercise.id })
     ).resolves.toBeUndefined()
 
-    const archivedExercise = await exercisesRepository.findById(exercise.id)
+    const archivedExercise = await exercisesRepository.findById(
+      exercise.id,
+      true
+    )
+    const visibleExercise = await exercisesRepository.findById(exercise.id)
     const libraryEntry = await myExercisesRepository.findByUserAndExercise(
       userId,
       exercise.id
     )
 
     expect(archivedExercise?.archivedAt).toBeInstanceOf(Date)
+    expect(visibleExercise).toBeNull()
     expect(libraryEntry).toBeNull()
     expect(
       await myExercisesRepository.findByUserAndExercise(
@@ -74,9 +79,43 @@ describe('DeleteCustomExerciseUseCase', () => {
         exercise.id
       )
     ).not.toBeNull()
+    await expect(
+      myExercisesRepository.findAllByUser('another-user-id', '', null, 1)
+    ).resolves.toEqual([])
     expect(exerciseLogsRepository.items).toHaveLength(1)
     expect(exerciseLogsRepository.items[0]?.exerciseId).toBe(exercise.id)
+    await expect(
+      exerciseLogsRepository.findAllByUser(userId)
+    ).resolves.toMatchObject([
+      {
+        exercise: { id: exercise.id, name: 'Bench Press' },
+      },
+    ])
     expect(workoutExercisesRepository.items).toHaveLength(1)
     expect(workoutExercisesRepository.items[0]?.exerciseId).toBe(exercise.id)
+    await expect(
+      workoutExercisesRepository.findByWorkout('workout-id')
+    ).resolves.toEqual([])
+  })
+
+  it('hides archived exercises from catalog and user listings', async () => {
+    await exercisesRepository.create({
+      name: 'Archived Catalog Exercise',
+      isCustom: false,
+      archivedAt: new Date(),
+    })
+    await exercisesRepository.create({
+      name: 'Archived Custom Exercise',
+      isCustom: true,
+      archivedAt: new Date(),
+      user: { connect: { id: userId } },
+    })
+
+    await expect(
+      exercisesRepository.findAllGlobals('', null, 1)
+    ).resolves.toEqual([])
+    await expect(exercisesRepository.findManyByUser(userId)).resolves.toEqual(
+      []
+    )
   })
 })

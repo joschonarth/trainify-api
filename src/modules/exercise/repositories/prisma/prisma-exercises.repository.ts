@@ -14,9 +14,15 @@ export class PrismaExercisesRepository implements ExercisesRepository {
     return await prisma.exercise.create({ data })
   }
 
-  async findById(id: string): Promise<Exercise | null> {
+  async findById(
+    id: string,
+    includeArchived = false
+  ): Promise<Exercise | null> {
     return await prisma.exercise.findUnique({
-      where: { id },
+      where: {
+        id,
+        ...(!includeArchived && { archivedAt: null }),
+      },
     })
   }
 
@@ -30,6 +36,7 @@ export class PrismaExercisesRepository implements ExercisesRepository {
     return await prisma.exercise.findMany({
       where: {
         isCustom: false,
+        archivedAt: null,
         ...(query && {
           name: {
             contains: query,

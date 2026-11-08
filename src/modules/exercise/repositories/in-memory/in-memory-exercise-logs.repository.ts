@@ -202,7 +202,10 @@ export class InMemoryExerciseLogsRepository implements ExerciseLogsRepository {
   ): Promise<ExerciseLogWithExercise[]> {
     const result: ExerciseLogWithExercise[] = []
     for (const log of logs) {
-      const exercise = await this.exercisesRepository.findById(log.exerciseId)
+      const exercise = await this.exercisesRepository.findById(
+        log.exerciseId,
+        true
+      )
       if (exercise) {
         result.push({
           ...copyLog(log),
