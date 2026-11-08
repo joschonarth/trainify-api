@@ -2,6 +2,7 @@ import { NotAllowedError } from '@/shared/errors/not-allowed.error'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
 import type { ExercisesRepository } from '../repositories/exercises.repository'
+import type { MyExercisesRepository } from '../repositories/my-exercises.repository'
 
 interface DeleteCustomExerciseUseCaseRequest {
   userId: string
@@ -9,7 +10,10 @@ interface DeleteCustomExerciseUseCaseRequest {
 }
 
 export class DeleteCustomExerciseUseCase {
-  constructor(private readonly exercisesRepository: ExercisesRepository) {}
+  constructor(
+    private readonly exercisesRepository: ExercisesRepository,
+    private readonly myExercisesRepository: MyExercisesRepository
+  ) {}
 
   async execute({
     userId,
@@ -21,14 +25,18 @@ export class DeleteCustomExerciseUseCase {
       throw new ResourceNotFoundError('Exercise not found.')
     }
 
+    if (exercise.archivedAt !== null) {
+      throw new ResourceNotFoundError('Exercise not found.')
+    }
+
     if (!exercise.isCustom) {
-      throw new NotAllowedError('Only custom exercises can be deleted.')
+      throw new NotAllowedError('Only custom exercises can be archived.')
     }
 
     if (exercise.userId !== userId) {
-      throw new NotAllowedError('You can only delete your own exercises.')
+      throw new NotAllowedError('You can only archive your own exercises.')
     }
 
-    await this.exercisesRepository.delete(exerciseId)
+    await this.myExercisesRepository.archiveCustomExercise(userId, exerciseId)
   }
 }

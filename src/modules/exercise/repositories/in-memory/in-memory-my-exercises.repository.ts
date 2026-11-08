@@ -33,11 +33,21 @@ export class InMemoryMyExercisesRepository implements MyExercisesRepository {
     try {
       await this.addExercise(userId, exercise.id)
     } catch (error) {
-      await this.exercisesRepository.delete(exercise.id)
+      await this.exercisesRepository.deleteUnlinked(exercise.id)
       throw error
     }
 
     return exercise
+  }
+
+  async archiveCustomExercise(
+    userId: string,
+    exerciseId: string
+  ): Promise<void> {
+    await this.exercisesRepository.archive(exerciseId)
+    this.items = this.items.filter(
+      (item) => item.userId !== userId || item.exerciseId !== exerciseId
+    )
   }
 
   addExercise(userId: string, exerciseId: string): Promise<MyExercise> {

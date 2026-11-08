@@ -5,6 +5,7 @@ export interface MyExercisesRepository {
     userId: string,
     data: Omit<Prisma.ExerciseCreateInput, 'user'>
   ): Promise<Exercise>
+  archiveCustomExercise(userId: string, exerciseId: string): Promise<void>
   addExercise(userId: string, exerciseId: string): Promise<MyExercise>
   findByUserAndExercise(
     userId: string,

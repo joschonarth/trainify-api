@@ -33,5 +33,6 @@ export interface ExercisesRepository {
       type?: ExerciseType | null
     }>
   ): Promise<Exercise>
-  delete(exerciseId: string): Promise<void>
+  archive(exerciseId: string): Promise<void>
+  deleteUnlinked(exerciseId: string): Promise<void>
 }

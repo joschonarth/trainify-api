@@ -158,7 +158,22 @@ export class InMemoryExercisesRepository implements ExercisesRepository {
     return Promise.resolve(copyExercise(updated))
   }
 
-  delete(exerciseId: string): Promise<void> {
+  archive(exerciseId: string): Promise<void> {
+    const index = this.items.findIndex((item) => item.id === exerciseId)
+    const current = this.items[index]
+    if (!current) {
+      return Promise.reject(new Error('Record to archive not found.'))
+    }
+
+    this.items[index] = {
+      ...current,
+      archivedAt: new Date(),
+      updatedAt: new Date(),
+    }
+    return Promise.resolve()
+  }
+
+  deleteUnlinked(exerciseId: string): Promise<void> {
     const index = this.items.findIndex((item) => item.id === exerciseId)
     if (index === -1) {
       return Promise.reject(new Error('Record to delete not found.'))

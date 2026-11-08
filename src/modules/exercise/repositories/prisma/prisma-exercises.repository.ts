@@ -105,18 +105,20 @@ export class PrismaExercisesRepository implements ExercisesRepository {
     if (data.type !== undefined) {
       prismaData.type = data.type
     }
-
     return await prisma.exercise.update({
       where: { id: exerciseId },
       data: prismaData,
     })
   }
 
-  async delete(exerciseId: string) {
-    await prisma.$transaction([
-      prisma.myExercise.deleteMany({ where: { exerciseId } }),
-      prisma.workoutExercise.deleteMany({ where: { exerciseId } }),
-      prisma.exercise.delete({ where: { id: exerciseId } }),
-    ])
+  async archive(exerciseId: string): Promise<void> {
+    await prisma.exercise.update({
+      where: { id: exerciseId },
+      data: { archivedAt: new Date() },
+    })
+  }
+
+  async deleteUnlinked(exerciseId: string) {
+    await prisma.exercise.delete({ where: { id: exerciseId } })
   }
 }
