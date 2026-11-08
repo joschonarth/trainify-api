@@ -18,6 +18,25 @@ export class PrismaWorkoutsRepository implements WorkoutsRepository {
     })
   }
 
+  async findByUserAndExercise(
+    userId: string,
+    exerciseId: string
+  ): Promise<Pick<Workout, 'id' | 'name'>[]> {
+    return await prisma.workout.findMany({
+      where: {
+        userId,
+        exercises: {
+          some: { exerciseId },
+        },
+      },
+      select: {
+        id: true,
+        name: true,
+      },
+      orderBy: { name: 'asc' },
+    })
+  }
+
   async findByIdWithDetails(id: string): Promise<WorkoutWithDetails | null> {
     return await prisma.workout.findUnique({
       where: { id },

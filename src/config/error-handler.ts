@@ -20,7 +20,9 @@ export function errorHandler(
   }
 
   if (error instanceof AppError) {
-    return reply.status(error.statusCode).send({ message: error.message })
+    return reply
+      .status(error.statusCode)
+      .send({ message: error.message, ...error.details })
   }
 
   request.log.error({ err: error }, 'Unhandled error')

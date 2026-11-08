@@ -21,6 +21,10 @@ export type WorkoutWithDetails = Prisma.WorkoutGetPayload<{
 export interface WorkoutsRepository {
   create(data: Prisma.WorkoutCreateInput): Promise<Workout>
   findById(id: string): Promise<Workout | null>
+  findByUserAndExercise(
+    userId: string,
+    exerciseId: string
+  ): Promise<Pick<Workout, 'id' | 'name'>[]>
   findByIdWithDetails(id: string): Promise<WorkoutWithDetails | null>
   findAllByUser(userId: string): Promise<
     (Workout & {
