@@ -54,8 +54,14 @@ export class CreateOrAttachExerciseToWorkoutUseCase {
 
     let exercise = await this.exercisesRepository.findByNameAndUser(
       name,
-      userId
+      userId,
+      undefined,
+      true
     )
+
+    if (exercise && exercise.archivedAt !== null) {
+      throw new ResourceNotFoundError('Exercise not found in user library.')
+    }
 
     if (!exercise) {
       exercise =
@@ -69,6 +75,14 @@ export class CreateOrAttachExerciseToWorkoutUseCase {
         )
     }
 
+    const libraryEntry = await this.myExercisesRepository.findByUserAndExercise(
+      userId,
+      exercise.id
+    )
+    if (!libraryEntry) {
+      throw new ResourceNotFoundError('Exercise not found in user library.')
+    }
+
     const existingWorkoutExercise =
       await this.workoutExercisesRepository.findByWorkoutAndExercise(
         workoutId,
@@ -79,15 +93,6 @@ export class CreateOrAttachExerciseToWorkoutUseCase {
       throw new ResourceAlreadyExistsError(
         'Exercise is already added to this workout.'
       )
-    }
-
-    const libraryEntry = await this.myExercisesRepository.findByUserAndExercise(
-      userId,
-      exercise.id
-    )
-
-    if (!libraryEntry) {
-      await this.myExercisesRepository.addExercise(userId, exercise.id)
     }
 
     const workoutExercise =

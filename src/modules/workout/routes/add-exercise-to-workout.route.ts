@@ -29,7 +29,9 @@ export function addExerciseToWorkoutRoute(app: FastifyInstance) {
             .describe('Exercise added to workout successfully.'),
           404: z
             .object({ message: z.string() })
-            .describe('Workout or exercise not found.'),
+            .describe(
+              'Workout not found or exercise is not in the active user library.'
+            ),
           409: z
             .object({ message: z.string() })
             .describe('Exercise already added to this workout.'),

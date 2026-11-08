@@ -1,6 +1,7 @@
 import type { WorkoutExercise } from 'generated/prisma'
 
 import type { ExercisesRepository } from '@/modules/exercise/repositories/exercises.repository'
+import type { MyExercisesRepository } from '@/modules/exercise/repositories/my-exercises.repository'
 import { ResourceAlreadyExistsError } from '@/shared/errors/resource-already-exists.error'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
@@ -24,7 +25,8 @@ export class AddExerciseToWorkoutUseCase {
   constructor(
     private readonly workoutExercisesRepository: WorkoutExercisesRepository,
     private readonly workoutsRepository: WorkoutsRepository,
-    private readonly exercisesRepository: ExercisesRepository
+    private readonly exercisesRepository: ExercisesRepository,
+    private readonly myExercisesRepository: MyExercisesRepository
   ) {}
 
   async execute({
@@ -43,6 +45,21 @@ export class AddExerciseToWorkoutUseCase {
     const exercise = await this.exercisesRepository.findById(exerciseId)
     if (!exercise) {
       throw new ResourceNotFoundError('Exercise not found.')
+    }
+
+    if (
+      exercise.archivedAt !== null ||
+      (exercise.userId !== null && exercise.userId !== userId)
+    ) {
+      throw new ResourceNotFoundError('Exercise not found in user library.')
+    }
+
+    const libraryEntry = await this.myExercisesRepository.findByUserAndExercise(
+      userId,
+      exerciseId
+    )
+    if (!libraryEntry) {
+      throw new ResourceNotFoundError('Exercise not found in user library.')
     }
 
     const existing =
