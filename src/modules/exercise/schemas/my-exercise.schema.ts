@@ -1,18 +1,14 @@
-import { ExerciseCategory, ExerciseType } from 'generated/prisma'
 import { z } from 'zod'
 
-export const myExerciseSchema = z.object({
-  myExerciseId: z.string().describe('User exercise relation ID.'),
-  exerciseId: z.string().describe('Exercise ID.'),
-  name: z.string().describe('Exercise name.'),
-  category: z.enum(ExerciseCategory).nullable().describe('Exercise category.'),
-  type: z.enum(ExerciseType).nullable().describe('Exercise type.'),
-  isCustom: z
-    .boolean()
-    .describe('Whether the exercise was created by the user.'),
-  createdAt: z.date().describe('Date the exercise was added to the library.'),
-  userId: z
-    .string()
-    .nullable()
-    .describe('ID of the user who created the exercise.'),
-})
+import { exerciseSchema } from './exercise.schema'
+
+export const myExerciseSchema = exerciseSchema
+  .omit({
+    id: true,
+    createdAt: true,
+  })
+  .extend({
+    myExerciseId: z.string().describe('User exercise relation ID.'),
+    exerciseId: z.string().describe('Exercise ID.'),
+    addedAt: z.date().describe('Date the exercise was added to the library.'),
+  })
