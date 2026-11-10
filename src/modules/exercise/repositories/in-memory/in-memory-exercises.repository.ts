@@ -73,6 +73,7 @@ export class InMemoryExercisesRepository implements ExercisesRepository {
     const exercises = this.items
       .filter(
         (item) =>
+          item.userId === null &&
           !item.isCustom &&
           item.archivedAt === null &&
           (!query || item.name.toLowerCase().includes(query.toLowerCase())) &&

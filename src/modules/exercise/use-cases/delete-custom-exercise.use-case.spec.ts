@@ -103,8 +103,8 @@ describe('DeleteCustomExerciseUseCase', () => {
       )
     ).not.toBeNull()
     await expect(
-      myExercisesRepository.findAllByUser('another-user-id', '', null, 1)
-    ).resolves.toEqual([])
+      myExercisesRepository.findAllByUser('another-user-id', '', null, 1, 20)
+    ).resolves.toEqual({ items: [], total: 0 })
     expect(exerciseLogsRepository.items).toHaveLength(1)
     expect(exerciseLogsRepository.items[0]?.exerciseId).toBe(exercise.id)
     await expect(

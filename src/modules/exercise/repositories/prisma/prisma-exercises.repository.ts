@@ -35,6 +35,7 @@ export class PrismaExercisesRepository implements ExercisesRepository {
 
     return await prisma.exercise.findMany({
       where: {
+        userId: null,
         isCustom: false,
         archivedAt: null,
         ...(query && {
