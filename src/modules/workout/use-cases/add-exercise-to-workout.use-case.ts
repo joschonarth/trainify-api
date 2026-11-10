@@ -74,10 +74,13 @@ export class AddExerciseToWorkoutUseCase {
       )
     }
 
+    const position =
+      await this.workoutExercisesRepository.getNextPosition(workoutId)
     const workoutExercise =
       await this.workoutExercisesRepository.addExerciseToWorkout({
         workout: { connect: { id: workoutId } },
         exercise: { connect: { id: exerciseId } },
+        position,
         defaultSets: defaultSets ?? null,
         defaultReps: defaultReps ?? null,
         defaultWeight: defaultWeight ?? null,

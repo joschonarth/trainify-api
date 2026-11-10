@@ -19,6 +19,8 @@ export interface WorkoutExercisesRepository {
     exerciseId: string
   ): Promise<WorkoutExercise | null>
 
+  getNextPosition(workoutId: string): Promise<number>
+
   removeByExerciseId(exerciseId: string): Promise<void>
 
   addExerciseToWorkout(

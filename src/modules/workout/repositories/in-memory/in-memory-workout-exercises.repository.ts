@@ -89,6 +89,14 @@ export class InMemoryWorkoutExercisesRepository
     return Promise.resolve(workoutExercise ? { ...workoutExercise } : null)
   }
 
+  getNextPosition(workoutId: string): Promise<number> {
+    const maxPosition = this.items
+      .filter((item) => item.workoutId === workoutId)
+      .reduce((max, item) => Math.max(max, item.position), -1)
+
+    return Promise.resolve(maxPosition + 1)
+  }
+
   removeByExerciseId(exerciseId: string): Promise<void> {
     this.items = this.items.filter((item) => item.exerciseId !== exerciseId)
     return Promise.resolve()

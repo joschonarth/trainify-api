@@ -89,6 +89,34 @@ describe('CreateOrAttachExerciseToWorkoutUseCase', () => {
     expect(libraryEntry).not.toBeNull()
   })
 
+  it('assigns the next sequential position to newly attached exercises', async () => {
+    const first = await sut.execute({
+      userId,
+      workoutId,
+      name: 'Bench Press',
+      category: 'CHEST',
+      type: 'STRENGTH',
+      defaultSets: 3,
+      defaultReps: 10,
+      defaultWeight: 20,
+    })
+    const second = await sut.execute({
+      userId,
+      workoutId,
+      name: 'Squat',
+      category: 'LEGS',
+      type: 'STRENGTH',
+      defaultSets: 3,
+      defaultReps: 10,
+      defaultWeight: 20,
+    })
+
+    expect([
+      first.workoutExercise.position,
+      second.workoutExercise.position,
+    ]).toEqual([0, 1])
+  })
+
   it('returns not found when an existing custom exercise is outside the library', async () => {
     const exercise = await exercisesRepository.create({
       name: 'Bench Press',

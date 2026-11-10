@@ -44,6 +44,15 @@ export class PrismaWorkoutExercisesRepository
     })
   }
 
+  async getNextPosition(workoutId: string): Promise<number> {
+    const result = await prisma.workoutExercise.aggregate({
+      where: { workoutId },
+      _max: { position: true },
+    })
+
+    return (result._max.position ?? -1) + 1
+  }
+
   async removeByExerciseId(exerciseId: string): Promise<void> {
     await prisma.workoutExercise.deleteMany({
       where: { exerciseId },
