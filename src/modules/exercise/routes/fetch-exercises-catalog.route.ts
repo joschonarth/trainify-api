@@ -15,14 +15,16 @@ export function fetchExercisesCatalogRoute(app: FastifyInstance) {
         tags: ['Exercises'],
         summary: 'Fetch exercises catalog',
         description:
-          'Returns all exercises available in the catalog. Supports filtering by name and category, with pagination.',
+          'Returns active global catalog exercises only. The catalog may be empty, in which case exercises is an empty array. Supports filtering by name and category, with pagination.',
         querystring: fetchExercisesCatalogQuerySchema,
         response: {
           200: z
             .object({
               exercises: z.array(exerciseSchema),
             })
-            .describe('Catalog exercises fetched successfully.'),
+            .describe(
+              'Catalog exercises fetched successfully. The exercises array is empty when no catalog exercises are available.'
+            ),
         },
       },
     },
