@@ -5,7 +5,6 @@ import { createExerciseRoute } from './create-exercise.route'
 import { fetchExerciseLogsRoute } from './fetch-exercise-logs.route'
 import { fetchExercisesCatalogRoute } from './fetch-exercises-catalog.route'
 import { fetchMyExercisesRoute } from './fetch-my-exercises.route'
-import { fetchUserExercisesRoute } from './fetch-user-exercises.route'
 import { getExerciseDetailsRoute } from './get-exercise-details.route'
 import { getExerciseLogRoute } from './get-exercise-log.route'
 import { getExerciseProgressRoute } from './get-exercise-progress.route'
@@ -13,7 +12,6 @@ import { removeExerciseFromLibraryRoute } from './remove-exercise-from-library.r
 import { updateExerciseRoute } from './update-exercise.route'
 
 export function exercisesRoutes(app: FastifyInstance) {
-  app.register(fetchUserExercisesRoute)
   app.register(getExerciseDetailsRoute)
   app.register(fetchMyExercisesRoute)
   app.register(fetchExercisesCatalogRoute)
