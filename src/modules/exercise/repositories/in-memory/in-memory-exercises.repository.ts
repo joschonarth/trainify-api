@@ -102,28 +102,6 @@ export class InMemoryExercisesRepository implements ExercisesRepository {
     return Promise.resolve(exercise ? copyExercise(exercise) : null)
   }
 
-  findManyByUser(
-    userId: string,
-    query?: string | null,
-    category?: ExerciseCategory | null,
-    type?: ExerciseType | null
-  ): Promise<Exercise[]> {
-    const exercises = this.items
-      .filter(
-        (item) =>
-          item.userId === userId &&
-          item.archivedAt === null &&
-          (!query || item.name.toLowerCase().includes(query.toLowerCase())) &&
-          (!category || item.category === category) &&
-          (!type || item.type === type)
-      )
-      .sort(
-        (left, right) => right.createdAt.getTime() - left.createdAt.getTime()
-      )
-
-    return Promise.resolve(exercises.map(copyExercise))
-  }
-
   update(
     exerciseId: string,
     data: Partial<{

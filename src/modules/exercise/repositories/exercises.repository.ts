@@ -19,12 +19,6 @@ export interface ExercisesRepository {
     excludeExerciseId?: string,
     includeArchived?: boolean
   ): Promise<Exercise | null>
-  findManyByUser(
-    userId: string,
-    query?: string | null,
-    category?: ExerciseCategory | null,
-    type?: ExerciseType | null
-  ): Promise<Exercise[]>
   update(
     exerciseId: string,
     data: Partial<{

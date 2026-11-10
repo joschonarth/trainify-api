@@ -71,29 +71,6 @@ export class PrismaExercisesRepository implements ExercisesRepository {
     })
   }
 
-  async findManyByUser(
-    userId: string,
-    query?: string | null,
-    category?: ExerciseCategory | null,
-    type?: ExerciseType | null
-  ): Promise<Exercise[]> {
-    return await prisma.exercise.findMany({
-      where: {
-        userId,
-        ...(query && {
-          name: {
-            contains: query,
-            mode: 'insensitive',
-          },
-        }),
-        ...(category && { category }),
-        ...(type && { type }),
-        archivedAt: null,
-      },
-      orderBy: { createdAt: 'desc' },
-    })
-  }
-
   async update(
     exerciseId: string,
     data: {

@@ -128,13 +128,13 @@ describe('DeleteCustomExerciseUseCase', () => {
     ).resolves.toMatchObject({ id: 'workout-id', name: 'Strength Workout' })
   })
 
-  it('hides archived exercises from catalog and user listings', async () => {
+  it('hides archived exercises from lookups and catalog listings', async () => {
     await exercisesRepository.create({
       name: 'Archived Catalog Exercise',
       isCustom: false,
       archivedAt: new Date(),
     })
-    await exercisesRepository.create({
+    const archivedCustomExercise = await exercisesRepository.create({
       name: 'Archived Custom Exercise',
       isCustom: true,
       archivedAt: new Date(),
@@ -144,8 +144,8 @@ describe('DeleteCustomExerciseUseCase', () => {
     await expect(
       exercisesRepository.findAllGlobals('', null, 1)
     ).resolves.toEqual([])
-    await expect(exercisesRepository.findManyByUser(userId)).resolves.toEqual(
-      []
-    )
+    await expect(
+      exercisesRepository.findById(archivedCustomExercise.id)
+    ).resolves.toBeNull()
   })
 })

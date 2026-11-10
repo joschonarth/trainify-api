@@ -10,8 +10,8 @@ import {
 } from '../schemas/update-exercise.schema'
 
 export function updateExerciseRoute(app: FastifyInstance) {
-  app.put(
-    '/exercises/:exerciseId',
+  app.patch(
+    '/exercises/my/:exerciseId',
     {
       onRequest: [verifyJwt],
       schema: {
