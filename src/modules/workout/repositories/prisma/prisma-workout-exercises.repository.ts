@@ -29,6 +29,7 @@ export class PrismaWorkoutExercisesRepository
           },
         },
       },
+      orderBy: { position: 'asc' },
     })
   }
 

@@ -43,6 +43,7 @@ export class PrismaWorkoutsRepository implements WorkoutsRepository {
       include: {
         exercises: {
           where: { exercise: { archivedAt: null } },
+          orderBy: { position: 'asc' },
           include: {
             exercise: {
               select: {
@@ -65,6 +66,7 @@ export class PrismaWorkoutsRepository implements WorkoutsRepository {
       include: {
         exercises: {
           where: { exercise: { archivedAt: null } },
+          orderBy: { position: 'asc' },
           include: {
             exercise: true,
           },

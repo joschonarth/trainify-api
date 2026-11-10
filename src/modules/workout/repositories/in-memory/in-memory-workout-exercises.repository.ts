@@ -76,7 +76,7 @@ export class InMemoryWorkoutExercisesRepository
         })
       }
     }
-    return results
+    return results.sort((left, right) => left.position - right.position)
   }
 
   findByWorkoutAndExercise(
