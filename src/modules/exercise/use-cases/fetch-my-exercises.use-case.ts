@@ -9,7 +9,7 @@ interface ExerciseDTO {
   category: ExerciseCategory | null
   type: ExerciseType | null
   isCustom: boolean
-  createdAt: Date
+  addedAt: Date
   userId: string | null
 }
 
@@ -57,14 +57,14 @@ export class FetchMyExercisesUseCase {
       )
 
     const exercises = myExercises.map(
-      ({ id: myExerciseId, createdAt, exercise }) => ({
+      ({ id: myExerciseId, createdAt: addedAt, exercise }) => ({
         myExerciseId,
         exerciseId: exercise.id,
         name: exercise.name,
         category: exercise.category,
         type: exercise.type,
         isCustom: exercise.isCustom,
-        createdAt,
+        addedAt,
         userId: exercise.userId,
       })
     )

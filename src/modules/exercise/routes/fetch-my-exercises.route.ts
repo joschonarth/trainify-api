@@ -18,13 +18,17 @@ export function fetchMyExercisesRoute(app: FastifyInstance) {
           'Returns active exercises in the authenticated user library with pagination and optional name, category and type filters.',
         querystring: fetchMyExercisesQuerySchema,
         response: {
-          200: z.object({
-            items: z.array(myExerciseSchema),
-            page: z.number(),
-            pageSize: z.number(),
-            total: z.number(),
-            totalPages: z.number(),
-          }),
+          200: z
+            .object({
+              items: z.array(myExerciseSchema),
+              page: z.number(),
+              pageSize: z.number(),
+              total: z.number(),
+              totalPages: z.number(),
+            })
+            .describe(
+              'Paginated library entries. Each item includes addedAt for the date it was added to the library.'
+            ),
         },
       },
     },

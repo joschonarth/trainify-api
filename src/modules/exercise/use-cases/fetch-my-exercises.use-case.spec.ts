@@ -69,7 +69,7 @@ describe('FetchMyExercisesUseCase', () => {
           category: exercise.category,
           type: exercise.type,
           isCustom: exercise.isCustom,
-          createdAt: libraryAddedAt,
+          addedAt: libraryAddedAt,
           userId: exercise.userId,
         },
       ],
