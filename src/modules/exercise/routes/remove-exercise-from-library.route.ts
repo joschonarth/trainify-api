@@ -2,11 +2,10 @@ import type { FastifyInstance } from 'fastify'
 import { z } from 'zod'
 
 import { verifyJwt } from '@/shared/middlewares/verify-jwt'
+import { removeExerciseFromLibraryController } from '../controllers/remove-exercise-from-library.controller'
+import { removeExerciseFromLibraryParamsSchema } from '../schemas/remove-exercise-from-library.schema'
 
-import { removeCatalogExerciseController } from '../controllers/remove-catalog-exercise.controller'
-import { removeCatalogExerciseParamsSchema } from '../schemas/remove-catalog-exercise.schema'
-
-export function removeCatalogExerciseRoute(app: FastifyInstance) {
+export function removeExerciseFromLibraryRoute(app: FastifyInstance) {
   app.delete(
     '/exercises/my/:exerciseId',
     {
@@ -15,10 +14,13 @@ export function removeCatalogExerciseRoute(app: FastifyInstance) {
         tags: ['Exercises'],
         summary: 'Remove exercise from library',
         description:
-          'Removes an exercise from the authenticated user library by exercise ID.',
-        params: removeCatalogExerciseParamsSchema,
+          'Removes a catalog exercise from the authenticated user library or archives their custom exercise. Catalog exercises used in workouts cannot be removed.',
+        params: removeExerciseFromLibraryParamsSchema,
         response: {
           204: z.null().describe('Exercise removed from library successfully.'),
+          403: z
+            .object({ message: z.string() })
+            .describe('User does not have permission to remove this exercise.'),
           404: z
             .object({ message: z.string() })
             .describe('Exercise not found in user library.'),
@@ -38,6 +40,6 @@ export function removeCatalogExerciseRoute(app: FastifyInstance) {
         },
       },
     },
-    removeCatalogExerciseController
+    removeExerciseFromLibraryController
   )
 }
