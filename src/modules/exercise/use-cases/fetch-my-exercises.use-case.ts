@@ -15,8 +15,9 @@ interface ExerciseDTO {
 
 interface FetchMyExercisesUseCaseRequest {
   userId: string
-  query: string
+  q: string
   category: ExerciseCategory | null
+  type: ExerciseType | null
   page: number
   pageSize: number
 }
@@ -39,18 +40,20 @@ export class FetchMyExercisesUseCase {
 
   async execute({
     userId,
-    query,
+    q,
     category,
+    type,
     page,
     pageSize,
   }: FetchMyExercisesUseCaseRequest): Promise<FetchMyExercisesUseCaseResponse> {
     const { items: myExercises, total } =
       await this.myExercisesRepository.findAllByUser(
         userId,
-        query,
+        q,
         category,
         page,
-        pageSize
+        pageSize,
+        type
       )
 
     const exercises = myExercises.map(

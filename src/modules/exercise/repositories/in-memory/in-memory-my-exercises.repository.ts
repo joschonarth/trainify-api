@@ -83,10 +83,11 @@ export class InMemoryMyExercisesRepository implements MyExercisesRepository {
 
   async findAllByUser(
     userId: string,
-    query: string,
+    q: string,
     category: Exercise['category'] | null,
     page: number,
-    pageSize: number
+    pageSize: number,
+    type?: Exercise['type'] | null
   ): Promise<{
     items: (MyExercise & { exercise: Exercise })[]
     total: number
@@ -103,8 +104,9 @@ export class InMemoryMyExercisesRepository implements MyExercisesRepository {
       )
       if (
         exercise &&
-        (!query || exercise.name.toLowerCase().includes(query.toLowerCase())) &&
-        (!category || exercise.category === category)
+        (!q || exercise.name.toLowerCase().includes(q.toLowerCase())) &&
+        (!category || exercise.category === category) &&
+        (!type || exercise.type === type)
       ) {
         matches.push({
           ...myExercise,

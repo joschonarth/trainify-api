@@ -15,7 +15,7 @@ export function fetchMyExercisesRoute(app: FastifyInstance) {
         tags: ['Exercises'],
         summary: 'Fetch my exercises',
         description:
-          'Returns active exercises in the authenticated user library with pagination and optional name and category filters.',
+          'Returns active exercises in the authenticated user library with pagination and optional name, category and type filters.',
         querystring: fetchMyExercisesQuerySchema,
         response: {
           200: z.object({

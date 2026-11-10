@@ -12,6 +12,7 @@ import { FetchMyExercisesUseCase } from './fetch-my-exercises.use-case'
 describe('FetchMyExercisesUseCase', () => {
   it('defaults pagination and caps page size at 50', () => {
     expect(fetchMyExercisesQuerySchema.parse({})).toMatchObject({
+      q: '',
       page: 1,
       pageSize: 20,
     })
@@ -53,8 +54,9 @@ describe('FetchMyExercisesUseCase', () => {
     await expect(
       sut.execute({
         userId: 'user-id',
-        query: '',
+        q: '',
         category: null,
+        type: null,
         page: 1,
         pageSize: 20,
       })
@@ -117,8 +119,9 @@ describe('FetchMyExercisesUseCase', () => {
     await expect(
       sut.execute({
         userId: 'user-id',
-        query: '',
+        q: '',
         category: null,
+        type: null,
         page: 2,
         pageSize: 20,
       })
@@ -128,6 +131,63 @@ describe('FetchMyExercisesUseCase', () => {
       pageSize: 20,
       total: 21,
       totalPages: 2,
+    })
+  })
+
+  it('combines name, category and type filters before counting and paginating', async () => {
+    const exercisesRepository = new InMemoryExercisesRepository()
+    const workoutExercisesRepository = new InMemoryWorkoutExercisesRepository(
+      exercisesRepository
+    )
+    const myExercisesRepository = new InMemoryMyExercisesRepository(
+      exercisesRepository,
+      workoutExercisesRepository
+    )
+    const matchingExercise = await exercisesRepository.create({
+      name: 'Incline Bench Press',
+      category: 'CHEST',
+      type: 'STRENGTH',
+    })
+    const exercises = [
+      matchingExercise,
+      await exercisesRepository.create({
+        name: 'Incline Row',
+        category: 'BACK',
+        type: 'STRENGTH',
+      }),
+      await exercisesRepository.create({
+        name: 'Incline Treadmill',
+        category: 'CHEST',
+        type: 'CARDIO',
+      }),
+      await exercisesRepository.create({
+        name: 'Bench Press',
+        category: 'CHEST',
+        type: 'STRENGTH',
+      }),
+    ]
+
+    for (const exercise of exercises) {
+      await myExercisesRepository.addExercise('user-id', exercise.id)
+    }
+
+    const sut = new FetchMyExercisesUseCase(myExercisesRepository)
+
+    await expect(
+      sut.execute({
+        userId: 'user-id',
+        q: 'incline',
+        category: 'CHEST',
+        type: 'STRENGTH',
+        page: 1,
+        pageSize: 1,
+      })
+    ).resolves.toMatchObject({
+      items: [{ exerciseId: matchingExercise.id, name: 'Incline Bench Press' }],
+      page: 1,
+      pageSize: 1,
+      total: 1,
+      totalPages: 1,
     })
   })
 })

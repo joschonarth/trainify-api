@@ -78,10 +78,11 @@ export class PrismaMyExercisesRepository implements MyExercisesRepository {
 
   async findAllByUser(
     userId: string,
-    query?: string,
+    q?: string,
     category?: Exercise['category'],
     page = 1,
-    pageSize = 20
+    pageSize = 20,
+    type?: Exercise['type']
   ): Promise<{
     items: (MyExercise & { exercise: Exercise })[]
     total: number
@@ -90,15 +91,20 @@ export class PrismaMyExercisesRepository implements MyExercisesRepository {
       userId,
       exercise: {
         archivedAt: null,
-        ...(query && {
+        ...(q && {
           name: {
-            contains: query,
+            contains: q,
             mode: 'insensitive',
           },
         }),
         ...(category && {
           category: {
             equals: category,
+          },
+        }),
+        ...(type && {
+          type: {
+            equals: type,
           },
         }),
       },

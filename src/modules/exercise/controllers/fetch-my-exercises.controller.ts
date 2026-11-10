@@ -6,7 +6,7 @@ export async function fetchMyExercisesController(
   request: FastifyRequest,
   reply: FastifyReply
 ) {
-  const { query, category, page, pageSize } =
+  const { q, category, type, page, pageSize } =
     request.query as FetchMyExercisesQuery
 
   const userId = request.user.sub
@@ -15,8 +15,9 @@ export async function fetchMyExercisesController(
 
   const result = await fetchMyExercisesUseCase.execute({
     userId,
-    query,
+    q,
     category: category ?? null,
+    type: type ?? null,
     page,
     pageSize,
   })
