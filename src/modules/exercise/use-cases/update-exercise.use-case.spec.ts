@@ -75,6 +75,30 @@ describe('UpdateExerciseUseCase', () => {
     expect(result.exercise.type).toBeNull()
   })
 
+  it('preserves fields omitted from a partial update', async () => {
+    const exercise = await makeExercise(exercisesRepository, {
+      name: 'Bench Press',
+      category: 'CHEST',
+      type: 'STRENGTH',
+      isCustom: true,
+      user: { connect: { id: 'user-id' } },
+    })
+
+    await expect(
+      sut.execute({
+        userId: 'user-id',
+        exerciseId: exercise.id,
+        name: 'Incline Bench Press',
+      })
+    ).resolves.toMatchObject({
+      exercise: {
+        name: 'Incline Bench Press',
+        category: 'CHEST',
+        type: 'STRENGTH',
+      },
+    })
+  })
+
   it('does not conflict with the exercise itself when its name is unchanged', async () => {
     const exercise = await makeExercise(exercisesRepository, {
       name: 'Bench Press',
