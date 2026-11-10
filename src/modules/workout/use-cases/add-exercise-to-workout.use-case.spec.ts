@@ -64,7 +64,75 @@ describe('AddExerciseToWorkoutUseCase', () => {
     })
 
     expect(workoutExercise.exerciseId).toBe(exercise.id)
+    expect(workoutExercise.position).toBe(0)
     expect(workoutExercisesRepository.items).toHaveLength(1)
+  })
+
+  it('assigns the next sequential position to each attached exercise', async () => {
+    const firstExercise = await exercisesRepository.create({
+      name: 'Bench Press',
+      isCustom: true,
+      user: { connect: { id: userId } },
+    })
+    const secondExercise = await exercisesRepository.create({
+      name: 'Squat',
+      isCustom: true,
+      user: { connect: { id: userId } },
+    })
+    await myExercisesRepository.addExercise(userId, firstExercise.id)
+    await myExercisesRepository.addExercise(userId, secondExercise.id)
+
+    const first = await sut.execute({
+      userId,
+      workoutId,
+      exerciseId: firstExercise.id,
+      defaultSets: 3,
+      defaultReps: 10,
+      defaultWeight: null,
+    })
+    const second = await sut.execute({
+      userId,
+      workoutId,
+      exerciseId: secondExercise.id,
+      defaultSets: 3,
+      defaultReps: 10,
+      defaultWeight: null,
+    })
+
+    expect([
+      first.workoutExercise.position,
+      second.workoutExercise.position,
+    ]).toEqual([0, 1])
+  })
+
+  it('returns workout exercises sorted by position', async () => {
+    const firstExercise = await exercisesRepository.create({
+      name: 'Bench Press',
+      isCustom: true,
+      user: { connect: { id: userId } },
+    })
+    const secondExercise = await exercisesRepository.create({
+      name: 'Squat',
+      isCustom: true,
+      user: { connect: { id: userId } },
+    })
+    await workoutExercisesRepository.addExerciseToWorkout({
+      workout: { connect: { id: workoutId } },
+      exercise: { connect: { id: firstExercise.id } },
+      position: 2,
+    })
+    await workoutExercisesRepository.addExerciseToWorkout({
+      workout: { connect: { id: workoutId } },
+      exercise: { connect: { id: secondExercise.id } },
+      position: 1,
+    })
+
+    await expect(
+      workoutExercisesRepository.findByWorkout(workoutId)
+    ).resolves.toMatchObject([
+      { exerciseId: secondExercise.id, position: 1 },
+      { exerciseId: firstExercise.id, position: 2 },
+    ])
   })
 
   it('returns not found when the exercise is outside the user library', async () => {

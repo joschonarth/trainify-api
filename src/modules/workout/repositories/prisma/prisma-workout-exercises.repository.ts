@@ -29,6 +29,7 @@ export class PrismaWorkoutExercisesRepository
           },
         },
       },
+      orderBy: { position: 'asc' },
     })
   }
 
@@ -40,6 +41,33 @@ export class PrismaWorkoutExercisesRepository
       where: {
         workoutId_exerciseId: { workoutId, exerciseId },
       },
+    })
+  }
+
+  async getNextPosition(workoutId: string): Promise<number> {
+    const result = await prisma.workoutExercise.aggregate({
+      where: { workoutId },
+      _max: { position: true },
+    })
+
+    return (result._max.position ?? -1) + 1
+  }
+
+  async updatePositions(
+    workoutId: string,
+    exerciseIds: string[]
+  ): Promise<void> {
+    await prisma.$transaction(async (transaction) => {
+      await Promise.all(
+        exerciseIds.map((exerciseId, position) =>
+          transaction.workoutExercise.update({
+            where: {
+              workoutId_exerciseId: { workoutId, exerciseId },
+            },
+            data: { position },
+          })
+        )
+      )
     })
   }
 
