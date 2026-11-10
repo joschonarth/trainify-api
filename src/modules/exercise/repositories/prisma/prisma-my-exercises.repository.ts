@@ -80,39 +80,46 @@ export class PrismaMyExercisesRepository implements MyExercisesRepository {
     userId: string,
     query?: string,
     category?: Exercise['category'],
-    page = 1
-  ): Promise<(MyExercise & { exercise: Exercise })[]> {
-    const ITEMS_PER_PAGE = 10
-
-    const myExercises = await prisma.myExercise.findMany({
-      where: {
-        userId,
-        exercise: {
-          archivedAt: null,
-          ...(query && {
-            name: {
-              contains: query,
-              mode: 'insensitive',
-            },
-          }),
-          ...(category && {
-            category: {
-              equals: category,
-            },
-          }),
-        },
+    page = 1,
+    pageSize = 20
+  ): Promise<{
+    items: (MyExercise & { exercise: Exercise })[]
+    total: number
+  }> {
+    const where: Prisma.MyExerciseWhereInput = {
+      userId,
+      exercise: {
+        archivedAt: null,
+        ...(query && {
+          name: {
+            contains: query,
+            mode: 'insensitive',
+          },
+        }),
+        ...(category && {
+          category: {
+            equals: category,
+          },
+        }),
       },
-      include: { exercise: true },
-      take: ITEMS_PER_PAGE,
-      skip: (page - 1) * ITEMS_PER_PAGE,
-      orderBy: {
-        exercise: {
-          name: 'asc',
-        },
-      },
-    })
+    }
 
-    return myExercises
+    const [items, total] = await Promise.all([
+      prisma.myExercise.findMany({
+        where,
+        include: { exercise: true },
+        take: pageSize,
+        skip: (page - 1) * pageSize,
+        orderBy: {
+          exercise: {
+            name: 'asc',
+          },
+        },
+      }),
+      prisma.myExercise.count({ where }),
+    ])
+
+    return { items, total }
   }
 
   async findById(id: string): Promise<MyExercise | null> {

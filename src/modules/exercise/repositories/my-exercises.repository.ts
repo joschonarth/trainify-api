@@ -15,8 +15,12 @@ export interface MyExercisesRepository {
     userId: string,
     query: string,
     category: Exercise['category'] | null,
-    page: number
-  ): Promise<(MyExercise & { exercise: Exercise })[]>
+    page: number,
+    pageSize: number
+  ): Promise<{
+    items: (MyExercise & { exercise: Exercise })[]
+    total: number
+  }>
   findById(id: string): Promise<MyExercise | null>
   deleteById(id: string): Promise<void>
 }

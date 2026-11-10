@@ -6,18 +6,20 @@ export async function fetchMyExercisesController(
   request: FastifyRequest,
   reply: FastifyReply
 ) {
-  const { query, category, page } = request.query as FetchMyExercisesQuery
+  const { query, category, page, pageSize } =
+    request.query as FetchMyExercisesQuery
 
   const userId = request.user.sub
 
   const fetchMyExercisesUseCase = makeFetchMyExercisesUseCase()
 
-  const { myExercises } = await fetchMyExercisesUseCase.execute({
+  const result = await fetchMyExercisesUseCase.execute({
     userId,
     query,
     category: category ?? null,
     page,
+    pageSize,
   })
 
-  return reply.status(200).send({ myExercises })
+  return reply.status(200).send(result)
 }

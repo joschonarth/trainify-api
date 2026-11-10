@@ -18,10 +18,15 @@ interface FetchMyExercisesUseCaseRequest {
   query: string
   category: ExerciseCategory | null
   page: number
+  pageSize: number
 }
 
 interface FetchMyExercisesUseCaseResponse {
-  myExercises: ExerciseDTO[]
+  items: ExerciseDTO[]
+  page: number
+  pageSize: number
+  total: number
+  totalPages: number
 }
 
 export class FetchMyExercisesUseCase {
@@ -37,13 +42,16 @@ export class FetchMyExercisesUseCase {
     query,
     category,
     page,
+    pageSize,
   }: FetchMyExercisesUseCaseRequest): Promise<FetchMyExercisesUseCaseResponse> {
-    const myExercises = await this.myExercisesRepository.findAllByUser(
-      userId,
-      query,
-      category,
-      page
-    )
+    const { items: myExercises, total } =
+      await this.myExercisesRepository.findAllByUser(
+        userId,
+        query,
+        category,
+        page,
+        pageSize
+      )
 
     const exercises = myExercises.map(
       ({ id: myExerciseId, createdAt, exercise }) => ({
@@ -58,6 +66,12 @@ export class FetchMyExercisesUseCase {
       })
     )
 
-    return { myExercises: exercises }
+    return {
+      items: exercises,
+      page,
+      pageSize,
+      total,
+      totalPages: Math.ceil(total / pageSize),
+    }
   }
 }

@@ -56,11 +56,12 @@ describe('CreateExerciseUseCase', () => {
       type: 'STRENGTH',
     })
 
-    const libraryEntries = await myExercisesRepository.findAllByUser(
+    const { items: libraryEntries } = await myExercisesRepository.findAllByUser(
       'user-id',
       '',
       null,
-      1
+      1,
+      20
     )
 
     expect(libraryEntries).toHaveLength(1)

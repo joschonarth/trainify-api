@@ -15,14 +15,16 @@ export function fetchMyExercisesRoute(app: FastifyInstance) {
         tags: ['Exercises'],
         summary: 'Fetch my exercises',
         description:
-          'Returns all exercises added to the authenticated user library, including custom and catalog exercises. Supports filtering by name and category, with pagination.',
+          'Returns active exercises in the authenticated user library with pagination and optional name and category filters.',
         querystring: fetchMyExercisesQuerySchema,
         response: {
-          200: z
-            .object({
-              myExercises: z.array(myExerciseSchema),
-            })
-            .describe('My exercises fetched successfully.'),
+          200: z.object({
+            items: z.array(myExerciseSchema),
+            page: z.number(),
+            pageSize: z.number(),
+            total: z.number(),
+            totalPages: z.number(),
+          }),
         },
       },
     },

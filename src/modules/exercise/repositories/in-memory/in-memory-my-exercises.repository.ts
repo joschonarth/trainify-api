@@ -4,8 +4,6 @@ import type { WorkoutExercisesRepository } from '@/modules/workout/repositories/
 import type { ExercisesRepository } from '../exercises.repository'
 import type { MyExercisesRepository } from '../my-exercises.repository'
 
-const ITEMS_PER_PAGE = 10
-
 function uniqueConstraintError(): Error & { code: 'P2002' } {
   return Object.assign(
     new Error(
@@ -87,8 +85,12 @@ export class InMemoryMyExercisesRepository implements MyExercisesRepository {
     userId: string,
     query: string,
     category: Exercise['category'] | null,
-    page: number
-  ): Promise<(MyExercise & { exercise: Exercise })[]> {
+    page: number,
+    pageSize: number
+  ): Promise<{
+    items: (MyExercise & { exercise: Exercise })[]
+    total: number
+  }> {
     const matches: (MyExercise & { exercise: Exercise })[] = []
 
     for (const myExercise of this.items) {
@@ -111,11 +113,14 @@ export class InMemoryMyExercisesRepository implements MyExercisesRepository {
       }
     }
 
-    return matches
-      .sort((left, right) =>
-        left.exercise.name.localeCompare(right.exercise.name)
-      )
-      .slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE)
+    const sorted = matches.sort((left, right) =>
+      left.exercise.name.localeCompare(right.exercise.name)
+    )
+
+    return {
+      items: sorted.slice((page - 1) * pageSize, page * pageSize),
+      total: sorted.length,
+    }
   }
 
   findById(id: string): Promise<MyExercise | null> {
