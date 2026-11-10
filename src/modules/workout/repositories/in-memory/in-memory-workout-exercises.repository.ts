@@ -97,6 +97,26 @@ export class InMemoryWorkoutExercisesRepository
     return Promise.resolve(maxPosition + 1)
   }
 
+  updatePositions(workoutId: string, exerciseIds: string[]): Promise<void> {
+    const workoutExercises = exerciseIds.map((exerciseId) =>
+      this.items.find(
+        (item) => item.workoutId === workoutId && item.exerciseId === exerciseId
+      )
+    )
+
+    if (workoutExercises.some((item) => item === undefined)) {
+      return Promise.reject(new Error('Workout exercise not found.'))
+    }
+
+    for (const [position, workoutExercise] of workoutExercises.entries()) {
+      if (workoutExercise) {
+        workoutExercise.position = position
+      }
+    }
+
+    return Promise.resolve()
+  }
+
   removeByExerciseId(exerciseId: string): Promise<void> {
     this.items = this.items.filter((item) => item.exerciseId !== exerciseId)
     return Promise.resolve()

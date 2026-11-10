@@ -12,6 +12,7 @@ import { getWorkoutDetailsRoute } from './get-workout-details.route'
 import { getWorkoutStatsRoute } from './get-workout-stats.route'
 import { removeExerciseFromWorkoutRoute } from './remove-exercise-from-workout.route'
 import { removeWorkoutScheduleDayRoute } from './remove-workout-schedule-day.route'
+import { reorderWorkoutExercisesRoute } from './reorder-workout-exercises.route'
 import { updateWorkoutRoute } from './update-workout.route'
 import { updateWorkoutExerciseDefaultsRoute } from './update-workout-exercise-defaults.route'
 import { updateWorkoutScheduleDayRoute } from './update-workout-schedule-day.route'
@@ -28,6 +29,7 @@ export function workoutsRoutes(app: FastifyInstance) {
   app.register(createOrAttachExerciseToWorkoutRoute)
   app.register(updateWorkoutExerciseDefaultsRoute)
   app.register(removeExerciseFromWorkoutRoute)
+  app.register(reorderWorkoutExercisesRoute)
   app.register(fetchWorkoutSchedulesRoute)
   app.register(assignDaysToWorkoutRoute)
   app.register(updateWorkoutScheduleDayRoute)

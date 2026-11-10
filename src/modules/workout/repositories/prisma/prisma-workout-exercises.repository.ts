@@ -53,6 +53,24 @@ export class PrismaWorkoutExercisesRepository
     return (result._max.position ?? -1) + 1
   }
 
+  async updatePositions(
+    workoutId: string,
+    exerciseIds: string[]
+  ): Promise<void> {
+    await prisma.$transaction(async (transaction) => {
+      await Promise.all(
+        exerciseIds.map((exerciseId, position) =>
+          transaction.workoutExercise.update({
+            where: {
+              workoutId_exerciseId: { workoutId, exerciseId },
+            },
+            data: { position },
+          })
+        )
+      )
+    })
+  }
+
   async removeByExerciseId(exerciseId: string): Promise<void> {
     await prisma.workoutExercise.deleteMany({
       where: { exerciseId },

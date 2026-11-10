@@ -12,6 +12,7 @@ interface FetchWorkoutExercisesUseCaseResponse {
   exercises: {
     id: string
     exerciseId: string
+    position: number
     defaultSets: number | null
     defaultReps: number | null
     defaultWeight: number | null
