@@ -2,6 +2,7 @@ import dayjs from 'dayjs'
 import isoWeek from 'dayjs/plugin/isoWeek'
 
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
+import { calculateVolume } from '@/shared/utils/calculate-volume'
 
 import type {
   WorkoutSessionsRepository,
@@ -86,7 +87,7 @@ export class CompareWeeklyWorkoutsUseCase {
             totalSets += sets
             totalReps += reps
             totalWeight += weight
-            totalVolume += sets * reps * weight
+            totalVolume += calculateVolume(sets, reps, weight)
           }
         }
       }
