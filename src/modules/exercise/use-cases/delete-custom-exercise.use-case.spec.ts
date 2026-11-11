@@ -74,6 +74,7 @@ describe('DeleteCustomExerciseUseCase', () => {
     await exerciseLogsRepository.create({
       sets: 3,
       reps: 10,
+      volume: 0,
       user: { connect: { id: userId } },
       exercise: { connect: { id: exercise.id } },
       exerciseSession: { connect: { id: 'exercise-session-id' } },

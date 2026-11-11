@@ -1,4 +1,5 @@
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
+import { calculateVolume } from '@/shared/utils/calculate-volume'
 
 import type {
   WorkoutSessionsRepository,
@@ -109,7 +110,11 @@ export class CompareWorkoutSessionsUseCase {
         totalSets += exercise.sets
         totalReps += exercise.reps
         totalWeight += exercise.weight
-        totalVolume += exercise.sets * exercise.reps * exercise.weight
+        totalVolume += calculateVolume(
+          exercise.sets,
+          exercise.reps,
+          exercise.weight
+        )
       }
 
       return { totalSets, totalReps, totalWeight, totalVolume }

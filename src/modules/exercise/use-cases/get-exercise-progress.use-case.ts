@@ -42,7 +42,7 @@ export class GetExerciseProgressUseCase {
       weight: log.weight ?? 0,
       reps: log.reps,
       sets: log.sets,
-      volume: log.volume ?? log.sets * log.reps * (log.weight ?? 0),
+      volume: log.volume,
     }))
 
     const totalVolume = progress.reduce((sum, log) => sum + log.volume, 0)

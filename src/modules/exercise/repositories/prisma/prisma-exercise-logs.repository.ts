@@ -132,6 +132,6 @@ export class PrismaExerciseLogsRepository implements ExerciseLogsRepository {
     if (!result) {
       return null
     }
-    return { maxVolume: result.volume ?? 0, date: result.date }
+    return { maxVolume: result.volume, date: result.date }
   }
 }

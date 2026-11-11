@@ -12,7 +12,7 @@ export type ExerciseSessionWithLogs = ExerciseSession & {
     sets: number
     reps: number
     weight: number | null
-    volume: number | null
+    volume: number
     date: Date
     description: string | null
   }[]

@@ -4,6 +4,7 @@ import type { ExerciseLogsRepository } from '@/modules/exercise/repositories/exe
 import type { UnlockAllBadgesUseCase } from '@/modules/gamification/use-cases/unlock-all-badges.use-case'
 import type { UpdateUserStreakUseCase } from '@/modules/gamification/use-cases/update-user-streak.use-case'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
+import { calculateVolume } from '@/shared/utils/calculate-volume'
 
 import { WorkoutSessionAlreadyCompletedError } from '../errors/workout-session-already-completed.error'
 import type { ExerciseSessionsRepository } from '../repositories/exercise-sessions.repository'
@@ -106,8 +107,11 @@ export class CompleteWorkoutSessionUseCase {
       exercise.completed &&
       !exerciseSessionIdsWithLogs.has(exerciseSession.id)
     ) {
-      const weight = exercise.weight ?? 0
-      const volume = exercise.sets * exercise.reps * weight
+      const volume = calculateVolume(
+        exercise.sets,
+        exercise.reps,
+        exercise.weight
+      )
 
       await this.exerciseLogsRepository.create({
         sets: exercise.sets,

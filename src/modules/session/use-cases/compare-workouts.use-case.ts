@@ -1,6 +1,7 @@
 import dayjs from 'dayjs'
 
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
+import { calculateVolume } from '@/shared/utils/calculate-volume'
 
 import type {
   WorkoutSessionsRepository,
@@ -107,7 +108,7 @@ export class CompareWorkoutsUseCase {
             totalSets += sets
             totalReps += reps
             totalWeight += weight
-            totalVolume += sets * reps * weight
+            totalVolume += calculateVolume(sets, reps, weight)
           }
         }
       }

@@ -39,11 +39,7 @@ export class GetExerciseSessionProgressUseCase {
     }
 
     const progress = sessions.map((session) => {
-      const totalVolume = session.logs.reduce(
-        (sum, log) =>
-          sum + (log.volume ?? log.sets * log.reps * (log.weight ?? 0)),
-        0
-      )
+      const totalVolume = session.logs.reduce((sum, log) => sum + log.volume, 0)
       const totalSets = session.logs.reduce((sum, log) => sum + log.sets, 0)
       const totalReps = session.logs.reduce((sum, log) => sum + log.reps, 0)
       const totalWeight = session.logs.reduce(
@@ -66,7 +62,7 @@ export class GetExerciseSessionProgressUseCase {
           sets: log.sets,
           reps: log.reps,
           weight: log.weight,
-          volume: log.volume ?? log.sets * log.reps * (log.weight ?? 0),
+          volume: log.volume,
           date: log.date,
           description: log.description,
         })),
