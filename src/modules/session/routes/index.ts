@@ -11,7 +11,6 @@ import { createExerciseLogSessionRoute } from './create-exercise-log-session.rou
 import { finishWorkoutSessionRoute } from './finish-workout-session.route'
 import { getDailyWorkoutSessionRoute } from './get-daily-workout-session.route'
 import { getExerciseSessionDetailsRoute } from './get-exercise-session-details.route'
-import { getExerciseSessionProgressRoute } from './get-exercise-session-progress.route'
 import { getMonthlyWorkoutCalendarRoute } from './get-monthly-workout-calendar.route'
 import { getWeeklyWorkoutCalendarRoute } from './get-weekly-workout-calendar.route'
 import { getWorkoutCalendarRoute } from './get-workout-calendar.route'
@@ -43,5 +42,4 @@ export function sessionsRoutes(app: FastifyInstance) {
   app.register(stopExerciseTimerRoute)
   app.register(getExerciseSessionDetailsRoute)
   app.register(completeExerciseSessionRoute)
-  app.register(getExerciseSessionProgressRoute)
 }
