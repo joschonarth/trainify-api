@@ -54,7 +54,7 @@ model ExerciseLog {
   sets        Int
   reps        Int
   weight      Float?
-  volume      Float?
+  volume      Float
   description String?
   date        DateTime @default(now())
 

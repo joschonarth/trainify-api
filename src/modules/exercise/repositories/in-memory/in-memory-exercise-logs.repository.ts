@@ -81,7 +81,7 @@ export class InMemoryExerciseLogsRepository implements ExerciseLogsRepository {
       sets: data.sets,
       reps: data.reps,
       weight: data.weight ?? null,
-      volume: data.volume ?? null,
+      volume: data.volume,
       description: data.description ?? null,
       date: data.date ? new Date(data.date) : new Date(),
       exerciseSessionId: connectedId(data.exerciseSession),
@@ -189,10 +189,10 @@ export class InMemoryExerciseLogsRepository implements ExerciseLogsRepository {
     }
 
     const maxLog = logs.reduce((max, log) =>
-      (log.volume ?? 0) > (max.volume ?? 0) ? log : max
+      log.volume > max.volume ? log : max
     )
     return Promise.resolve({
-      maxVolume: maxLog.volume ?? 0,
+      maxVolume: maxLog.volume,
       date: new Date(maxLog.date),
     })
   }

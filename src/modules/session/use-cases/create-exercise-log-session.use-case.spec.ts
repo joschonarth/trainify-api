@@ -21,7 +21,7 @@ describe('CreateExerciseLogSessionUseCase', () => {
       sets: data.sets,
       reps: data.reps,
       weight: data.weight ?? null,
-      volume: null,
+      volume: data.volume,
       description: data.description ?? null,
       date: new Date(data.date ?? new Date()),
       userId: 'user-id',
@@ -93,6 +93,21 @@ describe('CreateExerciseLogSessionUseCase', () => {
 
     expect(exerciseLogsRepository.create).toHaveBeenCalledWith(
       expect.objectContaining({ date })
+    )
+  })
+
+  it('persists the calculated volume with the exercise log', async () => {
+    await sut.execute({
+      userId: 'user-id',
+      sessionId: 'session-id',
+      exerciseId: 'exercise-id',
+      sets: 3,
+      reps: 10,
+      weight: 20,
+    })
+
+    expect(exerciseLogsRepository.create).toHaveBeenCalledWith(
+      expect.objectContaining({ volume: 600 })
     )
   })
 

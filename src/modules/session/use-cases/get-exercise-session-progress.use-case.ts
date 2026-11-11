@@ -1,7 +1,6 @@
 import dayjs from 'dayjs'
 
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
-import { calculateVolume } from '@/shared/utils/calculate-volume'
 
 import type { ExerciseSessionsRepository } from '../repositories/exercise-sessions.repository'
 
@@ -40,11 +39,7 @@ export class GetExerciseSessionProgressUseCase {
     }
 
     const progress = sessions.map((session) => {
-      const totalVolume = session.logs.reduce(
-        (sum, log) =>
-          sum + (log.volume ?? calculateVolume(log.sets, log.reps, log.weight)),
-        0
-      )
+      const totalVolume = session.logs.reduce((sum, log) => sum + log.volume, 0)
       const totalSets = session.logs.reduce((sum, log) => sum + log.sets, 0)
       const totalReps = session.logs.reduce((sum, log) => sum + log.reps, 0)
       const totalWeight = session.logs.reduce(
@@ -67,7 +62,7 @@ export class GetExerciseSessionProgressUseCase {
           sets: log.sets,
           reps: log.reps,
           weight: log.weight,
-          volume: log.volume ?? calculateVolume(log.sets, log.reps, log.weight),
+          volume: log.volume,
           date: log.date,
           description: log.description,
         })),

@@ -1,5 +1,4 @@
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
-import { calculateVolume } from '@/shared/utils/calculate-volume'
 
 import type { ExerciseLogsRepository } from '../repositories/exercise-logs.repository'
 import type { GetExerciseDetailsUseCase } from './get-exercise-details.use-case'
@@ -43,7 +42,7 @@ export class GetExerciseProgressUseCase {
       weight: log.weight ?? 0,
       reps: log.reps,
       sets: log.sets,
-      volume: log.volume ?? calculateVolume(log.sets, log.reps, log.weight),
+      volume: log.volume,
     }))
 
     const totalVolume = progress.reduce((sum, log) => sum + log.volume, 0)

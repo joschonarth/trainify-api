@@ -3,6 +3,7 @@ import type { ExerciseLog } from 'generated/prisma'
 import type { ExerciseLogsRepository } from '@/modules/exercise/repositories/exercise-logs.repository'
 import type { WorkoutSessionsRepository } from '@/modules/session/repositories/workout-sessions.repository'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
+import { calculateVolume } from '@/shared/utils/calculate-volume'
 
 interface CreateExerciseLogSessionUseCaseRequest {
   userId: string
@@ -60,6 +61,7 @@ export class CreateExerciseLogSessionUseCase {
       sets,
       reps,
       weight: weight ?? null,
+      volume: calculateVolume(sets, reps, weight),
       description: description ?? null,
       date: date ?? new Date(),
       user: { connect: { id: userId } },
