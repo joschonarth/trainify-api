@@ -1,9 +1,25 @@
 import { Measurement } from 'generated/prisma'
 import { describe, expect, it, vi } from 'vitest'
 
+import { calculateVolume } from '@/shared/utils/calculate-volume'
+
 import type { ExerciseLogsRepository } from '../repositories/exercise-logs.repository'
 import type { GetExerciseDetailsUseCase } from './get-exercise-details.use-case'
 import { GetExerciseProgressUseCase } from './get-exercise-progress.use-case'
+
+describe('calculateVolume', () => {
+  it('treats a null weight as zero', () => {
+    expect(calculateVolume(3, 10, null)).toBe(0)
+  })
+
+  it('returns zero for a zero weight', () => {
+    expect(calculateVolume(3, 10, 0)).toBe(0)
+  })
+
+  it('preserves fractional weights', () => {
+    expect(calculateVolume(3, 10, 2.5)).toBe(75)
+  })
+})
 
 describe('GetExerciseProgressUseCase', () => {
   it('returns zero metrics and empty progress when the exercise has no logs', async () => {
