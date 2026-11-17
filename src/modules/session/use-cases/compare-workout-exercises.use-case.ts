@@ -1,9 +1,10 @@
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
-
+import { calculateVolume } from '@/shared/utils/calculate-volume'
 import type {
   WorkoutSessionsRepository,
   WorkoutSessionWithWorkout,
 } from '../repositories/workout-sessions.repository'
+import { isSessionComparable } from '../utils/is-session-comparable'
 
 interface CompareWorkoutExercisesRequest {
   userId: string
@@ -47,9 +48,11 @@ export class CompareWorkoutExercisesUseCase {
         workoutId
       )
 
-    const sorted = [...sessions].sort(
-      (a, b) => b.date.getTime() - a.date.getTime()
-    )
+    const sorted = sessions
+      .filter((session) =>
+        isSessionComparable(session.status, session.exerciseSessions)
+      )
+      .sort((a, b) => b.date.getTime() - a.date.getTime())
 
     const [last, previous] = sorted
 
@@ -71,26 +74,29 @@ export class CompareWorkoutExercisesUseCase {
       > = {}
 
       for (const exerciseSession of session.exerciseSessions) {
-        const exerciseName = exerciseSession.exercise.name
+        const exerciseId = exerciseSession.exercise.id
         const logs = exerciseSession.logs
 
         if (!logs.length) {
           continue
         }
 
-        const avgWeight =
+        const sets = logs.reduce((acc, log) => acc + log.sets, 0)
+        const reps = logs.reduce((acc, log) => acc + log.reps, 0) / logs.length
+        const weight =
           logs.reduce((acc, log) => acc + (log.weight ?? 0), 0) / logs.length
-        const avgReps =
-          logs.reduce((acc, log) => acc + log.reps, 0) / logs.length
+        const volume = logs.reduce(
+          (acc, log) =>
+            acc +
+            (log.volume ||
+              calculateVolume(log.sets, log.reps, log.weight ?? 0)),
+          0
+        )
 
-        const sets = logs.length
-
-        const volume = sets * avgReps * avgWeight
-
-        result[exerciseName] = {
+        result[exerciseId] = {
           sets,
-          weight: avgWeight,
-          reps: avgReps,
+          weight,
+          reps,
           volume,
         }
       }
@@ -103,16 +109,18 @@ export class CompareWorkoutExercisesUseCase {
 
     const progress: ExerciseProgress[] = []
 
-    for (const exercise of Object.keys(lastExercises)) {
-      const lastData = lastExercises[exercise]
-      const prevData = prevExercises[exercise]
+    for (const exerciseId of Object.keys(lastExercises)) {
+      const lastData = lastExercises[exerciseId]
+      const prevData = prevExercises[exerciseId]
 
       if (!(lastData && prevData)) {
         continue
       }
 
       progress.push({
-        exercise,
+        exercise:
+          last.exerciseSessions.find((item) => item.exercise.id === exerciseId)
+            ?.exercise.name ?? exerciseId,
         sessions: [
           {
             date: previous.date.toISOString(),
