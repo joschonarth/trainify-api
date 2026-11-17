@@ -13,7 +13,10 @@ interface StartWorkoutSessionRequest {
 
 export class StartWorkoutSessionUseCase {
   constructor(
-    private readonly workoutSessionsRepository: WorkoutSessionsRepository
+    private readonly workoutSessionsRepository: Pick<
+      WorkoutSessionsRepository,
+      'findById' | 'update'
+    >
   ) {}
 
   async execute({ sessionId, userId }: StartWorkoutSessionRequest) {
@@ -23,7 +26,12 @@ export class StartWorkoutSessionUseCase {
       throw new ResourceNotFoundError('Workout session not found.')
     }
 
-    if (session.status === WorkoutSessionStatus.COMPLETED) {
+    if (
+      session.status === WorkoutSessionStatus.COMPLETED ||
+      session.status === WorkoutSessionStatus.INCOMPLETE ||
+      session.status === WorkoutSessionStatus.SKIPPED ||
+      session.endedAt
+    ) {
       throw new WorkoutSessionAlreadyCompletedError()
     }
 
@@ -35,6 +43,8 @@ export class StartWorkoutSessionUseCase {
 
     await this.workoutSessionsRepository.update(sessionId, {
       startedAt,
+      endedAt: null,
+      duration: null,
       status: WorkoutSessionStatus.IN_PROGRESS,
     })
 

@@ -351,7 +351,7 @@ describe('CompleteWorkoutSessionUseCase', () => {
     expect(workoutSessionsRepository.update).toHaveBeenCalledWith(sessionId, {
       endedAt,
       duration: 3600,
-      status: WorkoutSessionStatus.PENDING,
+      status: WorkoutSessionStatus.SKIPPED,
     })
   })
 
