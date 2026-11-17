@@ -1,10 +1,10 @@
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 import { calculateVolume } from '@/shared/utils/calculate-volume'
-
 import type {
   WorkoutSessionsRepository,
   WorkoutSessionWithWorkout,
 } from '../repositories/workout-sessions.repository'
+import { isSessionComparable } from '../utils/is-session-comparable'
 
 interface CompareWorkoutSessionsRequest {
   userId: string
@@ -35,6 +35,7 @@ interface ExerciseData {
   sets: number
   reps: number
   weight: number
+  volume: number
 }
 
 interface WorkoutSessionData {
@@ -66,9 +67,11 @@ export class CompareWorkoutSessionsUseCase {
         workoutId
       )
 
-    const sorted = [...sessions].sort(
-      (a, b) => b.date.getTime() - a.date.getTime()
-    )
+    const sorted = sessions
+      .filter((session) =>
+        isSessionComparable(session.status, session.exerciseSessions)
+      )
+      .sort((a, b) => b.date.getTime() - a.date.getTime())
 
     const [last, previous] = sorted
 
@@ -87,6 +90,7 @@ export class CompareWorkoutSessionsUseCase {
             sets: log.sets,
             reps: log.reps,
             weight: log.weight ?? 0,
+            volume: log.volume,
           }))
       )
 
@@ -110,11 +114,9 @@ export class CompareWorkoutSessionsUseCase {
         totalSets += exercise.sets
         totalReps += exercise.reps
         totalWeight += exercise.weight
-        totalVolume += calculateVolume(
-          exercise.sets,
-          exercise.reps,
-          exercise.weight
-        )
+        totalVolume +=
+          exercise.volume ||
+          calculateVolume(exercise.sets, exercise.reps, exercise.weight)
       }
 
       return { totalSets, totalReps, totalWeight, totalVolume }

@@ -49,6 +49,7 @@ export interface WorkoutSessionWithWorkout extends WorkoutSession {
       sets: number
       reps: number
       weight: number | null
+      volume: number
       date: Date
       description: string | null
     }[]

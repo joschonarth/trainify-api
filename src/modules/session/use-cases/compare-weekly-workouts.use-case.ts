@@ -3,11 +3,11 @@ import isoWeek from 'dayjs/plugin/isoWeek'
 
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 import { calculateVolume } from '@/shared/utils/calculate-volume'
-
 import type {
   WorkoutSessionsRepository,
   WorkoutSessionWithWorkout,
 } from '../repositories/workout-sessions.repository'
+import { isSessionComparable } from '../utils/is-session-comparable'
 
 dayjs.extend(isoWeek)
 
@@ -66,7 +66,19 @@ export class CompareWeeklyWorkoutsUseCase {
         prevEnd
       )
 
-    if (!(currentWeekSessions.length && previousWeekSessions.length)) {
+    const comparableCurrentWeekSessions = currentWeekSessions.filter(
+      (session) => isSessionComparable(session.status, session.exerciseSessions)
+    )
+    const comparablePreviousWeekSessions = previousWeekSessions.filter(
+      (session) => isSessionComparable(session.status, session.exerciseSessions)
+    )
+
+    if (
+      !(
+        comparableCurrentWeekSessions.length &&
+        comparablePreviousWeekSessions.length
+      )
+    ) {
       throw new ResourceNotFoundError('Not enough sessions to compare weeks.')
     }
 
@@ -87,7 +99,7 @@ export class CompareWeeklyWorkoutsUseCase {
             totalSets += sets
             totalReps += reps
             totalWeight += weight
-            totalVolume += calculateVolume(sets, reps, weight)
+            totalVolume += log.volume || calculateVolume(sets, reps, weight)
           }
         }
       }
@@ -95,8 +107,8 @@ export class CompareWeeklyWorkoutsUseCase {
       return { totalSets, totalReps, totalWeight, totalVolume }
     }
 
-    const current = calculateMetrics(currentWeekSessions)
-    const previous = calculateMetrics(previousWeekSessions)
+    const current = calculateMetrics(comparableCurrentWeekSessions)
+    const previous = calculateMetrics(comparablePreviousWeekSessions)
 
     const differences: WeekDifferences = {
       setsDiff: current.totalSets - previous.totalSets,
@@ -116,13 +128,13 @@ export class CompareWeeklyWorkoutsUseCase {
       currentWeek: {
         start: dayjs(startDate).toISOString(),
         end: dayjs(endDate).toISOString(),
-        totalWorkouts: currentWeekSessions.length,
+        totalWorkouts: comparableCurrentWeekSessions.length,
         ...current,
       },
       previousWeek: {
         start: dayjs(prevStart).toISOString(),
         end: dayjs(prevEnd).toISOString(),
-        totalWorkouts: previousWeekSessions.length,
+        totalWorkouts: comparablePreviousWeekSessions.length,
         ...previous,
       },
       differences,

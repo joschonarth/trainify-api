@@ -2,11 +2,11 @@ import dayjs from 'dayjs'
 
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 import { calculateVolume } from '@/shared/utils/calculate-volume'
-
 import type {
   WorkoutSessionsRepository,
   WorkoutSessionWithWorkout,
 } from '../repositories/workout-sessions.repository'
+import { isSessionComparable } from '../utils/is-session-comparable'
 
 interface CompareMonthlyWorkoutsRequest {
   userId: string
@@ -70,7 +70,19 @@ export class CompareMonthlyWorkoutsUseCase {
         prevEnd
       )
 
-    if (!(currentMonthSessions.length && previousMonthSessions.length)) {
+    const comparableCurrentMonthSessions = currentMonthSessions.filter(
+      (session) => isSessionComparable(session.status, session.exerciseSessions)
+    )
+    const comparablePreviousMonthSessions = previousMonthSessions.filter(
+      (session) => isSessionComparable(session.status, session.exerciseSessions)
+    )
+
+    if (
+      !(
+        comparableCurrentMonthSessions.length &&
+        comparablePreviousMonthSessions.length
+      )
+    ) {
       throw new ResourceNotFoundError('Not enough sessions to compare months.')
     }
 
@@ -91,7 +103,7 @@ export class CompareMonthlyWorkoutsUseCase {
             totalSets += sets
             totalReps += reps
             totalWeight += weight
-            totalVolume += calculateVolume(sets, reps, weight)
+            totalVolume += log.volume || calculateVolume(sets, reps, weight)
           }
         }
       }
@@ -99,8 +111,8 @@ export class CompareMonthlyWorkoutsUseCase {
       return { totalSets, totalReps, totalWeight, totalVolume }
     }
 
-    const current = calculateMetrics(currentMonthSessions)
-    const previous = calculateMetrics(previousMonthSessions)
+    const current = calculateMetrics(comparableCurrentMonthSessions)
+    const previous = calculateMetrics(comparablePreviousMonthSessions)
 
     const differences: MonthDifferences = {
       setsDiff: current.totalSets - previous.totalSets,
@@ -120,13 +132,13 @@ export class CompareMonthlyWorkoutsUseCase {
       currentMonth: {
         start: dayjs(startDate).toISOString(),
         end: dayjs(endDate).toISOString(),
-        totalWorkouts: currentMonthSessions.length,
+        totalWorkouts: comparableCurrentMonthSessions.length,
         ...current,
       },
       previousMonth: {
         start: dayjs(prevStart).toISOString(),
         end: dayjs(prevEnd).toISOString(),
-        totalWorkouts: previousMonthSessions.length,
+        totalWorkouts: comparablePreviousMonthSessions.length,
         ...previous,
       },
       differences,
