@@ -38,13 +38,18 @@ export class GetMonthlyWorkoutCalendarUseCase {
     const today = dayjs().tz(user.timezone)
     const currentYear = year ?? today.year()
     const currentMonth = month ?? today.month() + 1
-    const { startDay, endDay } = getZonedMonthRange(
+    const { start, end, startDay, endDay } = getZonedMonthRange(
       currentYear,
       currentMonth,
       user.timezone
     )
 
-    const sessions = await this.workoutSessionsRepository.findAllByUser(userId)
+    const sessions =
+      await this.workoutSessionsRepository.findByUserAndDateRange(
+        userId,
+        start,
+        end
+      )
 
     const totalDays = endDay.date()
     const daysArray = Array.from({ length: totalDays }, (_, i) =>

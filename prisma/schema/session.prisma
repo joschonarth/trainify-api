@@ -22,6 +22,7 @@ model WorkoutSession {
   workout          Workout           @relation(fields: [workoutId], references: [id], onDelete: Cascade)
   exerciseSessions ExerciseSession[]
 
+  @@index([userId, date])
   @@map("workout_sessions")
 }
 
@@ -47,6 +48,7 @@ model ExerciseSession {
   logs           ExerciseLog[]
 
   @@unique([workoutSessionId, exerciseId])
+  @@index([exerciseId])
   @@map("exercise_sessions")
 }
 
@@ -67,5 +69,6 @@ model ExerciseLog {
   user            User            @relation(fields: [userId], references: [id])
   exercise        Exercise        @relation(fields: [exerciseId], references: [id])
 
+  @@index([userId, exerciseId, date])
   @@map("exercise_logs")
 }

@@ -101,12 +101,65 @@ describe('GetWorkoutSessionsHistoryUseCase', () => {
         },
       ],
     })
+    let requestedSkip = -1
+    const toHistoryRecord = (session: WorkoutSessionWithWorkout) => ({
+      id: session.id,
+      date: session.date,
+      status: session.status,
+      startedAt: session.startedAt,
+      endedAt: session.endedAt,
+      duration: session.duration,
+      workout: {
+        name: session.workout.name,
+        exercises: session.workout.exercises.map((exercise) => ({
+          exerciseId: exercise.exerciseId,
+          position: exercise.position,
+        })),
+      },
+      exerciseSessions: session.exerciseSessions.map((exerciseSession) => ({
+        id: exerciseSession.id,
+        exerciseId: exerciseSession.exercise.id,
+        position: 0,
+        plannedSets: exerciseSession.plannedSets,
+        plannedReps: exerciseSession.plannedReps,
+        plannedWeight: exerciseSession.plannedWeight,
+        completed: exerciseSession.completed,
+        skipReason: exerciseSession.skipReason,
+        startedAt: exerciseSession.startedAt,
+        endedAt: exerciseSession.endedAt,
+        duration: exerciseSession.duration,
+        exercise: { name: exerciseSession.exercise.name },
+        logs: exerciseSession.logs.map((log) => ({
+          sets: log.sets,
+          reps: log.reps,
+          weight: log.weight,
+          description: log.description,
+        })),
+      })),
+    })
     const sut = new GetWorkoutSessionsHistoryUseCase({
-      findAllByUser: async () => [endedSession, openSession],
+      findHistoryByUser: ({ skip, take }) => {
+        requestedSkip = skip
+        expect(take).toBe(20)
+        return Promise.resolve({
+          sessions: [
+            toHistoryRecord(endedSession),
+            toHistoryRecord(openSession),
+          ],
+          total: 2,
+        })
+      },
     })
 
-    const { sessions } = await sut.execute({ userId: 'user-id' })
+    const { sessions, total, totalPages } = await sut.execute({
+      userId: 'user-id',
+      page: 1,
+      pageSize: 20,
+    })
 
+    expect(requestedSkip).toBe(0)
+    expect(total).toBe(2)
+    expect(totalPages).toBe(1)
     const [endedHistory, openHistory] = sessions
     if (!(endedHistory && openHistory)) {
       throw new Error('Session history fixtures are missing.')

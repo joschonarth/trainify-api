@@ -4,6 +4,7 @@ import { z } from 'zod'
 
 import { verifyJwt } from '@/shared/middlewares/verify-jwt'
 import { getWorkoutSessionsHistoryController } from '../controllers/get-workout-sessions-history.controller'
+import { getWorkoutSessionsHistoryQuerySchema } from '../schemas/get-workout-sessions-history.schema'
 
 const exerciseHistorySchema = z.object({
   name: z.string().describe('Exercise name.'),
@@ -50,7 +51,8 @@ export function getWorkoutSessionsHistoryRoute(app: FastifyInstance) {
         tags: ['Sessions'],
         summary: 'Get workout sessions history',
         description:
-          'Returns the full workout session history for the authenticated user.',
+          'Returns a paginated workout session history with optional date, status and workout filters.',
+        querystring: getWorkoutSessionsHistoryQuerySchema,
         response: {
           200: z
             .object({
@@ -80,6 +82,10 @@ export function getWorkoutSessionsHistoryRoute(app: FastifyInstance) {
                   exercises: z.array(exerciseHistorySchema),
                 })
               ),
+              page: z.number(),
+              pageSize: z.number(),
+              total: z.number(),
+              totalPages: z.number(),
             })
             .describe('Workout sessions history fetched successfully.'),
         },
