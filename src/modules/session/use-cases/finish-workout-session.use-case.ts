@@ -13,7 +13,10 @@ interface FinishWorkoutSessionRequest {
 
 export class FinishWorkoutSessionUseCase {
   constructor(
-    private readonly workoutSessionsRepository: WorkoutSessionsRepository
+    private readonly workoutSessionsRepository: Pick<
+      WorkoutSessionsRepository,
+      'findById' | 'update'
+    >
   ) {}
 
   async execute({ sessionId, userId }: FinishWorkoutSessionRequest) {
@@ -23,19 +26,32 @@ export class FinishWorkoutSessionUseCase {
       throw new ResourceNotFoundError('Workout session not found.')
     }
 
-    if (session.status === WorkoutSessionStatus.COMPLETED) {
+    if (
+      session.status === WorkoutSessionStatus.COMPLETED ||
+      session.status === WorkoutSessionStatus.INCOMPLETE ||
+      session.status === WorkoutSessionStatus.SKIPPED
+    ) {
       throw new WorkoutSessionAlreadyCompletedError()
     }
 
-    if (!session.startedAt) {
+    if (
+      session.status !== WorkoutSessionStatus.IN_PROGRESS ||
+      !session.startedAt
+    ) {
       throw new WorkoutSessionNotStartedError()
+    }
+
+    if (session.endedAt) {
+      throw new WorkoutSessionAlreadyCompletedError(
+        'Workout session has already been finished.'
+      )
     }
 
     const endedAt = new Date()
 
-    const duration = session.startedAt
-      ? Math.floor((endedAt.getTime() - session.startedAt.getTime()) / 1000)
-      : 0
+    const duration = Math.floor(
+      (endedAt.getTime() - session.startedAt.getTime()) / 1000
+    )
 
     await this.workoutSessionsRepository.update(sessionId, {
       endedAt,

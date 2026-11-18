@@ -64,7 +64,7 @@ export class CompleteWorkoutSessionUseCase {
     const completedCount = exercises.filter((ex) => ex.completed).length
 
     if (completedCount === 0) {
-      return WorkoutSessionStatus.PENDING
+      return WorkoutSessionStatus.SKIPPED
     }
     if (completedCount < total) {
       return WorkoutSessionStatus.INCOMPLETE
