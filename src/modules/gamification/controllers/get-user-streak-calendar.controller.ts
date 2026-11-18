@@ -14,8 +14,8 @@ export async function getUserStreakCalendarController(
 
   const { days } = await getUserStreakCalendarUseCase.execute({
     userId,
-    month,
-    year,
+    ...(month !== undefined && { month }),
+    ...(year !== undefined && { year }),
   })
 
   return reply.status(200).send({ days })

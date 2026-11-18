@@ -1,6 +1,14 @@
+import dayjs from 'dayjs'
+import timezonePlugin from 'dayjs/plugin/timezone'
+import utc from 'dayjs/plugin/utc'
+import type { UsersRepository } from '@/modules/user/repositories/users.repository'
+import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
+import { getZonedDayDifference } from '@/shared/utils/date-timezone'
 import type { UserStreakLogsRepository } from '../repositories/user-streak-logs.repository'
 import type { UserStreaksRepository } from '../repositories/user-streaks.repository'
-import { daysBetweenDates } from '../utils/get-days-between-dates'
+
+dayjs.extend(utc)
+dayjs.extend(timezonePlugin)
 
 interface UpdateUserStreakUseCaseRequest {
   userId: string
@@ -14,10 +22,23 @@ interface UpdateUserStreakUseCaseResponse {
   lastWorkout: Date | null
 }
 
+function toResponse(
+  streak: Awaited<ReturnType<UserStreaksRepository['findByUserId']>>
+): UpdateUserStreakUseCaseResponse {
+  return streak
+    ? {
+        currentStreak: streak.currentStreak,
+        bestStreak: streak.bestStreak,
+        lastWorkout: streak.lastWorkout,
+      }
+    : { currentStreak: 0, bestStreak: 0, lastWorkout: null }
+}
+
 export class UpdateUserStreakUseCase {
   constructor(
     private readonly userStreaksRepository: UserStreaksRepository,
-    private readonly userStreakLogsRepository: UserStreakLogsRepository
+    private readonly userStreakLogsRepository: UserStreakLogsRepository,
+    private readonly usersRepository: Pick<UsersRepository, 'findById'>
   ) {}
 
   async execute({
@@ -25,23 +46,24 @@ export class UpdateUserStreakUseCase {
     logDate,
     isRefresh = false,
   }: UpdateUserStreakUseCaseRequest): Promise<UpdateUserStreakUseCaseResponse> {
-    const normalizedDate = new Date(logDate.setHours(0, 0, 0, 0))
+    const user = await this.usersRepository.findById(userId)
+    if (!user) {
+      throw new ResourceNotFoundError('User not found.')
+    }
+
+    const timezone = user.timezone
+    const normalizedDate = dayjs(logDate).tz(timezone).startOf('day').toDate()
 
     const streak = await this.userStreaksRepository.findByUserId(userId)
 
     if (!isRefresh) {
       const existingLog = await this.userStreakLogsRepository.findByUserAndDate(
         userId,
-        normalizedDate
+        normalizedDate,
+        timezone
       )
       if (existingLog) {
-        return streak
-          ? {
-              currentStreak: streak.currentStreak,
-              bestStreak: streak.bestStreak,
-              lastWorkout: streak.lastWorkout,
-            }
-          : { currentStreak: 0, bestStreak: 0, lastWorkout: null }
+        return toResponse(streak)
       }
 
       await this.userStreakLogsRepository.create({
@@ -66,9 +88,10 @@ export class UpdateUserStreakUseCase {
       }
     }
 
-    const diffInDays = daysBetweenDates(
+    const diffInDays = getZonedDayDifference(
       new Date(streak.lastWorkout ?? normalizedDate),
-      normalizedDate
+      normalizedDate,
+      timezone
     )
 
     let current = streak.currentStreak

@@ -1,7 +1,7 @@
-import dayjs from 'dayjs'
-
+import type { UsersRepository } from '@/modules/user/repositories/users.repository'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 import { calculateVolume } from '@/shared/utils/calculate-volume'
+import { getZonedMonthRangeForDate } from '@/shared/utils/date-timezone'
 import type {
   WorkoutSessionsRepository,
   WorkoutSessionWithWorkout,
@@ -39,22 +39,25 @@ interface MonthlyComparisonResult {
 
 export class CompareMonthlyWorkoutsUseCase {
   constructor(
-    private readonly workoutSessionsRepository: WorkoutSessionsRepository
+    private readonly workoutSessionsRepository: WorkoutSessionsRepository,
+    private readonly usersRepository: UsersRepository
   ) {}
 
   async execute({
     userId,
   }: CompareMonthlyWorkoutsRequest): Promise<MonthlyComparisonResult> {
-    const startDate = dayjs().startOf('month').toDate()
-    const endDate = dayjs().endOf('month').toDate()
-    const prevStart = dayjs(startDate)
-      .subtract(1, 'month')
-      .startOf('month')
-      .toDate()
-    const prevEnd = dayjs(startDate)
-      .subtract(1, 'month')
-      .endOf('month')
-      .toDate()
+    const user = await this.usersRepository.findById(userId)
+    if (!user) {
+      throw new ResourceNotFoundError('User not found.')
+    }
+
+    const currentRange = getZonedMonthRangeForDate(new Date(), user.timezone)
+    const previousRange = getZonedMonthRangeForDate(
+      new Date(currentRange.start.getTime() - 1),
+      user.timezone
+    )
+    const { start: startDate, end: endDate } = currentRange
+    const { start: prevStart, end: prevEnd } = previousRange
 
     const currentMonthSessions =
       await this.workoutSessionsRepository.findDetailedByUserAndDateRange(
@@ -130,14 +133,14 @@ export class CompareMonthlyWorkoutsUseCase {
     return {
       userId,
       currentMonth: {
-        start: dayjs(startDate).toISOString(),
-        end: dayjs(endDate).toISOString(),
+        start: startDate.toISOString(),
+        end: endDate.toISOString(),
         totalWorkouts: comparableCurrentMonthSessions.length,
         ...current,
       },
       previousMonth: {
-        start: dayjs(prevStart).toISOString(),
-        end: dayjs(prevEnd).toISOString(),
+        start: prevStart.toISOString(),
+        end: prevEnd.toISOString(),
         totalWorkouts: comparablePreviousMonthSessions.length,
         ...previous,
       },

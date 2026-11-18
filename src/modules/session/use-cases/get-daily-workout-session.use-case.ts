@@ -1,9 +1,16 @@
+import dayjs from 'dayjs'
+import timezonePlugin from 'dayjs/plugin/timezone'
+import utc from 'dayjs/plugin/utc'
 import type {
   WorkoutSessionsRepository,
   WorkoutSessionWithWorkout,
 } from '@/modules/session/repositories/workout-sessions.repository'
+import type { UsersRepository } from '@/modules/user/repositories/users.repository'
 import type { WorkoutSchedulesRepository } from '@/modules/workout/repositories/workout-schedules.repository'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
+
+dayjs.extend(utc)
+dayjs.extend(timezonePlugin)
 
 interface GetDailyWorkoutSessionRequest {
   userId: string
@@ -16,16 +23,27 @@ interface GetDailyWorkoutSessionResponse {
 export class GetDailyWorkoutSessionUseCase {
   constructor(
     private readonly workoutSessionsRepository: WorkoutSessionsRepository,
-    private readonly workoutSchedulesRepository: WorkoutSchedulesRepository
+    private readonly workoutSchedulesRepository: WorkoutSchedulesRepository,
+    private readonly usersRepository: Pick<UsersRepository, 'findById'>
   ) {}
 
   async execute({
     userId,
   }: GetDailyWorkoutSessionRequest): Promise<GetDailyWorkoutSessionResponse> {
+    const user = await this.usersRepository.findById(userId)
+    if (!user) {
+      throw new ResourceNotFoundError('User not found.')
+    }
+
     const today = new Date()
+    const userToday = dayjs(today).tz(user.timezone)
 
     const existingSession =
-      await this.workoutSessionsRepository.findByUserAndDate(userId, today)
+      await this.workoutSessionsRepository.findByUserAndDate(
+        userId,
+        today,
+        user.timezone
+      )
 
     if (existingSession) {
       const detailedSession =
@@ -42,7 +60,7 @@ export class GetDailyWorkoutSessionUseCase {
 
     const schedule = await this.workoutSchedulesRepository.findByUserAndDay(
       userId,
-      today.getDay()
+      userToday.day()
     )
 
     if (!schedule) {

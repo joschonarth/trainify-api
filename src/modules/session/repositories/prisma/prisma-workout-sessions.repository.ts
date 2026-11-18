@@ -6,6 +6,7 @@ import type {
 } from 'generated/prisma'
 
 import { prisma } from '@/lib/prisma'
+import { getZonedDayRange } from '@/shared/utils/date-timezone'
 
 import type {
   WorkoutSessionsRepository,
@@ -29,20 +30,17 @@ export class PrismaWorkoutSessionsRepository
 
   async findByUserAndDate(
     userId: string,
-    date: Date
+    date: Date,
+    timezone: string
   ): Promise<WorkoutSession | null> {
-    const startOfDay = new Date(date)
-    startOfDay.setHours(0, 0, 0, 0)
-
-    const endOfDay = new Date(date)
-    endOfDay.setHours(23, 59, 59, 999)
+    const { start, end } = getZonedDayRange(date, timezone)
 
     return await prisma.workoutSession.findFirst({
       where: {
         userId,
         date: {
-          gte: startOfDay,
-          lte: endOfDay,
+          gte: start,
+          lte: end,
         },
       },
     })

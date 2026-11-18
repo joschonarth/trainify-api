@@ -5,6 +5,7 @@ export const userProfileSchema = z.object({
   name: z.string().describe('User name.'),
   email: z.email().describe('User email.'),
   avatarUrl: z.string().nullable().describe('User avatar URL.'),
+  timezone: z.string().describe('User IANA timezone.'),
   height: z.number().nullable().describe('User height in centimeters.'),
   weight: z.number().nullable().describe('User weight in kilograms.'),
   gender: z

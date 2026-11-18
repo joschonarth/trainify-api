@@ -1,6 +1,19 @@
 import { z } from 'zod'
 
 export const updateUserProfileBodySchema = z.object({
+  timezone: z
+    .string()
+    .trim()
+    .min(1)
+    .refine((timezone) => {
+      try {
+        new Intl.DateTimeFormat('en-US', { timeZone: timezone })
+        return true
+      } catch {
+        return false
+      }
+    }, 'Timezone must be a valid IANA timezone.')
+    .optional(),
   name: z.string().trim().min(1).max(100).optional(),
   height: z.number().int().min(50).max(260).optional(),
   weight: z.number().min(20).max(500).optional(),

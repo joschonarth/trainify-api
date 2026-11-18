@@ -63,7 +63,11 @@ export interface WorkoutSessionWithWorkout extends WorkoutSession {
 export interface WorkoutSessionsRepository {
   findById(id: string): Promise<WorkoutSession | null>
 
-  findByUserAndDate(userId: string, date: Date): Promise<WorkoutSession | null>
+  findByUserAndDate(
+    userId: string,
+    date: Date,
+    timezone: string
+  ): Promise<WorkoutSession | null>
 
   findByIdWithWorkout(id: string): Promise<WorkoutSessionWithWorkout | null>
 

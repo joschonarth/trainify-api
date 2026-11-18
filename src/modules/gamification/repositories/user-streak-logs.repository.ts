@@ -1,7 +1,11 @@
 import type { UserStreakLog } from 'generated/prisma'
 
 export interface UserStreakLogsRepository {
-  findByUserAndDate(userId: string, date: Date): Promise<UserStreakLog | null>
+  findByUserAndDate(
+    userId: string,
+    date: Date,
+    timezone: string
+  ): Promise<UserStreakLog | null>
   findByUserAndDateRange(
     userId: string,
     startDate: Date,

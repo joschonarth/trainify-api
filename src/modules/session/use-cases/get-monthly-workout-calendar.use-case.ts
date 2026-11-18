@@ -1,6 +1,14 @@
 import dayjs from 'dayjs'
+import timezonePlugin from 'dayjs/plugin/timezone'
+import utc from 'dayjs/plugin/utc'
 
 import type { WorkoutSessionsRepository } from '@/modules/session/repositories/workout-sessions.repository'
+import type { UsersRepository } from '@/modules/user/repositories/users.repository'
+import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
+import { getZonedMonthRange } from '@/shared/utils/date-timezone'
+
+dayjs.extend(utc)
+dayjs.extend(timezonePlugin)
 
 interface CalendarDayStatus {
   date: string
@@ -13,7 +21,8 @@ interface GetMonthlyWorkoutCalendarResponse {
 
 export class GetMonthlyWorkoutCalendarUseCase {
   constructor(
-    private readonly workoutSessionsRepository: WorkoutSessionsRepository
+    private readonly workoutSessionsRepository: WorkoutSessionsRepository,
+    private readonly usersRepository: Pick<UsersRepository, 'findById'>
   ) {}
 
   async execute(
@@ -21,25 +30,36 @@ export class GetMonthlyWorkoutCalendarUseCase {
     year?: number,
     month?: number
   ): Promise<GetMonthlyWorkoutCalendarResponse> {
-    const today = dayjs()
-    const currentYear = year ?? today.year()
-    const currentMonth = month ?? today.month()
+    const user = await this.usersRepository.findById(userId)
+    if (!user) {
+      throw new ResourceNotFoundError('User not found.')
+    }
 
-    const startOfMonth = dayjs(new Date(currentYear, currentMonth, 1))
-    const endOfMonth = startOfMonth.endOf('month')
+    const today = dayjs().tz(user.timezone)
+    const currentYear = year ?? today.year()
+    const currentMonth = month ?? today.month() + 1
+    const { startDay, endDay } = getZonedMonthRange(
+      currentYear,
+      currentMonth,
+      user.timezone
+    )
 
     const sessions = await this.workoutSessionsRepository.findAllByUser(userId)
 
-    const totalDays = endOfMonth.date()
+    const totalDays = endDay.date()
     const daysArray = Array.from({ length: totalDays }, (_, i) =>
-      startOfMonth.add(i, 'day')
+      startDay.add(i, 'day')
     )
 
     const days: CalendarDayStatus[] = daysArray.map((date) => {
-      const session = sessions.find((s) => dayjs(s.date).isSame(date, 'day'))
+      const completed = sessions.some(
+        (session) =>
+          session.status === 'COMPLETED' &&
+          dayjs(session.date).tz(user.timezone).isSame(date, 'day')
+      )
       return {
         date: date.format('YYYY-MM-DD'),
-        completed: session?.status === 'COMPLETED',
+        completed,
       }
     })
 

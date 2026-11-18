@@ -1,15 +1,12 @@
-import dayjs from 'dayjs'
-import isoWeek from 'dayjs/plugin/isoWeek'
-
+import type { UsersRepository } from '@/modules/user/repositories/users.repository'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 import { calculateVolume } from '@/shared/utils/calculate-volume'
+import { getZonedWeekRange } from '@/shared/utils/date-timezone'
 import type {
   WorkoutSessionsRepository,
   WorkoutSessionWithWorkout,
 } from '../repositories/workout-sessions.repository'
 import { isSessionComparable } from '../utils/is-session-comparable'
-
-dayjs.extend(isoWeek)
 
 interface CompareWeeklyWorkoutsRequest {
   userId: string
@@ -42,16 +39,25 @@ interface WeeklyComparisonResult {
 
 export class CompareWeeklyWorkoutsUseCase {
   constructor(
-    private readonly workoutSessionsRepository: WorkoutSessionsRepository
+    private readonly workoutSessionsRepository: WorkoutSessionsRepository,
+    private readonly usersRepository: UsersRepository
   ) {}
 
   async execute({
     userId,
   }: CompareWeeklyWorkoutsRequest): Promise<WeeklyComparisonResult> {
-    const startDate = dayjs().startOf('isoWeek').toDate()
-    const endDate = dayjs().endOf('isoWeek').toDate()
-    const prevStart = dayjs(startDate).subtract(1, 'week').toDate()
-    const prevEnd = dayjs(endDate).subtract(1, 'week').toDate()
+    const user = await this.usersRepository.findById(userId)
+    if (!user) {
+      throw new ResourceNotFoundError('User not found.')
+    }
+
+    const currentRange = getZonedWeekRange(new Date(), user.timezone)
+    const previousRange = getZonedWeekRange(
+      new Date(currentRange.start.getTime() - 1),
+      user.timezone
+    )
+    const { start: startDate, end: endDate } = currentRange
+    const { start: prevStart, end: prevEnd } = previousRange
 
     const currentWeekSessions =
       await this.workoutSessionsRepository.findDetailedByUserAndDateRange(
@@ -126,14 +132,14 @@ export class CompareWeeklyWorkoutsUseCase {
     return {
       userId,
       currentWeek: {
-        start: dayjs(startDate).toISOString(),
-        end: dayjs(endDate).toISOString(),
+        start: startDate.toISOString(),
+        end: endDate.toISOString(),
         totalWorkouts: comparableCurrentWeekSessions.length,
         ...current,
       },
       previousWeek: {
-        start: dayjs(prevStart).toISOString(),
-        end: dayjs(prevEnd).toISOString(),
+        start: prevStart.toISOString(),
+        end: prevEnd.toISOString(),
         totalWorkouts: comparablePreviousWeekSessions.length,
         ...previous,
       },
