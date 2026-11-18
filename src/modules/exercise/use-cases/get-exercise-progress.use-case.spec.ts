@@ -59,6 +59,7 @@ describe('GetExerciseProgressUseCase', () => {
       plannedSets: null,
       plannedReps: null,
       plannedWeight: null,
+      position: 0,
       skipReason: null,
       startedAt,
       endedAt: new Date(startedAt.getTime() + duration * 1000),

@@ -6,9 +6,9 @@ export const createExerciseLogSessionParamsSchema = z.object({
 
 export const createExerciseLogSessionBodySchema = z.object({
   exerciseId: z.string(),
-  sets: z.number(),
-  reps: z.number(),
-  weight: z.number().nullable(),
+  sets: z.number().int().min(1),
+  reps: z.number().int().min(1),
+  weight: z.number().min(0).nullable(),
   description: z.string().nullable(),
   date: z.iso.datetime().optional(),
 })

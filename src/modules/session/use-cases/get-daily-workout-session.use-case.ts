@@ -50,6 +50,15 @@ export class GetDailyWorkoutSessionUseCase {
     }
 
     const { workout } = schedule
+    const activeExercises = workout.exercises.filter(
+      (workoutExercise) => !workoutExercise.exercise.archivedAt
+    )
+
+    if (!activeExercises.length) {
+      throw new ResourceNotFoundError(
+        'The scheduled workout has no active exercises.'
+      )
+    }
 
     const newSession = await this.workoutSessionsRepository.create({
       userId,
@@ -57,8 +66,9 @@ export class GetDailyWorkoutSessionUseCase {
       date: today,
       status: 'PENDING',
       exerciseSessions: {
-        create: workout.exercises.map((we) => ({
+        create: activeExercises.map((we) => ({
           exerciseId: we.exercise.id,
+          position: we.position,
           plannedSets: we.defaultSets,
           plannedReps: we.defaultReps,
           plannedWeight: we.defaultWeight,

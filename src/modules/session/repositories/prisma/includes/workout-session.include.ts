@@ -4,6 +4,7 @@ export const workoutSessionInclude = {
   workout: {
     include: {
       exercises: {
+        orderBy: { position: 'asc' },
         include: {
           exercise: true,
         },
@@ -11,6 +12,7 @@ export const workoutSessionInclude = {
     },
   },
   exerciseSessions: {
+    orderBy: { position: 'asc' },
     include: {
       exercise: true,
       logs: { orderBy: { date: 'asc' } },

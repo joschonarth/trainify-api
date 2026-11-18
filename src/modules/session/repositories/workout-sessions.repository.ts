@@ -16,6 +16,8 @@ export interface WorkoutSessionWithWorkout extends WorkoutSession {
     name: string
     exercises: {
       id: string
+      exerciseId: string
+      position: number
       defaultSets: number | null
       defaultReps: number | null
       defaultWeight: number | null
@@ -24,6 +26,7 @@ export interface WorkoutSessionWithWorkout extends WorkoutSession {
         name: string
         category: string | null
         type: string | null
+        measurement: 'REPS' | 'DURATION'
       }
     }[]
   }
@@ -43,6 +46,7 @@ export interface WorkoutSessionWithWorkout extends WorkoutSession {
       name: string
       category: string | null
       type: string | null
+      measurement: 'REPS' | 'DURATION'
     }
     logs: {
       id: string
