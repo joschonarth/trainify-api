@@ -1,10 +1,19 @@
-import type { Exercise, ExerciseLog, Prisma } from 'generated/prisma'
+import type {
+  Exercise,
+  ExerciseLog,
+  Prisma,
+  PrismaClient,
+} from 'generated/prisma'
 import { prisma } from '@/lib/prisma'
 import type { ExerciseLogsRepository } from '../exercise-logs.repository'
 
 export class PrismaExerciseLogsRepository implements ExerciseLogsRepository {
+  constructor(
+    private readonly client: Prisma.TransactionClient | PrismaClient = prisma
+  ) {}
+
   async create(data: Prisma.ExerciseLogCreateInput): Promise<ExerciseLog> {
-    return await prisma.exerciseLog.create({ data })
+    return await this.client.exerciseLog.create({ data })
   }
 
   async update(

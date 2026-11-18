@@ -1,4 +1,4 @@
-import type { ExerciseSession, Prisma } from 'generated/prisma'
+import type { ExerciseSession, Prisma, PrismaClient } from 'generated/prisma'
 
 import { prisma } from '@/lib/prisma'
 
@@ -10,6 +10,10 @@ import type {
 export class PrismaExerciseSessionsRepository
   implements ExerciseSessionsRepository
 {
+  constructor(
+    private readonly client: Prisma.TransactionClient | PrismaClient = prisma
+  ) {}
+
   async countCompletedByUser(userId: string): Promise<number> {
     return await prisma.exerciseSession.count({
       where: {
@@ -24,7 +28,7 @@ export class PrismaExerciseSessionsRepository
   }
 
   async findBySessionId(sessionId: string): Promise<ExerciseSessionWithLogs[]> {
-    return (await prisma.exerciseSession.findMany({
+    return (await this.client.exerciseSession.findMany({
       where: { workoutSessionId: sessionId },
       include: {
         exercise: true,
@@ -36,7 +40,7 @@ export class PrismaExerciseSessionsRepository
   async findByWorkoutSessionId(
     workoutSessionId: string
   ): Promise<ExerciseSessionWithLogs[]> {
-    return (await prisma.exerciseSession.findMany({
+    return (await this.client.exerciseSession.findMany({
       where: { workoutSessionId },
       include: {
         exercise: true,
@@ -87,7 +91,7 @@ export class PrismaExerciseSessionsRepository
     id: string,
     data: Prisma.ExerciseSessionUncheckedUpdateInput
   ): Promise<ExerciseSession> {
-    return await prisma.exerciseSession.update({
+    return await this.client.exerciseSession.update({
       where: { id },
       data,
     })

@@ -14,6 +14,7 @@ import type {
 } from '@/modules/session/repositories/workout-sessions.repository'
 import { DuplicateExerciseCompletionError } from '../errors/duplicate-exercise-completion.error'
 import { WorkoutSessionAlreadyCompletedError } from '../errors/workout-session-already-completed.error'
+import type { SessionCompletionUnitOfWork } from '../repositories/session-completion-unit-of-work'
 import { completeWorkoutSessionBodySchema } from '../schemas/complete-workout-session.schema'
 import { CompleteWorkoutSessionUseCase } from './complete-workout-session.use-case'
 
@@ -174,10 +175,17 @@ describe('CompleteWorkoutSessionUseCase', () => {
       execute: vi.fn(unlockBadges),
     }
 
+    const unitOfWork: SessionCompletionUnitOfWork = {
+      execute: (operation) =>
+        operation({
+          workoutSessions: workoutSessionsRepository,
+          exerciseSessions: exerciseSessionsRepository,
+          exerciseLogs: exerciseLogsRepository,
+        }),
+    }
+
     sut = new CompleteWorkoutSessionUseCase(
-      workoutSessionsRepository,
-      exerciseSessionsRepository,
-      exerciseLogsRepository,
+      unitOfWork,
       updateUserStreakUseCase,
       unlockAllBadgesUseCase
     )

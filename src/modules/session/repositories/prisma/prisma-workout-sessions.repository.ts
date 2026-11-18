@@ -1,5 +1,6 @@
 import type {
   Prisma,
+  PrismaClient,
   WorkoutSession,
   WorkoutSessionStatus,
 } from 'generated/prisma'
@@ -16,6 +17,10 @@ import { mapWorkoutSession } from './mappers/workout-session.mapper'
 export class PrismaWorkoutSessionsRepository
   implements WorkoutSessionsRepository
 {
+  constructor(
+    private readonly client: Prisma.TransactionClient | PrismaClient = prisma
+  ) {}
+
   async findById(id: string): Promise<WorkoutSession | null> {
     return await prisma.workoutSession.findUnique({
       where: { id },
@@ -46,7 +51,7 @@ export class PrismaWorkoutSessionsRepository
   async findByIdWithWorkout(
     id: string
   ): Promise<WorkoutSessionWithWorkout | null> {
-    const session = await prisma.workoutSession.findUnique({
+    const session = await this.client.workoutSession.findUnique({
       where: { id },
       include: workoutSessionInclude,
     })
@@ -152,7 +157,7 @@ export class PrismaWorkoutSessionsRepository
     id: string,
     data: Prisma.WorkoutSessionUpdateInput
   ): Promise<WorkoutSession> {
-    return await prisma.workoutSession.update({
+    return await this.client.workoutSession.update({
       where: { id },
       data,
     })
