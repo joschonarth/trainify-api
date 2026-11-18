@@ -15,8 +15,8 @@ export async function getWorkoutCalendarController(
 
   const { days } = await getWorkoutCalendarUseCase.execute({
     userId,
-    month,
-    year,
+    ...(month !== undefined && { month }),
+    ...(year !== undefined && { year }),
   })
 
   return reply.status(200).send({ days })

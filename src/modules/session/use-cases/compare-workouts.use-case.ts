@@ -1,12 +1,19 @@
 import dayjs from 'dayjs'
-
+import isoWeek from 'dayjs/plugin/isoWeek'
+import timezonePlugin from 'dayjs/plugin/timezone'
+import utc from 'dayjs/plugin/utc'
+import type { UsersRepository } from '@/modules/user/repositories/users.repository'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 import { calculateVolume } from '@/shared/utils/calculate-volume'
-
 import type {
   WorkoutSessionsRepository,
   WorkoutSessionWithWorkout,
 } from '../repositories/workout-sessions.repository'
+import { isSessionComparable } from '../utils/is-session-comparable'
+
+dayjs.extend(isoWeek)
+dayjs.extend(utc)
+dayjs.extend(timezonePlugin)
 
 type Period = 'week' | 'month'
 
@@ -42,7 +49,8 @@ interface CompareWorkoutsResult {
 
 export class CompareWorkoutsUseCase {
   constructor(
-    private readonly workoutSessionsRepository: WorkoutSessionsRepository
+    private readonly workoutSessionsRepository: WorkoutSessionsRepository,
+    private readonly usersRepository: Pick<UsersRepository, 'findById'>
   ) {}
 
   async execute({
@@ -54,22 +62,27 @@ export class CompareWorkoutsUseCase {
     let prevStart: Date
     let prevEnd: Date
 
-    const today = dayjs()
+    const user = await this.usersRepository.findById(userId)
+    if (!user) {
+      throw new ResourceNotFoundError('User not found.')
+    }
+
+    const today = dayjs().tz(user.timezone)
 
     if (period === 'week') {
-      startDate = today.startOf('week').add(1, 'day').toDate()
-      endDate = today.endOf('week').add(1, 'day').toDate()
-      prevStart = today
-        .subtract(1, 'week')
-        .startOf('week')
-        .add(1, 'day')
-        .toDate()
-      prevEnd = today.subtract(1, 'week').endOf('week').add(1, 'day').toDate()
+      const currentWeek = today.startOf('isoWeek')
+      const previousWeek = currentWeek.subtract(1, 'week')
+      startDate = currentWeek.toDate()
+      endDate = currentWeek.endOf('isoWeek').toDate()
+      prevStart = previousWeek.toDate()
+      prevEnd = previousWeek.endOf('isoWeek').toDate()
     } else {
-      startDate = today.startOf('month').toDate()
-      endDate = today.endOf('month').toDate()
-      prevStart = today.subtract(1, 'month').startOf('month').toDate()
-      prevEnd = today.subtract(1, 'month').endOf('month').toDate()
+      const currentMonth = today.startOf('month')
+      const previousMonth = currentMonth.subtract(1, 'month')
+      startDate = currentMonth.toDate()
+      endDate = currentMonth.endOf('month').toDate()
+      prevStart = previousMonth.toDate()
+      prevEnd = previousMonth.endOf('month').toDate()
     }
 
     const currentSessions =
@@ -85,7 +98,16 @@ export class CompareWorkoutsUseCase {
         prevEnd
       )
 
-    if (!(currentSessions.length && previousSessions.length)) {
+    const comparableCurrentSessions = currentSessions.filter((session) =>
+      isSessionComparable(session.status, session.exerciseSessions)
+    )
+    const comparablePreviousSessions = previousSessions.filter((session) =>
+      isSessionComparable(session.status, session.exerciseSessions)
+    )
+
+    if (
+      !(comparableCurrentSessions.length && comparablePreviousSessions.length)
+    ) {
       throw new ResourceNotFoundError(
         `Not enough sessions to compare ${period}s.`
       )
@@ -116,8 +138,8 @@ export class CompareWorkoutsUseCase {
       return { totalSets, totalReps, totalWeight, totalVolume }
     }
 
-    const current = calculateMetrics(currentSessions)
-    const previous = calculateMetrics(previousSessions)
+    const current = calculateMetrics(comparableCurrentSessions)
+    const previous = calculateMetrics(comparablePreviousSessions)
 
     const differences: PeriodDifferences = {
       setsDiff: current.totalSets - previous.totalSets,
@@ -137,13 +159,13 @@ export class CompareWorkoutsUseCase {
       currentPeriod: {
         start: dayjs(startDate).toISOString(),
         end: dayjs(endDate).toISOString(),
-        totalWorkouts: currentSessions.length,
+        totalWorkouts: comparableCurrentSessions.length,
         ...current,
       },
       previousPeriod: {
         start: dayjs(prevStart).toISOString(),
         end: dayjs(prevEnd).toISOString(),
-        totalWorkouts: previousSessions.length,
+        totalWorkouts: comparablePreviousSessions.length,
         ...previous,
       },
       differences,
