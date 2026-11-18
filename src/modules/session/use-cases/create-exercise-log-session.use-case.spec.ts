@@ -8,6 +8,7 @@ import { createExerciseLogSessionBodySchema } from '../schemas/create-exercise-l
 import { CreateExerciseLogSessionUseCase } from './create-exercise-log-session.use-case'
 
 describe('CreateExerciseLogSessionUseCase', () => {
+  let sessionStatus: WorkoutSessionStatus
   let exerciseLogsRepository: Pick<ExerciseLogsRepository, 'create'>
   let workoutSessionsRepository: Pick<
     WorkoutSessionsRepository,
@@ -16,6 +17,7 @@ describe('CreateExerciseLogSessionUseCase', () => {
   let sut: CreateExerciseLogSessionUseCase
 
   beforeEach(() => {
+    sessionStatus = WorkoutSessionStatus.IN_PROGRESS
     const createLog: ExerciseLogsRepository['create'] = async (data) => ({
       id: 'log-id',
       sets: data.sets,
@@ -36,7 +38,7 @@ describe('CreateExerciseLogSessionUseCase', () => {
       findByIdWithWorkout: vi.fn(async () => ({
         id: 'session-id',
         date: new Date('2026-01-01T00:00:00.000Z'),
-        status: WorkoutSessionStatus.IN_PROGRESS,
+        status: sessionStatus,
         startedAt: null,
         endedAt: null,
         duration: null,
@@ -94,6 +96,22 @@ describe('CreateExerciseLogSessionUseCase', () => {
     expect(exerciseLogsRepository.create).toHaveBeenCalledWith(
       expect.objectContaining({ date })
     )
+  })
+
+  it('does not create a log when the workout session is not in progress', async () => {
+    sessionStatus = WorkoutSessionStatus.PENDING
+
+    await expect(
+      sut.execute({
+        userId: 'user-id',
+        sessionId: 'session-id',
+        exerciseId: 'exercise-id',
+        sets: 3,
+        reps: 10,
+      })
+    ).rejects.toMatchObject({ statusCode: 403 })
+
+    expect(exerciseLogsRepository.create).not.toHaveBeenCalled()
   })
 
   it('persists the calculated volume with the exercise log', async () => {
