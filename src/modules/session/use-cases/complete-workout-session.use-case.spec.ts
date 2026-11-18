@@ -12,7 +12,7 @@ import type {
   WorkoutSessionsRepository,
   WorkoutSessionWithWorkout,
 } from '@/modules/session/repositories/workout-sessions.repository'
-
+import { DuplicateExerciseCompletionError } from '../errors/duplicate-exercise-completion.error'
 import { WorkoutSessionAlreadyCompletedError } from '../errors/workout-session-already-completed.error'
 import { completeWorkoutSessionBodySchema } from '../schemas/complete-workout-session.schema'
 import { CompleteWorkoutSessionUseCase } from './complete-workout-session.use-case'
@@ -205,7 +205,7 @@ describe('CompleteWorkoutSessionUseCase', () => {
     )
   })
 
-  it('creates at most one log for each completed ExerciseSession', async () => {
+  it('rejects duplicate exercise session entries before writing', async () => {
     const completedExercise = {
       exerciseSessionId: 'exercise-session-id',
       sets: 3,
@@ -214,13 +214,36 @@ describe('CompleteWorkoutSessionUseCase', () => {
       completed: true,
     }
 
-    await sut.execute({
-      userId,
-      sessionId,
-      exercises: [completedExercise, completedExercise],
-    })
+    await expect(
+      sut.execute({
+        userId,
+        sessionId,
+        exercises: [completedExercise, completedExercise],
+      })
+    ).rejects.toBeInstanceOf(DuplicateExerciseCompletionError)
 
-    expect(exerciseLogsRepository.create).toHaveBeenCalledTimes(1)
+    expect(exerciseLogsRepository.create).not.toHaveBeenCalled()
+    expect(exerciseSessionsRepository.update).not.toHaveBeenCalled()
+  })
+
+  it('rejects an exercise session that does not belong to the workout session', async () => {
+    await expect(
+      sut.execute({
+        userId,
+        sessionId,
+        exercises: [
+          {
+            exerciseSessionId: 'another-session-exercise-id',
+            sets: 3,
+            reps: 10,
+            completed: true,
+          },
+        ],
+      })
+    ).rejects.toMatchObject({ statusCode: 404 })
+
+    expect(exerciseLogsRepository.create).not.toHaveBeenCalled()
+    expect(exerciseSessionsRepository.update).not.toHaveBeenCalled()
   })
 
   it('does not create another log for an ExerciseSession that already has one', async () => {

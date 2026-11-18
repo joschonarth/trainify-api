@@ -5,7 +5,7 @@ import type { UnlockAllBadgesUseCase } from '@/modules/gamification/use-cases/un
 import type { UpdateUserStreakUseCase } from '@/modules/gamification/use-cases/update-user-streak.use-case'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 import { calculateVolume } from '@/shared/utils/calculate-volume'
-
+import { DuplicateExerciseCompletionError } from '../errors/duplicate-exercise-completion.error'
 import { WorkoutSessionAlreadyCompletedError } from '../errors/workout-session-already-completed.error'
 import type { ExerciseSessionsRepository } from '../repositories/exercise-sessions.repository'
 import type { WorkoutSessionsRepository } from '../repositories/workout-sessions.repository'
@@ -85,6 +85,13 @@ export class CompleteWorkoutSessionUseCase {
     ) {
       throw new WorkoutSessionAlreadyCompletedError()
     }
+
+    if (
+      session.status !== WorkoutSessionStatus.PENDING &&
+      session.status !== WorkoutSessionStatus.IN_PROGRESS
+    ) {
+      throw new WorkoutSessionAlreadyCompletedError()
+    }
   }
 
   private async completeExercise(
@@ -156,6 +163,23 @@ export class CompleteWorkoutSessionUseCase {
 
     if (!exerciseSessions.length) {
       throw new ResourceNotFoundError('No exercises found for this session.')
+    }
+
+    const exerciseSessionIds = new Set(
+      exerciseSessions.map((exerciseSession) => exerciseSession.id)
+    )
+    const submittedExerciseSessionIds = new Set<string>()
+
+    for (const exercise of exercises) {
+      if (submittedExerciseSessionIds.has(exercise.exerciseSessionId)) {
+        throw new DuplicateExerciseCompletionError()
+      }
+
+      submittedExerciseSessionIds.add(exercise.exerciseSessionId)
+
+      if (!exerciseSessionIds.has(exercise.exerciseSessionId)) {
+        throw new ResourceNotFoundError('Exercise session not found.')
+      }
     }
 
     const now = new Date()
