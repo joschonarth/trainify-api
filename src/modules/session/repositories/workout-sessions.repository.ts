@@ -73,6 +73,50 @@ export interface WorkoutSessionsRepository {
 
   findAllByUser(userId: string): Promise<WorkoutSessionWithWorkout[]>
 
+  findHistoryByUser(query: {
+    userId: string
+    from?: Date
+    to?: Date
+    status?: WorkoutSessionStatus
+    workoutId?: string
+    skip: number
+    take: number
+  }): Promise<{
+    sessions: {
+      id: string
+      date: Date
+      status: WorkoutSessionStatus
+      startedAt: Date | null
+      endedAt: Date | null
+      duration: number | null
+      workout: {
+        name: string
+        exercises: { exerciseId: string; position: number }[]
+      }
+      exerciseSessions: {
+        id: string
+        position: number
+        exerciseId: string
+        plannedSets: number | null
+        plannedReps: number | null
+        plannedWeight: number | null
+        completed: boolean
+        skipReason: string | null
+        startedAt: Date | null
+        endedAt: Date | null
+        duration: number | null
+        exercise: { name: string }
+        logs: {
+          sets: number
+          reps: number
+          weight: number | null
+          description: string | null
+        }[]
+      }[]
+    }[]
+    total: number
+  }>
+
   findByIdWithWorkoutAndExerciseSessions(
     id: string
   ): Promise<WorkoutSessionWithWorkout | null>

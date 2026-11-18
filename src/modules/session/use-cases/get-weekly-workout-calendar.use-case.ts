@@ -32,10 +32,16 @@ export class GetWeeklyWorkoutCalendarUseCase {
       throw new ResourceNotFoundError('User not found.')
     }
 
-    const sessions = await this.workoutSessionsRepository.findAllByUser(userId)
-
     const today = dayjs().tz(user.timezone)
     const startOfWeek = today.startOf('isoWeek')
+    const startDate = startOfWeek.toDate()
+    const endDate = startOfWeek.endOf('isoWeek').toDate()
+    const sessions =
+      await this.workoutSessionsRepository.findByUserAndDateRange(
+        userId,
+        startDate,
+        endDate
+      )
 
     const weekDates = Array.from({ length: 7 }, (_, i) =>
       startOfWeek.add(i, 'day')

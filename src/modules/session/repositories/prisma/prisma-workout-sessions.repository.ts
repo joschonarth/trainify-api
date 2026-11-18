@@ -67,6 +67,89 @@ export class PrismaWorkoutSessionsRepository
     return sessions.map(mapWorkoutSession)
   }
 
+  async findHistoryByUser({
+    userId,
+    from,
+    to,
+    status,
+    workoutId,
+    skip,
+    take,
+  }: {
+    userId: string
+    from?: Date
+    to?: Date
+    status?: WorkoutSessionStatus
+    workoutId?: string
+    skip: number
+    take: number
+  }) {
+    const where: Prisma.WorkoutSessionWhereInput = {
+      userId,
+      ...(status && { status }),
+      ...(workoutId && { workoutId }),
+      ...((from || to) && {
+        date: {
+          ...(from && { gte: from }),
+          ...(to && { lte: to }),
+        },
+      }),
+    }
+
+    const [sessions, total] = await Promise.all([
+      this.client.workoutSession.findMany({
+        where,
+        skip,
+        take,
+        orderBy: [{ date: 'desc' }, { id: 'desc' }],
+        select: {
+          id: true,
+          date: true,
+          status: true,
+          startedAt: true,
+          endedAt: true,
+          duration: true,
+          workout: {
+            select: {
+              name: true,
+              exercises: { select: { exerciseId: true, position: true } },
+            },
+          },
+          exerciseSessions: {
+            orderBy: { position: 'asc' },
+            select: {
+              id: true,
+              exerciseId: true,
+              position: true,
+              plannedSets: true,
+              plannedReps: true,
+              plannedWeight: true,
+              completed: true,
+              skipReason: true,
+              startedAt: true,
+              endedAt: true,
+              duration: true,
+              exercise: { select: { name: true } },
+              logs: {
+                take: 1,
+                orderBy: { date: 'desc' },
+                select: {
+                  sets: true,
+                  reps: true,
+                  weight: true,
+                  description: true,
+                },
+              },
+            },
+          },
+        },
+      }),
+      this.client.workoutSession.count({ where }),
+    ])
+
+    return { sessions, total }
+  }
+
   async findByIdWithWorkoutAndExerciseSessions(
     id: string
   ): Promise<WorkoutSessionWithWorkout | null> {
