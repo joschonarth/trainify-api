@@ -37,6 +37,7 @@ describe('GetWorkoutSessionDetailsUseCase', () => {
             name: 'Bench Press',
             category: null,
             type: null,
+            measurement: 'REPS',
           },
           logs: [],
         },

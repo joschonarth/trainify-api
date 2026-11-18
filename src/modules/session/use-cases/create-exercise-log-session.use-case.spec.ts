@@ -66,6 +66,7 @@ describe('CreateExerciseLogSessionUseCase', () => {
               name: 'Bench Press',
               category: null,
               type: null,
+              measurement: 'REPS' as const,
             },
             logs: [],
           },

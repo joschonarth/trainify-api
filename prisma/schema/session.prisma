@@ -28,6 +28,7 @@ model WorkoutSession {
 model ExerciseSession {
   id        String  @id @default(cuid())
   completed Boolean @default(false)
+  position  Int     @default(0)
 
   plannedSets   Int?
   plannedReps   Int?

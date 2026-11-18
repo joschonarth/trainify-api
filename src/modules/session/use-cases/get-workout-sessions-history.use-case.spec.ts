@@ -40,6 +40,7 @@ function makeSession(
           name: 'Bench Press',
           category: null,
           type: null,
+          measurement: 'REPS',
         },
         logs: [
           {
@@ -47,6 +48,7 @@ function makeSession(
             sets: 3,
             reps: 15,
             weight: 10,
+            volume: 450,
             date: endedAt,
             description: null,
           },
@@ -68,6 +70,7 @@ function makeSession(
           name: 'Squat',
           category: null,
           type: null,
+          measurement: 'REPS',
         },
         logs: [],
       },

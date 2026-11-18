@@ -20,37 +20,57 @@ type PrismaSession = Prisma.WorkoutSessionGetPayload<{
 export function mapWorkoutSession(
   session: PrismaSession
 ): WorkoutSessionWithWorkout {
+  const legacyPositionValues = session.exerciseSessions.every(
+    (exerciseSession) => exerciseSession.position === 0
+  )
+
   return {
     ...session,
-    exerciseSessions: session.exerciseSessions.map((ex) => ({
-      id: ex.id,
-      plannedSets: ex.plannedSets,
-      plannedReps: ex.plannedReps,
-      plannedWeight: ex.plannedWeight,
-      completed: ex.completed,
-      skipReason: ex.skipReason,
-      state: getExerciseSessionState(
-        ex.completed,
-        session.endedAt,
-        session.status
-      ),
-      duration: ex.duration ?? null,
-      startedAt: ex.startedAt ?? null,
-      endedAt: ex.endedAt ?? null,
-      exercise: {
-        id: ex.exercise.id,
-        name: ex.exercise.name,
-        category: ex.exercise.category,
-        type: ex.exercise.type,
-      },
-      logs: ex.logs.map((log) => ({
-        id: log.id,
-        sets: log.sets,
-        reps: log.reps,
-        weight: log.weight ?? null,
-        date: log.date,
-        description: log.description ?? null,
+    exerciseSessions: [...session.exerciseSessions]
+      .sort((a, b) => {
+        if (!legacyPositionValues) {
+          return a.position - b.position
+        }
+
+        const aPosition = session.workout.exercises.findIndex(
+          (item) => item.exerciseId === a.exerciseId
+        )
+        const bPosition = session.workout.exercises.findIndex(
+          (item) => item.exerciseId === b.exerciseId
+        )
+        return aPosition - bPosition
+      })
+      .map((ex) => ({
+        id: ex.id,
+        plannedSets: ex.plannedSets,
+        plannedReps: ex.plannedReps,
+        plannedWeight: ex.plannedWeight,
+        completed: ex.completed,
+        skipReason: ex.skipReason,
+        state: getExerciseSessionState(
+          ex.completed,
+          session.endedAt,
+          session.status
+        ),
+        duration: ex.duration ?? null,
+        startedAt: ex.startedAt ?? null,
+        endedAt: ex.endedAt ?? null,
+        exercise: {
+          id: ex.exercise.id,
+          name: ex.exercise.name,
+          category: ex.exercise.category,
+          type: ex.exercise.type,
+          measurement: ex.exercise.measurement,
+        },
+        logs: ex.logs.map((log) => ({
+          id: log.id,
+          sets: log.sets,
+          reps: log.reps,
+          weight: log.weight ?? null,
+          volume: log.volume,
+          date: log.date,
+          description: log.description ?? null,
+        })),
       })),
-    })),
   }
 }

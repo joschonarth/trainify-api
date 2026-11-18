@@ -6,6 +6,8 @@ export interface WorkoutScheduleWithWorkout extends WorkoutSchedule {
     name: string
     exercises: {
       id: string
+      exerciseId: string
+      position: number
       defaultSets: number | null
       defaultReps: number | null
       defaultWeight: number | null
@@ -14,6 +16,8 @@ export interface WorkoutScheduleWithWorkout extends WorkoutSchedule {
         name: string
         category: string | null
         type: string | null
+        measurement: 'REPS' | 'DURATION'
+        archivedAt: Date | null
       }
     }[]
   }

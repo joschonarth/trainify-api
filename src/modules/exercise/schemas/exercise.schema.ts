@@ -1,4 +1,4 @@
-import { ExerciseCategory, ExerciseType } from 'generated/prisma'
+import { ExerciseCategory, ExerciseType, Measurement } from 'generated/prisma'
 import { z } from 'zod'
 
 export const exerciseSchema = z.object({
@@ -6,6 +6,7 @@ export const exerciseSchema = z.object({
   name: z.string().describe('Exercise name.'),
   category: z.enum(ExerciseCategory).nullable().describe('Exercise category.'),
   type: z.enum(ExerciseType).nullable().describe('Exercise type.'),
+  measurement: z.enum(Measurement).describe('Exercise measurement mode.'),
   isCustom: z
     .boolean()
     .describe('Whether the exercise was created by the user.'),

@@ -1,4 +1,4 @@
-import { WorkoutSessionStatus } from 'generated/prisma'
+import { Measurement, WorkoutSessionStatus } from 'generated/prisma'
 import { z } from 'zod'
 
 // --- Exercise Session ---
@@ -8,6 +8,7 @@ export const sessionExerciseItemSchema = z.object({
   name: z.string().describe('Exercise name.'),
   category: z.string().nullable().describe('Exercise category.'),
   type: z.string().nullable().describe('Exercise type.'),
+  measurement: z.enum(Measurement).describe('Exercise measurement mode.'),
 })
 
 export const sessionExerciseLogSchema = z.object({
@@ -124,6 +125,10 @@ export const sessionWithWorkoutSchema = baseSessionSchema.extend({
     exercises: z.array(
       z.object({
         id: z.string().describe('Workout exercise relation ID.'),
+        position: z
+          .number()
+          .int()
+          .describe('Exercise position in the workout.'),
         defaultSets: z.number().nullable().describe('Default number of sets.'),
         defaultReps: z.number().nullable().describe('Default number of reps.'),
         defaultWeight: z

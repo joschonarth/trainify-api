@@ -46,6 +46,7 @@ function makeExerciseSession(
     plannedSets: null,
     plannedReps: null,
     plannedWeight: null,
+    position: 0,
     startedAt: null,
     endedAt: null,
     duration: null,
