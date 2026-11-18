@@ -14,7 +14,9 @@ export function completeExerciseSessionRoute(app: FastifyInstance) {
       schema: {
         tags: ['Sessions'],
         summary: 'Complete exercise session',
-        description: 'Marks a specific exercise session as completed.',
+        deprecated: true,
+        description:
+          'Deprecated. Complete exercises through POST /sessions/:sessionId/complete.',
         params: completeExerciseSessionParamsSchema,
         response: {
           200: z

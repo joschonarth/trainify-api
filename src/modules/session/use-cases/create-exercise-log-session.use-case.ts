@@ -1,7 +1,8 @@
 import type { ExerciseLog } from 'generated/prisma'
-
+import { WorkoutSessionStatus } from 'generated/prisma'
 import type { ExerciseLogsRepository } from '@/modules/exercise/repositories/exercise-logs.repository'
 import type { WorkoutSessionsRepository } from '@/modules/session/repositories/workout-sessions.repository'
+import { NotAllowedError } from '@/shared/errors/not-allowed.error'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 import { calculateVolume } from '@/shared/utils/calculate-volume'
 
@@ -47,6 +48,12 @@ export class CreateExerciseLogSessionUseCase {
 
     if (!session || session.userId !== userId) {
       throw new ResourceNotFoundError('Workout session not found.')
+    }
+
+    if (session.status !== WorkoutSessionStatus.IN_PROGRESS) {
+      throw new NotAllowedError(
+        'Exercise logs can only be added while the workout session is in progress.'
+      )
     }
 
     const exerciseSession = session.exerciseSessions.find(

@@ -16,8 +16,9 @@ export function createExerciseLogSessionRoute(app: FastifyInstance) {
       schema: {
         tags: ['Sessions'],
         summary: 'Create exercise log session',
+        deprecated: true,
         description:
-          'Creates an exercise log entry for a specific workout session.',
+          'Deprecated. Use POST /sessions/:sessionId/complete to record exercise performance.',
         params: createExerciseLogSessionParamsSchema,
         body: createExerciseLogSessionBodySchema,
         response: {
