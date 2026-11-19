@@ -1,3 +1,4 @@
+import { ResourceAlreadyExistsError } from '@/shared/errors/resource-already-exists.error'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
 import type { WorkoutSchedulesRepository } from '../repositories/workout-schedules.repository'
@@ -34,20 +35,40 @@ export class AssignDaysToWorkoutUseCase {
       throw new ResourceNotFoundError('Workout not found.')
     }
 
-    const existingDays =
-      await this.workoutSchedulesRepository.findDaysByWorkout(workoutId)
-
-    for (const day of existingDays) {
-      await this.workoutSchedulesRepository.delete(day.id)
+    if (new Set(daysOfWeek).size !== daysOfWeek.length) {
+      throw new ResourceAlreadyExistsError('Schedule days must be unique.')
     }
-
-    const newDays = daysOfWeek.map((day) => ({
-      workoutId,
-      userId,
-      dayOfWeek: day,
-    }))
-
-    await this.workoutSchedulesRepository.assignDaysToWorkout(newDays)
+    const otherWorkoutDays =
+      await this.workoutSchedulesRepository.findDaysByUser(userId)
+    const conflict = otherWorkoutDays.find(
+      (schedule) =>
+        schedule.workoutId !== workoutId &&
+        daysOfWeek.includes(schedule.dayOfWeek)
+    )
+    if (conflict) {
+      throw new ResourceAlreadyExistsError(
+        'A workout already uses one of these days.'
+      )
+    }
+    try {
+      await this.workoutSchedulesRepository.replaceDaysForWorkout(
+        workoutId,
+        userId,
+        daysOfWeek
+      )
+    } catch (error) {
+      if (
+        typeof error === 'object' &&
+        error !== null &&
+        'code' in error &&
+        error.code === 'P2002'
+      ) {
+        throw new ResourceAlreadyExistsError(
+          'A workout already uses one of these days.'
+        )
+      }
+      throw error
+    }
 
     return { assignedDays: daysOfWeek }
   }
