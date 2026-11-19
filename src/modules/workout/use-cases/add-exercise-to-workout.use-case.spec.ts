@@ -215,4 +215,30 @@ describe('AddExerciseToWorkoutUseCase', () => {
     expect(addExerciseToWorkout).not.toHaveBeenCalled()
     expect(workoutExercisesRepository.items).toHaveLength(1)
   })
+
+  it('maps a concurrent unique constraint race to a conflict', async () => {
+    const exercise = await exercisesRepository.create({
+      name: 'Bench Press',
+      isCustom: true,
+      user: { connect: { id: userId } },
+    })
+    await myExercisesRepository.addExercise(userId, exercise.id)
+    vi.spyOn(
+      workoutExercisesRepository,
+      'addExerciseAtNextPosition'
+    ).mockRejectedValue(
+      Object.assign(new Error('Unique constraint failed.'), { code: 'P2002' })
+    )
+
+    await expect(
+      sut.execute({
+        userId,
+        workoutId,
+        exerciseId: exercise.id,
+        defaultSets: 3,
+        defaultReps: 10,
+        defaultWeight: 20,
+      })
+    ).rejects.toBeInstanceOf(ResourceAlreadyExistsError)
+  })
 })

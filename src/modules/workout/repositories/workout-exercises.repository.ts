@@ -21,6 +21,11 @@ export interface WorkoutExercisesRepository {
 
   getNextPosition(workoutId: string): Promise<number>
 
+  addExerciseAtNextPosition(
+    workoutId: string,
+    data: Prisma.WorkoutExerciseCreateInput
+  ): Promise<WorkoutExercise>
+
   updatePositions(workoutId: string, exerciseIds: string[]): Promise<void>
 
   removeByExerciseId(exerciseId: string): Promise<void>
@@ -39,4 +44,9 @@ export interface WorkoutExercisesRepository {
   ): Promise<WorkoutExercise>
 
   removeExerciseFromWorkout(workoutExerciseId: string): Promise<void>
+
+  removeAndNormalizePositions(
+    workoutId: string,
+    workoutExerciseId: string
+  ): Promise<void>
 }

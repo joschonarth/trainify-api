@@ -74,17 +74,32 @@ export class AddExerciseToWorkoutUseCase {
       )
     }
 
-    const position =
-      await this.workoutExercisesRepository.getNextPosition(workoutId)
-    const workoutExercise =
-      await this.workoutExercisesRepository.addExerciseToWorkout({
-        workout: { connect: { id: workoutId } },
-        exercise: { connect: { id: exerciseId } },
-        position,
-        defaultSets: defaultSets ?? null,
-        defaultReps: defaultReps ?? null,
-        defaultWeight: defaultWeight ?? null,
-      })
+    let workoutExercise: WorkoutExercise
+    try {
+      workoutExercise =
+        await this.workoutExercisesRepository.addExerciseAtNextPosition(
+          workoutId,
+          {
+            workout: { connect: { id: workoutId } },
+            exercise: { connect: { id: exerciseId } },
+            defaultSets: defaultSets ?? null,
+            defaultReps: defaultReps ?? null,
+            defaultWeight: defaultWeight ?? null,
+          }
+        )
+    } catch (error) {
+      if (
+        typeof error === 'object' &&
+        error !== null &&
+        'code' in error &&
+        error.code === 'P2002'
+      ) {
+        throw new ResourceAlreadyExistsError(
+          'Exercise is already added to this workout.'
+        )
+      }
+      throw error
+    }
 
     return { workoutExercise }
   }

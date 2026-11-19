@@ -58,6 +58,7 @@ export class PrismaWorkoutExercisesRepository
     exerciseIds: string[]
   ): Promise<void> {
     await prisma.$transaction(async (transaction) => {
+      await transaction.$queryRaw`SELECT id FROM workouts WHERE id = ${workoutId} FOR UPDATE`
       await Promise.all(
         exerciseIds.map((exerciseId, position) =>
           transaction.workoutExercise.update({
@@ -68,6 +69,22 @@ export class PrismaWorkoutExercisesRepository
           })
         )
       )
+    })
+  }
+
+  async addExerciseAtNextPosition(
+    workoutId: string,
+    data: Prisma.WorkoutExerciseCreateInput
+  ): Promise<WorkoutExercise> {
+    return await prisma.$transaction(async (transaction) => {
+      await transaction.$queryRaw`SELECT id FROM workouts WHERE id = ${workoutId} FOR UPDATE`
+      const aggregate = await transaction.workoutExercise.aggregate({
+        where: { workoutId },
+        _max: { position: true },
+      })
+      return await transaction.workoutExercise.create({
+        data: { ...data, position: (aggregate._max.position ?? -1) + 1 },
+      })
     })
   }
 
@@ -100,6 +117,29 @@ export class PrismaWorkoutExercisesRepository
   async removeExerciseFromWorkout(id: string): Promise<void> {
     await prisma.workoutExercise.delete({
       where: { id },
+    })
+  }
+
+  async removeAndNormalizePositions(
+    workoutId: string,
+    workoutExerciseId: string
+  ): Promise<void> {
+    await prisma.$transaction(async (transaction) => {
+      await transaction.$queryRaw`SELECT id FROM workouts WHERE id = ${workoutId} FOR UPDATE`
+      await transaction.workoutExercise.delete({
+        where: { id: workoutExerciseId },
+      })
+      const remaining = await transaction.workoutExercise.findMany({
+        where: { workoutId },
+        orderBy: [{ position: 'asc' }, { id: 'asc' }],
+        select: { id: true },
+      })
+      for (const [position, exercise] of remaining.entries()) {
+        await transaction.workoutExercise.update({
+          where: { id: exercise.id },
+          data: { position },
+        })
+      }
     })
   }
 }
