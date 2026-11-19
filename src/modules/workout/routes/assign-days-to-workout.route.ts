@@ -31,6 +31,9 @@ export function assignDaysToWorkoutRoute(app: FastifyInstance) {
             })
             .describe('Days assigned to workout successfully.'),
           404: z.object({ message: z.string() }).describe('Workout not found.'),
+          409: z
+            .object({ message: z.string() })
+            .describe('A schedule day is already assigned.'),
         },
       },
     },

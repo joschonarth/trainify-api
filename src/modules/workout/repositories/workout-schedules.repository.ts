@@ -24,10 +24,16 @@ export interface WorkoutScheduleWithWorkout extends WorkoutSchedule {
 }
 
 export interface WorkoutSchedulesRepository {
+  replaceDaysForWorkout(
+    workoutId: string,
+    userId: string,
+    daysOfWeek: number[]
+  ): Promise<void>
   assignDaysToWorkout(
     data: Prisma.WorkoutScheduleCreateManyInput[]
   ): Promise<void>
   findDaysByWorkout(workoutId: string): Promise<WorkoutSchedule[]>
+  findDaysByUser(userId: string): Promise<WorkoutSchedule[]>
   findById(id: string): Promise<WorkoutSchedule | null>
   findByUserAndDay(
     userId: string,

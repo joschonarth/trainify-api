@@ -1,3 +1,4 @@
+import type { WorkoutSchedule } from 'generated/prisma'
 import { ResourceAlreadyExistsError } from '@/shared/errors/resource-already-exists.error'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
@@ -39,21 +40,36 @@ export class UpdateWorkoutScheduleDayUseCase {
     }
 
     const existingDays =
-      await this.workoutSchedulesRepository.findDaysByWorkout(workoutId)
+      await this.workoutSchedulesRepository.findDaysByUser(userId)
     if (
       existingDays.some(
-        (d) => d.dayOfWeek === newDayOfWeek && d.id !== scheduleId
+        (d) => d.workoutId !== workoutId && d.dayOfWeek === newDayOfWeek
       )
     ) {
       throw new ResourceAlreadyExistsError(
-        `Workout already has schedule for day ${newDayOfWeek}`
+        `A workout already uses day ${newDayOfWeek}.`
       )
     }
 
-    const updatedSchedule = await this.workoutSchedulesRepository.updateDay(
-      scheduleId,
-      newDayOfWeek
-    )
+    let updatedSchedule: WorkoutSchedule
+    try {
+      updatedSchedule = await this.workoutSchedulesRepository.updateDay(
+        scheduleId,
+        newDayOfWeek
+      )
+    } catch (error) {
+      if (
+        typeof error === 'object' &&
+        error !== null &&
+        'code' in error &&
+        error.code === 'P2002'
+      ) {
+        throw new ResourceAlreadyExistsError(
+          `A workout already uses day ${newDayOfWeek}.`
+        )
+      }
+      throw error
+    }
 
     return { schedule: updatedSchedule }
   }

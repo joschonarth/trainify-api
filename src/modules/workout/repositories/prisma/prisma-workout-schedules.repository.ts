@@ -10,6 +10,37 @@ import type {
 export class PrismaWorkoutSchedulesRepository
   implements WorkoutSchedulesRepository
 {
+  async replaceDaysForWorkout(
+    workoutId: string,
+    userId: string,
+    daysOfWeek: number[]
+  ): Promise<void> {
+    await prisma.$transaction(async (transaction) => {
+      const conflicts = await transaction.workoutSchedule.findMany({
+        where: {
+          userId,
+          dayOfWeek: { in: daysOfWeek },
+          workoutId: { not: workoutId },
+        },
+      })
+      if (conflicts.length > 0) {
+        throw Object.assign(new Error('Unique constraint failed.'), {
+          code: 'P2002',
+        })
+      }
+      await transaction.workoutSchedule.deleteMany({ where: { workoutId } })
+      if (daysOfWeek.length > 0) {
+        await transaction.workoutSchedule.createMany({
+          data: daysOfWeek.map((dayOfWeek) => ({
+            workoutId,
+            userId,
+            dayOfWeek,
+          })),
+        })
+      }
+    })
+  }
+
   async assignDaysToWorkout(
     data: Prisma.WorkoutScheduleCreateManyInput[]
   ): Promise<void> {
@@ -22,6 +53,10 @@ export class PrismaWorkoutSchedulesRepository
     return await prisma.workoutSchedule.findMany({
       where: { workoutId },
     })
+  }
+
+  async findDaysByUser(userId: string): Promise<WorkoutSchedule[]> {
+    return await prisma.workoutSchedule.findMany({ where: { userId } })
   }
 
   async findById(id: string): Promise<WorkoutSchedule | null> {
