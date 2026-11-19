@@ -13,7 +13,8 @@ export function deleteWorkoutRoute(app: FastifyInstance) {
       schema: {
         tags: ['Workouts'],
         summary: 'Delete workout',
-        description: 'Deletes a workout owned by the authenticated user.',
+        description:
+          'Archives a workout owned by the authenticated user while preserving its session history.',
         params: deleteWorkoutParamsSchema,
         response: {
           204: z.null().describe('Workout deleted successfully.'),

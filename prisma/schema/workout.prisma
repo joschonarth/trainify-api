@@ -3,6 +3,7 @@ model Workout {
   name        String
   description String?
   createdAt   DateTime @default(now())
+  archivedAt  DateTime?
   userId      String
 
   user      User              @relation(fields: [userId], references: [id])
