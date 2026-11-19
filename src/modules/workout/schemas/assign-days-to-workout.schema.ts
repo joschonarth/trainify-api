@@ -5,7 +5,11 @@ export const assignDaysToWorkoutParamsSchema = z.object({
 })
 
 export const assignDaysToWorkoutBodySchema = z.object({
-  daysOfWeek: z.array(z.number().min(0).max(6)),
+  daysOfWeek: z
+    .array(z.number().int().min(0).max(6))
+    .refine((days) => new Set(days).size === days.length, {
+      message: 'Days of week must not contain duplicates.',
+    }),
 })
 
 export type AssignDaysToWorkoutParams = z.infer<

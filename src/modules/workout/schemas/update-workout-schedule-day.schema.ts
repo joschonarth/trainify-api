@@ -6,7 +6,7 @@ export const updateWorkoutScheduleDayParamsSchema = z.object({
 })
 
 export const updateWorkoutScheduleDayBodySchema = z.object({
-  newDayOfWeek: z.number().min(0).max(6),
+  newDayOfWeek: z.number().int().min(0).max(6),
 })
 
 export type UpdateWorkoutScheduleDayParams = z.infer<

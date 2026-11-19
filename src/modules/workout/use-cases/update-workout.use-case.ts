@@ -1,5 +1,5 @@
 import type { Workout } from 'generated/prisma'
-
+import { ResourceAlreadyExistsError } from '@/shared/errors/resource-already-exists.error'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
 import type { WorkoutsRepository } from '../repositories/workouts.repository'
@@ -29,10 +29,23 @@ export class UpdateWorkoutUseCase {
       throw new ResourceNotFoundError('Workout not found.')
     }
 
-    const workout = await this.workoutsRepository.update(workoutId, {
-      name: name ?? workoutExists.name,
-      description: description ?? workoutExists.description,
-    })
+    let workout: Workout
+    try {
+      workout = await this.workoutsRepository.update(workoutId, {
+        ...(name !== undefined && { name }),
+        ...(description !== undefined && { description }),
+      })
+    } catch (error) {
+      if (
+        typeof error === 'object' &&
+        error !== null &&
+        'code' in error &&
+        error.code === 'P2002'
+      ) {
+        throw new ResourceAlreadyExistsError('Workout name already exists.')
+      }
+      throw error
+    }
 
     return { workout }
   }

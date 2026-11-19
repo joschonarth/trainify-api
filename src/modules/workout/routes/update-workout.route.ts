@@ -28,6 +28,9 @@ export function updateWorkoutRoute(app: FastifyInstance) {
             })
             .describe('Workout updated successfully.'),
           404: z.object({ message: z.string() }).describe('Workout not found.'),
+          409: z
+            .object({ message: z.string() })
+            .describe('Workout name already exists.'),
         },
       },
     },

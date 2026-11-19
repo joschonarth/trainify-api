@@ -15,7 +15,7 @@ export async function createWorkoutController(
   const { workout } = await createWorkoutUseCase.execute({
     userId,
     name,
-    description,
+    description: description ?? null,
   })
 
   return reply.status(201).send({ workout })

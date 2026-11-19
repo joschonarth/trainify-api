@@ -6,9 +6,9 @@ export const addExerciseToWorkoutParamsSchema = z.object({
 
 export const addExerciseToWorkoutBodySchema = z.object({
   exerciseId: z.string(),
-  defaultSets: z.number().nullable(),
-  defaultReps: z.number().nullable(),
-  defaultWeight: z.number().nullable(),
+  defaultSets: z.number().int().positive().nullable(),
+  defaultReps: z.number().int().positive().nullable(),
+  defaultWeight: z.number().finite().nonnegative().nullable(),
 })
 
 export type AddExerciseToWorkoutParams = z.infer<

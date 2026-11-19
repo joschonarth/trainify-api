@@ -17,6 +17,9 @@ export function createWorkoutRoute(app: FastifyInstance) {
         description: 'Creates a new workout for the authenticated user.',
         body: createWorkoutBodySchema,
         response: {
+          409: z
+            .object({ message: z.string() })
+            .describe('Workout name already exists.'),
           201: z
             .object({
               workout: baseWorkoutSchema,
