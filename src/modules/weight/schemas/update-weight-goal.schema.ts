@@ -7,7 +7,11 @@ export const updateWeightGoalParamsSchema = z.object({
 export const updateWeightGoalBodySchema = z.object({
   name: z.string().optional(),
   description: z.string().nullable().optional(),
-  endDate: z.date().nullable().optional(),
+  endDate: z.iso
+    .datetime()
+    .transform((value) => new Date(value))
+    .nullable()
+    .optional(),
 })
 
 export type UpdateWeightGoalParams = z.infer<

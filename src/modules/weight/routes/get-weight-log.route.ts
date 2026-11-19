@@ -19,7 +19,7 @@ export function getWeightLogRoute(app: FastifyInstance) {
         response: {
           200: z
             .object({
-              log: z.array(weightLogSchema),
+              log: weightLogSchema,
             })
             .describe('Weight log fetched successfully.'),
           404: z
