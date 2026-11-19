@@ -126,6 +126,45 @@ export class InMemoryWorkoutsRepository implements WorkoutsRepository {
     )
   }
 
+  async findPageByUser({
+    userId,
+    page,
+    pageSize,
+    search,
+  }: {
+    userId: string
+    page: number
+    pageSize: number
+    search?: string
+  }) {
+    const normalizedSearch = search?.toLocaleLowerCase()
+    const matches = this.items
+      .filter(
+        (item) =>
+          item.userId === userId &&
+          !item.archivedAt &&
+          (!normalizedSearch ||
+            item.name.toLocaleLowerCase().includes(normalizedSearch))
+      )
+      .sort(
+        (left, right) =>
+          right.createdAt.getTime() - left.createdAt.getTime() ||
+          right.id.localeCompare(left.id)
+      )
+    const workouts = await Promise.all(
+      matches
+        .slice((page - 1) * pageSize, page * pageSize)
+        .map(async (workout) => ({
+          ...copyWorkout(workout),
+          exercises: this.workoutExercisesRepository
+            ? await this.workoutExercisesRepository.findByWorkout(workout.id)
+            : [],
+          schedules: [],
+        }))
+    )
+    return { workouts, total: matches.length }
+  }
+
   update(
     id: string,
     data: { name?: string; description?: string | null }

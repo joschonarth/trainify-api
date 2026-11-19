@@ -84,6 +84,42 @@ export class PrismaWorkoutsRepository implements WorkoutsRepository {
     })
   }
 
+  async findPageByUser({
+    userId,
+    page,
+    pageSize,
+    search,
+  }: {
+    userId: string
+    page: number
+    pageSize: number
+    search?: string
+  }) {
+    const where: Prisma.WorkoutWhereInput = {
+      userId,
+      archivedAt: null,
+      ...(search && { name: { contains: search, mode: 'insensitive' } }),
+    }
+    const [workouts, total] = await Promise.all([
+      prisma.workout.findMany({
+        where,
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        include: {
+          exercises: {
+            where: { exercise: { archivedAt: null } },
+            orderBy: { position: 'asc' },
+            include: { exercise: true },
+          },
+          schedules: true,
+        },
+        orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+      }),
+      prisma.workout.count({ where }),
+    ])
+    return { workouts, total }
+  }
+
   async update(
     id: string,
     data: { name?: string; description?: string | null }

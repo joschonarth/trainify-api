@@ -18,6 +18,24 @@ export type WorkoutWithDetails = Prisma.WorkoutGetPayload<{
   }
 }>
 
+export type WorkoutListItem = Workout & {
+  exercises: {
+    id: string
+    exerciseId: string
+    position: number
+    defaultSets: number | null
+    defaultReps: number | null
+    defaultWeight: number | null
+    exercise: {
+      id: string
+      name: string
+      category: string | null
+      type: string | null
+    }
+  }[]
+  schedules: { id: string; dayOfWeek: number }[]
+}
+
 export interface WorkoutsRepository {
   create(data: Prisma.WorkoutCreateInput): Promise<Workout>
   findById(id: string): Promise<Workout | null>
@@ -27,28 +45,13 @@ export interface WorkoutsRepository {
     exerciseId: string
   ): Promise<Pick<Workout, 'id' | 'name'>[]>
   findByIdWithDetails(id: string): Promise<WorkoutWithDetails | null>
-  findAllByUser(userId: string): Promise<
-    (Workout & {
-      exercises: {
-        id: string
-        exerciseId: string
-        position: number
-        defaultSets: number | null
-        defaultReps: number | null
-        defaultWeight: number | null
-        exercise: {
-          id: string
-          name: string
-          category: string | null
-          type: string | null
-        }
-      }[]
-      schedules: {
-        id: string
-        dayOfWeek: number
-      }[]
-    })[]
-  >
+  findAllByUser(userId: string): Promise<WorkoutListItem[]>
+  findPageByUser(query: {
+    userId: string
+    page: number
+    pageSize: number
+    search?: string
+  }): Promise<{ workouts: WorkoutListItem[]; total: number }>
   update(
     id: string,
     data: { name?: string; description?: string | null }

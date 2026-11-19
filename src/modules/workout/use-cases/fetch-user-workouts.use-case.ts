@@ -1,32 +1,23 @@
-import type { Workout } from 'generated/prisma'
-
-import type { WorkoutsRepository } from '../repositories/workouts.repository'
+import type {
+  WorkoutListItem,
+  WorkoutsRepository,
+} from '../repositories/workouts.repository'
 
 interface FetchUserWorkoutsUseCaseRequest {
   userId: string
+  page?: number
+  pageSize?: number
+  search?: string
 }
 
 interface FetchUserWorkoutsUseCaseResponse {
-  workouts: (Workout & {
-    exercises: {
-      id: string
-      exerciseId: string
-      position: number
-      defaultSets: number | null
-      defaultReps: number | null
-      defaultWeight: number | null
-      exercise: {
-        id: string
-        name: string
-        category: string | null
-        type: string | null
-      }
-    }[]
-    schedules: {
-      id: string
-      dayOfWeek: number
-    }[]
-  })[]
+  workouts: WorkoutListItem[]
+  pagination: {
+    page: number
+    pageSize: number
+    total: number
+    totalPages: number
+  }
 }
 
 export class FetchUserWorkoutsUseCase {
@@ -34,8 +25,24 @@ export class FetchUserWorkoutsUseCase {
 
   async execute({
     userId,
+    page = 1,
+    pageSize = 20,
+    search,
   }: FetchUserWorkoutsUseCaseRequest): Promise<FetchUserWorkoutsUseCaseResponse> {
-    const workouts = await this.workoutsRepository.findAllByUser(userId)
-    return { workouts }
+    const result = await this.workoutsRepository.findPageByUser({
+      userId,
+      page,
+      pageSize,
+      ...(search && search.length > 0 && { search }),
+    })
+    return {
+      workouts: result.workouts,
+      pagination: {
+        page,
+        pageSize,
+        total: result.total,
+        totalPages: Math.ceil(result.total / pageSize),
+      },
+    }
   }
 }
