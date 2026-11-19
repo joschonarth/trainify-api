@@ -18,13 +18,16 @@ export class DeleteWorkoutUseCase {
     workoutId,
     userId,
   }: DeleteWorkoutUseCaseRequest): Promise<DeleteWorkoutUseCaseResponse> {
-    const workout = await this.workoutsRepository.findById(workoutId)
+    const workout =
+      await this.workoutsRepository.findByIdIncludingArchived(workoutId)
 
     if (!workout || workout.userId !== userId) {
       throw new ResourceNotFoundError('Workout not found.')
     }
 
-    await this.workoutsRepository.delete(workoutId)
+    if (!workout.archivedAt) {
+      await this.workoutsRepository.archive(workoutId)
+    }
 
     return { success: true }
   }

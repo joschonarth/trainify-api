@@ -15,7 +15,11 @@ function uniqueConstraintError(): Error & { code: 'P2002' } {
 }
 
 function copyWorkout(workout: Workout): Workout {
-  return { ...workout, createdAt: new Date(workout.createdAt) }
+  return {
+    ...workout,
+    createdAt: new Date(workout.createdAt),
+    archivedAt: workout.archivedAt ? new Date(workout.archivedAt) : null,
+  }
 }
 
 function connectedUserId(data: Prisma.WorkoutCreateInput): string {
@@ -50,6 +54,7 @@ export class InMemoryWorkoutsRepository implements WorkoutsRepository {
       name: data.name,
       description: data.description ?? null,
       createdAt: data.createdAt ? new Date(data.createdAt) : new Date(),
+      archivedAt: null,
       userId,
     }
     this.items.push(workout)
@@ -57,6 +62,13 @@ export class InMemoryWorkoutsRepository implements WorkoutsRepository {
   }
 
   findById(id: string): Promise<Workout | null> {
+    const workout = this.items.find(
+      (item) => item.id === id && !item.archivedAt
+    )
+    return Promise.resolve(workout ? copyWorkout(workout) : null)
+  }
+
+  findByIdIncludingArchived(id: string): Promise<Workout | null> {
     const workout = this.items.find((item) => item.id === id)
     return Promise.resolve(workout ? copyWorkout(workout) : null)
   }
@@ -73,6 +85,7 @@ export class InMemoryWorkoutsRepository implements WorkoutsRepository {
     for (const workout of this.items) {
       if (
         workout.userId === userId &&
+        !workout.archivedAt &&
         (await this.workoutExercisesRepository.findByWorkoutAndExercise(
           workout.id,
           exerciseId
@@ -85,7 +98,7 @@ export class InMemoryWorkoutsRepository implements WorkoutsRepository {
   }
 
   async findByIdWithDetails(id: string): Promise<WorkoutWithDetails | null> {
-    const workout = await this.findById(id)
+    const workout = await this.findByIdIncludingArchived(id)
     if (!workout) {
       return null
     }
@@ -97,7 +110,7 @@ export class InMemoryWorkoutsRepository implements WorkoutsRepository {
 
   async findAllByUser(userId: string) {
     const workouts = this.items
-      .filter((item) => item.userId === userId)
+      .filter((item) => item.userId === userId && !item.archivedAt)
       .sort(
         (left, right) => right.createdAt.getTime() - left.createdAt.getTime()
       )
@@ -159,5 +172,17 @@ export class InMemoryWorkoutsRepository implements WorkoutsRepository {
         )
       )
     }
+  }
+
+  archive(id: string): Promise<void> {
+    const index = this.items.findIndex((item) => item.id === id)
+    const workout = this.items[index]
+    if (!workout) {
+      throw new Error('Record to archive not found.')
+    }
+    if (!workout.archivedAt) {
+      this.items[index] = { ...workout, archivedAt: new Date() }
+    }
+    return Promise.resolve()
   }
 }

@@ -71,6 +71,7 @@ export class PrismaWorkoutSchedulesRepository
       where: {
         dayOfWeek,
         userId,
+        workout: { archivedAt: null },
       },
       include: {
         workout: {
