@@ -6,9 +6,9 @@ export const updateWorkoutExerciseDefaultsParamsSchema = z.object({
 })
 
 export const updateWorkoutExerciseDefaultsBodySchema = z.object({
-  defaultSets: z.number().nullable(),
-  defaultReps: z.number().nullable(),
-  defaultWeight: z.number().nullable(),
+  defaultSets: z.number().int().positive().nullable(),
+  defaultReps: z.number().int().positive().nullable(),
+  defaultWeight: z.number().finite().nonnegative().nullable(),
 })
 
 export type UpdateWorkoutExerciseDefaultsParams = z.infer<

@@ -122,6 +122,17 @@ export class InMemoryWorkoutsRepository implements WorkoutsRepository {
     if (!current) {
       return Promise.reject(new Error('Record to update not found.'))
     }
+    if (
+      data.name !== undefined &&
+      this.items.some(
+        (item) =>
+          item.id !== id &&
+          item.userId === current.userId &&
+          item.name === data.name
+      )
+    ) {
+      return Promise.reject(uniqueConstraintError())
+    }
     const updated: Workout = {
       ...current,
       ...(data.name !== undefined && { name: data.name }),

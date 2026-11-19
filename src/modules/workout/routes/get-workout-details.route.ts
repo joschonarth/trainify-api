@@ -20,7 +20,7 @@ export function getWorkoutDetailsRoute(app: FastifyInstance) {
         response: {
           200: z
             .object({
-              workoutSchema,
+              workout: workoutSchema,
             })
             .describe('Workout details fetched successfully.'),
           404: z.object({ message: z.string() }).describe('Workout not found.'),
