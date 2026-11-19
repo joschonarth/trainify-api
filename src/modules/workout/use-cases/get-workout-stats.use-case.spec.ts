@@ -3,6 +3,7 @@ import type {
   WorkoutSessionsRepository,
   WorkoutSessionWithWorkout,
 } from '@/modules/session/repositories/workout-sessions.repository'
+import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 import { InMemoryWorkoutsRepository } from '../repositories/in-memory/in-memory-workouts.repository'
 import { GetWorkoutStatsUseCase } from './get-workout-stats.use-case'
 
@@ -73,5 +74,11 @@ describe('GetWorkoutStatsUseCase', () => {
     expect(result.totalVolume).toBe(75)
     expect(result.avgVolume).toBe(75)
     expect(result.highestVolumeSession?.totalVolume).toBe(75)
+  })
+
+  it('returns not found when the workout does not belong to the user', async () => {
+    await expect(
+      sut.execute({ userId: 'other-user', workoutId: 'workout-1' })
+    ).rejects.toBeInstanceOf(ResourceNotFoundError)
   })
 })
