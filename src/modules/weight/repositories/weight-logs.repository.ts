@@ -5,6 +5,7 @@ export interface CreateWeightLogData {
   goalId?: string | null
   weight: number
   note?: string | null
+  date?: Date
 }
 
 export interface WeightLogsRepository {
@@ -25,7 +26,12 @@ export interface WeightLogsRepository {
   findAverageByUserId(userId: string): Promise<number | null>
   update(
     id: string,
-    data: { goalId?: string | null; weight?: number; note?: string | null }
+    data: {
+      goalId?: string | null
+      weight?: number
+      note?: string | null
+      date?: Date
+    }
   ): Promise<WeightLog>
   delete(id: string): Promise<void>
 }

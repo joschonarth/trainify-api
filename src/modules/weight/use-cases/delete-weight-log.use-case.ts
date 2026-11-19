@@ -1,6 +1,8 @@
+import type { UsersRepository } from '@/modules/user/repositories/users.repository'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
 import type { WeightLogsRepository } from '../repositories/weight-logs.repository'
+import { syncUserWeightFromLatestLog } from '../utils/sync-user-weight-from-latest-log'
 import type { CalculateWeightGoalProgressUseCase } from './calculate-weight-goal-progress.use-case'
 
 interface DeleteWeightLogRequest {
@@ -11,7 +13,8 @@ interface DeleteWeightLogRequest {
 export class DeleteWeightLogUseCase {
   constructor(
     private readonly weightLogsRepository: WeightLogsRepository,
-    private readonly calculateWeightGoalProgressUseCase: CalculateWeightGoalProgressUseCase
+    private readonly calculateWeightGoalProgressUseCase: CalculateWeightGoalProgressUseCase,
+    private readonly usersRepository: UsersRepository
   ) {}
 
   async execute({ logId, userId }: DeleteWeightLogRequest): Promise<void> {
@@ -22,6 +25,11 @@ export class DeleteWeightLogUseCase {
     }
 
     await this.weightLogsRepository.delete(logId)
+    await syncUserWeightFromLatestLog(
+      userId,
+      this.usersRepository,
+      this.weightLogsRepository
+    )
 
     if (log.goalId) {
       await this.calculateWeightGoalProgressUseCase.execute({

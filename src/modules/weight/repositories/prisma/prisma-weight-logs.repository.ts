@@ -9,7 +9,7 @@ import type {
 
 export class PrismaWeightLogsRepository implements WeightLogsRepository {
   async create(data: CreateWeightLogData): Promise<WeightLog> {
-    const { userId, goalId, weight, note } = data
+    const { userId, goalId, weight, note, date } = data
 
     const safeNote = note ?? null
 
@@ -17,7 +17,7 @@ export class PrismaWeightLogsRepository implements WeightLogsRepository {
       data: {
         weight,
         note: safeNote,
-        createdAt: new Date(),
+        ...(date ? { date } : {}),
         user: { connect: { id: userId } },
         ...(goalId ? { goal: { connect: { id: goalId } } } : {}),
       },
@@ -33,7 +33,7 @@ export class PrismaWeightLogsRepository implements WeightLogsRepository {
   async findByUserId(userId: string): Promise<WeightLog[]> {
     return await prisma.weightLog.findMany({
       where: { userId },
-      orderBy: { createdAt: 'desc' },
+      orderBy: [{ date: 'desc' }, { id: 'desc' }],
     })
   }
 
@@ -45,7 +45,7 @@ export class PrismaWeightLogsRepository implements WeightLogsRepository {
       userId,
       ...(filters?.from || filters?.to
         ? {
-            createdAt: {
+            date: {
               ...(filters.from ? { gte: filters.from } : {}),
               ...(filters.to ? { lte: filters.to } : {}),
             },
@@ -55,42 +55,42 @@ export class PrismaWeightLogsRepository implements WeightLogsRepository {
 
     return await prisma.weightLog.findMany({
       where,
-      orderBy: { createdAt: 'asc' },
+      orderBy: [{ date: 'asc' }, { id: 'asc' }],
     })
   }
 
   async findByGoalId(goalId: string): Promise<WeightLog[]> {
     return await prisma.weightLog.findMany({
       where: { goalId },
-      orderBy: { createdAt: 'desc' },
+      orderBy: [{ date: 'desc' }, { id: 'desc' }],
     })
   }
 
   async findLatestByUserId(userId: string): Promise<WeightLog | null> {
     return await prisma.weightLog.findFirst({
       where: { userId },
-      orderBy: { createdAt: 'desc' },
+      orderBy: [{ date: 'desc' }, { id: 'desc' }],
     })
   }
 
   async findLatestByGoalId(goalId: string): Promise<WeightLog | null> {
     return await prisma.weightLog.findFirst({
       where: { goalId },
-      orderBy: { createdAt: 'desc' },
+      orderBy: [{ date: 'desc' }, { id: 'desc' }],
     })
   }
 
   async findFirstByUserId(userId: string): Promise<WeightLog | null> {
     return await prisma.weightLog.findFirst({
       where: { userId },
-      orderBy: { createdAt: 'asc' },
+      orderBy: [{ date: 'asc' }, { id: 'asc' }],
     })
   }
 
   async findFirstByGoalId(goalId: string): Promise<WeightLog | null> {
     return await prisma.weightLog.findFirst({
       where: { goalId },
-      orderBy: { date: 'asc' },
+      orderBy: [{ date: 'asc' }, { id: 'asc' }],
     })
   }
 
@@ -118,7 +118,12 @@ export class PrismaWeightLogsRepository implements WeightLogsRepository {
 
   async update(
     id: string,
-    data: { goalId?: string | null; weight?: number; note?: string | null }
+    data: {
+      goalId?: string | null
+      weight?: number
+      note?: string | null
+      date?: Date
+    }
   ): Promise<WeightLog> {
     return await prisma.weightLog.update({
       where: { id },
@@ -126,6 +131,7 @@ export class PrismaWeightLogsRepository implements WeightLogsRepository {
         ...(data.goalId === undefined ? {} : { goalId: data.goalId }),
         ...(data.weight === undefined ? {} : { weight: data.weight }),
         ...(data.note === undefined ? {} : { note: data.note }),
+        ...(data.date === undefined ? {} : { date: data.date }),
       },
     })
   }

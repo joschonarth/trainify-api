@@ -1,18 +1,19 @@
 import type { WeightGoal, WeightLog } from 'generated/prisma'
-
+import type { UsersRepository } from '@/modules/user/repositories/users.repository'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
-
 import { InvalidWeightGoalError } from '../errors/invalid-weight-goal.error'
 import type { WeightGoalsRepository } from '../repositories/weight-goals.repository'
 import type { WeightLogsRepository } from '../repositories/weight-logs.repository'
 import type { AchieveWeightGoalUseCase } from '../use-cases/achieve-weight-goal.use-case'
 import { calculateWeightGoalProgress } from '../utils/calculate-weight-goal-progress'
+import { syncUserWeightFromLatestLog } from '../utils/sync-user-weight-from-latest-log'
 
 interface CreateWeightLogUseCaseRequest {
   userId: string
   weight: number
   note?: string | null
   goalId?: string | null
+  date?: Date
 }
 
 interface CreateWeightLogUseCaseResponse {
@@ -23,7 +24,8 @@ export class CreateWeightLogUseCase {
   constructor(
     private readonly weightLogsRepository: WeightLogsRepository,
     private readonly weightGoalsRepository: WeightGoalsRepository,
-    private readonly achieveWeightGoalUseCase: AchieveWeightGoalUseCase
+    private readonly achieveWeightGoalUseCase: AchieveWeightGoalUseCase,
+    private readonly usersRepository: UsersRepository
   ) {}
 
   async execute({
@@ -31,6 +33,7 @@ export class CreateWeightLogUseCase {
     weight,
     note,
     goalId,
+    date,
   }: CreateWeightLogUseCaseRequest): Promise<CreateWeightLogUseCaseResponse> {
     let goal: WeightGoal | null = null
 
@@ -49,7 +52,13 @@ export class CreateWeightLogUseCase {
         goalId: null,
         weight,
         note: note ?? null,
+        ...(date ? { date } : {}),
       })
+      await syncUserWeightFromLatestLog(
+        userId,
+        this.usersRepository,
+        this.weightLogsRepository
+      )
       return { weightLog }
     }
 
@@ -64,7 +73,13 @@ export class CreateWeightLogUseCase {
       goalId: goal.id,
       weight,
       note: note ?? null,
+      ...(date ? { date } : {}),
     })
+    await syncUserWeightFromLatestLog(
+      userId,
+      this.usersRepository,
+      this.weightLogsRepository
+    )
 
     let startWeight = goal.startWeight
     if (!startWeight) {

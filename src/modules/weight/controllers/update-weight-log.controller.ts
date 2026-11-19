@@ -10,7 +10,7 @@ export async function updateWeightLogController(
   reply: FastifyReply
 ) {
   const { logId } = request.params as UpdateWeightLogParams
-  const { weight, note } = request.body as UpdateWeightLogBody
+  const { weight, note, date } = request.body as UpdateWeightLogBody
   const userId = request.user.sub
 
   const updateWeightLogUseCase = makeUpdateWeightLogUseCase()
@@ -19,6 +19,7 @@ export async function updateWeightLogController(
     userId,
     weight,
     note,
+    date,
   })
 
   return reply.status(200).send({ updatedLog })

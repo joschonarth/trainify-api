@@ -37,11 +37,11 @@ export class GetActiveWeightGoalAnalyticsUseCase {
     }
 
     const sorted = logs.sort(
-      (a, b) => a.createdAt.getTime() - b.createdAt.getTime()
+      (a, b) => a.date.getTime() - b.date.getTime() || a.id.localeCompare(b.id)
     )
 
     const dataPoints = sorted.map((l) => ({
-      date: l.createdAt,
+      date: l.date,
       weight: l.weight,
     }))
 
@@ -57,8 +57,7 @@ export class GetActiveWeightGoalAnalyticsUseCase {
     }
 
     const daysDiff =
-      (end.createdAt.getTime() - start.createdAt.getTime()) /
-      (1000 * 60 * 60 * 24)
+      (end.date.getTime() - start.date.getTime()) / (1000 * 60 * 60 * 24)
 
     const weeksDiff = daysDiff >= 7 ? daysDiff / 7 : 1
     const avgChangePerWeek = (end.weight - start.weight) / weeksDiff
