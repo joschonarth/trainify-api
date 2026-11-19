@@ -35,7 +35,8 @@ export class RemoveExerciseFromWorkoutUseCase {
       throw new ResourceNotFoundError('Exercise not found in this workout.')
     }
 
-    await this.workoutExercisesRepository.removeExerciseFromWorkout(
+    await this.workoutExercisesRepository.removeAndNormalizePositions(
+      workoutId,
       workoutExercise.id
     )
   }

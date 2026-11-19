@@ -97,6 +97,20 @@ export class InMemoryWorkoutExercisesRepository
     return Promise.resolve(maxPosition + 1)
   }
 
+  addExerciseAtNextPosition(
+    workoutId: string,
+    data: Prisma.WorkoutExerciseCreateInput
+  ): Promise<WorkoutExercise> {
+    const position =
+      this.items
+        .filter((item) => item.workoutId === workoutId)
+        .reduce((max, item) => Math.max(max, item.position), -1) + 1
+    return this.addExerciseToWorkout({
+      ...data,
+      position,
+    })
+  }
+
   updatePositions(workoutId: string, exerciseIds: string[]): Promise<void> {
     const workoutExercises = exerciseIds.map((exerciseId) =>
       this.items.find(
@@ -176,5 +190,21 @@ export class InMemoryWorkoutExercisesRepository
     }
     this.items.splice(index, 1)
     return Promise.resolve()
+  }
+
+  async removeAndNormalizePositions(
+    workoutId: string,
+    workoutExerciseId: string
+  ): Promise<void> {
+    await this.removeExerciseFromWorkout(workoutExerciseId)
+    const remaining = this.items
+      .filter((item) => item.workoutId === workoutId)
+      .sort(
+        (left, right) =>
+          left.position - right.position || left.id.localeCompare(right.id)
+      )
+    for (const [position, item] of remaining.entries()) {
+      item.position = position
+    }
   }
 }

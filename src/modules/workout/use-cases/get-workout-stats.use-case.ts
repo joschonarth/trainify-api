@@ -1,6 +1,5 @@
 import type { WorkoutSessionsRepository } from '@/modules/session/repositories/workout-sessions.repository'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
-import { calculateVolume } from '@/shared/utils/calculate-volume'
 
 import type { WorkoutsRepository } from '../repositories/workouts.repository'
 
@@ -27,18 +26,14 @@ export class GetWorkoutStatsUseCase {
         workoutId
       )
 
-    if (!sessions || sessions.length === 0) {
-      throw new ResourceNotFoundError('No sessions found for this workout.')
-    }
+    const completedSessions = sessions.filter(
+      (session) => session.status === 'COMPLETED'
+    )
+    const totalSessions = completedSessions.length
 
-    const totalSessions = sessions.length
-
-    const sessionsStats = sessions.map((session) => {
+    const sessionsStats = completedSessions.map((session) => {
       const totalVolume = session.exerciseSessions.reduce((sum, ex) => {
-        const exerciseVolume = ex.logs.reduce(
-          (acc, log) => acc + calculateVolume(log.sets, log.reps, log.weight),
-          0
-        )
+        const exerciseVolume = ex.logs.reduce((acc, log) => acc + log.volume, 0)
         return sum + exerciseVolume
       }, 0)
 
@@ -55,15 +50,18 @@ export class GetWorkoutStatsUseCase {
     })
 
     const totalVolume = sessionsStats.reduce((sum, s) => sum + s.totalVolume, 0)
-    const avgVolume = totalVolume / totalSessions
+    const avgVolume = totalSessions === 0 ? 0 : totalVolume / totalSessions
     const totalExercises = sessionsStats.reduce(
       (sum, s) => sum + s.totalExercises,
       0
     )
 
-    const highestVolumeSession = sessionsStats.reduce((prev, curr) =>
-      curr.totalVolume > prev.totalVolume ? curr : prev
-    )
+    const highestVolumeSession =
+      sessionsStats.length === 0
+        ? null
+        : sessionsStats.reduce((prev, curr) =>
+            curr.totalVolume > prev.totalVolume ? curr : prev
+          )
 
     return {
       workoutId: workout.id,

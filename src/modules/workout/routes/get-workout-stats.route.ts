@@ -42,9 +42,9 @@ export function getWorkoutStatsRoute(app: FastifyInstance) {
                 .number()
                 .describe('Sum of all volumes across all sessions.'),
               avgVolume: z.number().describe('Average volume per session.'),
-              highestVolumeSession: sessionSchema.describe(
-                'Session with the highest volume.'
-              ),
+              highestVolumeSession: sessionSchema
+                .nullable()
+                .describe('Session with the highest volume.'),
               sessions: z
                 .array(sessionSchema)
                 .describe('List of all sessions.'),
