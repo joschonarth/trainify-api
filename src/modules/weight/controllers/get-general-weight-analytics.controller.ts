@@ -6,11 +6,7 @@ export async function getGeneralWeightAnalyticsController(
   request: FastifyRequest,
   reply: FastifyReply
 ) {
-  const { from: fromStr, to: toStr } =
-    request.query as GetGeneralWeightAnalyticsQuery
-
-  const from = fromStr ? new Date(fromStr) : undefined
-  const to = toStr ? new Date(toStr) : undefined
+  const { from, to } = request.query as GetGeneralWeightAnalyticsQuery
 
   const userId = request.user.sub
 

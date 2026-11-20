@@ -6,8 +6,16 @@ export const createWeightGoalBodySchema = z.object({
   description: z.string().nullable().default(null),
   goalType: z.enum(GoalType),
   targetWeight: z.number(),
-  startDate: z.date().default(() => new Date()),
-  endDate: z.date().nullable().default(null),
+  startDate: z.iso
+    .datetime()
+    .transform((value) => new Date(value))
+    .optional()
+    .default(() => new Date()),
+  endDate: z.iso
+    .datetime()
+    .transform((value) => new Date(value))
+    .nullable()
+    .default(null),
 })
 
 export type CreateWeightGoalBody = z.infer<typeof createWeightGoalBodySchema>
