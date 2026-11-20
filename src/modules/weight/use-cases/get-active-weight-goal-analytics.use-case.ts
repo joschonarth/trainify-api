@@ -1,5 +1,6 @@
 import type { WeightGoalsRepository } from '../repositories/weight-goals.repository'
 import type { WeightLogsRepository } from '../repositories/weight-logs.repository'
+import { calculateWeightAnalytics } from '../utils/calculate-weight-analytics'
 
 interface GetActiveWeightGoalAnalyticsRequest {
   userId: string
@@ -27,47 +28,12 @@ export class GetActiveWeightGoalAnalyticsUseCase {
   }: GetActiveWeightGoalAnalyticsRequest): Promise<GetActiveWeightGoalAnalyticsResponse> {
     const activeGoal =
       await this.weightGoalsRepository.findActiveGoalByUserId(userId)
+
     if (!activeGoal) {
-      return { dataPoints: [], avgChangePerWeek: 0, trendDirection: 'stable' }
+      return calculateWeightAnalytics([])
     }
 
     const logs = await this.weightLogsRepository.findByGoalId(activeGoal.id)
-    if (logs.length === 0) {
-      return { dataPoints: [], avgChangePerWeek: 0, trendDirection: 'stable' }
-    }
-
-    const sorted = logs.sort(
-      (a, b) => a.date.getTime() - b.date.getTime() || a.id.localeCompare(b.id)
-    )
-
-    const dataPoints = sorted.map((l) => ({
-      date: l.date,
-      weight: l.weight,
-    }))
-
-    if (sorted.length === 1) {
-      return { dataPoints, avgChangePerWeek: 0, trendDirection: 'stable' }
-    }
-
-    const start = sorted.at(0)
-    const end = sorted.at(-1)
-
-    if (!(start && end)) {
-      return { dataPoints, avgChangePerWeek: 0, trendDirection: 'stable' }
-    }
-
-    const daysDiff =
-      (end.date.getTime() - start.date.getTime()) / (1000 * 60 * 60 * 24)
-
-    const weeksDiff = daysDiff >= 7 ? daysDiff / 7 : 1
-    const avgChangePerWeek = (end.weight - start.weight) / weeksDiff
-
-    let trendDirection: 'increasing' | 'decreasing' | 'stable' = 'stable'
-
-    if (Math.abs(avgChangePerWeek) >= 0.1) {
-      trendDirection = avgChangePerWeek > 0 ? 'increasing' : 'decreasing'
-    }
-
-    return { dataPoints, avgChangePerWeek, trendDirection }
+    return calculateWeightAnalytics(logs)
   }
 }
