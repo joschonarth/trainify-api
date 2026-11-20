@@ -1,7 +1,7 @@
 import { type ExerciseLog, WorkoutSessionStatus } from 'generated/prisma'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
-
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { ExerciseLogsRepository } from '@/modules/exercise/repositories/exercise-logs.repository'
+import { makeBadge } from '@/modules/gamification/badge/tests/factories/make-badge'
 import type { UnlockAllBadgesUseCase } from '@/modules/gamification/badge/use-cases/unlock-all-badges.use-case'
 import type { UpdateUserStreakUseCase } from '@/modules/gamification/streak/use-cases/update-user-streak.use-case'
 import type {
@@ -14,6 +14,7 @@ import type {
 } from '@/modules/session/repositories/workout-sessions.repository'
 import { DuplicateExerciseCompletionError } from '../errors/duplicate-exercise-completion.error'
 import { WorkoutSessionAlreadyCompletedError } from '../errors/workout-session-already-completed.error'
+import { InMemoryWorkoutSessionCompletionsRepository } from '../repositories/in-memory/in-memory-workout-session-completions.repository'
 import type { SessionCompletionUnitOfWork } from '../repositories/session-completion-unit-of-work'
 import { completeWorkoutSessionBodySchema } from '../schemas/complete-workout-session.schema'
 import { CompleteWorkoutSessionUseCase } from './complete-workout-session.use-case'
@@ -35,6 +36,7 @@ let exerciseLogsRepository: Pick<ExerciseLogsRepository, 'create'>
 let updateUserStreakUseCase: Pick<UpdateUserStreakUseCase, 'execute'>
 let unlockAllBadgesUseCase: Pick<UnlockAllBadgesUseCase, 'execute'>
 let sut: CompleteWorkoutSessionUseCase
+let completions: InMemoryWorkoutSessionCompletionsRepository
 
 function makeExerciseSession(
   overrides: Partial<ExerciseSessionWithLogs> = {}
@@ -177,13 +179,33 @@ describe('CompleteWorkoutSessionUseCase', () => {
       execute: vi.fn(unlockBadges),
     }
 
+    completions = new InMemoryWorkoutSessionCompletionsRepository()
+    let queue: Promise<unknown> = Promise.resolve()
     const unitOfWork: SessionCompletionUnitOfWork = {
-      execute: (operation) =>
-        operation({
-          workoutSessions: workoutSessionsRepository,
-          exerciseSessions: exerciseSessionsRepository,
-          exerciseLogs: exerciseLogsRepository,
-        }),
+      execute: (_id, operation) => {
+        const result = queue.then(async () => {
+          const before = structuredClone({
+            workoutSession,
+            exerciseSessions,
+            completions: completions.items,
+          })
+          try {
+            return await operation({
+              workoutSessions: workoutSessionsRepository,
+              exerciseSessions: exerciseSessionsRepository,
+              exerciseLogs: exerciseLogsRepository,
+              completions,
+            })
+          } catch (error) {
+            workoutSession = before.workoutSession
+            exerciseSessions = before.exerciseSessions
+            completions.items = before.completions
+            throw error
+          }
+        })
+        queue = result.catch(() => undefined)
+        return result
+      },
     }
 
     sut = new CompleteWorkoutSessionUseCase(
@@ -388,7 +410,7 @@ describe('CompleteWorkoutSessionUseCase', () => {
     })
   })
 
-  it('rejects a repeated completion after all exercises were skipped', async () => {
+  it('should return the recorded skipped session on a repeated completion', async () => {
     const request = {
       userId,
       sessionId,
@@ -404,9 +426,12 @@ describe('CompleteWorkoutSessionUseCase', () => {
 
     await sut.execute(request)
 
-    await expect(sut.execute(request)).rejects.toBeInstanceOf(
-      WorkoutSessionAlreadyCompletedError
-    )
+    const response = await sut.execute(request)
+    expect(response.session?.status).toBe(WorkoutSessionStatus.SKIPPED)
+    expect(response.unlockedBadges).toEqual([])
+    expect(updateUserStreakUseCase.execute).not.toHaveBeenCalled()
+    expect(exerciseLogsRepository.create).not.toHaveBeenCalled()
+    expect(workoutSessionsRepository.update).toHaveBeenCalledTimes(1)
   })
 
   it('trims and limits skip reason in the request schema', () => {
@@ -473,5 +498,250 @@ describe('CompleteWorkoutSessionUseCase', () => {
       expect.objectContaining({ sets: 2, reps: 30, weight: 60, volume: 0 })
     )
     expect(updateUserStreakUseCase.execute).toHaveBeenCalledTimes(1)
+  })
+  afterEach(() => vi.useRealTimers())
+
+  it('should return newly unlocked badges together with the completed session', async () => {
+    const badge = makeBadge()
+    vi.mocked(unlockAllBadgesUseCase.execute).mockResolvedValueOnce({
+      badges: [badge],
+    })
+    const result = await sut.execute({
+      userId,
+      sessionId,
+      exercises: [
+        {
+          exerciseSessionId: 'exercise-session-id',
+          sets: 3,
+          reps: 10,
+          completed: true,
+        },
+      ],
+    })
+    expect(result.unlockedBadges).toEqual([badge])
+    expect(result.session?.status).toBe(WorkoutSessionStatus.COMPLETED)
+    expect(completions.items).toHaveLength(1)
+    expect(completions.items[0]?.hasActivity).toBe(true)
+  })
+
+  it('should preserve activity from a previously completed exercise when only skipped exercises are submitted', async () => {
+    exerciseSessions = [
+      makeExerciseSession({ completed: true, logs: [makeExerciseLog()] }),
+      makeExerciseSession({
+        id: 'skipped-exercise',
+        exerciseId: 'other-exercise',
+      }),
+    ]
+    const request = {
+      userId,
+      sessionId,
+      exercises: [
+        {
+          exerciseSessionId: 'skipped-exercise',
+          sets: 3,
+          reps: 10,
+          completed: false,
+        },
+      ],
+    }
+    const result = await sut.execute(request)
+    expect(result.session?.status).toBe(WorkoutSessionStatus.INCOMPLETE)
+    expect(completions.items[0]?.hasActivity).toBe(true)
+    expect(updateUserStreakUseCase.execute).toHaveBeenCalledTimes(1)
+    expect(exerciseLogsRepository.create).not.toHaveBeenCalled()
+    await sut.execute(request)
+    expect(workoutSessionsRepository.update).toHaveBeenCalledTimes(1)
+    expect(exerciseSessionsRepository.update).toHaveBeenCalledTimes(1)
+  })
+
+  it('should retry rewards without rewriting completed execution or granting a second activity day', async () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-06-10T12:00:00Z'))
+    const request = {
+      userId,
+      sessionId,
+      exercises: [
+        {
+          exerciseSessionId: 'exercise-session-id',
+          sets: 3,
+          reps: 10,
+          completed: true,
+        },
+      ],
+    }
+    await sut.execute(request)
+    const before = structuredClone({
+      workoutSession,
+      exerciseSessions,
+      completions: completions.items,
+    })
+    vi.setSystemTime(new Date('2026-06-12T12:00:00Z'))
+    const result = await sut.execute({
+      ...request,
+      exercises: [
+        {
+          exerciseSessionId: 'exercise-session-id',
+          reps: 10,
+          completed: false,
+          sets: 99,
+        },
+      ],
+    })
+    expect(result.unlockedBadges).toEqual([])
+    expect({
+      workoutSession,
+      exerciseSessions,
+      completions: completions.items,
+    }).toEqual(before)
+    expect(exerciseLogsRepository.create).toHaveBeenCalledTimes(1)
+    expect(exerciseSessionsRepository.update).toHaveBeenCalledTimes(1)
+    expect(workoutSessionsRepository.update).toHaveBeenCalledTimes(1)
+    expect(updateUserStreakUseCase.execute).toHaveBeenLastCalledWith({
+      userId,
+      logDate: new Date('2026-06-10T12:00:00Z'),
+      recoverOriginalCompletion: true,
+    })
+  })
+
+  it.each([
+    'streak',
+    'badges',
+  ] as const)('should preserve completion after a post-commit %s failure and recover on retry', async (stage) => {
+    const dependency =
+      stage === 'streak' ? updateUserStreakUseCase : unlockAllBadgesUseCase
+    vi.mocked(dependency.execute).mockRejectedValueOnce(
+      new Error('Reward failed.')
+    )
+    const request = {
+      userId,
+      sessionId,
+      exercises: [
+        {
+          exerciseSessionId: 'exercise-session-id',
+          sets: 3,
+          reps: 10,
+          completed: true,
+        },
+      ],
+    }
+    await expect(sut.execute(request)).rejects.toThrow('Reward failed.')
+    expect(workoutSession.status).toBe(WorkoutSessionStatus.COMPLETED)
+    expect(completions.items).toHaveLength(1)
+    const badge = makeBadge()
+    vi.mocked(unlockAllBadgesUseCase.execute).mockResolvedValueOnce({
+      badges: [badge],
+    })
+    expect((await sut.execute(request)).unlockedBadges).toEqual([badge])
+    expect(exerciseLogsRepository.create).toHaveBeenCalledTimes(1)
+    expect(workoutSessionsRepository.update).toHaveBeenCalledTimes(1)
+  })
+
+  it('should preserve timer measurements but record the actual completion instant for reward recovery', async () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-06-12T12:00:00Z'))
+    workoutSession.startedAt = new Date('2026-06-10T12:00:00Z')
+    workoutSession.endedAt = new Date('2026-06-10T13:00:00Z')
+    workoutSession.duration = 3600
+    const request = {
+      userId,
+      sessionId,
+      exercises: [
+        {
+          exerciseSessionId: 'exercise-session-id',
+          sets: 3,
+          reps: 10,
+          completed: true,
+        },
+      ],
+    }
+    await sut.execute(request)
+    vi.setSystemTime(new Date('2026-06-13T12:00:00Z'))
+    await sut.execute(request)
+    expect(workoutSession.endedAt).toEqual(new Date('2026-06-10T13:00:00Z'))
+    expect(workoutSession.duration).toBe(3600)
+    expect(completions.items[0]?.completedAt).toEqual(
+      new Date('2026-06-12T12:00:00Z')
+    )
+    expect(updateUserStreakUseCase.execute).toHaveBeenLastCalledWith({
+      userId,
+      logDate: new Date('2026-06-12T12:00:00Z'),
+      recoverOriginalCompletion: true,
+    })
+  })
+
+  it('should serialize concurrent completions without duplicate performance writes', async () => {
+    const request = {
+      userId,
+      sessionId,
+      exercises: [
+        {
+          exerciseSessionId: 'exercise-session-id',
+          sets: 3,
+          reps: 10,
+          completed: true,
+        },
+      ],
+    }
+    const results = await Promise.all(
+      Array.from({ length: 12 }, () => sut.execute(request))
+    )
+    expect(
+      results.every(
+        (result) => result.session?.status === WorkoutSessionStatus.COMPLETED
+      )
+    ).toBe(true)
+    expect(exerciseLogsRepository.create).toHaveBeenCalledTimes(1)
+    expect(workoutSessionsRepository.update).toHaveBeenCalledTimes(1)
+    expect(completions.items).toHaveLength(1)
+  })
+
+  it('should reject another user retry before reward processing', async () => {
+    const request = {
+      userId,
+      sessionId,
+      exercises: [
+        {
+          exerciseSessionId: 'exercise-session-id',
+          sets: 3,
+          reps: 10,
+          completed: true,
+        },
+      ],
+    }
+    await sut.execute(request)
+    vi.mocked(updateUserStreakUseCase.execute).mockClear()
+    vi.mocked(unlockAllBadgesUseCase.execute).mockClear()
+    await expect(
+      sut.execute({ ...request, userId: 'other' })
+    ).rejects.toMatchObject({ statusCode: 404 })
+    expect(updateUserStreakUseCase.execute).not.toHaveBeenCalled()
+    expect(unlockAllBadgesUseCase.execute).not.toHaveBeenCalled()
+  })
+
+  it('should roll back execution when recording completion metadata fails', async () => {
+    vi.spyOn(completions, 'create').mockRejectedValueOnce(
+      new Error('Persistence failed.')
+    )
+    const before = structuredClone({ workoutSession, exerciseSessions })
+    const request = {
+      userId,
+      sessionId,
+      exercises: [
+        {
+          exerciseSessionId: 'exercise-session-id',
+          sets: 3,
+          reps: 10,
+          completed: true,
+        },
+      ],
+    }
+    await expect(sut.execute(request)).rejects.toThrow('Persistence failed.')
+    expect({ workoutSession, exerciseSessions }).toEqual(before)
+    expect(completions.items).toHaveLength(0)
+    expect(updateUserStreakUseCase.execute).not.toHaveBeenCalled()
+    expect(unlockAllBadgesUseCase.execute).not.toHaveBeenCalled()
+    expect((await sut.execute(request)).session?.status).toBe(
+      WorkoutSessionStatus.COMPLETED
+    )
   })
 })

@@ -1,4 +1,19 @@
 import { z } from 'zod'
+import { badgeSchema } from '@/modules/gamification/badge/schemas/badge.schema'
+import { sessionWithWorkoutSchema } from './workout-session.schema'
+
+export const completeWorkoutSessionResponseSchema = z.object({
+  session: sessionWithWorkoutSchema.nullable(),
+  unlockedBadges: z
+    .array(badgeSchema.omit({ unlocked: true, unlockedAt: true }))
+    .describe(
+      'Badges newly persisted by this request. Empty when no new badges were unlocked; previously delivered awards are not replayed.'
+    ),
+})
+
+export type CompleteWorkoutSessionResponse = z.infer<
+  typeof completeWorkoutSessionResponseSchema
+>
 
 export const completeWorkoutSessionParamsSchema = z.object({
   sessionId: z.cuid(),
