@@ -1,6 +1,7 @@
 import type { ExerciseLogsRepository } from '@/modules/exercise/repositories/exercise-logs.repository'
 
 import type { ExerciseSessionsRepository } from './exercise-sessions.repository'
+import type { WorkoutSessionCompletionsRepository } from './workout-session-completions.repository'
 import type { WorkoutSessionsRepository } from './workout-sessions.repository'
 
 export interface SessionCompletionRepositories {
@@ -13,10 +14,12 @@ export interface SessionCompletionRepositories {
     'findByWorkoutSessionId' | 'update'
   >
   exerciseLogs: Pick<ExerciseLogsRepository, 'create'>
+  completions: WorkoutSessionCompletionsRepository
 }
 
 export interface SessionCompletionUnitOfWork {
   execute<T>(
+    sessionId: string,
     operation: (repositories: SessionCompletionRepositories) => Promise<T>
   ): Promise<T>
 }

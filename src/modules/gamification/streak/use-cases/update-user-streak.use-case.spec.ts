@@ -14,6 +14,58 @@ let logs: InMemoryUserStreakLogsRepository
 let sut: UpdateUserStreakUseCase
 
 describe('Update user streak', () => {
+  it('should recover an original completion between newer credited days without regressing last workout', async () => {
+    vi.setSystemTime(new Date('2026-06-12T12:00:00Z'))
+    await sut.execute({
+      userId: 'user',
+      logDate: new Date('2026-06-10T12:00:00Z'),
+    })
+    await sut.execute({
+      userId: 'user',
+      logDate: new Date('2026-06-12T12:00:00Z'),
+    })
+    const streak = streaks.items[0]
+    if (!streak) {
+      throw new Error('Missing streak fixture')
+    }
+    await streaks.update(streak.id, { bestStreak: 7 })
+
+    const request = {
+      userId: 'user',
+      logDate: new Date('2026-06-11T12:00:00Z'),
+      recoverOriginalCompletion: true,
+    }
+    const expected = {
+      currentStreak: 3,
+      bestStreak: 7,
+      lastWorkout: new Date('2026-06-12T03:00:00Z'),
+    }
+    expect(await sut.execute(request)).toEqual(expected)
+    expect(await sut.execute(request)).toEqual(expected)
+    expect(logs.items).toHaveLength(3)
+    expect(streaks.items[0]).toMatchObject(expected)
+  })
+
+  it('should recover an older isolated completion without extending a newer streak', async () => {
+    vi.setSystemTime(new Date('2026-06-12T12:00:00Z'))
+    await sut.execute({
+      userId: 'user',
+      logDate: new Date('2026-06-12T12:00:00Z'),
+    })
+    expect(
+      await sut.execute({
+        userId: 'user',
+        logDate: new Date('2026-06-08T12:00:00Z'),
+        recoverOriginalCompletion: true,
+      })
+    ).toEqual({
+      currentStreak: 1,
+      bestStreak: 1,
+      lastWorkout: new Date('2026-06-12T03:00:00Z'),
+    })
+    expect(logs.items).toHaveLength(2)
+  })
+
   beforeEach(async () => {
     users = new InMemoryUsersRepository()
     streaks = new InMemoryUserStreaksRepository()

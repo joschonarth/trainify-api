@@ -1,8 +1,6 @@
-import dayjs from 'dayjs'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
-import { getZonedDayDifference } from '@/shared/utils/date-timezone'
 import type { StreakUnitOfWork } from '../repositories/streak-unit-of-work'
-import { getEffectiveStreak } from '../utils/get-effective-streak'
+import { rebuildStreak } from '../utils/rebuild-streak'
 
 interface RefreshUserStreakUseCaseRequest {
   userId: string
@@ -29,33 +27,12 @@ export class RefreshUserStreakUseCase {
         }
         const streak = await streaks.findByUserId(userId)
         const activity = await logs.findAllByUser(userId)
-        const dates = activity
-          .map((log) => log.date)
-          .sort((a, b) => a.getTime() - b.getTime())
-        let lastWorkout: Date | null = null
-        let current = 0
-        let best = streak?.bestStreak ?? 0
-        for (const date of dates) {
-          const difference = lastWorkout
-            ? getZonedDayDifference(lastWorkout, date, user.timezone)
-            : null
-          if (difference === 0) {
-            continue
-          }
-          current = difference === 1 ? current + 1 : 1
-          best = Math.max(best, current)
-          lastWorkout = dayjs(date).tz(user.timezone).startOf('day').toDate()
-        }
-        const response = {
-          currentStreak: getEffectiveStreak(
-            current,
-            lastWorkout,
-            new Date(),
-            user.timezone
-          ),
-          bestStreak: best,
-          lastWorkout,
-        }
+        const response = rebuildStreak(
+          activity.map((log) => log.date),
+          user.timezone,
+          new Date(),
+          streak?.bestStreak ?? 0
+        )
         if (streak) {
           await streaks.update(streak.id, response)
         } else {

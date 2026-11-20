@@ -1,4 +1,4 @@
-import { WorkoutSessionStatus } from 'generated/prisma'
+import { type Badge, WorkoutSessionStatus } from 'generated/prisma'
 import type { UnlockAllBadgesUseCase } from '@/modules/gamification/badge/use-cases/unlock-all-badges.use-case'
 import type { UpdateUserStreakUseCase } from '@/modules/gamification/streak/use-cases/update-user-streak.use-case'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
@@ -28,6 +28,7 @@ interface CompleteWorkoutSessionRequest {
 
 interface CompleteWorkoutSessionResponse {
   session: Awaited<ReturnType<WorkoutSessionsRepository['findByIdWithWorkout']>>
+  unlockedBadges: Badge[]
 }
 
 type CompletionExercise = CompleteWorkoutSessionRequest['exercises'][number]
@@ -148,6 +149,16 @@ export class CompleteWorkoutSessionUseCase {
       )
     }
 
+    const completion = await repositories.completions.findBySessionId(sessionId)
+    if (completion) {
+      return {
+        session,
+        anyExerciseCompleted: completion.hasActivity,
+        logDate: completion.completedAt,
+        isRetry: true,
+      }
+    }
+
     this.assertSessionCanBeCompleted(session)
 
     const exerciseSessions =
@@ -182,12 +193,11 @@ export class CompleteWorkoutSessionUseCase {
         .map((exerciseSession) => exerciseSession.id)
     )
 
-    let anyExerciseCompleted = false
     for (const exercise of exercises) {
       const exerciseSession = exerciseSessions.find(
         (item) => item.id === exercise.exerciseSessionId
       )
-      const completed = await this.completeExercise(
+      await this.completeExercise(
         userId,
         exercise,
         exerciseSession,
@@ -196,7 +206,6 @@ export class CompleteWorkoutSessionUseCase {
         processedExerciseSessionIds,
         repositories
       )
-      anyExerciseCompleted ||= completed
     }
 
     const updatedExerciseSessions =
@@ -223,25 +232,44 @@ export class CompleteWorkoutSessionUseCase {
       throw new ResourceNotFoundError('Failed to retrieve updated session.')
     }
 
-    return { session: updatedSession, anyExerciseCompleted, logDate: now }
+    const anyExerciseCompleted = updatedExerciseSessions.some(
+      (exercise) => exercise.completed
+    )
+    await repositories.completions.create({
+      sessionId,
+      completedAt: now,
+      hasActivity: anyExerciseCompleted,
+    })
+
+    return {
+      session: updatedSession,
+      anyExerciseCompleted,
+      logDate: now,
+      isRetry: false,
+    }
   }
 
   async execute(
     request: CompleteWorkoutSessionRequest
   ): Promise<CompleteWorkoutSessionResponse> {
-    const result = await this.unitOfWork.execute((repositories) =>
-      this.completeInTransaction(request, repositories)
+    const result = await this.unitOfWork.execute(
+      request.sessionId,
+      (repositories) => this.completeInTransaction(request, repositories)
     )
 
     if (result.anyExerciseCompleted) {
       await this.updateUserStreakUseCase.execute({
         userId: request.userId,
         logDate: result.logDate,
+        recoverOriginalCompletion: result.isRetry,
       })
     }
 
-    await this.unlockAllBadgesUseCase.execute({ userId: request.userId })
+    // Rewards are recoverable post-commit work; failures do not roll back completion.
+    const { badges } = await this.unlockAllBadgesUseCase.execute({
+      userId: request.userId,
+    })
 
-    return { session: result.session }
+    return { session: result.session, unlockedBadges: badges }
   }
 }

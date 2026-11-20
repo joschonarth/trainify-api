@@ -6,6 +6,7 @@ import { getZonedDayDifference } from '@/shared/utils/date-timezone'
 import type { StreakUnitOfWork } from '../repositories/streak-unit-of-work'
 import type { UserStreaksRepository } from '../repositories/user-streaks.repository'
 import { getEffectiveStreak } from '../utils/get-effective-streak'
+import { rebuildStreak } from '../utils/rebuild-streak'
 
 dayjs.extend(utc)
 dayjs.extend(timezonePlugin)
@@ -13,6 +14,7 @@ dayjs.extend(timezonePlugin)
 interface UpdateUserStreakUseCaseRequest {
   userId: string
   logDate: Date
+  recoverOriginalCompletion?: boolean
 }
 
 interface UpdateUserStreakUseCaseResponse {
@@ -39,6 +41,7 @@ export class UpdateUserStreakUseCase {
   async execute({
     userId,
     logDate,
+    recoverOriginalCompletion = false,
   }: UpdateUserStreakUseCaseRequest): Promise<UpdateUserStreakUseCaseResponse> {
     return await this.unitOfWork.execute(
       userId,
@@ -95,6 +98,19 @@ export class UpdateUserStreakUseCase {
           normalizedDate,
           timezone
         )
+
+        // A delayed reward retry may recover a completion older than newer credited activity.
+        if (recoverOriginalCompletion && diffInDays < 0) {
+          const activity = await logs.findAllByUser(userId)
+          const rebuilt = rebuildStreak(
+            activity.map((log) => log.date),
+            timezone,
+            new Date(),
+            streak.bestStreak
+          )
+          const updated = await streaks.update(streak.id, rebuilt)
+          return toResponse(updated)
+        }
 
         let current = getEffectiveStreak(
           streak.currentStreak,
