@@ -14,6 +14,19 @@ let logs: InMemoryUserStreakLogsRepository
 let sut: UpdateUserStreakUseCase
 
 describe('Update user streak', () => {
+  it('should not duplicate an existing legacy activity day when the streak record is absent', async () => {
+    const date = new Date('2026-06-10T03:00:00Z')
+    await logs.create({ userId: 'user', date })
+    expect(
+      await sut.execute({
+        userId: 'user',
+        logDate: new Date('2026-06-10T12:00:00Z'),
+      })
+    ).toEqual({ currentStreak: 0, bestStreak: 0, lastWorkout: null })
+    expect(logs.items).toHaveLength(1)
+    expect(streaks.items).toHaveLength(0)
+  })
+
   it('should recover an original completion between newer credited days without regressing last workout', async () => {
     vi.setSystemTime(new Date('2026-06-12T12:00:00Z'))
     await sut.execute({
