@@ -39,7 +39,7 @@ export class GetWeightSummaryUseCase {
       averageWeight: avgWeight ?? null,
       minWeight: minWeightLog?.weight ?? null,
       maxWeight: maxWeightLog?.weight ?? null,
-      lastLogDate: latestLog?.createdAt ?? null,
+      lastLogDate: latestLog?.date ?? null,
     }
   }
 }

@@ -1,6 +1,8 @@
+import type { UsersRepository } from '@/modules/user/repositories/users.repository'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
 import type { WeightLogsRepository } from '../repositories/weight-logs.repository'
+import { syncUserWeightFromLatestLog } from '../utils/sync-user-weight-from-latest-log'
 import type { CalculateWeightGoalProgressUseCase } from './calculate-weight-goal-progress.use-case'
 
 interface UpdateWeightLogRequest {
@@ -8,6 +10,7 @@ interface UpdateWeightLogRequest {
   userId: string
   weight?: number | undefined
   note?: string | null | undefined
+  date?: Date | undefined
 }
 
 interface UpdateWeightLogResponse {
@@ -23,7 +26,8 @@ interface UpdateWeightLogResponse {
 export class UpdateWeightLogUseCase {
   constructor(
     private readonly weightLogsRepository: WeightLogsRepository,
-    private readonly calculateWeightGoalProgressUseCase: CalculateWeightGoalProgressUseCase
+    private readonly calculateWeightGoalProgressUseCase: CalculateWeightGoalProgressUseCase,
+    private readonly usersRepository: UsersRepository
   ) {}
 
   async execute({
@@ -31,6 +35,7 @@ export class UpdateWeightLogUseCase {
     userId,
     weight,
     note,
+    date,
   }: UpdateWeightLogRequest): Promise<UpdateWeightLogResponse> {
     const log = await this.weightLogsRepository.findById(logId)
 
@@ -41,7 +46,13 @@ export class UpdateWeightLogUseCase {
     const updatedLog = await this.weightLogsRepository.update(logId, {
       weight: weight ?? log.weight,
       note: note ?? log.note,
+      ...(date === undefined ? {} : { date }),
     })
+    await syncUserWeightFromLatestLog(
+      userId,
+      this.usersRepository,
+      this.weightLogsRepository
+    )
 
     if (updatedLog.goalId) {
       await this.calculateWeightGoalProgressUseCase.execute({

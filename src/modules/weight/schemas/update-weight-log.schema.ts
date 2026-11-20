@@ -7,6 +7,10 @@ export const updateWeightLogParamsSchema = z.object({
 export const updateWeightLogBodySchema = z.object({
   weight: z.number().optional(),
   note: z.string().nullable().optional(),
+  date: z.iso
+    .datetime()
+    .transform((value) => new Date(value))
+    .optional(),
 })
 
 export type UpdateWeightLogParams = z.infer<typeof updateWeightLogParamsSchema>

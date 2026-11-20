@@ -40,18 +40,18 @@ export class GetGeneralWeightAnalyticsUseCase {
 
     if (logs.length < 2) {
       return {
-        dataPoints: logs.map((l) => ({ date: l.createdAt, weight: l.weight })),
+        dataPoints: logs.map((l) => ({ date: l.date, weight: l.weight })),
         avgChangePerWeek: 0,
         trendDirection: 'stable',
       }
     }
 
     const sorted = logs.sort(
-      (a, b) => a.createdAt.getTime() - b.createdAt.getTime()
+      (a, b) => a.date.getTime() - b.date.getTime() || a.id.localeCompare(b.id)
     )
 
     const dataPoints = sorted.map((l) => ({
-      date: l.createdAt,
+      date: l.date,
       weight: l.weight,
     }))
 
@@ -67,8 +67,7 @@ export class GetGeneralWeightAnalyticsUseCase {
     }
 
     const daysDiff =
-      (end.createdAt.getTime() - start.createdAt.getTime()) /
-      (1000 * 60 * 60 * 24)
+      (end.date.getTime() - start.date.getTime()) / (1000 * 60 * 60 * 24)
 
     const weeksDiff = daysDiff >= 7 ? daysDiff / 7 : 1
 

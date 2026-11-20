@@ -6,7 +6,7 @@ export async function createWeightLogController(
   request: FastifyRequest,
   reply: FastifyReply
 ) {
-  const { weight, note } = request.body as CreateWeightLogBody
+  const { weight, note, date } = request.body as CreateWeightLogBody
 
   const userId = request.user.sub
 
@@ -16,6 +16,7 @@ export async function createWeightLogController(
     userId,
     weight,
     note: note ?? null,
+    ...(date ? { date } : {}),
   })
 
   return reply.status(201).send({ weightLog })
