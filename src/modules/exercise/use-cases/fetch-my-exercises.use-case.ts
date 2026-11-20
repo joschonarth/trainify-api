@@ -1,8 +1,14 @@
-import type { ExerciseCategory, ExerciseType } from 'generated/prisma'
+import type {
+  ExerciseCategory,
+  ExerciseType,
+  Measurement,
+} from 'generated/prisma'
 
 import type { MyExercisesRepository } from '../repositories/my-exercises.repository'
 
 interface ExerciseDTO {
+  isFavorite: boolean
+  measurement: Measurement
   myExerciseId: string
   exerciseId: string
   name: string
@@ -15,6 +21,7 @@ interface ExerciseDTO {
 
 interface FetchMyExercisesUseCaseRequest {
   userId: string
+  isFavorite?: boolean
   q: string
   category: ExerciseCategory | null
   type: ExerciseType | null
@@ -45,6 +52,7 @@ export class FetchMyExercisesUseCase {
     type,
     page,
     pageSize,
+    isFavorite,
   }: FetchMyExercisesUseCaseRequest): Promise<FetchMyExercisesUseCaseResponse> {
     const { items: myExercises, total } =
       await this.myExercisesRepository.findAllByUser(
@@ -53,14 +61,17 @@ export class FetchMyExercisesUseCase {
         category,
         page,
         pageSize,
-        type
+        type,
+        isFavorite
       )
 
     const exercises = myExercises.map(
-      ({ id: myExerciseId, createdAt: addedAt, exercise }) => ({
+      ({ id: myExerciseId, createdAt: addedAt, isFavorite, exercise }) => ({
+        isFavorite,
         myExerciseId,
         exerciseId: exercise.id,
         name: exercise.name,
+        measurement: exercise.measurement,
         category: exercise.category,
         type: exercise.type,
         isCustom: exercise.isCustom,

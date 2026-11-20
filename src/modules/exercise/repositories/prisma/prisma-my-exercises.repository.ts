@@ -5,6 +5,35 @@ import { prisma } from '@/lib/prisma'
 import type { MyExercisesRepository } from '../my-exercises.repository'
 
 export class PrismaMyExercisesRepository implements MyExercisesRepository {
+  async setFavorite(
+    userId: string,
+    exerciseId: string,
+    isFavorite: boolean
+  ): Promise<MyExercise | null> {
+    return await prisma.$transaction(async (tx) => {
+      await tx.$queryRaw`SELECT id FROM exercises WHERE id = ${exerciseId} FOR UPDATE`
+      const exercise = await tx.exercise.findUnique({
+        where: { id: exerciseId },
+      })
+      if (
+        !exercise ||
+        exercise.archivedAt ||
+        (exercise.isCustom && exercise.userId !== userId)
+      ) {
+        return null
+      }
+      const result = await tx.myExercise.updateMany({
+        where: { userId, exerciseId },
+        data: { isFavorite },
+      })
+      if (!result.count) {
+        return null
+      }
+      return await tx.myExercise.findUnique({
+        where: { userId_exerciseId: { userId, exerciseId } },
+      })
+    })
+  }
   async createCustomExerciseWithLibraryEntry(
     userId: string,
     data: Omit<Prisma.ExerciseCreateInput, 'user'>
@@ -82,13 +111,15 @@ export class PrismaMyExercisesRepository implements MyExercisesRepository {
     category?: Exercise['category'],
     page = 1,
     pageSize = 20,
-    type?: Exercise['type']
+    type?: Exercise['type'] | null,
+    isFavorite?: boolean
   ): Promise<{
     items: (MyExercise & { exercise: Exercise })[]
     total: number
   }> {
     const where: Prisma.MyExerciseWhereInput = {
       userId,
+      ...(isFavorite !== undefined && { isFavorite }),
       exercise: {
         archivedAt: null,
         ...(q && {
@@ -116,11 +147,7 @@ export class PrismaMyExercisesRepository implements MyExercisesRepository {
         include: { exercise: true },
         take: pageSize,
         skip: (page - 1) * pageSize,
-        orderBy: {
-          exercise: {
-            name: 'asc',
-          },
-        },
+        orderBy: [{ exercise: { name: 'asc' } }, { exerciseId: 'asc' }],
       }),
       prisma.myExercise.count({ where }),
     ])
