@@ -6,6 +6,7 @@ import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 import { getZonedDayDifference } from '@/shared/utils/date-timezone'
 import type { UserStreakLogsRepository } from '../repositories/user-streak-logs.repository'
 import type { UserStreaksRepository } from '../repositories/user-streaks.repository'
+import { getEffectiveStreak } from '../utils/get-effective-streak'
 
 dayjs.extend(utc)
 dayjs.extend(timezonePlugin)
@@ -13,7 +14,6 @@ dayjs.extend(timezonePlugin)
 interface UpdateUserStreakUseCaseRequest {
   userId: string
   logDate: Date
-  isRefresh?: boolean
 }
 
 interface UpdateUserStreakUseCaseResponse {
@@ -44,7 +44,6 @@ export class UpdateUserStreakUseCase {
   async execute({
     userId,
     logDate,
-    isRefresh = false,
   }: UpdateUserStreakUseCaseRequest): Promise<UpdateUserStreakUseCaseResponse> {
     const user = await this.usersRepository.findById(userId)
     if (!user) {
@@ -56,29 +55,31 @@ export class UpdateUserStreakUseCase {
 
     const streak = await this.userStreaksRepository.findByUserId(userId)
 
-    if (!isRefresh) {
-      const existingLog = await this.userStreakLogsRepository.findByUserAndDate(
-        userId,
-        normalizedDate,
-        timezone
-      )
-      if (existingLog) {
-        return toResponse(streak)
+    const existingLog = await this.userStreakLogsRepository.findByUserAndDate(
+      userId,
+      normalizedDate,
+      timezone
+    )
+    if (existingLog) {
+      return {
+        ...toResponse(streak),
+        currentStreak: getEffectiveStreak(
+          streak?.currentStreak ?? 0,
+          streak?.lastWorkout ?? null,
+          normalizedDate,
+          timezone
+        ),
       }
-
-      await this.userStreakLogsRepository.create({
-        userId,
-        date: normalizedDate,
-      })
     }
+    await this.userStreakLogsRepository.create({ userId, date: normalizedDate })
 
     if (!streak) {
-      const initialStreak = isRefresh ? 0 : 1
+      const initialStreak = 1
       const created = await this.userStreaksRepository.create({
         user: { connect: { id: userId } },
         currentStreak: initialStreak,
         bestStreak: initialStreak,
-        lastWorkout: isRefresh ? null : normalizedDate,
+        lastWorkout: normalizedDate,
       })
 
       return {
@@ -94,19 +95,17 @@ export class UpdateUserStreakUseCase {
       timezone
     )
 
-    let current = streak.currentStreak
+    let current = getEffectiveStreak(
+      streak.currentStreak,
+      streak.lastWorkout,
+      normalizedDate,
+      timezone
+    )
     let best = streak.bestStreak
-
-    if (diffInDays > 1) {
-      current = 0
-    }
-
-    if (!isRefresh) {
-      if (diffInDays === 1) {
-        current += 1
-      } else if (diffInDays > 1) {
-        current = 1
-      }
+    if (!streak.lastWorkout || diffInDays > 1) {
+      current = 1
+    } else if (diffInDays === 1) {
+      current += 1
     }
 
     if (current > best) {
@@ -116,7 +115,7 @@ export class UpdateUserStreakUseCase {
     const updated = await this.userStreaksRepository.update(streak.id, {
       currentStreak: current,
       bestStreak: best,
-      lastWorkout: isRefresh ? streak.lastWorkout : normalizedDate,
+      lastWorkout: normalizedDate,
     })
 
     return {

@@ -1,5 +1,7 @@
 import type { UserStreaksRepository } from '@/modules/gamification/repositories/user-streaks.repository'
-import { daysBetweenDates } from '@/modules/gamification/utils/get-days-between-dates'
+import type { UsersRepository } from '@/modules/user/repositories/users.repository'
+import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
+import { getEffectiveStreak } from '../utils/get-effective-streak'
 
 interface GetUserStreakUseCaseResponse {
   currentStreak: number
@@ -8,48 +10,29 @@ interface GetUserStreakUseCaseResponse {
 }
 
 export class GetUserStreakUseCase {
-  constructor(private readonly userStreaksRepository: UserStreaksRepository) {}
+  constructor(
+    private readonly userStreaksRepository: Pick<
+      UserStreaksRepository,
+      'findByUserId'
+    >,
+    private readonly usersRepository: Pick<UsersRepository, 'findById'>
+  ) {}
 
   async execute(userId: string): Promise<GetUserStreakUseCaseResponse> {
+    const user = await this.usersRepository.findById(userId)
+    if (!user) {
+      throw new ResourceNotFoundError('User not found.')
+    }
     const streak = await this.userStreaksRepository.findByUserId(userId)
-
-    if (!streak) {
-      return {
-        currentStreak: 0,
-        bestStreak: 0,
-        lastWorkout: null,
-      }
-    }
-
-    if (!streak.lastWorkout) {
-      return {
-        currentStreak: streak.currentStreak ?? 0,
-        bestStreak: streak.bestStreak ?? 0,
-        lastWorkout: null,
-      }
-    }
-
-    const lastWorkoutDate = new Date(streak.lastWorkout)
-    const now = new Date()
-
-    const diffInDays = daysBetweenDates(lastWorkoutDate, now)
-
-    if (diffInDays > 1 && (streak.currentStreak ?? 0) > 0) {
-      await this.userStreaksRepository.update(streak.id, {
-        currentStreak: 0,
-      })
-
-      return {
-        currentStreak: 0,
-        bestStreak: streak.bestStreak ?? 0,
-        lastWorkout: streak.lastWorkout,
-      }
-    }
-
     return {
-      currentStreak: streak.currentStreak ?? 0,
-      bestStreak: streak.bestStreak ?? 0,
-      lastWorkout: streak.lastWorkout,
+      currentStreak: getEffectiveStreak(
+        streak?.currentStreak ?? 0,
+        streak?.lastWorkout ?? null,
+        new Date(),
+        user.timezone
+      ),
+      bestStreak: streak?.bestStreak ?? 0,
+      lastWorkout: streak?.lastWorkout ?? null,
     }
   }
 }
