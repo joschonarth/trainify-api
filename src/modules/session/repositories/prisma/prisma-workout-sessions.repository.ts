@@ -23,7 +23,7 @@ export class PrismaWorkoutSessionsRepository
   ) {}
 
   async findById(id: string): Promise<WorkoutSession | null> {
-    return await prisma.workoutSession.findUnique({
+    return await this.client.workoutSession.findUnique({
       where: { id },
     })
   }
@@ -49,6 +49,10 @@ export class PrismaWorkoutSessionsRepository
   async findByIdWithWorkout(
     id: string
   ): Promise<WorkoutSessionWithWorkout | null> {
+    if (this.client !== prisma) {
+      await this.client
+        .$queryRaw`SELECT id FROM workout_sessions WHERE id = ${id} FOR UPDATE`
+    }
     const session = await this.client.workoutSession.findUnique({
       where: { id },
       include: workoutSessionInclude,

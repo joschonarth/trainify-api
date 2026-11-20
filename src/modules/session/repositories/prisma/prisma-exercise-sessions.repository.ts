@@ -24,7 +24,7 @@ export class PrismaExerciseSessionsRepository
   }
 
   async findById(id: string): Promise<ExerciseSession | null> {
-    return await prisma.exerciseSession.findUnique({ where: { id } })
+    return await this.client.exerciseSession.findUnique({ where: { id } })
   }
 
   async findBySessionId(sessionId: string): Promise<ExerciseSessionWithLogs[]> {

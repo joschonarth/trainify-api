@@ -14,7 +14,8 @@ export function startExerciseTimerRoute(app: FastifyInstance) {
       schema: {
         tags: ['Sessions'],
         summary: 'Start exercise timer',
-        description: 'Starts the timer for a specific exercise session.',
+        description:
+          'Starts a timer on an unfinished exercise in an active workout session. Only one timer can run per session. Restarting a stopped timer clears its previous duration.',
         params: startExerciseTimerParamsSchema,
         response: {
           200: z
@@ -22,6 +23,9 @@ export function startExerciseTimerRoute(app: FastifyInstance) {
               exerciseSession: exerciseTimerSessionSchema,
             })
             .describe('Exercise timer started successfully.'),
+          403: z
+            .object({ message: z.string() })
+            .describe('Session is not active or the exercise is completed.'),
           404: z
             .object({ message: z.string() })
             .describe('Exercise session not found.'),
