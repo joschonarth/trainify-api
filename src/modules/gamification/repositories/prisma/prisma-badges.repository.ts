@@ -31,11 +31,13 @@ export class PrismaBadgesRepository implements BadgesRepository {
   }
 
   async unlockForUser(userId: string, badgeId: string) {
-    await prisma.userBadge.create({
+    const result = await prisma.userBadge.createMany({
+      skipDuplicates: true,
       data: {
         userId,
         badgeId,
       },
     })
+    return result.count === 1
   }
 }

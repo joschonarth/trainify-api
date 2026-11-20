@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { InMemoryUsersRepository } from '@/modules/user/repositories/in-memory/in-memory-users.repository'
 import { makeUser } from '@/modules/user/tests/factories/make-user'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
+import { InMemoryStreakUnitOfWork } from '../repositories/in-memory/in-memory-streak-unit-of-work'
 import { InMemoryUserStreakLogsRepository } from '../repositories/in-memory/in-memory-user-streak-logs.repository'
 import { InMemoryUserStreaksRepository } from '../repositories/in-memory/in-memory-user-streaks.repository'
 import { GetUserStreakUseCase } from './get-user-streak.use-case'
@@ -18,7 +19,9 @@ describe('Update user streak', () => {
     streaks = new InMemoryUserStreaksRepository()
     logs = new InMemoryUserStreakLogsRepository()
     await makeUser(users, { id: 'user' })
-    sut = new UpdateUserStreakUseCase(streaks, logs, users)
+    sut = new UpdateUserStreakUseCase(
+      new InMemoryStreakUnitOfWork({ streaks, logs, users })
+    )
     vi.useFakeTimers()
   })
   afterEach(() => vi.useRealTimers())
@@ -92,5 +95,71 @@ describe('Update user streak', () => {
       currentStreak: updated,
       bestStreak: Math.max(4, updated),
     })
+  })
+  it('should create one streak and one activity day for concurrent completions', async () => {
+    const date = new Date('2026-06-10T12:00:00Z')
+    const results = await Promise.all(
+      Array.from({ length: 12 }, () =>
+        sut.execute({ userId: 'user', logDate: date })
+      )
+    )
+    expect(
+      results.every(
+        (result) => result.currentStreak === 1 && result.bestStreak === 1
+      )
+    ).toBe(true)
+    expect(logs.items).toHaveLength(1)
+    expect(streaks.items).toHaveLength(1)
+  })
+  it('should increment only once when concurrent completions extend a streak', async () => {
+    await sut.execute({
+      userId: 'user',
+      logDate: new Date('2026-06-10T12:00:00Z'),
+    })
+    await Promise.all(
+      Array.from({ length: 12 }, () =>
+        sut.execute({
+          userId: 'user',
+          logDate: new Date('2026-06-11T12:00:00Z'),
+        })
+      )
+    )
+    expect(streaks.items[0]).toMatchObject({ currentStreak: 2, bestStreak: 2 })
+    expect(logs.items).toHaveLength(2)
+  })
+  it.each([
+    'create',
+    'update',
+  ] as const)('should roll back activity after a streak %s failure and allow retry', async (method) => {
+    if (method === 'update') {
+      await sut.execute({
+        userId: 'user',
+        logDate: new Date('2026-06-10T12:00:00Z'),
+      })
+    }
+    const before = structuredClone({ streaks: streaks.items, logs: logs.items })
+    vi.spyOn(streaks, method).mockRejectedValueOnce(
+      new Error('Persistence failed.')
+    )
+    const request = {
+      userId: 'user',
+      logDate: new Date('2026-06-11T12:00:00Z'),
+    }
+    await expect(sut.execute(request)).rejects.toThrow('Persistence failed.')
+    expect({ streaks: streaks.items, logs: logs.items }).toEqual(before)
+    expect(await sut.execute(request)).toMatchObject({
+      currentStreak: method === 'update' ? 2 : 1,
+    })
+    expect(logs.items).toHaveLength(method === 'update' ? 2 : 1)
+  })
+  it('should leave streaks untouched after an activity insert failure', async () => {
+    vi.spyOn(logs, 'create').mockRejectedValueOnce(
+      new Error('Persistence failed.')
+    )
+    const request = { userId: 'user', logDate: new Date() }
+    await expect(sut.execute(request)).rejects.toThrow('Persistence failed.')
+    expect(streaks.items).toHaveLength(0)
+    expect(logs.items).toHaveLength(0)
+    expect(await sut.execute(request)).toMatchObject({ currentStreak: 1 })
   })
 })

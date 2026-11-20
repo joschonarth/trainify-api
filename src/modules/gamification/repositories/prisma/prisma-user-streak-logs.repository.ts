@@ -1,4 +1,4 @@
-import type { UserStreakLog } from 'generated/prisma'
+import type { Prisma, PrismaClient, UserStreakLog } from 'generated/prisma'
 
 import { prisma } from '@/lib/prisma'
 import { getZonedDayRange } from '@/shared/utils/date-timezone'
@@ -8,6 +8,10 @@ import type { UserStreakLogsRepository } from '../user-streak-logs.repository'
 export class PrismaUserStreakLogsRepository
   implements UserStreakLogsRepository
 {
+  constructor(
+    private readonly client: Prisma.TransactionClient | PrismaClient = prisma
+  ) {}
+
   async findByUserAndDate(
     userId: string,
     date: Date,
@@ -15,7 +19,7 @@ export class PrismaUserStreakLogsRepository
   ): Promise<UserStreakLog | null> {
     const { start, end } = getZonedDayRange(date, timezone)
 
-    return await prisma.userStreakLog.findFirst({
+    return await this.client.userStreakLog.findFirst({
       where: {
         userId,
         date: {
@@ -31,7 +35,7 @@ export class PrismaUserStreakLogsRepository
     startDate: Date,
     endDate: Date
   ): Promise<UserStreakLog[]> {
-    return await prisma.userStreakLog.findMany({
+    return await this.client.userStreakLog.findMany({
       where: {
         userId,
         date: {
@@ -44,14 +48,14 @@ export class PrismaUserStreakLogsRepository
   }
 
   async findAllByUser(userId: string): Promise<UserStreakLog[]> {
-    return await prisma.userStreakLog.findMany({
+    return await this.client.userStreakLog.findMany({
       where: { userId },
       orderBy: { date: 'asc' },
     })
   }
 
   async create(data: { userId: string; date: Date }): Promise<UserStreakLog> {
-    return await prisma.userStreakLog.create({
+    return await this.client.userStreakLog.create({
       data,
     })
   }

@@ -1,16 +1,8 @@
-import { PrismaUsersRepository } from '@/modules/user/repositories/prisma/prisma-users.repository'
-import { PrismaUserStreakLogsRepository } from '../../repositories/prisma/prisma-user-streak-logs.repository'
-import { PrismaUserStreaksRepository } from '../../repositories/prisma/prisma-user-streaks.repository'
+import { PrismaStreakUnitOfWork } from '../../repositories/prisma/prisma-streak-unit-of-work'
 import { RefreshUserStreakUseCase } from '../refresh-user-streak.use-case'
 
 export function makeRefreshUserStreakUseCase() {
-  const userStreaksRepository = new PrismaUserStreaksRepository()
-  const userStreakLogsRepository = new PrismaUserStreakLogsRepository()
-  const usersRepository = new PrismaUsersRepository()
-  const refreshUserStreakUseCase = new RefreshUserStreakUseCase(
-    userStreaksRepository,
-    userStreakLogsRepository,
-    usersRepository
-  )
+  const unitOfWork = new PrismaStreakUnitOfWork()
+  const refreshUserStreakUseCase = new RefreshUserStreakUseCase(unitOfWork)
   return refreshUserStreakUseCase
 }

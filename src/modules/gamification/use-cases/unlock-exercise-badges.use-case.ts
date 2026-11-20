@@ -42,8 +42,13 @@ export class UnlockExerciseBadgesUseCase {
         badge.milestone &&
         completedExercises >= badge.milestone
       ) {
-        await this.badgesRepository.unlockForUser(userId, badge.id)
-        newBadges.push(badge)
+        const created = await this.badgesRepository.unlockForUser(
+          userId,
+          badge.id
+        )
+        if (created) {
+          newBadges.push(badge)
+        }
       }
     }
 

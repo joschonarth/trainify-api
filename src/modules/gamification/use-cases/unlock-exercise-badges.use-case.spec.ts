@@ -1,57 +1,68 @@
-import { type Badge, BadgeType } from 'generated/prisma'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-
-import type { BadgesRepository } from '@/modules/gamification/repositories/badges.repository'
-import type { ExerciseSessionsRepository } from '@/modules/session/repositories/exercise-sessions.repository'
-
+import { InMemoryExerciseSessionsRepository } from '@/modules/session/repositories/in-memory/in-memory-exercise-sessions.repository'
+import { InMemoryWorkoutSessionsRepository } from '@/modules/session/repositories/in-memory/in-memory-workout-sessions.repository'
+import {
+  makeTimerExerciseSession,
+  makeTimerWorkoutSession,
+} from '@/modules/session/tests/factories/make-timer-session'
+import { InMemoryBadgesRepository } from '../repositories/in-memory/in-memory-badges.repository'
+import { makeBadge } from '../tests/factories/make-badge'
 import { UnlockExerciseBadgesUseCase } from './unlock-exercise-badges.use-case'
 
-const exerciseBadge: Badge = {
-  id: 'badge-id',
-  name: 'First exercise',
-  description: 'Complete an exercise.',
-  type: BadgeType.EXERCISE,
-  milestone: 1,
-  createdAt: new Date('2026-01-01T00:00:00.000Z'),
-}
+let badges: InMemoryBadgesRepository
+let workouts: InMemoryWorkoutSessionsRepository
+let exercises: InMemoryExerciseSessionsRepository
+let sut: UnlockExerciseBadgesUseCase
 
 describe('UnlockExerciseBadgesUseCase', () => {
-  let badgesRepository: Pick<
-    BadgesRepository,
-    'findByUser' | 'findAllByType' | 'unlockForUser'
-  >
-  let exerciseSessionsRepository: Pick<
-    ExerciseSessionsRepository,
-    'countCompletedByUser'
-  >
-  let sut: UnlockExerciseBadgesUseCase
-
   beforeEach(() => {
-    badgesRepository = {
-      findByUser: vi.fn(async () => []),
-      findAllByType: vi.fn(async () => [exerciseBadge]),
-      unlockForUser: vi.fn(() => Promise.resolve()),
-    }
-    exerciseSessionsRepository = {
-      countCompletedByUser: vi.fn(async () => 1),
-    }
-    sut = new UnlockExerciseBadgesUseCase(
-      badgesRepository,
-      exerciseSessionsRepository
-    )
+    badges = new InMemoryBadgesRepository()
+    workouts = new InMemoryWorkoutSessionsRepository()
+    exercises = new InMemoryExerciseSessionsRepository(workouts)
+    workouts.items.push(makeTimerWorkoutSession({ status: 'COMPLETED' }))
+    exercises.items.push(makeTimerExerciseSession({ completed: true }))
+    sut = new UnlockExerciseBadgesUseCase(badges, exercises)
   })
-
-  it('unlocks exercise badges based on completed exercise sessions', async () => {
-    await expect(sut.execute({ userId: 'user-id' })).resolves.toEqual({
-      badges: [exerciseBadge],
-    })
-
-    expect(
-      exerciseSessionsRepository.countCompletedByUser
-    ).toHaveBeenCalledWith('user-id')
-    expect(badgesRepository.unlockForUser).toHaveBeenCalledWith(
-      'user-id',
-      exerciseBadge.id
+  it('should unlock an eligible badge and return it only on the first call', async () => {
+    const badge = makeBadge({ type: 'EXERCISE' })
+    badges.items.push(badge)
+    expect(await sut.execute({ userId: 'user' })).toEqual({ badges: [badge] })
+    expect(await sut.execute({ userId: 'user' })).toEqual({ badges: [] })
+    expect(badges.userBadges).toHaveLength(1)
+  })
+  it('should report a newly unlocked badge in only one concurrent response', async () => {
+    const badge = makeBadge({ type: 'EXERCISE' })
+    badges.items.push(badge)
+    const results = await Promise.all(
+      Array.from({ length: 12 }, () => sut.execute({ userId: 'user' }))
     )
+    expect(results.flatMap((result) => result.badges)).toEqual([badge])
+    expect(badges.userBadges).toHaveLength(1)
+  })
+  it('should not award badges for insufficient activity or badges of another type', async () => {
+    badges.items.push(
+      makeBadge({ type: 'EXERCISE', milestone: 2 }),
+      makeBadge({ type: 'EXERCISE', milestone: null }),
+      makeBadge({ type: 'WORKOUT' })
+    )
+    expect(await sut.execute({ userId: 'user' })).toEqual({ badges: [] })
+    expect(badges.userBadges).toHaveLength(0)
+  })
+  it('should not count another user activity', async () => {
+    badges.items.push(makeBadge({ type: 'EXERCISE' }))
+    expect(await sut.execute({ userId: 'other' })).toEqual({ badges: [] })
+    expect(badges.userBadges).toHaveLength(0)
+  })
+  it('should retry after a persistence failure without reporting an unpersisted badge', async () => {
+    const badge = makeBadge({ type: 'EXERCISE' })
+    badges.items.push(badge)
+    vi.spyOn(badges, 'unlockForUser').mockRejectedValueOnce(
+      new Error('Persistence failed.')
+    )
+    await expect(sut.execute({ userId: 'user' })).rejects.toThrow(
+      'Persistence failed.'
+    )
+    expect(badges.userBadges).toHaveLength(0)
+    expect(await sut.execute({ userId: 'user' })).toEqual({ badges: [badge] })
   })
 })
