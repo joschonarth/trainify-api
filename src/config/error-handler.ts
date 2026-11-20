@@ -1,4 +1,5 @@
 import type { FastifyError, FastifyReply, FastifyRequest } from 'fastify'
+import { hasZodFastifySchemaValidationErrors } from 'fastify-type-provider-zod'
 import z, { ZodError } from 'zod'
 import { AppError } from '../shared/errors/app.error'
 
@@ -7,6 +8,13 @@ export function errorHandler(
   request: FastifyRequest,
   reply: FastifyReply
 ) {
+  if (hasZodFastifySchemaValidationErrors(error)) {
+    return reply.status(400).send({
+      message: 'Validation error.',
+      issues: error.validation,
+    })
+  }
+
   if (error instanceof ZodError) {
     return reply
       .status(400)

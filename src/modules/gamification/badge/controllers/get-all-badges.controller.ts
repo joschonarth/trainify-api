@@ -9,14 +9,14 @@ export async function getAllBadgesController(
 ) {
   const { type, unlocked } = request.query as GetAllBadgesQuery
 
-  const userId = request.user?.sub
+  const userId = request.user.sub
 
   const getAllBadgesUseCase = makeGetAllBadgesUseCase()
 
   const { badges } = await getAllBadgesUseCase.execute({
     userId,
-    type: type ?? null,
-    unlocked: unlocked ?? null,
+    ...(type !== undefined && { type }),
+    ...(unlocked !== undefined && { unlocked }),
   })
 
   return reply.status(200).send({ badges })
