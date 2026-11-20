@@ -13,6 +13,14 @@ import type {
 export class InMemoryWorkoutSessionsRepository
   implements Pick<WorkoutSessionsRepository, 'findById' | 'resolveDailySession'>
 {
+  countCompletedByUser(userId: string): Promise<number> {
+    return Promise.resolve(
+      this.items.filter(
+        (item) => item.userId === userId && item.status === 'COMPLETED'
+      ).length
+    )
+  }
+
   items: WorkoutSession[] = []
   details = new Map<string, WorkoutSessionWithWorkout>()
   historyItems: Awaited<

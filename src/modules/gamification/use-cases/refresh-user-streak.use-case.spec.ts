@@ -2,9 +2,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { InMemoryUsersRepository } from '@/modules/user/repositories/in-memory/in-memory-users.repository'
 import { makeUser } from '@/modules/user/tests/factories/make-user'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
+import { InMemoryStreakUnitOfWork } from '../repositories/in-memory/in-memory-streak-unit-of-work'
 import { InMemoryUserStreakLogsRepository } from '../repositories/in-memory/in-memory-user-streak-logs.repository'
 import { InMemoryUserStreaksRepository } from '../repositories/in-memory/in-memory-user-streaks.repository'
 import { RefreshUserStreakUseCase } from './refresh-user-streak.use-case'
+import { UpdateUserStreakUseCase } from './update-user-streak.use-case'
 
 let users: InMemoryUsersRepository
 let streaks: InMemoryUserStreaksRepository
@@ -17,7 +19,9 @@ describe('Refresh user streak', () => {
     streaks = new InMemoryUserStreaksRepository()
     logs = new InMemoryUserStreakLogsRepository()
     await makeUser(users, { id: 'user', timezone: 'America/New_York' })
-    sut = new RefreshUserStreakUseCase(streaks, logs, users)
+    sut = new RefreshUserStreakUseCase(
+      new InMemoryStreakUnitOfWork({ streaks, logs, users })
+    )
     vi.useFakeTimers()
     vi.setSystemTime(new Date('2026-03-10T04:00:00Z'))
   })
@@ -82,5 +86,26 @@ describe('Refresh user streak', () => {
       lastWorkout: new Date('2026-03-08T05:00:00Z'),
     })
     expect(logs.items).toHaveLength(3)
+  })
+  it('should serialize refresh with activity and preserve the credited day', async () => {
+    const unitOfWork = new InMemoryStreakUnitOfWork({ users, streaks, logs })
+    sut = new RefreshUserStreakUseCase(unitOfWork)
+    const update = new UpdateUserStreakUseCase(unitOfWork)
+    await Promise.all([
+      sut.execute({ userId: 'user' }),
+      update.execute({ userId: 'user', logDate: new Date() }),
+      sut.execute({ userId: 'user' }),
+      update.execute({ userId: 'user', logDate: new Date() }),
+    ])
+    expect(streaks.items).toHaveLength(1)
+    expect(streaks.items[0]).toMatchObject({ currentStreak: 1, bestStreak: 1 })
+    expect(logs.items).toHaveLength(1)
+  })
+  it('should create only one streak for concurrent refresh requests without creating activity', async () => {
+    await Promise.all(
+      Array.from({ length: 12 }, () => sut.execute({ userId: 'user' }))
+    )
+    expect(streaks.items).toHaveLength(1)
+    expect(logs.items).toHaveLength(0)
   })
 })

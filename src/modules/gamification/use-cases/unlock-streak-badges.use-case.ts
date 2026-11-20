@@ -38,8 +38,13 @@ export class UnlockStreakBadgesUseCase {
       const alreadyHas = userBadges.some((ub) => ub.badgeId === badge.id)
 
       if (!alreadyHas && badge.milestone && currentStreak >= badge.milestone) {
-        await this.badgesRepository.unlockForUser(userId, badge.id)
-        newBadges.push(badge)
+        const created = await this.badgesRepository.unlockForUser(
+          userId,
+          badge.id
+        )
+        if (created) {
+          newBadges.push(badge)
+        }
       }
     }
 

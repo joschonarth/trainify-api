@@ -1,6 +1,7 @@
 import type { ExerciseSession, Prisma } from 'generated/prisma'
 import type { ExerciseSessionWithLogs } from '../exercise-sessions.repository'
 import type { ExerciseTimerRepositories } from '../exercise-timer-unit-of-work'
+import type { WorkoutSessionsRepository } from '../workout-sessions.repository'
 
 export class InMemoryExerciseSessionsRepository
   implements
@@ -9,6 +10,27 @@ export class InMemoryExerciseSessionsRepository
       'findById' | 'findByWorkoutSessionId' | 'update'
     >
 {
+  constructor(
+    private readonly workoutSessions?: Pick<
+      WorkoutSessionsRepository,
+      'findById'
+    >
+  ) {}
+
+  async countCompletedByUser(userId: string): Promise<number> {
+    const completed = await Promise.all(
+      this.items
+        .filter((item) => item.completed)
+        .map(async (item) => {
+          const workout = await this.workoutSessions?.findById(
+            item.workoutSessionId
+          )
+          return workout?.userId === userId
+        })
+    )
+    return completed.filter(Boolean).length
+  }
+
   items: ExerciseSession[] = []
   details = new Map<string, ExerciseSessionWithLogs>()
   writes = 0

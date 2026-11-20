@@ -1,7 +1,7 @@
 import type { Badge } from 'generated/prisma'
 
 import type { BadgesRepository } from '@/modules/gamification/repositories/badges.repository'
-import type { PrismaWorkoutSessionsRepository } from '@/modules/session/repositories/prisma/prisma-workout-sessions.repository'
+import type { WorkoutSessionsRepository } from '@/modules/session/repositories/workout-sessions.repository'
 
 interface UnlockWorkoutBadgesRequest {
   userId: string
@@ -14,7 +14,10 @@ interface UnlockWorkoutBadgesResponse {
 export class UnlockWorkoutBadgesUseCase {
   constructor(
     private readonly badgesRepository: BadgesRepository,
-    private readonly workoutSessionRepository: PrismaWorkoutSessionsRepository
+    private readonly workoutSessionRepository: Pick<
+      WorkoutSessionsRepository,
+      'countCompletedByUser'
+    >
   ) {}
 
   async execute({
@@ -37,8 +40,13 @@ export class UnlockWorkoutBadgesUseCase {
         badge.milestone &&
         completedWorkouts >= badge.milestone
       ) {
-        await this.badgesRepository.unlockForUser(userId, badge.id)
-        newBadges.push(badge)
+        const created = await this.badgesRepository.unlockForUser(
+          userId,
+          badge.id
+        )
+        if (created) {
+          newBadges.push(badge)
+        }
       }
     }
 
