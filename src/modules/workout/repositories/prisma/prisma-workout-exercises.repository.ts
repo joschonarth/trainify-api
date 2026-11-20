@@ -1,6 +1,7 @@
 import type { Prisma, WorkoutExercise } from 'generated/prisma'
 
 import { prisma } from '@/lib/prisma'
+import { ExerciseUnavailableError } from '@/modules/exercise/errors/exercise-unavailable.error'
 
 import type { WorkoutExercisesRepository } from '../workout-exercises.repository'
 
@@ -17,7 +18,6 @@ export class PrismaWorkoutExercisesRepository
     return await prisma.workoutExercise.findMany({
       where: {
         workoutId,
-        exercise: { archivedAt: null },
       },
       include: {
         exercise: {
@@ -77,6 +77,19 @@ export class PrismaWorkoutExercisesRepository
     data: Prisma.WorkoutExerciseCreateInput
   ): Promise<WorkoutExercise> {
     return await prisma.$transaction(async (transaction) => {
+      const exerciseId = data.exercise?.connect?.id
+      if (exerciseId) {
+        const rows = await transaction.$queryRaw<Array<{ id: string }>>`
+          SELECT id FROM exercises WHERE id = ${exerciseId} FOR UPDATE
+        `
+        const exercise = await transaction.exercise.findUnique({
+          where: { id: exerciseId },
+          select: { archivedAt: true },
+        })
+        if (!(rows.length && exercise) || exercise.archivedAt) {
+          throw new ExerciseUnavailableError()
+        }
+      }
       await transaction.$queryRaw`SELECT id FROM workouts WHERE id = ${workoutId} FOR UPDATE`
       const aggregate = await transaction.workoutExercise.aggregate({
         where: { workoutId },

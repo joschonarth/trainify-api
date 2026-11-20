@@ -110,4 +110,11 @@ export class AdminGlobalExercisesUseCase {
       throw error
     }
   }
+
+  async setArchived(exerciseId: string, archived: boolean): Promise<void> {
+    const exists = await this.repository.setGlobalArchived(exerciseId, archived)
+    if (!exists) {
+      throw new ResourceNotFoundError('Global exercise not found.')
+    }
+  }
 }

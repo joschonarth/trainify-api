@@ -150,4 +150,30 @@ export function adminGlobalExercisesRoute(app: FastifyInstance) {
         ),
       })
   )
+
+  for (const action of ['archive', 'restore'] as const) {
+    app.post(
+      `/admin/exercises/:exerciseId/${action}`,
+      {
+        onRequest: [verifyJwt, requireRole('ADMIN')],
+        schema: {
+          security,
+          tags: ['Admin Exercises'],
+          params,
+          response: {
+            ...commonErrors,
+            204: z.null(),
+            404: z.object({ message: z.string() }),
+          },
+        },
+      },
+      async (request, reply) => {
+        await makeUseCase().setArchived(
+          (request.params as { exerciseId: string }).exerciseId,
+          action === 'archive'
+        )
+        return reply.code(204).send()
+      }
+    )
+  }
 }
