@@ -1,11 +1,12 @@
+import dayjs from 'dayjs'
 import type {
   Prisma,
   PrismaClient,
   WorkoutSession,
   WorkoutSessionStatus,
 } from 'generated/prisma'
-
 import { prisma } from '@/lib/prisma'
+import { PrismaStreakPlansRepository } from '@/modules/gamification/streak/repositories/prisma/prisma-streak-plans.repository'
 import { getZonedDayRange } from '@/shared/utils/date-timezone'
 
 import type {
@@ -20,14 +21,15 @@ export class PrismaWorkoutSessionsRepository
   implements WorkoutSessionsRepository
 {
   constructor(
-    private readonly client: Prisma.TransactionClient | PrismaClient = prisma
+    private readonly client: Prisma.TransactionClient | PrismaClient = prisma,
+    private readonly rootClient: PrismaClient = prisma
   ) {}
 
   async resolveDailySession(
     request: DailySessionRequest,
     create?: Prisma.WorkoutSessionUncheckedCreateInput
   ): Promise<WorkoutSessionWithWorkout | null> {
-    return await prisma.$transaction(async (transaction) => {
+    return await this.rootClient.$transaction(async (transaction) => {
       // Serialize creation and legacy adoption by user, including requests for different timezones.
       await transaction.$queryRaw`SELECT id FROM users WHERE id = ${request.userId} FOR UPDATE`
       const identity = await transaction.dailyWorkoutSession.findUnique({
@@ -49,6 +51,21 @@ export class PrismaWorkoutSessionsRepository
           },
           orderBy: [{ date: 'asc' }, { id: 'asc' }],
         })
+        if (create && !legacy) {
+          const tracking = await new PrismaStreakPlansRepository(
+            transaction
+          ).findByUser(request.userId)
+          const version = tracking?.versions
+            .filter((item) => item.effectiveDate <= request.businessDate)
+            .at(-1)
+          if (
+            version &&
+            version.workouts[String(dayjs.utc(request.businessDate).day())] !==
+              create.workoutId
+          ) {
+            return null
+          }
+        }
         const session =
           legacy ??
           (create
@@ -222,20 +239,45 @@ export class PrismaWorkoutSessionsRepository
   async findByUserAndDateRange(
     userId: string,
     startDate: Date,
-    endDate: Date
-  ): Promise<{ id: string; date: Date; status: WorkoutSessionStatus }[]> {
-    return await prisma.workoutSession.findMany({
+    endDate: Date,
+    timezone = 'UTC'
+  ): Promise<
+    {
+      id: string
+      date: Date
+      status: WorkoutSessionStatus
+      businessDate: string | null
+    }[]
+  > {
+    const sessions = await this.client.workoutSession.findMany({
       where: {
         userId,
-        date: { gte: startDate, lte: endDate },
+        OR: [
+          {
+            dailyIdentity: {
+              is: {
+                businessDate: {
+                  gte: dayjs(startDate).tz(timezone).format('YYYY-MM-DD'),
+                  lte: dayjs(endDate).tz(timezone).format('YYYY-MM-DD'),
+                },
+              },
+            },
+          },
+          { dailyIdentity: null, date: { gte: startDate, lte: endDate } },
+        ],
       },
       select: {
         id: true,
         date: true,
         status: true,
+        dailyIdentity: { select: { businessDate: true } },
       },
       orderBy: { date: 'asc' },
     })
+    return sessions.map(({ dailyIdentity, ...session }) => ({
+      ...session,
+      businessDate: dailyIdentity?.businessDate ?? null,
+    }))
   }
 
   async findManyByWorkoutAndUser(

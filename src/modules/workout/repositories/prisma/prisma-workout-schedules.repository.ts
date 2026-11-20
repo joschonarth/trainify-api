@@ -1,6 +1,10 @@
-import type { Prisma, WorkoutSchedule } from 'generated/prisma'
-
+import dayjs from 'dayjs'
+import type { Prisma, PrismaClient, WorkoutSchedule } from 'generated/prisma'
 import { prisma } from '@/lib/prisma'
+import {
+  PrismaStreakPlansRepository,
+  scheduleStreakPlan,
+} from '@/modules/gamification/streak/repositories/prisma/prisma-streak-plans.repository'
 
 import type {
   WorkoutSchedulesRepository,
@@ -10,12 +14,13 @@ import type {
 export class PrismaWorkoutSchedulesRepository
   implements WorkoutSchedulesRepository
 {
+  constructor(private readonly client: PrismaClient = prisma) {}
   async replaceDaysForWorkout(
     workoutId: string,
     userId: string,
     daysOfWeek: number[]
   ): Promise<boolean> {
-    return await prisma.$transaction(async (transaction) => {
+    return await this.client.$transaction(async (transaction) => {
       await transaction.$queryRaw`SELECT id FROM users WHERE id = ${userId} FOR UPDATE`
       await transaction.$queryRaw`SELECT id FROM workouts WHERE id = ${workoutId} AND "userId" = ${userId} FOR UPDATE`
       const active = await transaction.workout.findFirst({
@@ -47,6 +52,7 @@ export class PrismaWorkoutSchedulesRepository
           })),
         })
       }
+      await scheduleStreakPlan(transaction, userId)
       return true
     })
   }
@@ -54,30 +60,63 @@ export class PrismaWorkoutSchedulesRepository
   async assignDaysToWorkout(
     data: Prisma.WorkoutScheduleCreateManyInput[]
   ): Promise<void> {
-    await prisma.workoutSchedule.createMany({
-      data,
-    })
+    for (const userId of [...new Set(data.map((item) => item.userId))].sort()) {
+      await this.client.$transaction(async (transaction) => {
+        await transaction.$queryRaw`SELECT id FROM users WHERE id = ${userId} FOR UPDATE`
+        await transaction.workoutSchedule.createMany({
+          data: data.filter((item) => item.userId === userId),
+        })
+        await scheduleStreakPlan(transaction, userId)
+      })
+    }
   }
 
   async findDaysByWorkout(workoutId: string): Promise<WorkoutSchedule[]> {
-    return await prisma.workoutSchedule.findMany({
+    return await this.client.workoutSchedule.findMany({
       where: { workoutId },
     })
   }
 
   async findDaysByUser(userId: string): Promise<WorkoutSchedule[]> {
-    return await prisma.workoutSchedule.findMany({ where: { userId } })
+    return await this.client.workoutSchedule.findMany({ where: { userId } })
   }
 
   async findById(id: string): Promise<WorkoutSchedule | null> {
-    return await prisma.workoutSchedule.findUnique({ where: { id } })
+    return await this.client.workoutSchedule.findUnique({ where: { id } })
   }
 
   async findByUserAndDay(
     userId: string,
     dayOfWeek: number
   ): Promise<WorkoutScheduleWithWorkout | null> {
-    return await prisma.workoutSchedule.findFirst({
+    const tracking = await new PrismaStreakPlansRepository(
+      this.client
+    ).findByUser(userId)
+    if (tracking) {
+      const today = dayjs().tz(tracking.timezone).format('YYYY-MM-DD')
+      const version = tracking.versions
+        .filter((item) => item.effectiveDate <= today)
+        .at(-1)
+      if (version) {
+        const workoutId = version.workouts[String(dayOfWeek)]
+        if (!workoutId) {
+          return null
+        }
+        const workout = await this.client.workout.findUnique({
+          where: { id: workoutId, userId },
+          include: {
+            exercises: {
+              where: { exercise: { archivedAt: null } },
+              include: { exercise: true },
+            },
+          },
+        })
+        return workout
+          ? { id: 'historical-plan', userId, workoutId, dayOfWeek, workout }
+          : null
+      }
+    }
+    return await this.client.workoutSchedule.findFirst({
       where: {
         dayOfWeek,
         userId,
@@ -100,7 +139,7 @@ export class PrismaWorkoutSchedulesRepository
     id: string,
     dayOfWeek: number
   ): Promise<WorkoutSchedule | null> {
-    return await prisma.$transaction(async (transaction) => {
+    return await this.client.$transaction(async (transaction) => {
       const original = await transaction.workoutSchedule.findUnique({
         where: { id },
       })
@@ -115,16 +154,26 @@ export class PrismaWorkoutSchedulesRepository
       if (!schedule) {
         return null
       }
-      return await transaction.workoutSchedule.update({
+      const updated = await transaction.workoutSchedule.update({
         where: { id },
         data: { dayOfWeek },
       })
+      await scheduleStreakPlan(transaction, original.userId)
+      return updated
     })
   }
 
   async delete(id: string): Promise<void> {
-    await prisma.workoutSchedule.delete({
-      where: { id },
+    await this.client.$transaction(async (transaction) => {
+      const original = await transaction.workoutSchedule.findUnique({
+        where: { id },
+      })
+      if (!original) {
+        return
+      }
+      await transaction.$queryRaw`SELECT id FROM users WHERE id = ${original.userId} FOR UPDATE`
+      await transaction.workoutSchedule.deleteMany({ where: { id } })
+      await scheduleStreakPlan(transaction, original.userId)
     })
   }
 }

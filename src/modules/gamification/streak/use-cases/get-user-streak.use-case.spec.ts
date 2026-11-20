@@ -1,78 +1,117 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { InMemoryUsersRepository } from '@/modules/user/repositories/in-memory/in-memory-users.repository'
-import { makeUser } from '@/modules/user/tests/factories/make-user'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
-import { InMemoryUserStreakLogsRepository } from '../repositories/in-memory/in-memory-user-streak-logs.repository'
-import { InMemoryUserStreaksRepository } from '../repositories/in-memory/in-memory-user-streaks.repository'
-import { GetUserStreakUseCase } from './get-user-streak.use-case'
+import { makePlannedStreakContext } from '../tests/make-planned-streak-context'
 
-let users: InMemoryUsersRepository
-let streaks: InMemoryUserStreaksRepository
-let logs: InMemoryUserStreakLogsRepository
-let sut: GetUserStreakUseCase
+let context: Awaited<ReturnType<typeof makePlannedStreakContext>>
+beforeEach(async () => {
+  vi.useFakeTimers()
+  vi.setSystemTime(new Date('2026-11-19T15:00:00Z'))
+  context = await makePlannedStreakContext()
+})
+afterEach(() => vi.useRealTimers())
 
-describe('Get user streak', () => {
-  beforeEach(async () => {
-    users = new InMemoryUsersRepository()
-    streaks = new InMemoryUserStreaksRepository()
-    logs = new InMemoryUserStreakLogsRepository()
-    await makeUser(users, { id: 'user' })
-    sut = new GetUserStreakUseCase(streaks, users)
-    vi.useFakeTimers()
-  })
-  afterEach(() => vi.useRealTimers())
-  it('should return zero without creating a streak', async () => {
-    expect(await sut.execute('user')).toEqual({
+describe('read scheduled streak', () => {
+  it('does not create records before the first activity', async () => {
+    expect(await context.read.execute('user')).toMatchObject({
+      enabled: true,
       currentStreak: 0,
       bestStreak: 0,
-      lastWorkout: null,
+      unit: 'scheduled_training_days',
     })
-    expect(streaks.items).toHaveLength(0)
+    expect(context.streaks.items).toHaveLength(0)
+    expect(context.logs.items).toHaveLength(0)
   })
-  it('should reject a missing user', async () => {
-    await expect(sut.execute('missing')).rejects.toBeInstanceOf(
+  it('rejects an unknown user', async () => {
+    await expect(context.read.execute('missing')).rejects.toBeInstanceOf(
       ResourceNotFoundError
     )
   })
-  it.each([
-    ['America/Sao_Paulo', '2026-06-10T03:00:00Z', '2026-06-11T02:59:00Z', 4],
-    ['America/Sao_Paulo', '2026-06-10T03:00:00Z', '2026-06-12T02:59:00Z', 4],
-    ['America/Sao_Paulo', '2026-06-10T03:00:00Z', '2026-06-12T03:00:00Z', 0],
-    ['Pacific/Kiritimati', '2026-06-09T10:00:00Z', '2026-06-10T10:00:00Z', 4],
-    ['America/New_York', '2026-03-08T05:00:00Z', '2026-03-09T04:00:00Z', 4],
-    ['America/New_York', '2026-03-07T05:00:00Z', '2026-03-09T04:00:00Z', 0],
-    ['America/New_York', '2026-11-01T04:00:00Z', '2026-11-02T05:00:00Z', 4],
-    ['America/New_York', '2026-10-31T04:00:00Z', '2026-11-02T05:00:00Z', 0],
-  ])('should calculate local days in %s from %s to %s', async (timezone, last, now, expected) => {
-    await users.update('user', { timezone })
-    const date = new Date(last)
-    await streaks.create({
-      user: { connect: { id: 'user' } },
-      currentStreak: 4,
-      bestStreak: 7,
-      lastWorkout: date,
-    })
-    const before = structuredClone(streaks.items)
-    vi.setSystemTime(new Date(now))
-    expect(await sut.execute('user')).toEqual({
-      currentStreak: expected,
-      bestStreak: 7,
-      lastWorkout: date,
-    })
-    expect(streaks.items).toEqual(before)
-    expect(date.toISOString()).toBe(new Date(last).toISOString())
-    expect(logs.items).toHaveLength(0)
-  })
-  it('should return zero when no last workout exists', async () => {
-    await streaks.create({
-      user: { connect: { id: 'user' } },
-      currentStreak: 3,
-      bestStreak: 7,
-    })
-    expect(await sut.execute('user')).toEqual({
+  it('does not mistake an absent schedule for rest', async () => {
+    context.plans.items.clear()
+    expect(await context.read.execute('user')).toMatchObject({
+      enabled: false,
+      timezone: null,
+      activationDate: null,
       currentStreak: 0,
-      bestStreak: 7,
-      lastWorkout: null,
+    })
+  })
+  it('does not enable the next day plan today', async () => {
+    const plan = context.plans.items.get('user')
+    if (!plan?.versions[0]) {
+      throw new Error('Missing plan fixture')
+    }
+    plan.activationDate = '2026-11-20'
+    plan.versions[0].effectiveDate = '2026-11-20'
+    expect(await context.read.execute('user')).toMatchObject({
+      enabled: false,
+      currentStreak: 0,
+    })
+  })
+  it.each([
+    ['2026-11-18T15:00:00Z', 2],
+    ['2026-11-20T02:59:59Z', 2],
+    ['2026-11-20T03:00:00Z', 0],
+  ])('treats rest and closed misses correctly at %s', async (instant, currentStreak) => {
+    await context.recordActivity('2026-11-16')
+    await context.recordActivity('2026-11-17')
+    vi.setSystemTime(new Date(instant))
+    const before = structuredClone(context.streaks.items)
+    expect(await context.read.execute('user')).toMatchObject({
+      currentStreak,
+      bestStreak: 2,
+    })
+    expect(context.streaks.items).toEqual(before)
+  })
+  it('keeps the fixed timezone when the profile moves ahead', async () => {
+    await context.recordActivity('2026-11-16')
+    await context.recordActivity('2026-11-17')
+    await context.users.update('user', { timezone: 'Asia/Tokyo' })
+    vi.setSystemTime(new Date('2026-11-20T02:59:59Z'))
+    expect(await context.read.execute('user')).toMatchObject({
+      currentStreak: 2,
+      timezone: 'America/Sao_Paulo',
+    })
+  })
+  it.each([
+    ['2026-03-06', '2026-03-09', '2026-03-09T16:00:00Z'],
+    ['2026-10-30', '2026-11-02', '2026-11-02T17:00:00Z'],
+  ])('preserves weekend rest across DST from %s to %s', async (friday, monday, reference) => {
+    context.plans.items.set('user', {
+      timezone: 'America/New_York',
+      activationDate: friday,
+      versions: [{ effectiveDate: friday, workouts: { 1: 'a', 5: 'b' } }],
+    })
+    await context.recordActivity(friday)
+    await context.recordActivity(monday)
+    vi.setSystemTime(new Date(reference))
+    expect(await context.read.execute('user')).toMatchObject({
+      currentStreak: 2,
+      bestStreak: 2,
+    })
+  })
+  it('ends the sequence when disabled and keeps its record after reactivation', async () => {
+    context.plans.items.set('user', {
+      timezone: 'America/Sao_Paulo',
+      activationDate: '2026-11-16',
+      versions: [
+        { effectiveDate: '2026-11-16', workouts: { 1: 'a', 2: 'b' } },
+        { effectiveDate: '2026-11-18', workouts: {} },
+        { effectiveDate: '2026-11-23', workouts: { 1: 'a' } },
+      ],
+    })
+    for (const date of ['2026-11-16', '2026-11-17', '2026-11-23']) {
+      await context.recordActivity(date)
+    }
+    expect(await context.read.execute('user')).toMatchObject({
+      enabled: false,
+      currentStreak: 0,
+      bestStreak: 2,
+    })
+    vi.setSystemTime(new Date('2026-11-23T15:00:00Z'))
+    expect(await context.read.execute('user')).toMatchObject({
+      enabled: true,
+      currentStreak: 1,
+      bestStreak: 2,
     })
   })
 })

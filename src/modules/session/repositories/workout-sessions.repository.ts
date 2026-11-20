@@ -139,8 +139,16 @@ export interface WorkoutSessionsRepository {
   findByUserAndDateRange(
     userId: string,
     startDate: Date,
-    endDate: Date
-  ): Promise<{ id: string; date: Date; status: WorkoutSessionStatus }[]>
+    endDate: Date,
+    timezone?: string
+  ): Promise<
+    {
+      id: string
+      date: Date
+      status: WorkoutSessionStatus
+      businessDate?: string | null
+    }[]
+  >
 
   findManyByWorkoutAndUser(
     userId: string,

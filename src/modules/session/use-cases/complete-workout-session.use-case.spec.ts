@@ -169,6 +169,12 @@ describe('CompleteWorkoutSessionUseCase', () => {
       currentStreak: 1,
       bestStreak: 1,
       lastWorkout: null,
+      lastBusinessDate: null,
+      days: [],
+      enabled: true,
+      unit: 'scheduled_training_days',
+      timezone: 'America/Sao_Paulo',
+      activationDate: '2026-01-01',
     })
     updateUserStreakUseCase = {
       execute: vi.fn(updateStreak),
@@ -602,7 +608,6 @@ describe('CompleteWorkoutSessionUseCase', () => {
     expect(updateUserStreakUseCase.execute).toHaveBeenLastCalledWith({
       userId,
       logDate: new Date('2026-06-10T12:00:00Z'),
-      recoverOriginalCompletion: true,
       creditDay: { businessDate: '2026-06-10', timezone: 'America/Sao_Paulo' },
     })
   })
@@ -670,7 +675,6 @@ describe('CompleteWorkoutSessionUseCase', () => {
     expect(updateUserStreakUseCase.execute).toHaveBeenLastCalledWith({
       userId,
       logDate: new Date('2026-06-12T12:00:00Z'),
-      recoverOriginalCompletion: true,
       creditDay: { businessDate: '2026-06-12', timezone: 'America/Sao_Paulo' },
     })
   })
@@ -807,7 +811,6 @@ describe('CompleteWorkoutSessionUseCase', () => {
           businessDate: '2026-01-01',
           timezone: 'America/Sao_Paulo',
         },
-        recoverOriginalCompletion: true,
       })
     )
   })

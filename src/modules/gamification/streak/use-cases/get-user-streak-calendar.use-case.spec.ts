@@ -2,10 +2,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { InMemoryUsersRepository } from '@/modules/user/repositories/in-memory/in-memory-users.repository'
 import { makeUser } from '@/modules/user/tests/factories/make-user'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
+import { InMemoryStreakPlansRepository } from '../repositories/in-memory/in-memory-streak-plans.repository'
 import { InMemoryUserStreakLogsRepository } from '../repositories/in-memory/in-memory-user-streak-logs.repository'
 import { GetUserStreakCalendarUseCase } from './get-user-streak-calendar.use-case'
 
 let users: InMemoryUsersRepository
+let plans: InMemoryStreakPlansRepository
 let logs: InMemoryUserStreakLogsRepository
 let sut: GetUserStreakCalendarUseCase
 
@@ -14,7 +16,8 @@ describe('Get user streak calendar', () => {
     users = new InMemoryUsersRepository()
     logs = new InMemoryUserStreakLogsRepository()
     await makeUser(users, { id: 'user', timezone: 'America/Sao_Paulo' })
-    sut = new GetUserStreakCalendarUseCase(logs, users)
+    plans = new InMemoryStreakPlansRepository()
+    sut = new GetUserStreakCalendarUseCase(logs, users, plans)
     vi.useFakeTimers()
     vi.setSystemTime(new Date('2027-01-01T02:00:00Z'))
   })
@@ -23,8 +26,16 @@ describe('Get user streak calendar', () => {
   it('should use the local month and year when both are omitted', async () => {
     const { days } = await sut.execute({ userId: 'user' })
     expect(days).toHaveLength(31)
-    expect(days[0]).toEqual({ date: '2026-12-01', completed: false })
-    expect(days.at(-1)).toEqual({ date: '2026-12-31', completed: false })
+    expect(days[0]).toEqual({
+      date: '2026-12-01',
+      completed: false,
+      status: 'unplanned',
+    })
+    expect(days.at(-1)).toEqual({
+      date: '2026-12-31',
+      completed: false,
+      status: 'unplanned',
+    })
   })
 
   it('should default only the omitted year or month using the user timezone', async () => {
@@ -42,7 +53,11 @@ describe('Get user streak calendar', () => {
     })
     const { days } = await sut.execute({ userId: 'user', year: 2024, month: 2 })
     expect(days).toHaveLength(29)
-    expect(days.at(-1)).toEqual({ date: '2024-02-29', completed: true })
+    expect(days.at(-1)).toEqual({
+      date: '2024-02-29',
+      completed: true,
+      status: 'unplanned',
+    })
   })
 
   it('should honor inclusive local month bounds and isolate another user activity', async () => {
@@ -61,8 +76,8 @@ describe('Get user streak calendar', () => {
     const { days } = await sut.execute({ userId: 'user', year: 2026, month: 6 })
     expect(days).toHaveLength(30)
     expect(days.filter((day) => day.completed)).toEqual([
-      { date: '2026-06-01', completed: true },
-      { date: '2026-06-30', completed: true },
+      { date: '2026-06-01', completed: true, status: 'unplanned' },
+      { date: '2026-06-30', completed: true, status: 'unplanned' },
     ])
   })
 
@@ -78,7 +93,7 @@ describe('Get user streak calendar', () => {
     const before = structuredClone(logs.items)
     const { days } = await sut.execute({ userId: 'user', year: 2026, month: 6 })
     expect(days.filter((day) => day.completed)).toEqual([
-      { date: '2026-06-10', completed: true },
+      { date: '2026-06-10', completed: true, status: 'unplanned' },
     ])
     expect(logs.items).toEqual(before)
   })
@@ -109,8 +124,8 @@ describe('Get user streak calendar', () => {
     }
     const { days } = await sut.execute({ userId: 'user', year: 2026, month })
     expect(days.filter((day) => day.completed)).toEqual([
-      { date: firstDate, completed: true },
-      { date: secondDate, completed: true },
+      { date: firstDate, completed: true, status: 'unplanned' },
+      { date: secondDate, completed: true, status: 'unplanned' },
     ])
   })
 
@@ -136,6 +151,45 @@ describe('Get user streak calendar', () => {
     })
     await users.update('user', { timezone: 'America/Los_Angeles' })
     const { days } = await sut.execute({ userId: 'user', year: 2026, month: 6 })
-    expect(days[0]).toEqual({ date: '2026-06-01', completed: true })
+    expect(days[0]).toEqual({
+      date: '2026-06-01',
+      completed: true,
+      status: 'unplanned',
+    })
+  })
+  it('distinguishes all planning states and keeps extra activity on rest separate', async () => {
+    vi.setSystemTime(new Date('2026-11-19T15:00:00Z'))
+    plans.items.set('user', {
+      timezone: 'America/Sao_Paulo',
+      activationDate: '2026-11-16',
+      versions: [
+        {
+          effectiveDate: '2026-11-16',
+          workouts: { 1: 'a', 2: 'b', 4: 'a', 5: 'b' },
+        },
+      ],
+    })
+    for (const businessDate of ['2026-11-16', '2026-11-18']) {
+      await logs.create({
+        userId: 'user',
+        businessDate,
+        date: new Date(businessDate),
+      })
+    }
+    const { days } = await sut.execute({
+      userId: 'user',
+      month: 11,
+      year: 2026,
+    })
+    expect(
+      days.filter((day) => day.date >= '2026-11-15' && day.date <= '2026-11-20')
+    ).toEqual([
+      { date: '2026-11-15', status: 'unplanned', completed: false },
+      { date: '2026-11-16', status: 'completed', completed: true },
+      { date: '2026-11-17', status: 'missed', completed: false },
+      { date: '2026-11-18', status: 'rest', completed: true },
+      { date: '2026-11-19', status: 'pending', completed: false },
+      { date: '2026-11-20', status: 'scheduled', completed: false },
+    ])
   })
 })

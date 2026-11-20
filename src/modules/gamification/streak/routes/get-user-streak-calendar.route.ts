@@ -26,6 +26,14 @@ export function getUserStreakCalendarRoute(app: FastifyInstance) {
               days: z.array(
                 z.object({
                   date: z.string().describe('Date in YYYY-MM-DD format.'),
+                  status: z.enum([
+                    'completed',
+                    'pending',
+                    'missed',
+                    'rest',
+                    'scheduled',
+                    'unplanned',
+                  ]),
                   completed: z
                     .boolean()
                     .describe('Whether a workout was completed on this day.'),

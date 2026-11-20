@@ -1,3 +1,6 @@
+import { PrismaStreakPlansRepository } from '@/modules/gamification/streak/repositories/prisma/prisma-streak-plans.repository'
+import { PrismaUserStreakLogsRepository } from '@/modules/gamification/streak/repositories/prisma/prisma-user-streak-logs.repository'
+import { GetPlanningCalendarContext } from '@/modules/gamification/streak/use-cases/get-planning-calendar-context'
 import { PrismaWorkoutSessionsRepository } from '@/modules/session/repositories/prisma/prisma-workout-sessions.repository'
 import { PrismaUsersRepository } from '@/modules/user/repositories/prisma/prisma-users.repository'
 
@@ -6,9 +9,16 @@ import { GetMonthlyWorkoutCalendarUseCase } from '../get-monthly-workout-calenda
 export function makeGetMonthlyWorkoutCalendarUseCase() {
   const workoutSessionsRepository = new PrismaWorkoutSessionsRepository()
   const usersRepository = new PrismaUsersRepository()
+  const streakPlansRepository = new PrismaStreakPlansRepository()
+  const streakLogsRepository = new PrismaUserStreakLogsRepository()
+  const planning = new GetPlanningCalendarContext(
+    streakPlansRepository,
+    streakLogsRepository
+  )
   const getMonthlyWorkoutCalendarUseCase = new GetMonthlyWorkoutCalendarUseCase(
     workoutSessionsRepository,
-    usersRepository
+    usersRepository,
+    planning
   )
 
   return getMonthlyWorkoutCalendarUseCase
