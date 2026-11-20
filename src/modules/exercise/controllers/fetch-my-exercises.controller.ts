@@ -6,7 +6,7 @@ export async function fetchMyExercisesController(
   request: FastifyRequest,
   reply: FastifyReply
 ) {
-  const { q, category, type, page, pageSize } =
+  const { q, category, type, page, pageSize, isFavorite } =
     request.query as FetchMyExercisesQuery
 
   const userId = request.user.sub
@@ -15,6 +15,7 @@ export async function fetchMyExercisesController(
 
   const result = await fetchMyExercisesUseCase.execute({
     userId,
+    ...(isFavorite !== undefined && { isFavorite }),
     q,
     category: category ?? null,
     type: type ?? null,

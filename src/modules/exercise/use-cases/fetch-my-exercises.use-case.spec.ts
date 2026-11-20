@@ -37,6 +37,7 @@ describe('FetchMyExercisesUseCase', () => {
       userId: 'user-id',
     }
     const myExercise: MyExercise = {
+      isFavorite: false,
       id: 'my-exercise-id',
       createdAt: libraryAddedAt,
       userId: 'user-id',
@@ -63,9 +64,11 @@ describe('FetchMyExercisesUseCase', () => {
     ).resolves.toEqual({
       items: [
         {
+          isFavorite: false,
           myExerciseId: myExercise.id,
           exerciseId: exercise.id,
           name: exercise.name,
+          measurement: exercise.measurement,
           category: exercise.category,
           type: exercise.type,
           isCustom: exercise.isCustom,

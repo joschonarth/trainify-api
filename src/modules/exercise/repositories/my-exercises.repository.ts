@@ -1,6 +1,11 @@
 import type { Exercise, MyExercise, Prisma } from 'generated/prisma'
 
 export interface MyExercisesRepository {
+  setFavorite(
+    userId: string,
+    exerciseId: string,
+    isFavorite: boolean
+  ): Promise<MyExercise | null>
   createCustomExerciseWithLibraryEntry(
     userId: string,
     data: Omit<Prisma.ExerciseCreateInput, 'user'>
@@ -17,7 +22,8 @@ export interface MyExercisesRepository {
     category: Exercise['category'] | null,
     page: number,
     pageSize: number,
-    type?: Exercise['type'] | null
+    type?: Exercise['type'] | null,
+    isFavorite?: boolean
   ): Promise<{
     items: (MyExercise & { exercise: Exercise })[]
     total: number

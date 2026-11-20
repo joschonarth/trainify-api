@@ -21,6 +21,28 @@ export class InMemoryMyExercisesRepository implements MyExercisesRepository {
     private readonly workoutExercisesRepository: WorkoutExercisesRepository
   ) {}
 
+  async setFavorite(
+    userId: string,
+    exerciseId: string,
+    isFavorite: boolean
+  ): Promise<MyExercise | null> {
+    const exercise = await this.exercisesRepository.findById(exerciseId)
+    if (
+      !exercise ||
+      exercise.archivedAt ||
+      (exercise.isCustom && exercise.userId !== userId)
+    ) {
+      return null
+    }
+    const item = this.items.find(
+      (item) => item.userId === userId && item.exerciseId === exerciseId
+    )
+    if (!item) {
+      return null
+    }
+    item.isFavorite = isFavorite
+    return { ...item }
+  }
   async createCustomExerciseWithLibraryEntry(
     userId: string,
     data: Omit<Prisma.ExerciseCreateInput, 'user'>
@@ -62,6 +84,7 @@ export class InMemoryMyExercisesRepository implements MyExercisesRepository {
     }
 
     const myExercise: MyExercise = {
+      isFavorite: false,
       id: randomUUID(),
       createdAt: new Date(),
       userId,
@@ -87,7 +110,8 @@ export class InMemoryMyExercisesRepository implements MyExercisesRepository {
     category: Exercise['category'] | null,
     page: number,
     pageSize: number,
-    type?: Exercise['type'] | null
+    type?: Exercise['type'] | null,
+    isFavorite?: boolean
   ): Promise<{
     items: (MyExercise & { exercise: Exercise })[]
     total: number
@@ -95,7 +119,10 @@ export class InMemoryMyExercisesRepository implements MyExercisesRepository {
     const matches: (MyExercise & { exercise: Exercise })[] = []
 
     for (const myExercise of this.items) {
-      if (myExercise.userId !== userId) {
+      if (
+        myExercise.userId !== userId ||
+        (isFavorite !== undefined && myExercise.isFavorite !== isFavorite)
+      ) {
         continue
       }
 
@@ -115,8 +142,10 @@ export class InMemoryMyExercisesRepository implements MyExercisesRepository {
       }
     }
 
-    const sorted = matches.sort((left, right) =>
-      left.exercise.name.localeCompare(right.exercise.name)
+    const sorted = matches.sort(
+      (left, right) =>
+        left.exercise.name.localeCompare(right.exercise.name) ||
+        left.exerciseId.localeCompare(right.exerciseId)
     )
 
     return {

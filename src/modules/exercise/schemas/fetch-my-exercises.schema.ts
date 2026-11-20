@@ -2,6 +2,10 @@ import { ExerciseCategory, ExerciseType } from 'generated/prisma'
 import { z } from 'zod'
 
 export const fetchMyExercisesQuerySchema = z.object({
+  isFavorite: z
+    .enum(['true', 'false'])
+    .transform((value) => value === 'true')
+    .optional(),
   q: z.string().optional().default(''),
   category: z.enum(ExerciseCategory).optional(),
   type: z.enum(ExerciseType).optional(),

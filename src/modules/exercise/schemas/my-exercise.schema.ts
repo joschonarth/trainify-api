@@ -8,6 +8,7 @@ export const myExerciseSchema = exerciseSchema
     createdAt: true,
   })
   .extend({
+    isFavorite: z.boolean(),
     myExerciseId: z.string().describe('User exercise relation ID.'),
     exerciseId: z.string().describe('Exercise ID.'),
     addedAt: z.date().describe('Date the exercise was added to the library.'),

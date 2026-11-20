@@ -45,6 +45,7 @@ model Exercise {
 }
 
 model MyExercise {
+  isFavorite Boolean @default(false) @map("is_favorite")
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
 
