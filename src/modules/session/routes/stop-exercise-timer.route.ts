@@ -15,7 +15,7 @@ export function stopExerciseTimerRoute(app: FastifyInstance) {
         tags: ['Sessions'],
         summary: 'Stop exercise timer',
         description:
-          'Stops the timer for a specific exercise session and records the elapsed time.',
+          'Stops a timer on an unfinished exercise in an active workout session. Repeated stops preserve the original timestamps and duration without writing.',
         params: stopExerciseTimerParamsSchema,
         response: {
           200: z
@@ -27,6 +27,9 @@ export function stopExerciseTimerRoute(app: FastifyInstance) {
           400: z
             .object({ message: z.string() })
             .describe('Exercise timer has not been started.'),
+          403: z
+            .object({ message: z.string() })
+            .describe('Session is not active or the exercise is completed.'),
           404: z
             .object({ message: z.string() })
             .describe('Exercise session not found.'),
