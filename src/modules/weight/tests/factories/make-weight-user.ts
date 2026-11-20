@@ -10,6 +10,7 @@ export function makeWeightUser(
     email: `${id}@example.com`,
     password: null,
     tokenVersion: 0,
+    role: 'USER',
     avatarUrl: null,
     timezone: 'UTC',
     height: null,
