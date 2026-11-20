@@ -85,6 +85,59 @@ export class InMemoryExercisesRepository implements ExercisesRepository {
     return Promise.resolve(exercises.map(copyExercise))
   }
 
+  findGlobalById(
+    id: string,
+    includeArchived = false
+  ): Promise<Exercise | null> {
+    const exercise = this.items.find(
+      (item) =>
+        item.id === id &&
+        item.userId === null &&
+        !item.isCustom &&
+        (includeArchived || item.archivedAt === null)
+    )
+    return Promise.resolve(exercise ? copyExercise(exercise) : null)
+  }
+
+  findAllGlobalsForAdmin({
+    query,
+    category,
+    status,
+    page,
+  }: {
+    query: string
+    category: ExerciseCategory | null
+    status: 'active' | 'archived' | 'all'
+    page: number
+  }): Promise<Exercise[]> {
+    const exercises = this.items
+      .filter(
+        (item) =>
+          item.userId === null &&
+          !item.isCustom &&
+          (!query || item.name.toLowerCase().includes(query.toLowerCase())) &&
+          (!category || item.category === category) &&
+          (status === 'all' ||
+            (status === 'active'
+              ? item.archivedAt === null
+              : item.archivedAt !== null))
+      )
+      .sort((a, b) => a.name.localeCompare(b.name) || a.id.localeCompare(b.id))
+      .slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE)
+    return Promise.resolve(exercises.map(copyExercise))
+  }
+
+  findGlobalByName(name: string, excludeId?: string): Promise<Exercise | null> {
+    const exercise = this.items.find(
+      (item) =>
+        item.id !== excludeId &&
+        item.userId === null &&
+        !item.isCustom &&
+        item.name.toLowerCase() === name.toLowerCase()
+    )
+    return Promise.resolve(exercise ? copyExercise(exercise) : null)
+  }
+
   findByNameAndUser(
     name: string,
     userId: string,
