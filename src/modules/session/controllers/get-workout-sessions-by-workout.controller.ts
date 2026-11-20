@@ -18,5 +18,5 @@ export async function getWorkoutSessionsByWorkoutController(
     workoutId,
   })
 
-  return reply.status(200).send({ result })
+  return reply.status(200).send(result)
 }

@@ -15,9 +15,14 @@ export function getWorkoutSessionsByWorkoutRoute(app: FastifyInstance) {
         tags: ['Sessions'],
         summary: 'Get workout sessions by workout',
         description:
-          'Returns all sessions for a specific workout, including exercise performance data.',
+          'Returns sessions for an owned workout, including archived workouts. A workout without history returns an empty list and totalSessions 0. The weight field is the latest log weight, rather than a sum of weights; ties use log ID descending. Missing or unweighted logs return 0.',
         params: getWorkoutSessionsByWorkoutParamsSchema,
         response: {
+          404: z
+            .object({ message: z.string() })
+            .describe(
+              'Workout not found or not owned by the authenticated user.'
+            ),
           200: z
             .object({
               workoutId: z.string().describe('Workout ID.'),
@@ -37,11 +42,21 @@ export function getWorkoutSessionsByWorkoutRoute(app: FastifyInstance) {
                     z.object({
                       exerciseName: z.string().describe('Exercise name.'),
                       sets: z.number().describe('Number of sets performed.'),
-                      reps: z.number().describe('Number of reps performed.'),
-                      weight: z.number().describe('Weight used in kilograms.'),
+                      reps: z
+                        .number()
+                        .describe(
+                          'Repetitions for REPS or seconds per set for DURATION, summed across logs.'
+                        ),
+                      weight: z
+                        .number()
+                        .describe(
+                          'Weight in kilograms from the latest log by date then ID descending; 0 for missing or unweighted logs.'
+                        ),
                       volume: z
                         .number()
-                        .describe('Volume (sets * reps * weight).'),
+                        .describe(
+                          'Sum of logged load volumes for REPS; zero for DURATION.'
+                        ),
                       completed: z.boolean(),
                       skipReason: z.string().nullable(),
                       state: z.enum(['COMPLETED', 'SKIPPED', 'PENDING']),

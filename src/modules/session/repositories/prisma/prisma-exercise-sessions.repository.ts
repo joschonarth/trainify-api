@@ -1,11 +1,11 @@
 import type { ExerciseSession, Prisma, PrismaClient } from 'generated/prisma'
 
 import { prisma } from '@/lib/prisma'
-
 import type {
   ExerciseSessionsRepository,
   ExerciseSessionWithLogs,
 } from '../exercise-sessions.repository'
+import { exerciseSessionWithLogsInclude } from '../includes/exercise-session.include'
 
 export class PrismaExerciseSessionsRepository
   implements ExerciseSessionsRepository
@@ -15,7 +15,7 @@ export class PrismaExerciseSessionsRepository
   ) {}
 
   async countCompletedByUser(userId: string): Promise<number> {
-    return await prisma.exerciseSession.count({
+    return await this.client.exerciseSession.count({
       where: {
         completed: true,
         workoutSession: { userId },
@@ -28,43 +28,34 @@ export class PrismaExerciseSessionsRepository
   }
 
   async findBySessionId(sessionId: string): Promise<ExerciseSessionWithLogs[]> {
-    return (await this.client.exerciseSession.findMany({
+    return await this.client.exerciseSession.findMany({
       where: { workoutSessionId: sessionId },
-      include: {
-        exercise: true,
-        logs: { orderBy: { date: 'asc' } },
-      },
-    })) as unknown as ExerciseSessionWithLogs[]
+      include: exerciseSessionWithLogsInclude,
+    })
   }
 
   async findByWorkoutSessionId(
     workoutSessionId: string
   ): Promise<ExerciseSessionWithLogs[]> {
-    return (await this.client.exerciseSession.findMany({
+    return await this.client.exerciseSession.findMany({
       where: { workoutSessionId },
-      include: {
-        exercise: true,
-        logs: { orderBy: { date: 'asc' } },
-      },
-    })) as unknown as ExerciseSessionWithLogs[]
+      include: exerciseSessionWithLogsInclude,
+    })
   }
 
   async findByIdWithLogs(id: string): Promise<ExerciseSessionWithLogs | null> {
-    return (await prisma.exerciseSession.findUnique({
+    return await this.client.exerciseSession.findUnique({
       where: { id },
-      include: {
-        exercise: true,
-        logs: { orderBy: { date: 'asc' } },
-      },
-    })) as unknown as ExerciseSessionWithLogs | null
+      include: exerciseSessionWithLogsInclude,
+    })
   }
 
   async findManyByUserAndExercise(
     userId: string,
     exerciseId: string,
-    fromDate: Date
+    fromDate?: Date
   ): Promise<ExerciseSessionWithLogs[]> {
-    return (await prisma.exerciseSession.findMany({
+    return await this.client.exerciseSession.findMany({
       where: {
         exerciseId,
         logs: {
@@ -74,17 +65,14 @@ export class PrismaExerciseSessionsRepository
         },
         ...(fromDate && { startedAt: { gte: fromDate } }),
       },
-      include: {
-        exercise: true,
-        logs: { orderBy: { date: 'asc' } },
-      },
-    })) as unknown as ExerciseSessionWithLogs[]
+      include: exerciseSessionWithLogsInclude,
+    })
   }
 
   async create(
     data: Prisma.ExerciseSessionUncheckedCreateInput
   ): Promise<ExerciseSession> {
-    return await prisma.exerciseSession.create({ data })
+    return await this.client.exerciseSession.create({ data })
   }
 
   async update(
@@ -98,6 +86,6 @@ export class PrismaExerciseSessionsRepository
   }
 
   async delete(id: string): Promise<void> {
-    await prisma.exerciseSession.delete({ where: { id } })
+    await this.client.exerciseSession.delete({ where: { id } })
   }
 }
