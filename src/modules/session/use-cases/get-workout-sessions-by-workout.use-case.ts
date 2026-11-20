@@ -1,3 +1,4 @@
+import type { WorkoutsRepository } from '@/modules/workout/repositories/workouts.repository'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 import { getLogVolume } from '@/shared/utils/calculate-volume'
 
@@ -11,10 +12,23 @@ interface GetWorkoutSessionsByWorkoutRequest {
 
 export class GetWorkoutSessionsByWorkoutUseCase {
   constructor(
-    private readonly workoutSessionsRepository: WorkoutSessionsRepository
+    private readonly workoutSessionsRepository: Pick<
+      WorkoutSessionsRepository,
+      'findManyByWorkoutId'
+    >,
+    private readonly workoutsRepository: Pick<
+      WorkoutsRepository,
+      'findByIdIncludingArchived'
+    >
   ) {}
 
   async execute({ userId, workoutId }: GetWorkoutSessionsByWorkoutRequest) {
+    const workout =
+      await this.workoutsRepository.findByIdIncludingArchived(workoutId)
+    if (!workout || workout.userId !== userId) {
+      throw new ResourceNotFoundError('Workout not found.')
+    }
+
     const sessions = await this.workoutSessionsRepository.findManyByWorkoutId(
       workoutId,
       userId
@@ -27,11 +41,16 @@ export class GetWorkoutSessionsByWorkoutUseCase {
           0
         )
 
+        const latestLog = [...es.logs].sort(
+          (a, b) =>
+            b.date.getTime() - a.date.getTime() || b.id.localeCompare(a.id)
+        )[0]
+
         return {
           exerciseName: es.exercise.name,
           sets: es.logs.reduce((sum, log) => sum + log.sets, 0),
           reps: es.logs.reduce((sum, log) => sum + log.reps, 0),
-          weight: es.logs.reduce((sum, log) => sum + (log.weight ?? 0), 0),
+          weight: latestLog?.weight ?? 0,
           volume,
           completed: es.completed,
           skipReason: es.skipReason,
@@ -57,17 +76,9 @@ export class GetWorkoutSessionsByWorkoutUseCase {
       }
     })
 
-    const firstSession = sessions[0]
-
-    if (!firstSession) {
-      throw new ResourceNotFoundError(
-        'No workout sessions found for this workout.'
-      )
-    }
-
     return {
       workoutId,
-      workoutName: firstSession.workout.name,
+      workoutName: workout.name,
       totalSessions: sessions.length,
       sessions: formattedSessions,
     }

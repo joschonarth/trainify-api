@@ -15,8 +15,20 @@ export class InMemoryWorkoutSessionsRepository
 {
   items: WorkoutSession[] = []
   details = new Map<string, WorkoutSessionWithWorkout>()
+  historyItems: Awaited<
+    ReturnType<WorkoutSessionsRepository['findManyByWorkoutId']>
+  > = []
   dailyIdentities: DailyWorkoutSession[] = []
   private queue: Promise<unknown> = Promise.resolve()
+
+  findManyByWorkoutId(workoutId: string, userId: string) {
+    return Promise.resolve(
+      this.historyItems.filter(
+        (session) =>
+          session.workoutId === workoutId && session.userId === userId
+      )
+    )
+  }
 
   findById(id: string) {
     return Promise.resolve(this.items.find((item) => item.id === id) ?? null)

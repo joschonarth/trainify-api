@@ -1,23 +1,10 @@
 import type { ExerciseSession, Prisma } from 'generated/prisma'
 
-export type ExerciseSessionWithLogs = ExerciseSession & {
-  exercise: {
-    id: string
-    name: string
-    category: string | null
-    type: string | null
-    measurement: 'REPS' | 'DURATION'
-  }
-  logs: {
-    id: string
-    sets: number
-    reps: number
-    weight: number | null
-    volume: number
-    date: Date
-    description: string | null
-  }[]
-}
+import type { exerciseSessionWithLogsInclude } from './includes/exercise-session.include'
+
+export type ExerciseSessionWithLogs = Prisma.ExerciseSessionGetPayload<{
+  include: typeof exerciseSessionWithLogsInclude
+}>
 
 export interface ExerciseSessionsRepository {
   countCompletedByUser(userId: string): Promise<number>
