@@ -35,6 +35,7 @@ function copyUser(user: User): User {
   return {
     ...user,
     tokenVersion: user.tokenVersion,
+    role: user.role,
     birthdate: user.birthdate ? new Date(user.birthdate) : null,
     createdAt: new Date(user.createdAt),
   }
@@ -71,6 +72,7 @@ export class InMemoryUsersRepository implements UsersRepository {
       email: data.email,
       password: data.password ?? null,
       tokenVersion: data.tokenVersion ?? 0,
+      role: data.role ?? 'USER',
       avatarUrl: data.avatarUrl ?? null,
       timezone: data.timezone ?? 'America/Sao_Paulo',
       height: data.height ?? null,
@@ -106,6 +108,7 @@ export class InMemoryUsersRepository implements UsersRepository {
       email: unwrap(data.email, current.email),
       password: unwrap(data.password, current.password),
       tokenVersion: unwrap(data.tokenVersion, current.tokenVersion),
+      role: unwrap(data.role, current.role),
       avatarUrl: unwrap(data.avatarUrl, current.avatarUrl),
       timezone: unwrap(data.timezone, current.timezone),
       height: unwrap(data.height, current.height),
