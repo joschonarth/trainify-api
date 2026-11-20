@@ -11,7 +11,11 @@ export interface CreateWeightLogData {
 export interface WeightLogsRepository {
   create(data: CreateWeightLogData): Promise<WeightLog>
   findById(id: string): Promise<WeightLog | null>
-  findByUserId(userId: string): Promise<WeightLog[]>
+  findPageByUserId(query: {
+    userId: string
+    page: number
+    pageSize: number
+  }): Promise<{ weightLogs: WeightLog[]; total: number }>
   findManyByUserId(
     userId: string,
     filters?: { from?: Date; to?: Date }
@@ -20,7 +24,6 @@ export interface WeightLogsRepository {
   findLatestByUserId(userId: string, through?: Date): Promise<WeightLog | null>
   findLatestByGoalId(goalId: string): Promise<WeightLog | null>
   findFirstByUserId(userId: string): Promise<WeightLog | null>
-  findFirstByGoalId(goalId: string): Promise<WeightLog | null>
   findMinByUserId(userId: string): Promise<WeightLog | null>
   findMaxByUserId(userId: string): Promise<WeightLog | null>
   findAverageByUserId(userId: string): Promise<number | null>

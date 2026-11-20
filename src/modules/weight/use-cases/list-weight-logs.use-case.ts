@@ -4,10 +4,18 @@ import type { WeightLogsRepository } from '../repositories/weight-logs.repositor
 
 interface ListWeightLogsUseCaseRequest {
   userId: string
+  page?: number
+  pageSize?: number
 }
 
 interface ListWeightLogsUseCaseResponse {
   weightLogs: WeightLog[]
+  pagination: {
+    page: number
+    pageSize: number
+    total: number
+    totalPages: number
+  }
 }
 
 export class ListWeightLogsUseCase {
@@ -15,9 +23,23 @@ export class ListWeightLogsUseCase {
 
   async execute({
     userId,
+    page = 1,
+    pageSize = 20,
   }: ListWeightLogsUseCaseRequest): Promise<ListWeightLogsUseCaseResponse> {
-    const weightLogs = await this.weightLogsRepository.findByUserId(userId)
+    const result = await this.weightLogsRepository.findPageByUserId({
+      userId,
+      page,
+      pageSize,
+    })
 
-    return { weightLogs }
+    return {
+      weightLogs: result.weightLogs,
+      pagination: {
+        page,
+        pageSize,
+        total: result.total,
+        totalPages: Math.ceil(result.total / pageSize),
+      },
+    }
   }
 }

@@ -43,5 +43,6 @@ model WeightLog {
 
   createdAt DateTime @default(now())
 
+  @@index([userId, date])
   @@map("weight_logs")
 }
