@@ -61,13 +61,14 @@ export class GetUserStreakCalendarUseCase {
       startDay.add(i, 'day')
     )
 
+    const completedDates = new Set(
+      logs.map((log) => dayjs(log.date).tz(user.timezone).format('YYYY-MM-DD'))
+    )
     const days: CalendarDayStatus[] = daysArray.map((date) => {
-      const log = logs.find((l) =>
-        dayjs(l.date).tz(user.timezone).isSame(date, 'day')
-      )
+      const calendarDate = date.format('YYYY-MM-DD')
       return {
-        date: date.format('YYYY-MM-DD'),
-        completed: Boolean(log),
+        date: calendarDate,
+        completed: completedDates.has(calendarDate),
       }
     })
 

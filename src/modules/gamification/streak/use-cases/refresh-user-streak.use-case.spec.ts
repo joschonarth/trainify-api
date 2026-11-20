@@ -14,6 +14,43 @@ let logs: InMemoryUserStreakLogsRepository
 let sut: RefreshUserStreakUseCase
 
 describe('Refresh user streak', () => {
+  it('should clear stale current metadata without activity while preserving the historical best', async () => {
+    await streaks.create({
+      user: { connect: { id: 'user' } },
+      currentStreak: 4,
+      bestStreak: 7,
+      lastWorkout: new Date('2026-03-09T04:00:00Z'),
+    })
+    expect(await sut.execute({ userId: 'user' })).toEqual({
+      currentStreak: 0,
+      bestStreak: 7,
+      lastWorkout: null,
+    })
+    expect(logs.items).toHaveLength(0)
+  })
+
+  it('should allow retry after a refresh persistence failure without altering activity', async () => {
+    await logs.create({
+      userId: 'user',
+      date: new Date('2026-03-09T04:00:00Z'),
+    })
+    await streaks.create({ user: { connect: { id: 'user' } }, bestStreak: 7 })
+    const before = structuredClone({ logs: logs.items, streaks: streaks.items })
+    vi.spyOn(streaks, 'update').mockRejectedValueOnce(
+      new Error('Persistence failed.')
+    )
+    await expect(sut.execute({ userId: 'user' })).rejects.toThrow(
+      'Persistence failed.'
+    )
+    expect({ logs: logs.items, streaks: streaks.items }).toEqual(before)
+    expect(await sut.execute({ userId: 'user' })).toEqual({
+      currentStreak: 1,
+      bestStreak: 7,
+      lastWorkout: new Date('2026-03-09T04:00:00Z'),
+    })
+    expect(logs.items).toEqual(before.logs)
+  })
+
   beforeEach(async () => {
     users = new InMemoryUsersRepository()
     streaks = new InMemoryUserStreaksRepository()

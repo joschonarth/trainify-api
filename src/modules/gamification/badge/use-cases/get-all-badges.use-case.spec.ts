@@ -7,6 +7,30 @@ let repository: InMemoryBadgesRepository
 let sut: GetAllBadgesUseCase
 
 describe('Get all badges', () => {
+  it('should keep catalog order within unlocked and locked groups', async () => {
+    const firstUnlocked = makeBadge()
+    const firstLocked = makeBadge()
+    const secondLocked = makeBadge()
+    const secondUnlocked = makeBadge()
+    repository.items.push(
+      firstUnlocked,
+      firstLocked,
+      secondLocked,
+      secondUnlocked
+    )
+    await repository.unlockForUser('user', firstUnlocked.id)
+    await repository.unlockForUser('user', secondUnlocked.id)
+
+    expect(
+      (await sut.execute({ userId: 'user' })).badges.map((badge) => badge.id)
+    ).toEqual([
+      firstUnlocked.id,
+      secondUnlocked.id,
+      firstLocked.id,
+      secondLocked.id,
+    ])
+  })
+
   beforeEach(() => {
     repository = new InMemoryBadgesRepository()
     sut = new GetAllBadgesUseCase(repository)
