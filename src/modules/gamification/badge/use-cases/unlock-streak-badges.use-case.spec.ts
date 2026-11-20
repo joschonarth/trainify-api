@@ -61,4 +61,61 @@ describe('UnlockStreakBadgesUseCase', () => {
     expect(badges.userBadges).toHaveLength(0)
     expect(await sut.execute({ userId: 'user' })).toEqual({ badges: [badge] })
   })
+
+  it.each([
+    0, 1,
+  ])('should award a previously reached milestone when the current streak is %s', async (currentStreak) => {
+    const streak = streaks.items[0]
+    if (!streak) {
+      throw new Error('Missing streak fixture')
+    }
+    await streaks.update(streak.id, { currentStreak, bestStreak: 7 })
+    const badge = makeBadge({ type: 'STREAK', milestone: 7 })
+    badges.items.push(badge)
+
+    expect(await sut.execute({ userId: 'user' })).toEqual({ badges: [badge] })
+    expect(await sut.execute({ userId: 'user' })).toEqual({ badges: [] })
+    expect(streaks.items[0]).toMatchObject({ currentStreak, bestStreak: 7 })
+  })
+
+  it('should award all reached historical milestones and leave higher milestones locked', async () => {
+    const streak = streaks.items[0]
+    if (!streak) {
+      throw new Error('Missing streak fixture')
+    }
+    await streaks.update(streak.id, { currentStreak: 0, bestStreak: 14 })
+    const reached = [3, 7, 14].map((milestone) =>
+      makeBadge({ type: 'STREAK', milestone })
+    )
+    badges.items.push(...reached, makeBadge({ type: 'STREAK', milestone: 30 }))
+
+    expect(await sut.execute({ userId: 'user' })).toEqual({ badges: reached })
+    expect(badges.userBadges).toHaveLength(3)
+  })
+
+  it('should keep an existing badge even when the saved best streak is below its milestone', async () => {
+    const badge = makeBadge({ type: 'STREAK', milestone: 30 })
+    badges.items.push(badge)
+    await badges.unlockForUser('user', badge.id)
+    const existing = structuredClone(badges.userBadges)
+
+    expect(await sut.execute({ userId: 'user' })).toEqual({ badges: [] })
+    expect(badges.userBadges).toEqual(existing)
+  })
+
+  it('should report a historical milestone only once across concurrent unlock calls', async () => {
+    const streak = streaks.items[0]
+    if (!streak) {
+      throw new Error('Missing streak fixture')
+    }
+    await streaks.update(streak.id, { currentStreak: 0, bestStreak: 7 })
+    const badge = makeBadge({ type: 'STREAK', milestone: 7 })
+    badges.items.push(badge)
+
+    const results = await Promise.all(
+      Array.from({ length: 12 }, () => sut.execute({ userId: 'user' }))
+    )
+    expect(results.flatMap((result) => result.badges)).toEqual([badge])
+    expect(badges.userBadges).toHaveLength(1)
+  })
 })
