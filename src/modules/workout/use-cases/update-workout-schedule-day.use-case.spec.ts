@@ -1,5 +1,5 @@
 import type { WorkoutSchedule } from 'generated/prisma'
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { ResourceAlreadyExistsError } from '@/shared/errors/resource-already-exists.error'
 import type { WorkoutSchedulesRepository } from '../repositories/workout-schedules.repository'
 import { UpdateWorkoutScheduleDayUseCase } from './update-workout-schedule-day.use-case'
@@ -45,5 +45,20 @@ describe('UpdateWorkoutScheduleDayUseCase', () => {
       newDayOfWeek: 4,
     })
     expect(result.schedule.dayOfWeek).toBe(4)
+  })
+  it('returns the same 404 when archiving removes the schedule before the write', async () => {
+    vi.spyOn(schedules, 'updateDay').mockResolvedValueOnce(null)
+    await expect(
+      sut.execute({
+        userId: 'u1',
+        workoutId: 'w1',
+        scheduleId: 's1',
+        newDayOfWeek: 4,
+      })
+    ).rejects.toMatchObject({
+      statusCode: 404,
+      message: 'Schedule not found for this workout.',
+    })
+    expect(current.dayOfWeek).toBe(1)
   })
 })

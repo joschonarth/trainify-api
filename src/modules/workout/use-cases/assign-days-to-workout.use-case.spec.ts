@@ -48,4 +48,12 @@ describe('AssignDaysToWorkoutUseCase', () => {
       (await schedules.findDaysByWorkout('w1')).map((day) => day.dayOfWeek)
     ).toEqual([2])
   })
+  it('rejects a workout that becomes unavailable after the initial ownership read', async () => {
+    schedules.unavailableWorkouts.add('w1')
+    const before = structuredClone(schedules.items)
+    await expect(
+      sut.execute({ workoutId: 'w1', userId: 'u1', daysOfWeek: [4] })
+    ).rejects.toMatchObject({ statusCode: 404, message: 'Workout not found.' })
+    expect(schedules.items).toEqual(before)
+  })
 })

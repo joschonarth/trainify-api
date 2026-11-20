@@ -51,11 +51,15 @@ export class AssignDaysToWorkoutUseCase {
       )
     }
     try {
-      await this.workoutSchedulesRepository.replaceDaysForWorkout(
-        workoutId,
-        userId,
-        daysOfWeek
-      )
+      const replaced =
+        await this.workoutSchedulesRepository.replaceDaysForWorkout(
+          workoutId,
+          userId,
+          daysOfWeek
+        )
+      if (!replaced) {
+        throw new ResourceNotFoundError('Workout not found.')
+      }
     } catch (error) {
       if (
         typeof error === 'object' &&

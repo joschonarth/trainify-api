@@ -14,6 +14,7 @@ function uniqueConstraintError(): Error & { code: 'P2002' } {
 export class InMemoryWorkoutSchedulesRepository
   implements WorkoutSchedulesRepository
 {
+  unavailableWorkouts = new Set<string>()
   items: WorkoutSchedule[] = []
   schedulesWithWorkouts: WorkoutScheduleWithWorkout[] = []
 
@@ -21,7 +22,10 @@ export class InMemoryWorkoutSchedulesRepository
     workoutId: string,
     userId: string,
     daysOfWeek: number[]
-  ): Promise<void> {
+  ): Promise<boolean> {
+    if (this.unavailableWorkouts.has(workoutId)) {
+      return Promise.resolve(false)
+    }
     const conflicts = this.items.some(
       (item) =>
         item.userId === userId &&
@@ -41,7 +45,7 @@ export class InMemoryWorkoutSchedulesRepository
         dayOfWeek,
       })),
     ]
-    return Promise.resolve()
+    return Promise.resolve(true)
   }
 
   assignDaysToWorkout(
@@ -94,10 +98,13 @@ export class InMemoryWorkoutSchedulesRepository
     )
   }
 
-  async updateDay(id: string, dayOfWeek: number): Promise<WorkoutSchedule> {
+  async updateDay(
+    id: string,
+    dayOfWeek: number
+  ): Promise<WorkoutSchedule | null> {
     const schedule = await this.findById(id)
-    if (!schedule) {
-      throw new Error('Schedule not found.')
+    if (!schedule || this.unavailableWorkouts.has(schedule.workoutId)) {
+      return null
     }
     if (
       this.items.some(
