@@ -8,6 +8,7 @@ import { createExerciseLogSessionBodySchema } from '../schemas/create-exercise-l
 import { CreateExerciseLogSessionUseCase } from './create-exercise-log-session.use-case'
 
 describe('CreateExerciseLogSessionUseCase', () => {
+  let measurement: 'REPS' | 'DURATION'
   let sessionStatus: WorkoutSessionStatus
   let exerciseLogsRepository: Pick<ExerciseLogsRepository, 'create'>
   let workoutSessionsRepository: Pick<
@@ -17,6 +18,7 @@ describe('CreateExerciseLogSessionUseCase', () => {
   let sut: CreateExerciseLogSessionUseCase
 
   beforeEach(() => {
+    measurement = 'REPS'
     sessionStatus = WorkoutSessionStatus.IN_PROGRESS
     const createLog: ExerciseLogsRepository['create'] = async (data) => ({
       id: 'log-id',
@@ -66,7 +68,7 @@ describe('CreateExerciseLogSessionUseCase', () => {
               name: 'Bench Press',
               category: null,
               type: null,
-              measurement: 'REPS' as const,
+              measurement,
             },
             logs: [],
           },
@@ -151,5 +153,17 @@ describe('CreateExerciseLogSessionUseCase', () => {
         date: 'not-a-date',
       }).success
     ).toBe(false)
+  })
+  it('should log seconds from the payload and zero volume for duration exercises', async () => {
+    measurement = 'DURATION'
+    const result = await sut.execute({
+      userId: 'user-id',
+      sessionId: 'session-id',
+      exerciseId: 'exercise-id',
+      sets: 2,
+      reps: 45,
+      weight: 10,
+    })
+    expect(result.exerciseLog).toMatchObject({ sets: 2, reps: 45, volume: 0 })
   })
 })

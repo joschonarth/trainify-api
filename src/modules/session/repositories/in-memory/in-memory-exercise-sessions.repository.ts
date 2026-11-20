@@ -24,6 +24,7 @@ export class InMemoryExerciseSessionsRepository
             name: 'Exercise',
             category: null,
             type: null,
+            measurement: 'REPS' as const,
           },
           logs: [],
         }))

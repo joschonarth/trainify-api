@@ -109,7 +109,8 @@ export class CompleteWorkoutSessionUseCase {
       const volume = calculateVolume(
         exercise.sets,
         exercise.reps,
-        exercise.weight
+        exercise.weight,
+        exerciseSession.exercise.measurement
       )
 
       await repositories.exerciseLogs.create({

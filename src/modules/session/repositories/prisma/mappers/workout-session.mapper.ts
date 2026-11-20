@@ -1,4 +1,5 @@
 import type { Prisma } from 'generated/prisma'
+import { getLogVolume } from '@/shared/utils/calculate-volume'
 import { getExerciseSessionState } from '../../../utils/exercise-session-state'
 import type { WorkoutSessionWithWorkout } from '../../workout-sessions.repository'
 
@@ -52,7 +53,7 @@ export function mapWorkoutSession(
           sets: log.sets,
           reps: log.reps,
           weight: log.weight ?? null,
-          volume: log.volume,
+          volume: getLogVolume(log, ex.exercise.measurement),
           date: log.date,
           description: log.description ?? null,
         })),

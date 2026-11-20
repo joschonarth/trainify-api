@@ -7,7 +7,11 @@ export const periodSummarySchema = z.object({
   totalSets: z.number().describe('Total sets performed in the period.'),
   totalReps: z.number().describe('Total reps performed in the period.'),
   totalWeight: z.number().describe('Total weight used in the period.'),
-  totalVolume: z.number().describe('Total volume in the period.'),
+  totalVolume: z
+    .number()
+    .describe(
+      'Total load volume for REPS exercises only; DURATION contributes zero, including legacy logs.'
+    ),
 })
 
 export const periodDifferencesSchema = z.object({

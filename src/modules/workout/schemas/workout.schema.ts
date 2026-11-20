@@ -15,7 +15,12 @@ export const workoutExerciseSchema = z.object({
   workoutId: z.string().describe('Workout ID.'),
   position: z.number().describe('Exercise order in the workout.'),
   defaultSets: z.number().nullable().describe('Default number of sets.'),
-  defaultReps: z.number().nullable().describe('Default number of reps.'),
+  defaultReps: z
+    .number()
+    .nullable()
+    .describe(
+      'Default repetitions per set for REPS; seconds per set for DURATION.'
+    ),
   defaultWeight: z.number().nullable().describe('Default weight in kilograms.'),
   exercise: z.object({
     id: z.string().describe('Exercise ID.'),

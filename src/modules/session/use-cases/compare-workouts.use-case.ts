@@ -4,7 +4,7 @@ import timezonePlugin from 'dayjs/plugin/timezone'
 import utc from 'dayjs/plugin/utc'
 import type { UsersRepository } from '@/modules/user/repositories/users.repository'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
-import { calculateVolume } from '@/shared/utils/calculate-volume'
+import { getLogVolume } from '@/shared/utils/calculate-volume'
 import type {
   WorkoutSessionsRepository,
   WorkoutSessionWithWorkout,
@@ -49,7 +49,10 @@ interface CompareWorkoutsResult {
 
 export class CompareWorkoutsUseCase {
   constructor(
-    private readonly workoutSessionsRepository: WorkoutSessionsRepository,
+    private readonly workoutSessionsRepository: Pick<
+      WorkoutSessionsRepository,
+      'findDetailedByUserAndDateRange'
+    >,
     private readonly usersRepository: Pick<UsersRepository, 'findById'>
   ) {}
 
@@ -130,7 +133,10 @@ export class CompareWorkoutsUseCase {
             totalSets += sets
             totalReps += reps
             totalWeight += weight
-            totalVolume += calculateVolume(sets, reps, weight)
+            totalVolume += getLogVolume(
+              log,
+              exerciseSession.exercise.measurement
+            )
           }
         }
       }

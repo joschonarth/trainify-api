@@ -19,6 +19,7 @@ function makeSession(
     exerciseSessions: [
       {
         completed: true,
+        exercise: { measurement: 'REPS' },
         logs: [{ volume, sets: 2, reps: 5, weight: 10 }],
       },
     ],
@@ -80,5 +81,23 @@ describe('GetWorkoutStatsUseCase', () => {
     await expect(
       sut.execute({ userId: 'other-user', workoutId: 'workout-1' })
     ).rejects.toBeInstanceOf(ResourceNotFoundError)
+  })
+  it('should ignore legacy duration load volume while preserving strength volume', async () => {
+    const duration = makeSession('COMPLETED', 99_999, 'duration')
+    const exercise = duration.exerciseSessions[0]
+    if (!exercise) {
+      throw new Error('Missing fixture')
+    }
+    exercise.exercise.measurement = 'DURATION'
+    sessionItems = [duration, makeSession('COMPLETED', 75, 'strength')]
+    const result = await sut.execute({
+      userId: 'user-1',
+      workoutId: 'workout-1',
+    })
+    expect(result.totalVolume).toBe(75)
+    expect(result.totalExercises).toBe(2)
+    expect(
+      result.sessions.find((session) => session.id === 'duration')?.totalVolume
+    ).toBe(0)
   })
 })

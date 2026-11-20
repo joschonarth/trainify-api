@@ -62,6 +62,7 @@ type ExerciseLogWithExercise = ExerciseLog & {
     name: string
     category: Exercise['category'] | null
     type: Exercise['type'] | null
+    measurement: Exercise['measurement']
   }
 }
 
@@ -214,6 +215,7 @@ export class InMemoryExerciseLogsRepository implements ExerciseLogsRepository {
             name: exercise.name,
             category: exercise.category,
             type: exercise.type,
+            measurement: exercise.measurement,
           },
         })
       }

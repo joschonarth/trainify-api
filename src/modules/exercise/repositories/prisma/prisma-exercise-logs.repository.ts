@@ -33,6 +33,7 @@ export class PrismaExerciseLogsRepository implements ExerciseLogsRepository {
         name: string
         category: Exercise['category'] | null
         type: Exercise['type'] | null
+        measurement: Exercise['measurement']
       }
     })[]
   > {
@@ -45,6 +46,7 @@ export class PrismaExerciseLogsRepository implements ExerciseLogsRepository {
             name: true,
             category: true,
             type: true,
+            measurement: true,
           },
         },
       },
@@ -74,6 +76,7 @@ export class PrismaExerciseLogsRepository implements ExerciseLogsRepository {
           name: string
           category: Exercise['category'] | null
           type: Exercise['type'] | null
+          measurement: Exercise['measurement']
         }
       })
     | null
@@ -82,7 +85,13 @@ export class PrismaExerciseLogsRepository implements ExerciseLogsRepository {
       where: { id },
       include: {
         exercise: {
-          select: { id: true, name: true, category: true, type: true },
+          select: {
+            id: true,
+            name: true,
+            category: true,
+            type: true,
+            measurement: true,
+          },
         },
       },
     })
@@ -106,6 +115,7 @@ export class PrismaExerciseLogsRepository implements ExerciseLogsRepository {
         name: string
         category: Exercise['category'] | null
         type: Exercise['type'] | null
+        measurement: Exercise['measurement']
       }
     })[]
   > {
@@ -118,6 +128,7 @@ export class PrismaExerciseLogsRepository implements ExerciseLogsRepository {
             name: true,
             category: true,
             type: true,
+            measurement: true,
           },
         },
       },

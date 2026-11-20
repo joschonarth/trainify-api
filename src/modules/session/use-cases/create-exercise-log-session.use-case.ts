@@ -68,7 +68,12 @@ export class CreateExerciseLogSessionUseCase {
       sets,
       reps,
       weight: weight ?? null,
-      volume: calculateVolume(sets, reps, weight),
+      volume: calculateVolume(
+        sets,
+        reps,
+        weight,
+        exerciseSession.exercise.measurement
+      ),
       description: description ?? null,
       date: date ?? new Date(),
       user: { connect: { id: userId } },

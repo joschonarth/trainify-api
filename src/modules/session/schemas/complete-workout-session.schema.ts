@@ -10,7 +10,13 @@ export const completeWorkoutSessionBodySchema = z.object({
       z.object({
         exerciseSessionId: z.cuid(),
         sets: z.number().int().min(1, 'Sets must be at least 1'),
-        reps: z.number().int().min(1, 'Reps must be at least 1'),
+        reps: z
+          .number()
+          .int()
+          .min(1, 'Reps must be at least 1')
+          .describe(
+            'Repetitions per set for REPS; positive integer seconds per set for DURATION. Reported execution comes from the payload, not the timer.'
+          ),
         weight: z.number().min(0).optional().default(0),
         completed: z.boolean(),
         note: z.string().optional(),
