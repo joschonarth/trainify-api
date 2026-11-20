@@ -5,10 +5,16 @@ import { z } from 'zod'
 
 export const sessionExerciseItemSchema = z.object({
   id: z.string().describe('Exercise ID.'),
-  name: z.string().describe('Exercise name.'),
+  name: z
+    .string()
+    .describe(
+      'Current exercise name from the exercise catalog; not a session snapshot.'
+    ),
   category: z.string().nullable().describe('Exercise category.'),
   type: z.string().nullable().describe('Exercise type.'),
-  measurement: z.enum(Measurement).describe('Exercise measurement mode.'),
+  measurement: z
+    .enum(Measurement)
+    .describe('Current exercise measurement mode; not a session snapshot.'),
 })
 
 export const sessionExerciseLogSchema = z.object({
@@ -22,9 +28,24 @@ export const sessionExerciseLogSchema = z.object({
 
 export const exerciseSessionSchema = z.object({
   id: z.string().describe('Exercise session ID.'),
-  plannedSets: z.number().nullable().describe('Planned number of sets.'),
-  plannedReps: z.number().nullable().describe('Planned number of reps.'),
-  plannedWeight: z.number().nullable().describe('Planned weight in kilograms.'),
+  plannedSets: z
+    .number()
+    .nullable()
+    .describe(
+      'Number of sets captured at session creation; later workout edits do not change it.'
+    ),
+  plannedReps: z
+    .number()
+    .nullable()
+    .describe(
+      'Reps captured at session creation; later workout edits do not change them.'
+    ),
+  plannedWeight: z
+    .number()
+    .nullable()
+    .describe(
+      'Weight in kilograms captured at session creation; later workout edits do not change it.'
+    ),
   completed: z
     .boolean()
     .describe('Whether the exercise session was completed.'),
@@ -60,9 +81,24 @@ export const exerciseTimerSessionSchema = z.object({
     .string()
     .nullable()
     .describe('Reason the exercise was skipped.'),
-  plannedSets: z.number().nullable().describe('Planned number of sets.'),
-  plannedReps: z.number().nullable().describe('Planned number of reps.'),
-  plannedWeight: z.number().nullable().describe('Planned weight in kilograms.'),
+  plannedSets: z
+    .number()
+    .nullable()
+    .describe(
+      'Number of sets captured at session creation; later workout edits do not change it.'
+    ),
+  plannedReps: z
+    .number()
+    .nullable()
+    .describe(
+      'Reps captured at session creation; later workout edits do not change them.'
+    ),
+  plannedWeight: z
+    .number()
+    .nullable()
+    .describe(
+      'Weight in kilograms captured at session creation; later workout edits do not change it.'
+    ),
   workoutSessionId: z.string().describe('Workout session ID.'),
   exerciseId: z.string().describe('Exercise ID.'),
 })
@@ -72,12 +108,31 @@ export const exerciseTimerSessionSchema = z.object({
 export const exerciseSessionDetailsSchema = z.object({
   id: z.string().describe('Exercise session ID.'),
   exerciseId: z.string().describe('Exercise ID.'),
-  exerciseName: z.string().describe('Exercise name.'),
+  exerciseName: z
+    .string()
+    .describe(
+      'Current exercise name from the exercise catalog; not a session snapshot.'
+    ),
   category: z.string().nullable().describe('Exercise category.'),
   type: z.string().nullable().describe('Exercise type.'),
-  plannedSets: z.number().nullable().describe('Planned number of sets.'),
-  plannedReps: z.number().nullable().describe('Planned number of reps.'),
-  plannedWeight: z.number().nullable().describe('Planned weight in kilograms.'),
+  plannedSets: z
+    .number()
+    .nullable()
+    .describe(
+      'Number of sets captured at session creation; later workout edits do not change it.'
+    ),
+  plannedReps: z
+    .number()
+    .nullable()
+    .describe(
+      'Reps captured at session creation; later workout edits do not change them.'
+    ),
+  plannedWeight: z
+    .number()
+    .nullable()
+    .describe(
+      'Weight in kilograms captured at session creation; later workout edits do not change it.'
+    ),
   completed: z
     .boolean()
     .describe('Whether the exercise session was completed.'),
@@ -119,27 +174,43 @@ export const baseSessionSchema = z.object({
 })
 
 export const sessionWithWorkoutSchema = baseSessionSchema.extend({
-  workout: z.object({
-    id: z.string().describe('Workout ID.'),
-    name: z.string().describe('Workout name.'),
-    exercises: z.array(
-      z.object({
-        id: z.string().describe('Workout exercise relation ID.'),
-        position: z
-          .number()
-          .int()
-          .describe('Exercise position in the workout.'),
-        defaultSets: z.number().nullable().describe('Default number of sets.'),
-        defaultReps: z.number().nullable().describe('Default number of reps.'),
-        defaultWeight: z
-          .number()
-          .nullable()
-          .describe('Default weight in kilograms.'),
-        exercise: sessionExerciseItemSchema,
-      })
+  workout: z
+    .object({
+      id: z.string().describe('Workout ID.'),
+      name: z.string().describe('Workout name.'),
+      exercises: z.array(
+        z.object({
+          id: z.string().describe('Workout exercise relation ID.'),
+          position: z
+            .number()
+            .int()
+            .describe(
+              'Current position in the workout template; session order comes from the stored exercise sessions.'
+            ),
+          defaultSets: z
+            .number()
+            .nullable()
+            .describe('Default number of sets.'),
+          defaultReps: z
+            .number()
+            .nullable()
+            .describe('Default number of reps.'),
+          defaultWeight: z
+            .number()
+            .nullable()
+            .describe('Default weight in kilograms.'),
+          exercise: sessionExerciseItemSchema,
+        })
+      ),
+    })
+    .describe(
+      'Current workout template, which may differ from the preserved exerciseSessions snapshot.'
     ),
-  }),
-  exerciseSessions: z.array(exerciseSessionSchema),
+  exerciseSessions: z
+    .array(exerciseSessionSchema)
+    .describe(
+      'Exercise membership, order and planned defaults are captured at creation, including while PENDING. Existing sessions remain available after workout archival.'
+    ),
 })
 
 // --- Calendar ---

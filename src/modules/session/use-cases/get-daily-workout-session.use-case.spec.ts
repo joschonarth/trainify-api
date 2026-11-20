@@ -128,6 +128,47 @@ describe('GetDailyWorkoutSessionUseCase', () => {
     const second = await sut.execute(request)
     expect(second.session).toEqual(first.session)
   })
+  it('should preserve pending exercises and defaults after the workout template is edited', async () => {
+    const first = await sut.execute(request)
+    const snapshot = structuredClone(first.session.exerciseSessions)
+    const changed = makeDailySchedule()
+    const exercise = changed.workout.exercises[0]
+    if (!exercise) {
+      throw new Error('Missing fixture')
+    }
+    exercise.defaultSets = 8
+    exercise.defaultReps = 2
+    exercise.defaultWeight = 99
+    exercise.position = 0
+    exercise.exerciseId = 'replacement'
+    exercise.exercise.id = 'replacement'
+    schedules.schedulesWithWorkouts = [changed]
+    const second = await sut.execute(request)
+    expect(second.session.status).toBe('PENDING')
+    expect(second.session.exerciseSessions).toEqual(snapshot)
+    expect(second.session.id).toBe(first.session.id)
+  })
+  it('should apply edited defaults and membership only to new sessions', async () => {
+    const first = await sut.execute(request)
+    const oldSnapshot = structuredClone(first.session.exerciseSessions)
+    vi.advanceTimersByTime(24 * 60 * 60 * 1000)
+    const changed = makeDailySchedule(5)
+    const exercise = changed.workout.exercises[0]
+    if (!exercise) {
+      throw new Error('Missing fixture')
+    }
+    exercise.defaultSets = 8
+    exercise.exerciseId = 'replacement'
+    exercise.exercise.id = 'replacement'
+    schedules.schedulesWithWorkouts = [changed]
+    const second = await sut.execute(request)
+    expect(second.session.id).not.toBe(first.session.id)
+    expect(second.session.exerciseSessions[0]).toMatchObject({
+      plannedSets: 8,
+      exercise: { id: 'replacement' },
+    })
+    expect(first.session.exerciseSessions).toEqual(oldSnapshot)
+  })
   it.each([
     ['2026-01-01T01:00:00Z', 'America/Sao_Paulo', '2025-12-31', 3],
     ['2026-03-01T01:00:00Z', 'America/Sao_Paulo', '2026-02-28', 6],
