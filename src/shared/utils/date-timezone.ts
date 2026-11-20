@@ -12,7 +12,16 @@ export function getZonedDayRange(date: Date, timezoneName: string) {
 
   return {
     start: start.toDate(),
-    end: start.add(1, 'day').subtract(1, 'millisecond').toDate(),
+    end: dayjs
+      .tz(
+        dayjs
+          .utc(start.format('YYYY-MM-DD'))
+          .add(1, 'day')
+          .format('YYYY-MM-DD'),
+        timezoneName
+      )
+      .subtract(1, 'millisecond')
+      .toDate(),
   }
 }
 

@@ -1,6 +1,9 @@
 import { randomUUID } from 'node:crypto'
 import type { Prisma, WorkoutSchedule } from 'generated/prisma'
-import type { WorkoutSchedulesRepository } from '../workout-schedules.repository'
+import type {
+  WorkoutSchedulesRepository,
+  WorkoutScheduleWithWorkout,
+} from '../workout-schedules.repository'
 
 function uniqueConstraintError(): Error & { code: 'P2002' } {
   return Object.assign(new Error('Unique schedule day constraint failed.'), {
@@ -12,6 +15,7 @@ export class InMemoryWorkoutSchedulesRepository
   implements WorkoutSchedulesRepository
 {
   items: WorkoutSchedule[] = []
+  schedulesWithWorkouts: WorkoutScheduleWithWorkout[] = []
 
   replaceDaysForWorkout(
     workoutId: string,
@@ -79,8 +83,15 @@ export class InMemoryWorkoutSchedulesRepository
     return Promise.resolve(this.items.find((item) => item.id === id) ?? null)
   }
 
-  findByUserAndDay(): Promise<null> {
-    return Promise.resolve(null)
+  findByUserAndDay(
+    userId: string,
+    dayOfWeek: number
+  ): Promise<WorkoutScheduleWithWorkout | null> {
+    return Promise.resolve(
+      this.schedulesWithWorkouts.find(
+        (item) => item.userId === userId && item.dayOfWeek === dayOfWeek
+      ) ?? null
+    )
   }
 
   async updateDay(id: string, dayOfWeek: number): Promise<WorkoutSchedule> {

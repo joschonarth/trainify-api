@@ -9,6 +9,7 @@ import { prisma } from '@/lib/prisma'
 import { getZonedDayRange } from '@/shared/utils/date-timezone'
 
 import type {
+  DailySessionRequest,
   WorkoutSessionsRepository,
   WorkoutSessionWithWorkout,
 } from '../workout-sessions.repository'
@@ -21,6 +22,58 @@ export class PrismaWorkoutSessionsRepository
   constructor(
     private readonly client: Prisma.TransactionClient | PrismaClient = prisma
   ) {}
+
+  async resolveDailySession(
+    request: DailySessionRequest,
+    create?: Prisma.WorkoutSessionUncheckedCreateInput
+  ): Promise<WorkoutSessionWithWorkout | null> {
+    return await prisma.$transaction(async (transaction) => {
+      // Serialize creation and legacy adoption by user, including requests for different timezones.
+      await transaction.$queryRaw`SELECT id FROM users WHERE id = ${request.userId} FOR UPDATE`
+      const identity = await transaction.dailyWorkoutSession.findUnique({
+        where: {
+          userId_businessDate: {
+            userId: request.userId,
+            businessDate: request.businessDate,
+          },
+        },
+      })
+      let sessionId = identity?.sessionId
+      if (!sessionId) {
+        // Lazily adopt the earliest unclaimed legacy session; never delete duplicate history.
+        const legacy = await transaction.workoutSession.findFirst({
+          where: {
+            userId: request.userId,
+            date: { gte: request.start, lte: request.end },
+            dailyIdentity: null,
+          },
+          orderBy: [{ date: 'asc' }, { id: 'asc' }],
+        })
+        const session =
+          legacy ??
+          (create
+            ? await transaction.workoutSession.create({ data: create })
+            : null)
+        if (!session) {
+          return null
+        }
+        const dailyIdentity = await transaction.dailyWorkoutSession.create({
+          data: {
+            userId: request.userId,
+            businessDate: request.businessDate,
+            timezone: request.timezone,
+            sessionId: session.id,
+          },
+        })
+        sessionId = dailyIdentity.sessionId
+      }
+      const session = await transaction.workoutSession.findUnique({
+        where: { id: sessionId },
+        include: workoutSessionInclude,
+      })
+      return session ? mapWorkoutSession(session) : null
+    })
+  }
 
   async findById(id: string): Promise<WorkoutSession | null> {
     return await this.client.workoutSession.findUnique({
