@@ -6,7 +6,7 @@ import { refreshUserStreakController } from '../controllers/refresh-user-streak.
 import { streakSchema } from '../schemas/streak.schema'
 
 export function refreshUserStreakRoute(app: FastifyInstance) {
-  app.get(
+  app.post(
     '/streak/refresh',
     {
       onRequest: [verifyJwt],
@@ -14,7 +14,7 @@ export function refreshUserStreakRoute(app: FastifyInstance) {
         tags: ['Gamification'],
         summary: 'Refresh user streak',
         description:
-          'Recalculates and updates the authenticated user streak based on the current date.',
+          'Recalculates and persists the streak from existing activity logs without creating activity. Client migration: replace GET /streak/refresh with POST /streak/refresh. Cookie authentication requires an allowed Origin. Use GET /streak for read-only access.',
         response: {
           200: z
             .object({

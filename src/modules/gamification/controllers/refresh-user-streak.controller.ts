@@ -1,18 +1,16 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
 
-import { makeUpdateUserStreakUseCase } from '../use-cases/factories/make-update-user-streak-use-case'
+import { makeRefreshUserStreakUseCase } from '../use-cases/factories/make-refresh-user-streak-use-case'
 
 export async function refreshUserStreakController(
   request: FastifyRequest,
   reply: FastifyReply
 ) {
   const userId = request.user.sub
-  const updateUserStreakUseCase = makeUpdateUserStreakUseCase()
+  const refreshUserStreakUseCase = makeRefreshUserStreakUseCase()
 
-  const streak = await updateUserStreakUseCase.execute({
+  const streak = await refreshUserStreakUseCase.execute({
     userId,
-    logDate: new Date(),
-    isRefresh: true,
   })
 
   return reply.status(200).send({ streak })
