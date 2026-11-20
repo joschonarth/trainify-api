@@ -15,12 +15,16 @@ export function compareWorkoutsRoute(app: FastifyInstance) {
     {
       onRequest: [verifyJwt],
       schema: {
+        security: [{ bearerAuth: [] }, { cookieAuth: [] }],
         tags: ['Sessions'],
         summary: 'Compare workouts',
         description:
           'Compares workout performance between the current and previous period (week or month).',
         querystring: compareWorkoutsQuerySchema,
         response: {
+          401: z
+            .object({ message: z.string() })
+            .describe('Missing or invalid authentication token.'),
           200: z
             .object({
               result: z.object({

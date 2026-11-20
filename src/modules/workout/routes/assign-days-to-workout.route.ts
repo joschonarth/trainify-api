@@ -14,6 +14,7 @@ export function assignDaysToWorkoutRoute(app: FastifyInstance) {
     {
       onRequest: [verifyJwt],
       schema: {
+        security: [{ bearerAuth: [] }, { cookieAuth: [] }],
         tags: ['Workouts'],
         summary: 'Assign days to workout',
         description:
@@ -21,6 +22,9 @@ export function assignDaysToWorkoutRoute(app: FastifyInstance) {
         params: assignDaysToWorkoutParamsSchema,
         body: assignDaysToWorkoutBodySchema,
         response: {
+          401: z
+            .object({ message: z.string() })
+            .describe('Missing or invalid authentication token.'),
           200: z
             .object({
               assignedDays: z

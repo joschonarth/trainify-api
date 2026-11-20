@@ -14,6 +14,7 @@ export function updateWorkoutScheduleDayRoute(app: FastifyInstance) {
     {
       onRequest: [verifyJwt],
       schema: {
+        security: [{ bearerAuth: [] }, { cookieAuth: [] }],
         tags: ['Workouts'],
         summary: 'Update workout schedule day',
         description:
@@ -21,6 +22,9 @@ export function updateWorkoutScheduleDayRoute(app: FastifyInstance) {
         params: updateWorkoutScheduleDayParamsSchema,
         body: updateWorkoutScheduleDayBodySchema,
         response: {
+          401: z
+            .object({ message: z.string() })
+            .describe('Missing or invalid authentication token.'),
           200: z
             .object({
               schedule: z.object({

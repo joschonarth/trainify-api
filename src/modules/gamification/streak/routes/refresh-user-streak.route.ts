@@ -11,11 +11,15 @@ export function refreshUserStreakRoute(app: FastifyInstance) {
     {
       onRequest: [verifyJwt],
       schema: {
+        security: [{ bearerAuth: [] }, { cookieAuth: [] }],
         tags: ['Gamification'],
         summary: 'Refresh user streak',
         description:
           'Recalculates and persists the streak from existing activity logs without creating activity. Client migration: replace GET /streak/refresh with POST /streak/refresh. Cookie authentication requires an allowed Origin. Use GET /streak for read-only access.',
         response: {
+          401: z
+            .object({ message: z.string() })
+            .describe('Missing or invalid authentication token.'),
           200: z
             .object({
               streak: streakSchema,

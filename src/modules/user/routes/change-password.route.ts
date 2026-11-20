@@ -11,12 +11,16 @@ export function changePasswordRoute(app: FastifyInstance) {
     {
       onRequest: [verifyJwt],
       schema: {
+        security: [{ bearerAuth: [] }, { cookieAuth: [] }],
         tags: ['Users'],
         summary: 'Change user password',
         description:
           'Changes the authenticated user password. Requires the current password and confirmation of the new password.',
         body: changePasswordBodySchema,
         response: {
+          401: z
+            .object({ message: z.string() })
+            .describe('Missing or invalid authentication token.'),
           200: z
             .object({ token: z.string().describe('New access token.') })
             .describe('Password changed and the current session refreshed.'),

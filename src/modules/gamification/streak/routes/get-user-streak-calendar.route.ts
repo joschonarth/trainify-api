@@ -11,12 +11,16 @@ export function getUserStreakCalendarRoute(app: FastifyInstance) {
     {
       onRequest: [verifyJwt],
       schema: {
+        security: [{ bearerAuth: [] }, { cookieAuth: [] }],
         tags: ['Gamification'],
         summary: 'Get user streak calendar',
         description:
           'Returns the workout completion status for each day of a given month and year for the authenticated user.',
         querystring: getUserStreakCalendarQuerySchema,
         response: {
+          401: z
+            .object({ message: z.string() })
+            .describe('Missing or invalid authentication token.'),
           200: z
             .object({
               days: z.array(

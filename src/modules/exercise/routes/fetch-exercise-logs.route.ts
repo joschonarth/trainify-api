@@ -11,10 +11,14 @@ export function fetchExerciseLogsRoute(app: FastifyInstance) {
     {
       onRequest: [verifyJwt],
       schema: {
+        security: [{ bearerAuth: [] }, { cookieAuth: [] }],
         tags: ['Exercise Logs'],
         summary: 'Fetch exercise logs',
         description: 'Returns all exercise logs from the authenticated user.',
         response: {
+          401: z
+            .object({ message: z.string() })
+            .describe('Missing or invalid authentication token.'),
           200: z
             .object({
               logs: z.array(

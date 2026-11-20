@@ -11,10 +11,14 @@ export function getUnlockedBadgesRoute(app: FastifyInstance) {
     {
       onRequest: [verifyJwt],
       schema: {
+        security: [{ bearerAuth: [] }, { cookieAuth: [] }],
         tags: ['Gamification'],
         summary: 'Get unlocked badges',
         description: 'Returns all badges unlocked by the authenticated user.',
         response: {
+          401: z
+            .object({ message: z.string() })
+            .describe('Missing or invalid authentication token.'),
           200: z
             .object({
               badges: z.array(

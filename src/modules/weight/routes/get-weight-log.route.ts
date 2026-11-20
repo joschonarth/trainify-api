@@ -12,11 +12,15 @@ export function getWeightLogRoute(app: FastifyInstance) {
     {
       onRequest: [verifyJwt],
       schema: {
+        security: [{ bearerAuth: [] }, { cookieAuth: [] }],
         tags: ['Weight'],
         summary: 'Get weight log',
         description: 'Returns a specific weight log by ID.',
         params: getWeightLogParamsSchema,
         response: {
+          401: z
+            .object({ message: z.string() })
+            .describe('Missing or invalid authentication token.'),
           200: z
             .object({
               log: weightLogSchema,

@@ -11,12 +11,16 @@ export function addExerciseFromCatalogRoute(app: FastifyInstance) {
     {
       onRequest: [verifyJwt],
       schema: {
+        security: [{ bearerAuth: [] }, { cookieAuth: [] }],
         tags: ['Exercises'],
         summary: 'Add exercise from catalog',
         description:
           'Adds a catalog exercise to the authenticated user library.',
         params: addExerciseFromCatalogParamsSchema,
         response: {
+          401: z
+            .object({ message: z.string() })
+            .describe('Missing or invalid authentication token.'),
           201: z
             .object({
               myExercise: z.object({

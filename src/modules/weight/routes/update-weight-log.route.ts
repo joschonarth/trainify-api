@@ -15,6 +15,7 @@ export function updateWeightLogRoute(app: FastifyInstance) {
     {
       onRequest: [verifyJwt],
       schema: {
+        security: [{ bearerAuth: [] }, { cookieAuth: [] }],
         tags: ['Weight'],
         summary: 'Update weight log',
         description:
@@ -22,6 +23,9 @@ export function updateWeightLogRoute(app: FastifyInstance) {
         params: updateWeightLogParamsSchema,
         body: updateWeightLogBodySchema,
         response: {
+          401: z
+            .object({ message: z.string() })
+            .describe('Missing or invalid authentication token.'),
           200: z
             .object({
               updatedLog: weightLogSchema,

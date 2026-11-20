@@ -10,11 +10,15 @@ export function getWeightSummaryRoute(app: FastifyInstance) {
     {
       onRequest: [verifyJwt],
       schema: {
+        security: [{ bearerAuth: [] }, { cookieAuth: [] }],
         tags: ['Weight'],
         summary: 'Get weight summary',
         description:
           'Returns a summary of weight metrics for the authenticated user.',
         response: {
+          401: z
+            .object({ message: z.string() })
+            .describe('Missing or invalid authentication token.'),
           200: z
             .object({
               summary: z.object({

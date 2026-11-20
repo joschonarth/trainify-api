@@ -35,6 +35,13 @@ export async function registerSwagger(app: FastifyInstance) {
             scheme: 'bearer',
             bearerFormat: 'JWT',
           },
+          cookieAuth: {
+            type: 'apiKey',
+            in: 'cookie',
+            name: 'token',
+            description:
+              'HTTP-only access token cookie set by the authentication endpoints.',
+          },
         },
       },
     },

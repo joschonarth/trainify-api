@@ -11,12 +11,16 @@ export function deleteWeightLogRoute(app: FastifyInstance) {
     {
       onRequest: [verifyJwt],
       schema: {
+        security: [{ bearerAuth: [] }, { cookieAuth: [] }],
         tags: ['Weight'],
         summary: 'Delete weight log',
         description:
           'Deletes a specific weight log for the authenticated user.',
         params: deleteWeightLogParamsSchema,
         response: {
+          401: z
+            .object({ message: z.string() })
+            .describe('Missing or invalid authentication token.'),
           204: z.null().describe('Weight log deleted successfully.'),
           404: z
             .object({ message: z.string() })

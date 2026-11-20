@@ -12,6 +12,7 @@ export function completeExerciseSessionRoute(app: FastifyInstance) {
     {
       onRequest: [verifyJwt],
       schema: {
+        security: [{ bearerAuth: [] }, { cookieAuth: [] }],
         tags: ['Sessions'],
         summary: 'Complete exercise session',
         deprecated: true,
@@ -19,6 +20,9 @@ export function completeExerciseSessionRoute(app: FastifyInstance) {
           'Deprecated. Complete exercises through POST /sessions/:sessionId/complete. New execution is allowed only on the session business day in its captured timezone; expired or future sessions return 409. Earlier sessions without a daily identity use their date in America/Sao_Paulo.',
         params: completeExerciseSessionParamsSchema,
         response: {
+          401: z
+            .object({ message: z.string() })
+            .describe('Missing or invalid authentication token.'),
           409: z
             .object({ message: z.string() })
             .describe('Session is outside its business day.'),

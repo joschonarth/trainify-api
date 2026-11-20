@@ -12,12 +12,16 @@ export function createExerciseRoute(app: FastifyInstance) {
     {
       onRequest: [verifyJwt],
       schema: {
+        security: [{ bearerAuth: [] }, { cookieAuth: [] }],
         tags: ['Exercises'],
         summary: 'Create custom exercise',
         description:
           'Creates a new custom exercise for the authenticated user.',
         body: createExerciseBodySchema,
         response: {
+          401: z
+            .object({ message: z.string() })
+            .describe('Missing or invalid authentication token.'),
           201: z
             .object({
               exercise: exerciseSchema,
