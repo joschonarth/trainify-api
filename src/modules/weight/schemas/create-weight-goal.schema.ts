@@ -5,7 +5,7 @@ export const createWeightGoalBodySchema = z.object({
   name: z.string().min(1, 'Name is required'),
   description: z.string().nullable().default(null),
   goalType: z.enum(GoalType),
-  targetWeight: z.number(),
+  targetWeight: z.number().positive(),
   startDate: z.iso
     .datetime()
     .transform((value) => new Date(value))

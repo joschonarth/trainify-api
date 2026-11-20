@@ -1,7 +1,7 @@
-import type { UsersRepository } from '@/modules/user/repositories/users.repository'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
-import type { WeightLogsRepository } from '../repositories/weight-logs.repository'
+import { InvalidWeightGoalError } from '../errors/invalid-weight-goal.error'
+import type { WeightUnitOfWork } from '../repositories/weight-unit-of-work'
 import { syncUserWeightFromLatestLog } from '../utils/sync-user-weight-from-latest-log'
 import type { CalculateWeightGoalProgressUseCase } from './calculate-weight-goal-progress.use-case'
 
@@ -25,9 +25,8 @@ interface UpdateWeightLogResponse {
 
 export class UpdateWeightLogUseCase {
   constructor(
-    private readonly weightLogsRepository: WeightLogsRepository,
-    private readonly calculateWeightGoalProgressUseCase: CalculateWeightGoalProgressUseCase,
-    private readonly usersRepository: UsersRepository
+    private readonly weightUnitOfWork: WeightUnitOfWork,
+    private readonly calculateWeightGoalProgressUseCase: CalculateWeightGoalProgressUseCase
   ) {}
 
   async execute({
@@ -37,38 +36,52 @@ export class UpdateWeightLogUseCase {
     note,
     date,
   }: UpdateWeightLogRequest): Promise<UpdateWeightLogResponse> {
-    const log = await this.weightLogsRepository.findById(logId)
-
-    if (!log || log.userId !== userId) {
-      throw new ResourceNotFoundError('Weight log not found')
+    if (weight !== undefined && (!Number.isFinite(weight) || weight <= 0)) {
+      throw new InvalidWeightGoalError(
+        'Weight must be a positive finite number.'
+      )
     }
 
-    const updatedLog = await this.weightLogsRepository.update(logId, {
-      weight: weight ?? log.weight,
-      note: note ?? log.note,
-      ...(date === undefined ? {} : { date }),
-    })
-    await syncUserWeightFromLatestLog(
-      userId,
-      this.usersRepository,
-      this.weightLogsRepository
-    )
+    if (date !== undefined && !Number.isFinite(date.getTime())) {
+      throw new InvalidWeightGoalError('Log date must be valid.')
+    }
 
-    if (updatedLog.goalId) {
-      await this.calculateWeightGoalProgressUseCase.execute({
-        goalId: updatedLog.goalId,
-        userId,
+    return await this.weightUnitOfWork.execute(userId, async (repositories) => {
+      const log = await repositories.logs.findById(logId)
+
+      if (!log || log.userId !== userId) {
+        throw new ResourceNotFoundError('Weight log not found')
+      }
+
+      const updatedLog = await repositories.logs.update(logId, {
+        ...(weight === undefined ? {} : { weight }),
+        ...(note === undefined ? {} : { note }),
+        ...(date === undefined ? {} : { date }),
       })
-    }
 
-    return {
-      id: updatedLog.id,
-      userId: updatedLog.userId,
-      goalId: updatedLog.goalId,
-      weight: updatedLog.weight,
-      note: updatedLog.note,
-      date: updatedLog.date,
-      createdAt: updatedLog.createdAt,
-    }
+      await syncUserWeightFromLatestLog(
+        userId,
+        repositories.users,
+        repositories.logs
+      )
+
+      if (updatedLog.goalId) {
+        await this.calculateWeightGoalProgressUseCase.executeInTransaction(
+          updatedLog.goalId,
+          userId,
+          repositories
+        )
+      }
+
+      return {
+        id: updatedLog.id,
+        userId: updatedLog.userId,
+        goalId: updatedLog.goalId,
+        weight: updatedLog.weight,
+        note: updatedLog.note,
+        date: updatedLog.date,
+        createdAt: updatedLog.createdAt,
+      }
+    })
   }
 }

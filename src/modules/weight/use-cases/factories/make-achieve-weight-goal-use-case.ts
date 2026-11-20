@@ -1,14 +1,10 @@
-import { PrismaWeightGoalsRepository } from '../../repositories/prisma/prisma-weight-goals.repository'
-import { PrismaWeightLogsRepository } from '../../repositories/prisma/prisma-weight-logs.repository'
+import { PrismaWeightUnitOfWork } from '../../repositories/prisma/prisma-weight-unit-of-work'
 import { AchieveWeightGoalUseCase } from '../achieve-weight-goal.use-case'
 
 export function makeAchieveWeightGoalUseCase() {
-  const weightGoalsRepository = new PrismaWeightGoalsRepository()
-  const weightLogsRepository = new PrismaWeightLogsRepository()
-
+  const weightUnitOfWork = new PrismaWeightUnitOfWork()
   const achieveWeightGoalUseCase = new AchieveWeightGoalUseCase(
-    weightGoalsRepository,
-    weightLogsRepository
+    weightUnitOfWork
   )
 
   return achieveWeightGoalUseCase

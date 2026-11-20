@@ -1,7 +1,6 @@
-import type { UsersRepository } from '@/modules/user/repositories/users.repository'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
-import type { WeightLogsRepository } from '../repositories/weight-logs.repository'
+import type { WeightUnitOfWork } from '../repositories/weight-unit-of-work'
 import { syncUserWeightFromLatestLog } from '../utils/sync-user-weight-from-latest-log'
 import type { CalculateWeightGoalProgressUseCase } from './calculate-weight-goal-progress.use-case'
 
@@ -12,30 +11,32 @@ interface DeleteWeightLogRequest {
 
 export class DeleteWeightLogUseCase {
   constructor(
-    private readonly weightLogsRepository: WeightLogsRepository,
-    private readonly calculateWeightGoalProgressUseCase: CalculateWeightGoalProgressUseCase,
-    private readonly usersRepository: UsersRepository
+    private readonly weightUnitOfWork: WeightUnitOfWork,
+    private readonly calculateWeightGoalProgressUseCase: CalculateWeightGoalProgressUseCase
   ) {}
 
   async execute({ logId, userId }: DeleteWeightLogRequest): Promise<void> {
-    const log = await this.weightLogsRepository.findById(logId)
+    await this.weightUnitOfWork.execute(userId, async (repositories) => {
+      const log = await repositories.logs.findById(logId)
 
-    if (!log || log.userId !== userId) {
-      throw new ResourceNotFoundError('Weight log not found')
-    }
+      if (!log || log.userId !== userId) {
+        throw new ResourceNotFoundError('Weight log not found')
+      }
 
-    await this.weightLogsRepository.delete(logId)
-    await syncUserWeightFromLatestLog(
-      userId,
-      this.usersRepository,
-      this.weightLogsRepository
-    )
-
-    if (log.goalId) {
-      await this.calculateWeightGoalProgressUseCase.execute({
-        goalId: log.goalId,
+      await repositories.logs.delete(logId)
+      await syncUserWeightFromLatestLog(
         userId,
-      })
-    }
+        repositories.users,
+        repositories.logs
+      )
+
+      if (log.goalId) {
+        await this.calculateWeightGoalProgressUseCase.executeInTransaction(
+          log.goalId,
+          userId,
+          repositories
+        )
+      }
+    })
   }
 }

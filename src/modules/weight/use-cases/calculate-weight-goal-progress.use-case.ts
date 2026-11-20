@@ -1,9 +1,10 @@
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
-import type { WeightGoalsRepository } from '../repositories/weight-goals.repository'
-import type { WeightLogsRepository } from '../repositories/weight-logs.repository'
+import type {
+  WeightRepositories,
+  WeightUnitOfWork,
+} from '../repositories/weight-unit-of-work'
 import { calculateWeightGoalProgress } from '../utils/calculate-weight-goal-progress'
-import type { AchieveWeightGoalUseCase } from './achieve-weight-goal.use-case'
 
 interface CalculateWeightGoalProgressRequest {
   goalId: string
@@ -17,39 +18,46 @@ interface CalculateWeightGoalProgressResponse {
 }
 
 export class CalculateWeightGoalProgressUseCase {
-  constructor(
-    private readonly weightGoalsRepository: WeightGoalsRepository,
-    private readonly weightLogsRepository: WeightLogsRepository,
-    private readonly achieveWeightGoalUseCase: AchieveWeightGoalUseCase
-  ) {}
+  constructor(private readonly weightUnitOfWork: WeightUnitOfWork) {}
 
   async execute({
     goalId,
     userId,
   }: CalculateWeightGoalProgressRequest): Promise<CalculateWeightGoalProgressResponse> {
-    const goal = await this.weightGoalsRepository.findById(goalId)
+    return await this.weightUnitOfWork.execute(userId, (repositories) =>
+      this.executeInTransaction(goalId, userId, repositories)
+    )
+  }
+
+  async executeInTransaction(
+    goalId: string,
+    userId: string,
+    repositories: WeightRepositories
+  ): Promise<CalculateWeightGoalProgressResponse> {
+    const goal = await repositories.goals.findById(goalId)
 
     if (!goal || goal.userId !== userId) {
       throw new ResourceNotFoundError('Weight goal not found')
     }
 
-    const latestLog = await this.weightLogsRepository.findLatestByGoalId(goalId)
+    const latestLog = await repositories.logs.findLatestByGoalId(goalId)
     if (!latestLog) {
-      await this.weightGoalsRepository.updateProgress(goal.id, 0)
+      await repositories.goals.updateProgress(goal.id, 0)
       return { goalId: goal.id, progress: 0, achieved: false }
     }
 
     const logs =
       goal.goalType === 'MAINTAIN'
-        ? await this.weightLogsRepository.findByGoalId(goalId)
+        ? await repositories.logs.findByGoalId(goalId)
         : []
 
     const progress = calculateWeightGoalProgress(goal, latestLog.weight, logs)
-    await this.weightGoalsRepository.updateProgress(goal.id, progress)
+    await repositories.goals.updateProgress(goal.id, progress)
 
     let achieved = false
     if (goal.goalType !== 'MAINTAIN' && progress >= 100 && goal.isActive) {
-      await this.achieveWeightGoalUseCase.execute({ goalId: goal.id, userId })
+      await repositories.goals.markAsAchieved(goal.id, new Date())
+      await repositories.goals.updateProgress(goal.id, 100)
       achieved = true
     }
 

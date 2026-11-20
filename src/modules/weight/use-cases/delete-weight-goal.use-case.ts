@@ -1,7 +1,6 @@
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
-import type { WeightGoalsRepository } from '../repositories/weight-goals.repository'
-import type { WeightLogsRepository } from '../repositories/weight-logs.repository'
+import type { WeightUnitOfWork } from '../repositories/weight-unit-of-work'
 
 interface DeleteWeightGoalRequest {
   goalId: string
@@ -9,28 +8,23 @@ interface DeleteWeightGoalRequest {
 }
 
 export class DeleteWeightGoalUseCase {
-  constructor(
-    private readonly weightGoalsRepository: WeightGoalsRepository,
-    private readonly weightLogsRepository: WeightLogsRepository
-  ) {}
+  constructor(private readonly weightUnitOfWork: WeightUnitOfWork) {}
 
   async execute({ goalId, userId }: DeleteWeightGoalRequest): Promise<void> {
-    const goal = await this.weightGoalsRepository.findById(goalId)
+    await this.weightUnitOfWork.execute(userId, async (repositories) => {
+      const goal = await repositories.goals.findById(goalId)
 
-    if (!goal || goal.userId !== userId) {
-      throw new ResourceNotFoundError('Weight goal not found')
-    }
+      if (!goal || goal.userId !== userId) {
+        throw new ResourceNotFoundError('Weight goal not found')
+      }
 
-    const logs = await this.weightLogsRepository.findByGoalId(goalId)
+      const logs = await repositories.logs.findByGoalId(goalId)
 
-    if (logs.length > 0) {
       await Promise.all(
-        logs.map((log) =>
-          this.weightLogsRepository.update(log.id, { goalId: null })
-        )
+        logs.map((log) => repositories.logs.update(log.id, { goalId: null }))
       )
-    }
 
-    await this.weightGoalsRepository.delete(goalId)
+      await repositories.goals.delete(goalId)
+    })
   }
 }

@@ -20,8 +20,8 @@ export async function updateWeightGoalController(
     goalId,
     userId,
     name,
-    description: description ?? null,
-    endDate: endDate ?? null,
+    ...(description === undefined ? {} : { description }),
+    ...(endDate === undefined ? {} : { endDate }),
   })
 
   return reply.status(200).send({ weightGoal })

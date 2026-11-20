@@ -1,4 +1,4 @@
-import type { WeightGoal } from 'generated/prisma'
+import type { Prisma, WeightGoal } from 'generated/prisma'
 
 import { prisma } from '@/lib/prisma'
 
@@ -8,8 +8,10 @@ import type {
 } from '../weight-goals.repository'
 
 export class PrismaWeightGoalsRepository implements WeightGoalsRepository {
+  constructor(private readonly client: Prisma.TransactionClient = prisma) {}
+
   findById(id: string): Promise<WeightGoal | null> {
-    return prisma.weightGoal.findUnique({
+    return this.client.weightGoal.findUnique({
       where: { id },
     })
   }
@@ -18,7 +20,7 @@ export class PrismaWeightGoalsRepository implements WeightGoalsRepository {
     userId: string,
     filters?: { status?: 'active' | 'completed' }
   ): Promise<WeightGoal[]> {
-    return prisma.weightGoal.findMany({
+    return this.client.weightGoal.findMany({
       where: {
         userId,
         ...(filters?.status === 'active' && {
@@ -33,14 +35,14 @@ export class PrismaWeightGoalsRepository implements WeightGoalsRepository {
   }
 
   findActiveGoalByUserId(userId: string): Promise<WeightGoal | null> {
-    return prisma.weightGoal.findFirst({
+    return this.client.weightGoal.findFirst({
       where: { userId, isActive: true },
       orderBy: { createdAt: 'desc' },
     })
   }
 
   create(data: CreateWeightGoalData): Promise<WeightGoal> {
-    return prisma.weightGoal.create({
+    return this.client.weightGoal.create({
       data: {
         user: { connect: { id: data.userId } },
         name: data.name,
@@ -56,21 +58,21 @@ export class PrismaWeightGoalsRepository implements WeightGoalsRepository {
   }
 
   async deactivateGoal(id: string): Promise<void> {
-    await prisma.weightGoal.update({
+    await this.client.weightGoal.update({
       where: { id },
       data: { isActive: false },
     })
   }
 
   async deactivateAllByUserId(userId: string): Promise<void> {
-    await prisma.weightGoal.updateMany({
+    await this.client.weightGoal.updateMany({
       where: { userId, isActive: true },
       data: { isActive: false },
     })
   }
 
   async markAsAchieved(id: string, achievedAt: Date): Promise<void> {
-    await prisma.weightGoal.update({
+    await this.client.weightGoal.update({
       where: { id },
       data: { achievedAt, isActive: false },
     })
@@ -85,7 +87,7 @@ export class PrismaWeightGoalsRepository implements WeightGoalsRepository {
       startWeight?: number | null
     }
   ): Promise<WeightGoal> {
-    return prisma.weightGoal.update({
+    return this.client.weightGoal.update({
       where: { id },
       data: {
         ...data,
@@ -94,14 +96,14 @@ export class PrismaWeightGoalsRepository implements WeightGoalsRepository {
   }
 
   async updateProgress(id: string, progress: number): Promise<void> {
-    await prisma.weightGoal.update({
+    await this.client.weightGoal.update({
       where: { id },
       data: { progress },
     })
   }
 
   async delete(id: string): Promise<void> {
-    await prisma.weightGoal.delete({
+    await this.client.weightGoal.delete({
       where: { id },
     })
   }

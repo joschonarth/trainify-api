@@ -5,8 +5,10 @@ import { prisma } from '@/lib/prisma'
 import type { UsersRepository } from '../users.repository'
 
 export class PrismaUsersRepository implements UsersRepository {
+  constructor(private readonly client: Prisma.TransactionClient = prisma) {}
+
   async findById(id: string) {
-    const user = await prisma.user.findUnique({
+    const user = await this.client.user.findUnique({
       where: {
         id,
       },
@@ -16,7 +18,7 @@ export class PrismaUsersRepository implements UsersRepository {
   }
 
   async findByEmail(email: string) {
-    const user = await prisma.user.findUnique({
+    const user = await this.client.user.findUnique({
       where: {
         email,
       },
@@ -26,7 +28,7 @@ export class PrismaUsersRepository implements UsersRepository {
   }
 
   async create(data: Prisma.UserCreateInput) {
-    const user = await prisma.user.create({
+    const user = await this.client.user.create({
       data,
     })
 
@@ -34,7 +36,7 @@ export class PrismaUsersRepository implements UsersRepository {
   }
 
   async update(id: string, data: Prisma.UserUpdateInput) {
-    return await prisma.user.update({
+    return await this.client.user.update({
       where: { id },
       data,
     })
