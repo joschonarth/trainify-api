@@ -2,8 +2,8 @@ import { type ExerciseLog, WorkoutSessionStatus } from 'generated/prisma'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { ExerciseLogsRepository } from '@/modules/exercise/repositories/exercise-logs.repository'
-import type { UnlockAllBadgesUseCase } from '@/modules/gamification/use-cases/unlock-all-badges.use-case'
-import type { UpdateUserStreakUseCase } from '@/modules/gamification/use-cases/update-user-streak.use-case'
+import type { UnlockAllBadgesUseCase } from '@/modules/gamification/badge/use-cases/unlock-all-badges.use-case'
+import type { UpdateUserStreakUseCase } from '@/modules/gamification/streak/use-cases/update-user-streak.use-case'
 import type {
   ExerciseSessionsRepository,
   ExerciseSessionWithLogs,
