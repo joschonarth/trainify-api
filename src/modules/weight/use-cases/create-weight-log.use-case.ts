@@ -1,12 +1,63 @@
-import type { WeightGoal, WeightLog } from 'generated/prisma'
-import type { UsersRepository } from '@/modules/user/repositories/users.repository'
+import type { WeightLog } from 'generated/prisma'
+
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
+
 import { InvalidWeightGoalError } from '../errors/invalid-weight-goal.error'
-import type { WeightGoalsRepository } from '../repositories/weight-goals.repository'
-import type { WeightLogsRepository } from '../repositories/weight-logs.repository'
-import type { AchieveWeightGoalUseCase } from '../use-cases/achieve-weight-goal.use-case'
-import { calculateWeightGoalProgress } from '../utils/calculate-weight-goal-progress'
+import type {
+  WeightRepositories,
+  WeightUnitOfWork,
+} from '../repositories/weight-unit-of-work'
 import { syncUserWeightFromLatestLog } from '../utils/sync-user-weight-from-latest-log'
+import type { CalculateWeightGoalProgressUseCase } from './calculate-weight-goal-progress.use-case'
+
+async function getGoalForLogging(
+  userId: string,
+  goalId: string | null | undefined,
+  weight: number,
+  repositories: WeightRepositories
+) {
+  const goal = goalId
+    ? await repositories.goals.findById(goalId)
+    : await repositories.goals.findActiveGoalByUserId(userId)
+
+  if (goalId && (!goal || goal.userId !== userId)) {
+    throw new ResourceNotFoundError('Weight goal not found.')
+  }
+
+  if (!goal) {
+    return null
+  }
+
+  if (!goal.isActive) {
+    throw new InvalidWeightGoalError(
+      'Cannot log weight for an inactive or already achieved goal.'
+    )
+  }
+
+  const startWeight = goal.startWeight ?? weight
+  if (
+    !Number.isFinite(goal.targetWeight) ||
+    goal.targetWeight <= 0 ||
+    !Number.isFinite(startWeight) ||
+    startWeight <= 0 ||
+    (goal.goalType === 'LOSE' && goal.targetWeight >= startWeight) ||
+    (goal.goalType === 'GAIN' && goal.targetWeight <= startWeight)
+  ) {
+    throw new InvalidWeightGoalError('Invalid weight goal data.')
+  }
+
+  return goal
+}
+
+function validateLog(weight: number, date?: Date) {
+  if (!Number.isFinite(weight) || weight <= 0) {
+    throw new InvalidWeightGoalError('Weight must be a positive finite number.')
+  }
+
+  if (date && !Number.isFinite(date.getTime())) {
+    throw new InvalidWeightGoalError('Log date must be valid.')
+  }
+}
 
 interface CreateWeightLogUseCaseRequest {
   userId: string
@@ -22,10 +73,8 @@ interface CreateWeightLogUseCaseResponse {
 
 export class CreateWeightLogUseCase {
   constructor(
-    private readonly weightLogsRepository: WeightLogsRepository,
-    private readonly weightGoalsRepository: WeightGoalsRepository,
-    private readonly achieveWeightGoalUseCase: AchieveWeightGoalUseCase,
-    private readonly usersRepository: UsersRepository
+    private readonly weightUnitOfWork: WeightUnitOfWork,
+    private readonly calculateWeightGoalProgressUseCase: CalculateWeightGoalProgressUseCase
   ) {}
 
   async execute({
@@ -35,79 +84,38 @@ export class CreateWeightLogUseCase {
     goalId,
     date,
   }: CreateWeightLogUseCaseRequest): Promise<CreateWeightLogUseCaseResponse> {
-    let goal: WeightGoal | null = null
+    validateLog(weight, date)
 
-    if (goalId) {
-      goal = await this.weightGoalsRepository.findById(goalId)
-      if (!goal) {
-        throw new ResourceNotFoundError('Weight goal not found.')
-      }
-    } else {
-      goal = await this.weightGoalsRepository.findActiveGoalByUserId(userId)
-    }
+    return await this.weightUnitOfWork.execute(userId, async (repositories) => {
+      let goal = await getGoalForLogging(userId, goalId, weight, repositories)
 
-    if (!goal) {
-      const weightLog = await this.weightLogsRepository.create({
+      const weightLog = await repositories.logs.create({
         userId,
-        goalId: null,
+        goalId: goal?.id ?? null,
         weight,
         note: note ?? null,
         ...(date ? { date } : {}),
       })
+
       await syncUserWeightFromLatestLog(
         userId,
-        this.usersRepository,
-        this.weightLogsRepository
+        repositories.users,
+        repositories.logs
       )
+
+      if (goal && goal.startWeight === null) {
+        goal = await repositories.goals.update(goal.id, { startWeight: weight })
+      }
+
+      if (goal) {
+        await this.calculateWeightGoalProgressUseCase.executeInTransaction(
+          goal.id,
+          userId,
+          repositories
+        )
+      }
+
       return { weightLog }
-    }
-
-    if (!goal.isActive) {
-      throw new InvalidWeightGoalError(
-        'Cannot log weight for an inactive or already achieved goal.'
-      )
-    }
-
-    const weightLog = await this.weightLogsRepository.create({
-      userId,
-      goalId: goal.id,
-      weight,
-      note: note ?? null,
-      ...(date ? { date } : {}),
     })
-    await syncUserWeightFromLatestLog(
-      userId,
-      this.usersRepository,
-      this.weightLogsRepository
-    )
-
-    let startWeight = goal.startWeight
-    if (!startWeight) {
-      startWeight = weight
-      await this.weightGoalsRepository.update(goal.id, {
-        startWeight: weight,
-      })
-    }
-
-    const logs =
-      goal.goalType === 'MAINTAIN'
-        ? await this.weightLogsRepository.findByGoalId(goal.id)
-        : []
-
-    const progress = calculateWeightGoalProgress(
-      { ...goal, startWeight },
-      weightLog.weight,
-      logs
-    )
-    await this.weightGoalsRepository.updateProgress(goal.id, progress)
-
-    if (goal.goalType !== 'MAINTAIN' && progress >= 100 && goal.isActive) {
-      await this.achieveWeightGoalUseCase.execute({
-        goalId: goal.id,
-        userId,
-      })
-    }
-
-    return { weightLog }
   }
 }

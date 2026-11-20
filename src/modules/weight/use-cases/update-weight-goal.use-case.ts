@@ -3,8 +3,33 @@ import type { WeightGoal } from 'generated/prisma'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
 import { InvalidWeightGoalError } from '../errors/invalid-weight-goal.error'
-import type { WeightGoalsRepository } from '../repositories/weight-goals.repository'
-import type { WeightLogsRepository } from '../repositories/weight-logs.repository'
+import type {
+  WeightRepositories,
+  WeightUnitOfWork,
+} from '../repositories/weight-unit-of-work'
+
+async function validateEndDate(
+  endDate: Date | null | undefined,
+  startDate: Date,
+  goalId: string,
+  repositories: WeightRepositories
+) {
+  if (!endDate) {
+    return
+  }
+
+  if (!Number.isFinite(endDate.getTime()) || endDate < startDate) {
+    throw new InvalidWeightGoalError('End date cannot be before start date')
+  }
+
+  const latestLog = await repositories.logs.findLatestByGoalId(goalId)
+
+  if (latestLog && endDate < latestLog.date) {
+    throw new InvalidWeightGoalError(
+      'End date cannot be before the last logged weight date'
+    )
+  }
+}
 
 interface UpdateWeightGoalRequest {
   goalId: string
@@ -19,10 +44,7 @@ interface UpdateWeightGoalResponse {
 }
 
 export class UpdateWeightGoalUseCase {
-  constructor(
-    private readonly weightGoalsRepository: WeightGoalsRepository,
-    private readonly weightLogsRepository: WeightLogsRepository
-  ) {}
+  constructor(private readonly weightUnitOfWork: WeightUnitOfWork) {}
 
   async execute({
     goalId,
@@ -31,37 +53,27 @@ export class UpdateWeightGoalUseCase {
     description,
     endDate,
   }: UpdateWeightGoalRequest): Promise<UpdateWeightGoalResponse> {
-    const goal = await this.weightGoalsRepository.findById(goalId)
-    if (!goal || goal.userId !== userId) {
-      throw new ResourceNotFoundError('Weight goal not found')
-    }
-
-    if (goal.achievedAt) {
-      throw new InvalidWeightGoalError(
-        'Cannot edit a goal that has already been achieved'
-      )
-    }
-
-    if (endDate) {
-      if (endDate < goal.startDate) {
-        throw new InvalidWeightGoalError('End date cannot be before start date')
+    return await this.weightUnitOfWork.execute(userId, async (repositories) => {
+      const goal = await repositories.goals.findById(goalId)
+      if (!goal || goal.userId !== userId) {
+        throw new ResourceNotFoundError('Weight goal not found')
       }
 
-      const latestLog =
-        await this.weightLogsRepository.findLatestByGoalId(goalId)
-      if (latestLog && endDate < latestLog.date) {
+      if (goal.achievedAt) {
         throw new InvalidWeightGoalError(
-          'End date cannot be before the last logged weight date'
+          'Cannot edit a goal that has already been achieved'
         )
       }
-    }
 
-    const updatedGoal = await this.weightGoalsRepository.update(goalId, {
-      name: name ?? goal.name,
-      description: description ?? goal.description,
-      endDate: endDate ?? goal.endDate,
+      await validateEndDate(endDate, goal.startDate, goalId, repositories)
+
+      const updatedGoal = await repositories.goals.update(goalId, {
+        ...(name === undefined ? {} : { name }),
+        ...(description === undefined ? {} : { description }),
+        ...(endDate === undefined ? {} : { endDate }),
+      })
+
+      return { weightGoal: updatedGoal }
     })
-
-    return { weightGoal: updatedGoal }
   }
 }

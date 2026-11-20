@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
 export const createWeightLogBodySchema = z.object({
-  weight: z.number(),
+  weight: z.number().positive(),
   note: z.string().nullable().optional(),
   date: z.iso
     .datetime()

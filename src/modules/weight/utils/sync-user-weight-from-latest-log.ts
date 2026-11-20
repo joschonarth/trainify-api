@@ -4,7 +4,7 @@ import type { WeightLogsRepository } from '../repositories/weight-logs.repositor
 
 export async function syncUserWeightFromLatestLog(
   userId: string,
-  usersRepository: UsersRepository,
+  usersRepository: Pick<UsersRepository, 'update'>,
   weightLogsRepository: WeightLogsRepository
 ): Promise<void> {
   const latestLog = await weightLogsRepository.findLatestByUserId(userId)

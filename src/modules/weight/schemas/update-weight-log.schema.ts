@@ -5,7 +5,7 @@ export const updateWeightLogParamsSchema = z.object({
 })
 
 export const updateWeightLogBodySchema = z.object({
-  weight: z.number().optional(),
+  weight: z.number().positive().optional(),
   note: z.string().nullable().optional(),
   date: z.iso
     .datetime()

@@ -1,18 +1,15 @@
-import { PrismaUsersRepository } from '@/modules/user/repositories/prisma/prisma-users.repository'
-import { PrismaWeightLogsRepository } from '../../repositories/prisma/prisma-weight-logs.repository'
+import { PrismaWeightUnitOfWork } from '../../repositories/prisma/prisma-weight-unit-of-work'
+import { CalculateWeightGoalProgressUseCase } from '../calculate-weight-goal-progress.use-case'
 import { DeleteWeightLogUseCase } from '../delete-weight-log.use-case'
-import { makeCalculateWeightGoalProgressUseCase } from './make-calculate-weight-goal-progress-use-case'
 
 export function makeDeleteWeightLogUseCase() {
-  const weightLogsRepository = new PrismaWeightLogsRepository()
+  const weightUnitOfWork = new PrismaWeightUnitOfWork()
   const calculateWeightGoalProgressUseCase =
-    makeCalculateWeightGoalProgressUseCase()
-  const usersRepository = new PrismaUsersRepository()
+    new CalculateWeightGoalProgressUseCase(weightUnitOfWork)
 
   const deleteWeightLogUseCase = new DeleteWeightLogUseCase(
-    weightLogsRepository,
-    calculateWeightGoalProgressUseCase,
-    usersRepository
+    weightUnitOfWork,
+    calculateWeightGoalProgressUseCase
   )
 
   return deleteWeightLogUseCase
