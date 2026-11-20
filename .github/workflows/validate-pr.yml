@@ -39,7 +39,11 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - run: npm run generate
+        env:
+          DATABASE_URL: ${{ vars.DATABASE_URL }}
       - run: npm run check
+      - run: npm run typecheck
       - run: npm run test
         env:
           NODE_ENV: test
