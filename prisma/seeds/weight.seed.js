@@ -1,10 +1,10 @@
-import { GoalType, PrismaClient } from 'generated/prisma'
+import { GoalType } from '../../generated/prisma/index.js'
+import { dayjs } from './dates.js'
 
-const prisma = new PrismaClient()
-
-export async function seedWeights(userId) {
+export async function seedWeights(prisma, userId) {
   console.log('⚖️ Seeding weight goals and logs...')
 
+  const user = await prisma.user.findUniqueOrThrow({ where: { id: userId } })
   const existingGoal = await prisma.weightGoal.findFirst({
     where: { userId, name: 'Meta de Verão' },
   })
@@ -19,42 +19,48 @@ export async function seedWeights(userId) {
         goalType: GoalType.LOSE,
         startWeight: 100,
         targetWeight: 80,
-        startDate: new Date(new Date().setMonth(new Date().getMonth() - 2)),
+        startDate: dayjs
+          .utc(dayjs(user.createdAt).tz(user.timezone).format('YYYY-MM-DD'))
+          .subtract(2, 'month')
+          .toDate(),
         isActive: true,
       },
     }))
 
   console.log(`✅ Weight goal created: ${goal.name}`)
 
-  const logs = []
-  let currentWeight = 100
-  const date = new Date(goal.startDate)
-
-  while (currentWeight > 84) {
-    const change = Math.floor(Math.random() * 3)
-    currentWeight -= change
-    if (currentWeight < 84) {
-      currentWeight = 84
-    }
-
-    logs.push({
+  const logs = Array.from({ length: 17 }, (_, index) => {
+    const date = dayjs.utc(goal.startDate).add(index, 'day').toDate()
+    return {
       userId,
       goalId: goal.id,
-      date: new Date(date),
-      weight: currentWeight,
+      date,
+      weight: 100 - index,
       note: 'Pesei de jejum',
-    })
-
-    date.setDate(date.getDate() + 1)
-  }
+    }
+  })
 
   for (const log of logs) {
-    await prisma.weightLog.create({ data: log })
+    const existingLog = await prisma.weightLog.findFirst({
+      where: { userId, goalId: goal.id, date: log.date },
+    })
+    if (!existingLog) {
+      await prisma.weightLog.create({ data: log })
+    }
   }
+
+  const latest = await prisma.weightLog.findFirstOrThrow({
+    where: { userId },
+    orderBy: [{ date: 'desc' }, { id: 'desc' }],
+  })
+  await prisma.user.update({
+    where: { id: userId },
+    data: { weight: latest.weight },
+  })
 
   const startWeight = goal.startWeight ?? 100
   const targetWeight = goal.targetWeight
-  const lost = startWeight - currentWeight
+  const lost = startWeight - 84
   const totalToLose = startWeight - targetWeight
   const progress = Math.min((lost / totalToLose) * 100, 100)
 
@@ -63,7 +69,5 @@ export async function seedWeights(userId) {
     data: { progress },
   })
 
-  console.log(
-    `✅ ${logs.length} weight logs created, progress up to ${currentWeight}kg`
-  )
+  console.log(`✅ ${logs.length} weight logs ensured, progress up to 84kg`)
 }
