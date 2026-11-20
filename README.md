@@ -57,7 +57,7 @@ The project was built with Fastify, TypeScript, Prisma ORM and PostgreSQL, with 
 
 - [x] 🏋️ Exercise management (catalog and custom exercises)
 - [x] 🗓️ Workout creation, plans and weekly scheduling
-- [x] ⏱️ Starting, pausing and finishing workout sessions
+- [x] ⏱️ Starting and finishing workout sessions
 - [x] 📝 Exercise log tracking and session history
 - [x] 📊 Performance comparisons (weekly, monthly and per exercise)
 - [x] ⚖️ Weight logging, weight goals and analytics
