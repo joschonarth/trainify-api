@@ -30,17 +30,17 @@ export class GetBadgesStatsUseCase {
   }: GetBadgesStatsUseCaseRequest): Promise<GetBadgesStatsUseCaseResponse> {
     const allBadges = await this.badgesRepository.findAll()
     const userBadges = await this.badgesRepository.findByUser(userId)
-    const unlockedIds = userBadges.map((ub) => ub.badgeId)
+    const unlockedIds = new Set(userBadges.map((ub) => ub.badgeId))
 
     const total = allBadges.length
-    const unlocked = allBadges.filter((b) => unlockedIds.includes(b.id)).length
+    const unlocked = allBadges.filter((b) => unlockedIds.has(b.id)).length
     const progress = total > 0 ? Math.round((unlocked / total) * 100) : 0
 
     const byType = Object.values(BadgeType).reduce(
       (acc, type) => {
         const badgesOfType = allBadges.filter((b) => b.type === type)
         const unlockedOfType = badgesOfType.filter((b) =>
-          unlockedIds.includes(b.id)
+          unlockedIds.has(b.id)
         ).length
 
         acc[type] = {

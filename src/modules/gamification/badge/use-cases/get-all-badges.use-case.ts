@@ -41,7 +41,7 @@ export class GetAllBadgesUseCase {
       }
     })
 
-    if (unlocked !== undefined) {
+    if (unlocked !== undefined && unlocked !== null) {
       badgesWithStatus = badgesWithStatus.filter((b) => b.unlocked === unlocked)
     }
 
