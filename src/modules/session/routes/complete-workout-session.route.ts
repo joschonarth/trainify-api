@@ -7,7 +7,7 @@ import {
   completeWorkoutSessionBodySchema,
   completeWorkoutSessionParamsSchema,
 } from '../schemas/complete-workout-session.schema'
-import { sessionWithWorkoutSchema } from '../schemas/session.schema'
+import { sessionWithWorkoutSchema } from '../schemas/workout-session.schema'
 
 export function completeWorkoutSessionRoute(app: FastifyInstance) {
   app.post(

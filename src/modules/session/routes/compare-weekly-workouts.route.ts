@@ -6,7 +6,7 @@ import { compareWeeklyWorkoutsController } from '../controllers/compare-weekly-w
 import {
   periodDifferencesSchema,
   periodSummarySchema,
-} from '../schemas/session.schema'
+} from '../schemas/session-comparison.schema'
 
 export function compareWeeklyWorkoutsRoute(app: FastifyInstance) {
   app.get(

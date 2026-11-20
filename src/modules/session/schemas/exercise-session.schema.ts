@@ -1,7 +1,5 @@
-import { Measurement, WorkoutSessionStatus } from 'generated/prisma'
+import { Measurement } from 'generated/prisma'
 import { z } from 'zod'
-
-// --- Exercise Session ---
 
 export const sessionExerciseItemSchema = z.object({
   id: z.string().describe('Exercise ID.'),
@@ -158,92 +156,4 @@ export const exerciseSessionDetailsSchema = z.object({
       metPlan: z.boolean().nullable(),
     })
     .nullable(),
-})
-
-// --- Workout Session ---
-
-export const baseSessionSchema = z.object({
-  id: z.string().describe('Session ID.'),
-  userId: z.string().describe('User ID.'),
-  workoutId: z.string().describe('Workout ID.'),
-  date: z.date().describe('Session date.'),
-  status: z.enum(WorkoutSessionStatus).describe('Session status.'),
-  startedAt: z.date().nullable().describe('Session start time.'),
-  endedAt: z.date().nullable().describe('Session end time.'),
-  duration: z.number().nullable().describe('Session duration in seconds.'),
-})
-
-export const sessionWithWorkoutSchema = baseSessionSchema.extend({
-  workout: z
-    .object({
-      id: z.string().describe('Workout ID.'),
-      name: z.string().describe('Workout name.'),
-      exercises: z.array(
-        z.object({
-          id: z.string().describe('Workout exercise relation ID.'),
-          position: z
-            .number()
-            .int()
-            .describe(
-              'Current position in the workout template; session order comes from the stored exercise sessions.'
-            ),
-          defaultSets: z
-            .number()
-            .nullable()
-            .describe('Default number of sets.'),
-          defaultReps: z
-            .number()
-            .nullable()
-            .describe('Default number of reps.'),
-          defaultWeight: z
-            .number()
-            .nullable()
-            .describe('Default weight in kilograms.'),
-          exercise: sessionExerciseItemSchema,
-        })
-      ),
-    })
-    .describe(
-      'Current workout template, which may differ from the preserved exerciseSessions snapshot.'
-    ),
-  exerciseSessions: z
-    .array(exerciseSessionSchema)
-    .describe(
-      'Exercise membership, order and planned defaults are captured at creation, including while PENDING. Existing sessions remain available after workout archival.'
-    ),
-})
-
-// --- Calendar ---
-
-export const calendarDaySchema = z.object({
-  date: z.string().describe('Date in YYYY-MM-DD format.'),
-  completed: z
-    .boolean()
-    .describe('Whether a workout was completed on this day.'),
-})
-
-// --- Comparison ---
-
-export const periodSummarySchema = z.object({
-  start: z.string().describe('Start date of the period.'),
-  end: z.string().describe('End date of the period.'),
-  totalWorkouts: z.number().describe('Total workouts completed in the period.'),
-  totalSets: z.number().describe('Total sets performed in the period.'),
-  totalReps: z.number().describe('Total reps performed in the period.'),
-  totalWeight: z.number().describe('Total weight used in the period.'),
-  totalVolume: z.number().describe('Total volume in the period.'),
-})
-
-export const periodDifferencesSchema = z.object({
-  setsDiff: z.number().describe('Difference in total sets between periods.'),
-  repsDiff: z.number().describe('Difference in total reps between periods.'),
-  weightDiff: z
-    .number()
-    .describe('Difference in total weight between periods.'),
-  volumeDiff: z
-    .number()
-    .describe('Difference in total volume between periods.'),
-  percentageVolumeChange: z
-    .number()
-    .describe('Percentage change in volume between periods.'),
 })

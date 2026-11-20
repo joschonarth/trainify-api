@@ -3,8 +3,8 @@ import { z } from 'zod'
 
 import { verifyJwt } from '@/shared/middlewares/verify-jwt'
 import { getExerciseSessionDetailsController } from '../controllers/get-exercise-session-details.controller'
+import { exerciseSessionDetailsSchema } from '../schemas/exercise-session.schema'
 import { getExerciseSessionDetailsParamsSchema } from '../schemas/get-exercise-session-details.schema'
-import { exerciseSessionDetailsSchema } from '../schemas/session.schema'
 
 export function getExerciseSessionDetailsRoute(app: FastifyInstance) {
   app.get(
