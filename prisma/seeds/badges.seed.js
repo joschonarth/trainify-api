@@ -141,12 +141,12 @@ export async function seedBadges() {
     where: { userId: user.id },
   })
 
-  const currentStreak = streak?.bestStreak ?? 0
+  const bestStreak = streak?.bestStreak ?? 0
 
   console.log({
     totalWorkouts,
     totalExercises,
-    currentStreak,
+    bestStreak,
   })
 
   const badgesToUnlock = allBadges.filter((badge) => {
@@ -157,7 +157,7 @@ export async function seedBadges() {
       return totalExercises >= badge.milestone
     }
     if (badge.type === 'STREAK') {
-      return currentStreak >= badge.milestone
+      return bestStreak >= badge.milestone
     }
     return false
   })

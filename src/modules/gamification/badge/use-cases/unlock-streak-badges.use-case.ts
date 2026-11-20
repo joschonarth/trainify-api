@@ -26,7 +26,7 @@ export class UnlockStreakBadgesUseCase {
       return { badges: [] }
     }
 
-    const { currentStreak } = userStreak
+    const { bestStreak } = userStreak
 
     const userBadges = await this.badgesRepository.findByUser(userId)
 
@@ -37,7 +37,7 @@ export class UnlockStreakBadgesUseCase {
     for (const badge of streakBadges) {
       const alreadyHas = userBadges.some((ub) => ub.badgeId === badge.id)
 
-      if (!alreadyHas && badge.milestone && currentStreak >= badge.milestone) {
+      if (!alreadyHas && badge.milestone && bestStreak >= badge.milestone) {
         const created = await this.badgesRepository.unlockForUser(
           userId,
           badge.id
