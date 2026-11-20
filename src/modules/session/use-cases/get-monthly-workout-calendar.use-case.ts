@@ -1,6 +1,8 @@
 import dayjs from 'dayjs'
 import timezonePlugin from 'dayjs/plugin/timezone'
 import utc from 'dayjs/plugin/utc'
+import type { GetPlanningCalendarContext } from '@/modules/gamification/streak/use-cases/get-planning-calendar-context'
+import type { PlannedDayStatus } from '@/modules/gamification/streak/utils/calculate-planned-streak'
 
 import type { WorkoutSessionsRepository } from '@/modules/session/repositories/workout-sessions.repository'
 import type { UsersRepository } from '@/modules/user/repositories/users.repository'
@@ -13,6 +15,8 @@ dayjs.extend(timezonePlugin)
 interface CalendarDayStatus {
   date: string
   completed: boolean
+  planningStatus?: PlannedDayStatus
+  hasActivity?: boolean
 }
 
 interface GetMonthlyWorkoutCalendarResponse {
@@ -25,7 +29,8 @@ export class GetMonthlyWorkoutCalendarUseCase {
       WorkoutSessionsRepository,
       'findByUserAndDateRange'
     >,
-    private readonly usersRepository: Pick<UsersRepository, 'findById'>
+    private readonly usersRepository: Pick<UsersRepository, 'findById'>,
+    private readonly planning?: GetPlanningCalendarContext
   ) {}
 
   async execute(
@@ -38,20 +43,23 @@ export class GetMonthlyWorkoutCalendarUseCase {
       throw new ResourceNotFoundError('User not found.')
     }
 
-    const today = dayjs().tz(user.timezone)
+    const context = await this.planning?.execute(userId, user.timezone)
+    const timezone = context?.timezone ?? user.timezone
+    const today = dayjs().tz(timezone)
     const currentYear = year ?? today.year()
     const currentMonth = month ?? today.month() + 1
     const { start, end, startDay, endDay } = getZonedMonthRange(
       currentYear,
       currentMonth,
-      user.timezone
+      timezone
     )
 
     const sessions =
       await this.workoutSessionsRepository.findByUserAndDateRange(
         userId,
         start,
-        end
+        end,
+        timezone
       )
 
     const totalDays = endDay.date()
@@ -59,13 +67,24 @@ export class GetMonthlyWorkoutCalendarUseCase {
       startDay.add(i, 'day')
     )
 
+    const planned = context?.daysThrough(endDay.format('YYYY-MM-DD'))
     const days: CalendarDayStatus[] = daysArray.map((date) => {
       const completed = sessions.some(
         (session) =>
           session.status === 'COMPLETED' &&
-          dayjs(session.date).tz(user.timezone).isSame(date, 'day')
+          (session.businessDate
+            ? session.businessDate === date.format('YYYY-MM-DD')
+            : dayjs(session.date).tz(timezone).isSame(date, 'day'))
       )
       return {
+        ...(context
+          ? {
+              planningStatus:
+                planned?.get(date.format('YYYY-MM-DD'))?.status ??
+                ('unplanned' as const),
+              hasActivity: context.hasActivity(date.format('YYYY-MM-DD')),
+            }
+          : {}),
         date: date.format('YYYY-MM-DD'),
         completed,
       }

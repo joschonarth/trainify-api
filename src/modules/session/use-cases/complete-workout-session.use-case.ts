@@ -159,7 +159,6 @@ export class CompleteWorkoutSessionUseCase {
         session,
         anyExerciseCompleted: completion.hasActivity,
         logDate: completion.completedAt,
-        isRetry: true,
         creditDay:
           completion.businessDate && completion.timezone
             ? {
@@ -258,7 +257,6 @@ export class CompleteWorkoutSessionUseCase {
       session: updatedSession,
       anyExerciseCompleted,
       logDate: now,
-      isRetry: false,
       creditDay: getSessionBusinessDay(session),
     }
   }
@@ -275,7 +273,6 @@ export class CompleteWorkoutSessionUseCase {
       await this.updateUserStreakUseCase.execute({
         userId: request.userId,
         logDate: result.logDate,
-        recoverOriginalCompletion: result.isRetry,
         ...(result.creditDay ? { creditDay: result.creditDay } : {}),
       })
     }

@@ -1,47 +1,28 @@
-import type { UserStreaksRepository } from '@/modules/gamification/streak/repositories/user-streaks.repository'
 import type { UsersRepository } from '@/modules/user/repositories/users.repository'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
-import { activityDate } from '../utils/activity-business-day'
-import { getEffectiveStreak } from '../utils/get-effective-streak'
-
-interface GetUserStreakUseCaseResponse {
-  currentStreak: number
-  bestStreak: number
-  lastWorkout: Date | null
-}
+import type { StreakPlansRepository } from '../repositories/streak-plans.repository'
+import type { UserStreakLogsRepository } from '../repositories/user-streak-logs.repository'
+import { activityBusinessDate } from '../utils/activity-business-day'
+import { evaluateTracking } from '../utils/evaluate-tracking'
 
 export class GetUserStreakUseCase {
   constructor(
-    private readonly userStreaksRepository: Pick<
-      UserStreaksRepository,
-      'findByUserId'
-    >,
-    private readonly usersRepository: Pick<UsersRepository, 'findById'>
+    private readonly users: Pick<UsersRepository, 'findById'>,
+    private readonly plans: StreakPlansRepository,
+    private readonly logs: UserStreakLogsRepository
   ) {}
-
-  async execute(userId: string): Promise<GetUserStreakUseCaseResponse> {
-    const user = await this.usersRepository.findById(userId)
+  async execute(userId: string) {
+    const user = await this.users.findById(userId)
     if (!user) {
       throw new ResourceNotFoundError('User not found.')
     }
-    const streak = await this.userStreaksRepository.findByUserId(userId)
-    return {
-      currentStreak: getEffectiveStreak(
-        streak?.currentStreak ?? 0,
-        streak?.lastBusinessDate
-          ? activityDate(
-              {
-                date: streak.lastWorkout ?? new Date(),
-                businessDate: streak.lastBusinessDate,
-              },
-              user.timezone
-            )
-          : (streak?.lastWorkout ?? null),
-        new Date(),
-        user.timezone
-      ),
-      bestStreak: streak?.bestStreak ?? 0,
-      lastWorkout: streak?.lastWorkout ?? null,
-    }
+    const plan = await this.plans.findByUser(userId)
+    const logs = await this.logs.findAllByUser(userId)
+    return evaluateTracking(
+      plan,
+      logs.map((log) =>
+        activityBusinessDate(log, plan?.timezone ?? user.timezone)
+      )
+    )
   }
 }

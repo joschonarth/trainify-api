@@ -1,3 +1,4 @@
+import { PrismaStreakPlansRepository } from '@/modules/gamification/streak/repositories/prisma/prisma-streak-plans.repository'
 import { PrismaWorkoutSessionsRepository } from '@/modules/session/repositories/prisma/prisma-workout-sessions.repository'
 import { PrismaUsersRepository } from '@/modules/user/repositories/prisma/prisma-users.repository'
 import { PrismaWorkoutSchedulesRepository } from '@/modules/workout/repositories/prisma/prisma-workout-schedules.repository'
@@ -8,10 +9,12 @@ export function makeGetDailyWorkoutSessionUseCase() {
   const workoutSessionsRepository = new PrismaWorkoutSessionsRepository()
   const workoutSchedulesRepository = new PrismaWorkoutSchedulesRepository()
   const usersRepository = new PrismaUsersRepository()
+  const streakPlansRepository = new PrismaStreakPlansRepository()
   const getDailyWorkoutSessionUseCase = new GetDailyWorkoutSessionUseCase(
     workoutSessionsRepository,
     workoutSchedulesRepository,
-    usersRepository
+    usersRepository,
+    streakPlansRepository
   )
 
   return getDailyWorkoutSessionUseCase

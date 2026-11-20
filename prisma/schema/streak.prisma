@@ -1,3 +1,21 @@
+model StreakTracking {
+  userId String @id
+  timezone String
+  activationDate String @db.VarChar(10)
+  user User @relation(fields: [userId], references: [id])
+  versions StreakPlan[]
+  @@map("streak_tracking")
+}
+
+model StreakPlan {
+  userId String
+  effectiveDate String @db.VarChar(10)
+  workouts Json
+  tracking StreakTracking @relation(fields: [userId], references: [userId])
+  @@id([userId, effectiveDate])
+  @@map("streak_plans")
+}
+
 model UserStreak {
   id            String    @id @default(cuid())
   userId        String    @unique

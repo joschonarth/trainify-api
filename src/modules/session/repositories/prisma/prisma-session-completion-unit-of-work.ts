@@ -1,3 +1,4 @@
+import type { PrismaClient } from 'generated/prisma'
 import { prisma } from '@/lib/prisma'
 import { PrismaExerciseLogsRepository } from '@/modules/exercise/repositories/prisma/prisma-exercise-logs.repository'
 
@@ -12,11 +13,12 @@ import { PrismaWorkoutSessionsRepository } from './prisma-workout-sessions.repos
 export class PrismaSessionCompletionUnitOfWork
   implements SessionCompletionUnitOfWork
 {
+  constructor(private readonly client: PrismaClient = prisma) {}
   async execute<T>(
     sessionId: string,
     operation: (repositories: SessionCompletionRepositories) => Promise<T>
   ): Promise<T> {
-    return await prisma.$transaction(async (transaction) => {
+    return await this.client.$transaction(async (transaction) => {
       // Match timer lock order and serialize completion retries before reading state.
       await transaction.$queryRaw`SELECT id FROM workout_sessions WHERE id = ${sessionId} FOR UPDATE`
       await transaction.$queryRaw`SELECT id FROM exercise_sessions WHERE "workoutSessionId" = ${sessionId} ORDER BY id FOR UPDATE`

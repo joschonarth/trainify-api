@@ -1,8 +1,10 @@
 import type { UsersRepository } from '@/modules/user/repositories/users.repository'
+import type { StreakPlansRepository } from './streak-plans.repository'
 import type { UserStreakLogsRepository } from './user-streak-logs.repository'
 import type { UserStreaksRepository } from './user-streaks.repository'
 
 export interface StreakRepositories {
+  plans: StreakPlansRepository
   users: Pick<UsersRepository, 'findById'>
   streaks: UserStreaksRepository
   logs: UserStreakLogsRepository

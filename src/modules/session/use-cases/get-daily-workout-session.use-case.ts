@@ -1,6 +1,7 @@
 import dayjs from 'dayjs'
 import timezonePlugin from 'dayjs/plugin/timezone'
 import utc from 'dayjs/plugin/utc'
+import type { StreakPlansRepository } from '@/modules/gamification/streak/repositories/streak-plans.repository'
 import type {
   WorkoutSessionsRepository,
   WorkoutSessionWithWorkout,
@@ -31,7 +32,8 @@ export class GetDailyWorkoutSessionUseCase {
       WorkoutSchedulesRepository,
       'findByUserAndDay'
     >,
-    private readonly usersRepository: Pick<UsersRepository, 'findById'>
+    private readonly usersRepository: Pick<UsersRepository, 'findById'>,
+    private readonly plans?: StreakPlansRepository
   ) {}
 
   async execute({
@@ -42,14 +44,20 @@ export class GetDailyWorkoutSessionUseCase {
       throw new ResourceNotFoundError('User not found.')
     }
 
+    const plan = await this.plans?.findByUser(userId)
     const today = new Date()
-    const userToday = dayjs(today).tz(user.timezone)
+    const timezone =
+      plan &&
+      dayjs(today).tz(plan.timezone).format('YYYY-MM-DD') >= plan.activationDate
+        ? plan.timezone
+        : user.timezone
+    const userToday = dayjs(today).tz(timezone)
 
     const dailyRequest = {
       userId,
       businessDate: userToday.format('YYYY-MM-DD'),
-      timezone: user.timezone,
-      ...getZonedDayRange(today, user.timezone),
+      timezone,
+      ...getZonedDayRange(today, timezone),
     }
     const existingSession =
       await this.workoutSessionsRepository.resolveDailySession(dailyRequest)

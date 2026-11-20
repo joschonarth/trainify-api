@@ -1,12 +1,16 @@
 import { z } from 'zod'
 
 export const streakSchema = z.object({
+  enabled: z.boolean(),
+  unit: z.literal('scheduled_training_days'),
+  timezone: z.string().nullable(),
+  activationDate: z.string().nullable(),
   currentStreak: z
     .number()
-    .describe('Current consecutive workout streak in days.'),
+    .describe('Current consecutive scheduled training days completed.'),
   bestStreak: z
     .number()
-    .describe('Best consecutive workout streak ever achieved.'),
+    .describe('Best sequence of scheduled training days completed.'),
   lastWorkout: z
     .date()
     .nullable()

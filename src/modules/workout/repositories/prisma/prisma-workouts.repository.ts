@@ -1,6 +1,6 @@
-import type { Prisma, Workout } from 'generated/prisma'
-
+import type { Prisma, PrismaClient, Workout } from 'generated/prisma'
 import { prisma } from '@/lib/prisma'
+import { scheduleStreakPlan } from '@/modules/gamification/streak/repositories/prisma/prisma-streak-plans.repository'
 
 import type {
   WorkoutsRepository,
@@ -8,25 +8,26 @@ import type {
 } from '../workouts.repository'
 
 export class PrismaWorkoutsRepository implements WorkoutsRepository {
+  constructor(private readonly client: PrismaClient = prisma) {}
   async create(data: Prisma.WorkoutCreateInput): Promise<Workout> {
-    return await prisma.workout.create({ data })
+    return await this.client.workout.create({ data })
   }
 
   async findById(id: string): Promise<Workout | null> {
-    return await prisma.workout.findUnique({
+    return await this.client.workout.findUnique({
       where: { id, archivedAt: null },
     })
   }
 
   async findByIdIncludingArchived(id: string): Promise<Workout | null> {
-    return await prisma.workout.findUnique({ where: { id } })
+    return await this.client.workout.findUnique({ where: { id } })
   }
 
   async findByUserAndExercise(
     userId: string,
     exerciseId: string
   ): Promise<Pick<Workout, 'id' | 'name'>[]> {
-    return await prisma.workout.findMany({
+    return await this.client.workout.findMany({
       where: {
         userId,
         archivedAt: null,
@@ -43,7 +44,7 @@ export class PrismaWorkoutsRepository implements WorkoutsRepository {
   }
 
   async findByIdWithDetails(id: string): Promise<WorkoutWithDetails | null> {
-    return await prisma.workout.findUnique({
+    return await this.client.workout.findUnique({
       where: { id },
       include: {
         exercises: {
@@ -66,7 +67,7 @@ export class PrismaWorkoutsRepository implements WorkoutsRepository {
   }
 
   async findAllByUser(userId: string) {
-    return await prisma.workout.findMany({
+    return await this.client.workout.findMany({
       where: { userId, archivedAt: null },
       include: {
         exercises: {
@@ -101,7 +102,7 @@ export class PrismaWorkoutsRepository implements WorkoutsRepository {
       ...(search && { name: { contains: search, mode: 'insensitive' } }),
     }
     const [workouts, total] = await Promise.all([
-      prisma.workout.findMany({
+      this.client.workout.findMany({
         where,
         skip: (page - 1) * pageSize,
         take: pageSize,
@@ -115,7 +116,7 @@ export class PrismaWorkoutsRepository implements WorkoutsRepository {
         },
         orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
       }),
-      prisma.workout.count({ where }),
+      this.client.workout.count({ where }),
     ])
     return { workouts, total }
   }
@@ -124,27 +125,31 @@ export class PrismaWorkoutsRepository implements WorkoutsRepository {
     id: string,
     data: { name?: string; description?: string | null }
   ): Promise<Workout> {
-    return await prisma.workout.update({
+    return await this.client.workout.update({
       where: { id, archivedAt: null },
       data,
     })
   }
 
   async delete(id: string): Promise<void> {
-    await prisma.workout.delete({
+    await this.client.workout.delete({
       where: { id },
     })
   }
 
   async archive(id: string): Promise<void> {
-    await prisma.$transaction(async (transaction) => {
+    await this.client.$transaction(async (transaction) => {
       await transaction.$queryRaw`SELECT id FROM users WHERE id = (SELECT "userId" FROM workouts WHERE id = ${id}) FOR UPDATE`
       await transaction.$queryRaw`SELECT id FROM workouts WHERE id = ${id} FOR UPDATE`
+      const workout = await transaction.workout.findUniqueOrThrow({
+        where: { id },
+      })
       await transaction.workoutSchedule.deleteMany({ where: { workoutId: id } })
       await transaction.workout.updateMany({
         where: { id, archivedAt: null },
         data: { archivedAt: new Date() },
       })
+      await scheduleStreakPlan(transaction, workout.userId)
     })
   }
 }
