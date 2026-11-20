@@ -12,11 +12,15 @@ export function fetchWorkoutSchedulesRoute(app: FastifyInstance) {
     {
       onRequest: [verifyJwt],
       schema: {
+        security: [{ bearerAuth: [] }, { cookieAuth: [] }],
         tags: ['Workouts'],
         summary: 'Fetch workout schedules',
         description: 'Returns all scheduled days for a specific workout.',
         params: fetchWorkoutSchedulesParamsSchema,
         response: {
+          401: z
+            .object({ message: z.string() })
+            .describe('Missing or invalid authentication token.'),
           200: z
             .object({
               schedules: z.array(workoutScheduleSchema),

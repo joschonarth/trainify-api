@@ -15,6 +15,7 @@ export function completeWorkoutSessionRoute(app: FastifyInstance) {
     {
       onRequest: [verifyJwt],
       schema: {
+        security: [{ bearerAuth: [] }, { cookieAuth: [] }],
         tags: ['Sessions'],
         summary: 'Complete workout session',
         description:
@@ -22,6 +23,9 @@ export function completeWorkoutSessionRoute(app: FastifyInstance) {
         params: completeWorkoutSessionParamsSchema,
         body: completeWorkoutSessionBodySchema,
         response: {
+          401: z
+            .object({ message: z.string() })
+            .describe('Missing or invalid authentication token.'),
           400: z
             .object({ message: z.string() })
             .describe('Invalid completion data.'),

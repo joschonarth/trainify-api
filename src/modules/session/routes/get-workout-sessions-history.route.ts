@@ -48,12 +48,16 @@ export function getWorkoutSessionsHistoryRoute(app: FastifyInstance) {
     {
       onRequest: [verifyJwt],
       schema: {
+        security: [{ bearerAuth: [] }, { cookieAuth: [] }],
         tags: ['Sessions'],
         summary: 'Get workout sessions history',
         description:
           'Returns a paginated workout session history with optional date, status and workout filters.',
         querystring: getWorkoutSessionsHistoryQuerySchema,
         response: {
+          401: z
+            .object({ message: z.string() })
+            .describe('Missing or invalid authentication token.'),
           200: z
             .object({
               sessions: z.array(

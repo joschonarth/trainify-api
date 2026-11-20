@@ -14,6 +14,7 @@ export function createExerciseLogSessionRoute(app: FastifyInstance) {
     {
       onRequest: [verifyJwt],
       schema: {
+        security: [{ bearerAuth: [] }, { cookieAuth: [] }],
         tags: ['Sessions'],
         summary: 'Create exercise log session',
         deprecated: true,
@@ -22,6 +23,9 @@ export function createExerciseLogSessionRoute(app: FastifyInstance) {
         params: createExerciseLogSessionParamsSchema,
         body: createExerciseLogSessionBodySchema,
         response: {
+          401: z
+            .object({ message: z.string() })
+            .describe('Missing or invalid authentication token.'),
           409: z
             .object({ message: z.string() })
             .describe('Session is outside its business day.'),

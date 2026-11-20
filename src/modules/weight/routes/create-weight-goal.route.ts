@@ -12,11 +12,15 @@ export function createWeightGoalRoute(app: FastifyInstance) {
     {
       onRequest: [verifyJwt],
       schema: {
+        security: [{ bearerAuth: [] }, { cookieAuth: [] }],
         tags: ['Weight'],
         summary: 'Create weight goal',
         description: 'Creates a new weight goal for the authenticated user.',
         body: createWeightGoalBodySchema,
         response: {
+          401: z
+            .object({ message: z.string() })
+            .describe('Missing or invalid authentication token.'),
           201: z
             .object({
               weightGoal: weightGoalSchema,

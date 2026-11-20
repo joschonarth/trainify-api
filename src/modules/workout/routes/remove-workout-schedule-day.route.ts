@@ -11,11 +11,15 @@ export function removeWorkoutScheduleDayRoute(app: FastifyInstance) {
     {
       onRequest: [verifyJwt],
       schema: {
+        security: [{ bearerAuth: [] }, { cookieAuth: [] }],
         tags: ['Workouts'],
         summary: 'Remove workout schedule day',
         description: 'Removes a scheduled day from a specific workout.',
         params: removeWorkoutScheduleDayParamsSchema,
         response: {
+          401: z
+            .object({ message: z.string() })
+            .describe('Missing or invalid authentication token.'),
           204: z.null().describe('Workout schedule day removed successfully.'),
           404: z
             .object({ message: z.string() })

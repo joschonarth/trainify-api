@@ -12,11 +12,15 @@ export function getExerciseSessionDetailsRoute(app: FastifyInstance) {
     {
       onRequest: [verifyJwt],
       schema: {
+        security: [{ bearerAuth: [] }, { cookieAuth: [] }],
         tags: ['Sessions'],
         summary: 'Get exercise session details',
         description: 'Returns the details of a specific exercise session.',
         params: getExerciseSessionDetailsParamsSchema,
         response: {
+          401: z
+            .object({ message: z.string() })
+            .describe('Missing or invalid authentication token.'),
           200: z
             .object({
               session: exerciseSessionDetailsSchema,

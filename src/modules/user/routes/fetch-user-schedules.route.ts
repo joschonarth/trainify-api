@@ -9,11 +9,11 @@ export function fetchUserSchedulesRoute(app: FastifyInstance) {
     {
       onRequest: [verifyJwt],
       schema: {
+        security: [{ bearerAuth: [] }, { cookieAuth: [] }],
         tags: ['Users'],
         summary: 'Fetch user schedules',
         description:
           'Returns the workout schedules of the authenticated user, including exercises for each day of the week.',
-        security: [{ bearerAuth: [] }],
         response: {
           200: z
             .object({

@@ -15,6 +15,7 @@ export function reorderWorkoutExercisesRoute(app: FastifyInstance) {
     {
       onRequest: [verifyJwt],
       schema: {
+        security: [{ bearerAuth: [] }, { cookieAuth: [] }],
         tags: ['Workouts'],
         summary: 'Reorder workout exercises',
         description:
@@ -22,6 +23,9 @@ export function reorderWorkoutExercisesRoute(app: FastifyInstance) {
         params: reorderWorkoutExercisesParamsSchema,
         body: reorderWorkoutExercisesBodySchema,
         response: {
+          401: z
+            .object({ message: z.string() })
+            .describe('Missing or invalid authentication token.'),
           200: z
             .object({
               exercises: z.array(

@@ -11,12 +11,16 @@ export function getUserStreakLogsRoute(app: FastifyInstance) {
     {
       onRequest: [verifyJwt],
       schema: {
+        security: [{ bearerAuth: [] }, { cookieAuth: [] }],
         tags: ['Gamification'],
         summary: 'Get user streak logs',
         description:
           'Returns the streak logs for the authenticated user. Optionally filter by date range.',
         querystring: getUserStreakLogsQuerySchema,
         response: {
+          401: z
+            .object({ message: z.string() })
+            .describe('Missing or invalid authentication token.'),
           200: z
             .object({
               logs: z.array(

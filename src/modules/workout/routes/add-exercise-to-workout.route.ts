@@ -15,6 +15,7 @@ export function addExerciseToWorkoutRoute(app: FastifyInstance) {
     {
       onRequest: [verifyJwt],
       schema: {
+        security: [{ bearerAuth: [] }, { cookieAuth: [] }],
         tags: ['Workouts'],
         summary: 'Add exercise to workout',
         description:
@@ -22,6 +23,9 @@ export function addExerciseToWorkoutRoute(app: FastifyInstance) {
         params: addExerciseToWorkoutParamsSchema,
         body: addExerciseToWorkoutBodySchema,
         response: {
+          401: z
+            .object({ message: z.string() })
+            .describe('Missing or invalid authentication token.'),
           201: z
             .object({
               workoutExercise: workoutExerciseSchema.omit({ exercise: true }),

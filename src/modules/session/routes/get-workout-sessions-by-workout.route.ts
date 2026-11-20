@@ -12,12 +12,16 @@ export function getWorkoutSessionsByWorkoutRoute(app: FastifyInstance) {
     {
       onRequest: [verifyJwt],
       schema: {
+        security: [{ bearerAuth: [] }, { cookieAuth: [] }],
         tags: ['Sessions'],
         summary: 'Get workout sessions by workout',
         description:
           'Returns sessions for an owned workout, including archived workouts. A workout without history returns an empty list and totalSessions 0. The weight field is the latest log weight, rather than a sum of weights; ties use log ID descending. Missing or unweighted logs return 0.',
         params: getWorkoutSessionsByWorkoutParamsSchema,
         response: {
+          401: z
+            .object({ message: z.string() })
+            .describe('Missing or invalid authentication token.'),
           404: z
             .object({ message: z.string() })
             .describe(

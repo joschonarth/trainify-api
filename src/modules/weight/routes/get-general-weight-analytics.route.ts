@@ -12,12 +12,16 @@ export function getGeneralWeightAnalyticsRoute(app: FastifyInstance) {
     {
       onRequest: [verifyJwt],
       schema: {
+        security: [{ bearerAuth: [] }, { cookieAuth: [] }],
         tags: ['Weight'],
         summary: 'Get general weight analytics',
         description:
           'Returns general weight analytics for the authenticated user, including data points, weekly change rate and trend direction. Optionally filter by date range.',
         querystring: getGeneralWeightAnalyticsQuerySchema,
         response: {
+          401: z
+            .object({ message: z.string() })
+            .describe('Missing or invalid authentication token.'),
           200: z
             .object({
               analytics: weightAnalyticsSchema,

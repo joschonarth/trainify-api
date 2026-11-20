@@ -14,6 +14,7 @@ export function getExerciseProgressRoute(app: FastifyInstance) {
     {
       onRequest: [verifyJwt],
       schema: {
+        security: [{ bearerAuth: [] }, { cookieAuth: [] }],
         tags: ['Exercises'],
         summary: 'Get exercise progress',
         description:
@@ -21,6 +22,9 @@ export function getExerciseProgressRoute(app: FastifyInstance) {
         params: getExerciseProgressParamsSchema,
         querystring: getExerciseProgressQuerySchema,
         response: {
+          401: z
+            .object({ message: z.string() })
+            .describe('Missing or invalid authentication token.'),
           200: z
             .object({
               exerciseId: z.string().describe('Exercise ID.'),

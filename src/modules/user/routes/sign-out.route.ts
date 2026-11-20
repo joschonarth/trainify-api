@@ -9,6 +9,7 @@ export function signOutRoute(app: FastifyInstance) {
     {
       onRequest: [verifyJwt],
       schema: {
+        security: [{ bearerAuth: [] }, { cookieAuth: [] }],
         tags: ['Users'],
         summary: 'Sign out',
         description:

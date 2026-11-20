@@ -10,11 +10,15 @@ export function getUserMetricsRoute(app: FastifyInstance) {
     {
       onRequest: [verifyJwt],
       schema: {
+        security: [{ bearerAuth: [] }, { cookieAuth: [] }],
         tags: ['Metrics'],
         summary: 'Get user metrics',
         description:
           'Returns overall fitness metrics for the authenticated user, including total workouts, exercises and workout duration.',
         response: {
+          401: z
+            .object({ message: z.string() })
+            .describe('Missing or invalid authentication token.'),
           200: z
             .object({
               metrics: z.object({

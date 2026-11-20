@@ -11,12 +11,16 @@ export function deleteWorkoutRoute(app: FastifyInstance) {
     {
       onRequest: [verifyJwt],
       schema: {
+        security: [{ bearerAuth: [] }, { cookieAuth: [] }],
         tags: ['Workouts'],
         summary: 'Delete workout',
         description:
           'Archives a workout owned by the authenticated user while preserving its session history.',
         params: deleteWorkoutParamsSchema,
         response: {
+          401: z
+            .object({ message: z.string() })
+            .describe('Missing or invalid authentication token.'),
           204: z.null().describe('Workout deleted successfully.'),
           404: z.object({ message: z.string() }).describe('Workout not found.'),
         },

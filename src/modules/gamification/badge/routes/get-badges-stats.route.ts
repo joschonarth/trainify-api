@@ -17,11 +17,15 @@ export function getBadgesStatsRoute(app: FastifyInstance) {
     {
       onRequest: [verifyJwt],
       schema: {
+        security: [{ bearerAuth: [] }, { cookieAuth: [] }],
         tags: ['Gamification'],
         summary: 'Get badges stats',
         description:
           'Returns badge unlock statistics for the authenticated user, both overall and broken down by badge type.',
         response: {
+          401: z
+            .object({ message: z.string() })
+            .describe('Missing or invalid authentication token.'),
           200: z
             .object({
               stats: z.object({

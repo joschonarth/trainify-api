@@ -10,11 +10,15 @@ export function getWeeklyWorkoutCalendarRoute(app: FastifyInstance) {
     {
       onRequest: [verifyJwt],
       schema: {
+        security: [{ bearerAuth: [] }, { cookieAuth: [] }],
         tags: ['Sessions'],
         summary: 'Get weekly workout calendar',
         description:
           'Returns the workout completion status for each day of the current week for the authenticated user.',
         response: {
+          401: z
+            .object({ message: z.string() })
+            .describe('Missing or invalid authentication token.'),
           200: z
             .object({
               week: z.array(

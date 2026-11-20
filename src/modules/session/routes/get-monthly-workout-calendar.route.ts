@@ -12,12 +12,16 @@ export function getMonthlyWorkoutCalendarRoute(app: FastifyInstance) {
     {
       onRequest: [verifyJwt],
       schema: {
+        security: [{ bearerAuth: [] }, { cookieAuth: [] }],
         tags: ['Sessions'],
         summary: 'Get monthly workout calendar',
         description:
           'Returns the workout completion status for each day of a given month. Defaults to the current month if no parameters are provided.',
         querystring: getMonthlyWorkoutCalendarQuerySchema,
         response: {
+          401: z
+            .object({ message: z.string() })
+            .describe('Missing or invalid authentication token.'),
           200: z
             .object({
               days: z.array(calendarDaySchema),

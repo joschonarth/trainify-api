@@ -12,12 +12,16 @@ export function fetchExercisesCatalogRoute(app: FastifyInstance) {
     {
       onRequest: [verifyJwt],
       schema: {
+        security: [{ bearerAuth: [] }, { cookieAuth: [] }],
         tags: ['Exercises'],
         summary: 'Fetch exercises catalog',
         description:
           'Returns active global catalog exercises only. The catalog may be empty, in which case exercises is an empty array. Supports filtering by name and category, with pagination.',
         querystring: fetchExercisesCatalogQuerySchema,
         response: {
+          401: z
+            .object({ message: z.string() })
+            .describe('Missing or invalid authentication token.'),
           200: z
             .object({
               exercises: z.array(exerciseSchema),

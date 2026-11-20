@@ -11,12 +11,16 @@ export function deleteWeightGoalRoute(app: FastifyInstance) {
     {
       onRequest: [verifyJwt],
       schema: {
+        security: [{ bearerAuth: [] }, { cookieAuth: [] }],
         tags: ['Weight'],
         summary: 'Delete weight goal',
         description:
           'Deletes a specific weight goal for the authenticated user.',
         params: deleteWeightGoalParamsSchema,
         response: {
+          401: z
+            .object({ message: z.string() })
+            .describe('Missing or invalid authentication token.'),
           204: z.null().describe('Weight goal deleted successfully.'),
           404: z
             .object({ message: z.string() })

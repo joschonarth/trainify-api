@@ -12,12 +12,16 @@ export function updateUserProfileRoute(app: FastifyInstance) {
     {
       onRequest: [verifyJwt],
       schema: {
+        security: [{ bearerAuth: [] }, { cookieAuth: [] }],
         tags: ['Users'],
         summary: 'Update user profile',
         description:
           'Updates the authenticated user profile data. All fields are optional — only provided fields will be updated.',
         body: updateUserProfileBodySchema,
         response: {
+          401: z
+            .object({ message: z.string() })
+            .describe('Missing or invalid authentication token.'),
           200: userProfileSchema.describe('Profile updated successfully.'),
           404: z
             .object({

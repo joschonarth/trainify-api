@@ -11,11 +11,15 @@ export function removeExerciseFromWorkoutRoute(app: FastifyInstance) {
     {
       onRequest: [verifyJwt],
       schema: {
+        security: [{ bearerAuth: [] }, { cookieAuth: [] }],
         tags: ['Workouts'],
         summary: 'Remove exercise from workout',
         description: 'Removes an exercise from a specific workout.',
         params: removeExerciseFromWorkoutParamsSchema,
         response: {
+          401: z
+            .object({ message: z.string() })
+            .describe('Missing or invalid authentication token.'),
           204: z.null().describe('Exercise removed from workout successfully.'),
           404: z
             .object({ message: z.string() })

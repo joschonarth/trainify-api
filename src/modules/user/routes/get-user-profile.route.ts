@@ -10,11 +10,11 @@ export function getUserProfileRoute(app: FastifyInstance) {
     {
       onRequest: [verifyJwt],
       schema: {
+        security: [{ bearerAuth: [] }, { cookieAuth: [] }],
         tags: ['Users'],
         summary: 'Get authenticated user profile',
         description:
           'Returns the profile data of the currently authenticated user. Requires a valid JWT token.',
-        security: [{ bearerAuth: [] }],
         response: {
           200: z
             .object({
