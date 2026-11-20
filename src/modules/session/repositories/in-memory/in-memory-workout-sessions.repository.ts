@@ -21,6 +21,30 @@ export class InMemoryWorkoutSessionsRepository
   dailyIdentities: DailyWorkoutSession[] = []
   private queue: Promise<unknown> = Promise.resolve()
 
+  findHistoryByUser(
+    query: Parameters<WorkoutSessionsRepository['findHistoryByUser']>[0]
+  ): ReturnType<WorkoutSessionsRepository['findHistoryByUser']> {
+    const matches = this.historyItems
+      .filter(
+        (session) =>
+          session.userId === query.userId &&
+          (!query.workoutId || session.workoutId === query.workoutId) &&
+          (!query.status || session.status === query.status) &&
+          (!query.from || session.date >= query.from) &&
+          (!query.to || session.date <= query.to)
+      )
+      .sort((a, b) => b.date.getTime() - a.date.getTime())
+    return Promise.resolve({
+      total: matches.length,
+      sessions: matches
+        .slice(query.skip, query.skip + query.take)
+        .map((session) => ({
+          ...session,
+          workout: { ...session.workout, exercises: [] },
+        })),
+    })
+  }
+
   findManyByWorkoutId(workoutId: string, userId: string) {
     return Promise.resolve(
       this.historyItems.filter(
@@ -28,6 +52,21 @@ export class InMemoryWorkoutSessionsRepository
           session.workoutId === workoutId && session.userId === userId
       )
     )
+  }
+
+  findByUserAndDateRange(userId: string, start: Date, end: Date) {
+    return Promise.resolve(
+      this.items
+        .filter(
+          (item) =>
+            item.userId === userId && item.date >= start && item.date <= end
+        )
+        .map(({ id, date, status }) => ({ id, date, status }))
+    )
+  }
+
+  findByIdWithWorkoutAndExerciseSessions(id: string) {
+    return Promise.resolve(this.details.get(id) ?? null)
   }
 
   findById(id: string) {

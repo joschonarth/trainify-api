@@ -22,7 +22,10 @@ interface GetWeeklyWorkoutCalendarResponse {
 
 export class GetWeeklyWorkoutCalendarUseCase {
   constructor(
-    private readonly workoutSessionsRepository: WorkoutSessionsRepository,
+    private readonly workoutSessionsRepository: Pick<
+      WorkoutSessionsRepository,
+      'findByUserAndDateRange'
+    >,
     private readonly usersRepository: Pick<UsersRepository, 'findById'>
   ) {}
 
