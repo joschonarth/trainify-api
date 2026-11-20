@@ -13,6 +13,17 @@ export interface ExercisesRepository {
     category: ExerciseCategory | null,
     page: number
   ): Promise<Exercise[]>
+  findGlobalById(
+    id: string,
+    includeArchived?: boolean
+  ): Promise<Exercise | null>
+  findAllGlobalsForAdmin(options: {
+    query: string
+    category: ExerciseCategory | null
+    status: 'active' | 'archived' | 'all'
+    page: number
+  }): Promise<Exercise[]>
+  findGlobalByName(name: string, excludeId?: string): Promise<Exercise | null>
   findByNameAndUser(
     name: string,
     userId: string,

@@ -54,6 +54,54 @@ export class PrismaExercisesRepository implements ExercisesRepository {
     })
   }
 
+  async findGlobalById(id: string, includeArchived = false) {
+    return await prisma.exercise.findFirst({
+      where: {
+        id,
+        userId: null,
+        isCustom: false,
+        ...(!includeArchived && { archivedAt: null }),
+      },
+    })
+  }
+
+  async findAllGlobalsForAdmin({
+    query,
+    category,
+    status,
+    page,
+  }: {
+    query: string
+    category: ExerciseCategory | null
+    status: 'active' | 'archived' | 'all'
+    page: number
+  }) {
+    return await prisma.exercise.findMany({
+      where: {
+        userId: null,
+        isCustom: false,
+        ...(status === 'active' && { archivedAt: null }),
+        ...(status === 'archived' && { archivedAt: { not: null } }),
+        ...(query && { name: { contains: query, mode: 'insensitive' } }),
+        ...(category && { category }),
+      },
+      take: 10,
+      skip: (page - 1) * 10,
+      orderBy: [{ name: 'asc' }, { id: 'asc' }],
+    })
+  }
+
+  async findGlobalByName(name: string, excludeId?: string) {
+    return await prisma.exercise.findFirst({
+      where: {
+        userId: null,
+        isCustom: false,
+        name: { equals: name, mode: 'insensitive' },
+        ...(excludeId && { id: { not: excludeId } }),
+      },
+    })
+  }
+
   async findByNameAndUser(
     name: string,
     userId: string,
