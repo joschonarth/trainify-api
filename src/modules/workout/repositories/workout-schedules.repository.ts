@@ -28,7 +28,7 @@ export interface WorkoutSchedulesRepository {
     workoutId: string,
     userId: string,
     daysOfWeek: number[]
-  ): Promise<void>
+  ): Promise<boolean>
   assignDaysToWorkout(
     data: Prisma.WorkoutScheduleCreateManyInput[]
   ): Promise<void>
@@ -39,6 +39,6 @@ export interface WorkoutSchedulesRepository {
     userId: string,
     dayOfWeek: number
   ): Promise<WorkoutScheduleWithWorkout | null>
-  updateDay(id: string, dayOfWeek: number): Promise<WorkoutSchedule>
+  updateDay(id: string, dayOfWeek: number): Promise<WorkoutSchedule | null>
   delete(id: string): Promise<void>
 }

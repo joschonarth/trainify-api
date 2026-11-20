@@ -14,8 +14,17 @@ export class PrismaWorkoutSchedulesRepository
     workoutId: string,
     userId: string,
     daysOfWeek: number[]
-  ): Promise<void> {
-    await prisma.$transaction(async (transaction) => {
+  ): Promise<boolean> {
+    return await prisma.$transaction(async (transaction) => {
+      await transaction.$queryRaw`SELECT id FROM users WHERE id = ${userId} FOR UPDATE`
+      await transaction.$queryRaw`SELECT id FROM workouts WHERE id = ${workoutId} AND "userId" = ${userId} FOR UPDATE`
+      const active = await transaction.workout.findFirst({
+        where: { id: workoutId, userId, archivedAt: null },
+        select: { id: true },
+      })
+      if (!active) {
+        return false
+      }
       const conflicts = await transaction.workoutSchedule.findMany({
         where: {
           userId,
@@ -38,6 +47,7 @@ export class PrismaWorkoutSchedulesRepository
           })),
         })
       }
+      return true
     })
   }
 
@@ -86,10 +96,29 @@ export class PrismaWorkoutSchedulesRepository
     })
   }
 
-  async updateDay(id: string, dayOfWeek: number): Promise<WorkoutSchedule> {
-    return await prisma.workoutSchedule.update({
-      where: { id },
-      data: { dayOfWeek },
+  async updateDay(
+    id: string,
+    dayOfWeek: number
+  ): Promise<WorkoutSchedule | null> {
+    return await prisma.$transaction(async (transaction) => {
+      const original = await transaction.workoutSchedule.findUnique({
+        where: { id },
+      })
+      if (!original) {
+        return null
+      }
+      await transaction.$queryRaw`SELECT id FROM users WHERE id = ${original.userId} FOR UPDATE`
+      await transaction.$queryRaw`SELECT id FROM workouts WHERE id = ${original.workoutId} FOR UPDATE`
+      const schedule = await transaction.workoutSchedule.findFirst({
+        where: { id, workout: { archivedAt: null } },
+      })
+      if (!schedule) {
+        return null
+      }
+      return await transaction.workoutSchedule.update({
+        where: { id },
+        data: { dayOfWeek },
+      })
     })
   }
 

@@ -138,6 +138,8 @@ export class PrismaWorkoutsRepository implements WorkoutsRepository {
 
   async archive(id: string): Promise<void> {
     await prisma.$transaction(async (transaction) => {
+      await transaction.$queryRaw`SELECT id FROM users WHERE id = (SELECT "userId" FROM workouts WHERE id = ${id}) FOR UPDATE`
+      await transaction.$queryRaw`SELECT id FROM workouts WHERE id = ${id} FOR UPDATE`
       await transaction.workoutSchedule.deleteMany({ where: { workoutId: id } })
       await transaction.workout.updateMany({
         where: { id, archivedAt: null },

@@ -51,7 +51,7 @@ export class UpdateWorkoutScheduleDayUseCase {
       )
     }
 
-    let updatedSchedule: WorkoutSchedule
+    let updatedSchedule: WorkoutSchedule | null
     try {
       updatedSchedule = await this.workoutSchedulesRepository.updateDay(
         scheduleId,
@@ -71,6 +71,9 @@ export class UpdateWorkoutScheduleDayUseCase {
       throw error
     }
 
+    if (!updatedSchedule) {
+      throw new ResourceNotFoundError('Schedule not found for this workout.')
+    }
     return { schedule: updatedSchedule }
   }
 }
