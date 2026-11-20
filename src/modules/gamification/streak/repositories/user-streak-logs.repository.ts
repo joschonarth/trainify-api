@@ -11,6 +11,16 @@ export interface UserStreakLogsRepository {
     startDate: Date,
     endDate: Date
   ): Promise<UserStreakLog[]>
+  findByBusinessDateRange(
+    userId: string,
+    start: string,
+    end: string
+  ): Promise<UserStreakLog[]>
+  assignBusinessDate(id: string, businessDate: string): Promise<UserStreakLog>
   findAllByUser(userId: string): Promise<UserStreakLog[]>
-  create(data: { userId: string; date: Date }): Promise<UserStreakLog>
+  create(data: {
+    userId: string
+    date: Date
+    businessDate?: string
+  }): Promise<UserStreakLog>
 }

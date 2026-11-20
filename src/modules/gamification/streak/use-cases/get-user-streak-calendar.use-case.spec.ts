@@ -128,4 +128,14 @@ describe('Get user streak calendar', () => {
     )
     expect(logs.items).toHaveLength(0)
   })
+  it('keeps a credited calendar day after moving to another timezone', async () => {
+    await logs.create({
+      userId: 'user',
+      date: new Date('2026-05-31T10:00:00Z'),
+      businessDate: '2026-06-01',
+    })
+    await users.update('user', { timezone: 'America/Los_Angeles' })
+    const { days } = await sut.execute({ userId: 'user', year: 2026, month: 6 })
+    expect(days[0]).toEqual({ date: '2026-06-01', completed: true })
+  })
 })

@@ -15,9 +15,12 @@ export function stopExerciseTimerRoute(app: FastifyInstance) {
         tags: ['Sessions'],
         summary: 'Stop exercise timer',
         description:
-          'Stops a timer on an unfinished exercise in an active workout session. Repeated stops preserve the original timestamps and duration without writing.',
+          'Stops a timer on an unfinished exercise in an active workout session. Repeated stops preserve the original timestamps and duration without writing. New execution is allowed only on the session business day in its captured timezone; expired or future sessions return 409. Earlier sessions without a daily identity use their date in America/Sao_Paulo.',
         params: stopExerciseTimerParamsSchema,
         response: {
+          409: z
+            .object({ message: z.string() })
+            .describe('Session is outside its business day.'),
           200: z
             .object({
               exerciseSession: exerciseTimerSessionSchema,

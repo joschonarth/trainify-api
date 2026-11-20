@@ -15,7 +15,7 @@ export function finishWorkoutSessionRoute(app: FastifyInstance) {
         tags: ['Sessions'],
         summary: 'Finish workout session',
         description:
-          'Marks a workout session as finished and records the end time and duration.',
+          'Marks a workout session as finished and records the end time and duration. New execution is allowed only on the session business day in its captured timezone; expired or future sessions return 409. Earlier sessions without a daily identity use their date in America/Sao_Paulo.',
         params: finishWorkoutSessionParamsSchema,
         response: {
           200: z

@@ -3,6 +3,7 @@ import type { ExerciseSessionsRepository } from '@/modules/session/repositories/
 import type { WorkoutSessionsRepository } from '@/modules/session/repositories/workout-sessions.repository'
 import { NotAllowedError } from '@/shared/errors/not-allowed.error'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
+import { assertSessionBusinessDay } from '../utils/session-business-day'
 
 interface CompleteExerciseSessionUseCaseRequest {
   userId: string
@@ -45,6 +46,8 @@ export class CompleteExerciseSessionUseCase {
         'Exercises can only be completed while the workout session is in progress.'
       )
     }
+
+    assertSessionBusinessDay(workoutSession)
 
     if (exerciseSession.logs.length === 0) {
       throw new NotAllowedError(

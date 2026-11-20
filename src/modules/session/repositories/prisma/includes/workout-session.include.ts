@@ -1,6 +1,7 @@
 import type { Prisma } from 'generated/prisma'
 
 export const workoutSessionInclude = {
+  dailyIdentity: true,
   workout: {
     include: {
       exercises: {

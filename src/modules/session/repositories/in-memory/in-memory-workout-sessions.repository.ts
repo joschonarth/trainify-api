@@ -74,11 +74,29 @@ export class InMemoryWorkoutSessionsRepository
   }
 
   findByIdWithWorkoutAndExerciseSessions(id: string) {
-    return Promise.resolve(this.details.get(id) ?? null)
+    const item = this.details.get(id)
+    return Promise.resolve(
+      item
+        ? {
+            ...item,
+            dailyIdentity:
+              this.dailyIdentities.find((day) => day.sessionId === id) ?? null,
+          }
+        : null
+    )
   }
 
   findById(id: string) {
-    return Promise.resolve(this.items.find((item) => item.id === id) ?? null)
+    const item = this.items.find((session) => session.id === id)
+    return Promise.resolve(
+      item
+        ? {
+            ...item,
+            dailyIdentity:
+              this.dailyIdentities.find((day) => day.sessionId === id) ?? null,
+          }
+        : null
+    )
   }
 
   resolveDailySession(

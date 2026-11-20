@@ -5,6 +5,7 @@ import type { WorkoutSessionsRepository } from '@/modules/session/repositories/w
 import { NotAllowedError } from '@/shared/errors/not-allowed.error'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 import { calculateVolume } from '@/shared/utils/calculate-volume'
+import { assertSessionBusinessDay } from '../utils/session-business-day'
 
 interface CreateExerciseLogSessionUseCaseRequest {
   userId: string
@@ -54,6 +55,11 @@ export class CreateExerciseLogSessionUseCase {
       throw new NotAllowedError(
         'Exercise logs can only be added while the workout session is in progress.'
       )
+    }
+
+    assertSessionBusinessDay(session)
+    if (date) {
+      assertSessionBusinessDay(session, date)
     }
 
     const exerciseSession = session.exerciseSessions.find(

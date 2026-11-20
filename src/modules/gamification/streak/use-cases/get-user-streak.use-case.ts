@@ -1,6 +1,7 @@
 import type { UserStreaksRepository } from '@/modules/gamification/streak/repositories/user-streaks.repository'
 import type { UsersRepository } from '@/modules/user/repositories/users.repository'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
+import { activityDate } from '../utils/activity-business-day'
 import { getEffectiveStreak } from '../utils/get-effective-streak'
 
 interface GetUserStreakUseCaseResponse {
@@ -27,7 +28,15 @@ export class GetUserStreakUseCase {
     return {
       currentStreak: getEffectiveStreak(
         streak?.currentStreak ?? 0,
-        streak?.lastWorkout ?? null,
+        streak?.lastBusinessDate
+          ? activityDate(
+              {
+                date: streak.lastWorkout ?? new Date(),
+                businessDate: streak.lastBusinessDate,
+              },
+              user.timezone
+            )
+          : (streak?.lastWorkout ?? null),
         new Date(),
         user.timezone
       ),

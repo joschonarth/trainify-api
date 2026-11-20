@@ -1,10 +1,9 @@
 import { WorkoutSessionStatus } from 'generated/prisma'
-
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
-
 import { WorkoutSessionAlreadyCompletedError } from '../errors/workout-session-already-completed.error'
 import { WorkoutSessionNotStartedError } from '../errors/workout-session-not-started.error'
 import type { WorkoutSessionsRepository } from '../repositories/workout-sessions.repository'
+import { assertSessionBusinessDay } from '../utils/session-business-day'
 
 interface FinishWorkoutSessionRequest {
   sessionId: string
@@ -46,6 +45,8 @@ export class FinishWorkoutSessionUseCase {
         'Workout session has already been finished.'
       )
     }
+
+    assertSessionBusinessDay(session)
 
     const endedAt = new Date()
 

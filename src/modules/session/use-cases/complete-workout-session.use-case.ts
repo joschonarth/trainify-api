@@ -11,6 +11,10 @@ import type {
   SessionCompletionUnitOfWork,
 } from '../repositories/session-completion-unit-of-work'
 import type { WorkoutSessionsRepository } from '../repositories/workout-sessions.repository'
+import {
+  assertSessionBusinessDay,
+  getSessionBusinessDay,
+} from '../utils/session-business-day'
 
 interface CompleteWorkoutSessionRequest {
   userId: string
@@ -156,10 +160,19 @@ export class CompleteWorkoutSessionUseCase {
         anyExerciseCompleted: completion.hasActivity,
         logDate: completion.completedAt,
         isRetry: true,
+        creditDay:
+          completion.businessDate && completion.timezone
+            ? {
+                businessDate: completion.businessDate,
+                timezone: completion.timezone,
+              }
+            : undefined,
       }
     }
 
     this.assertSessionCanBeCompleted(session)
+    const now = new Date()
+    assertSessionBusinessDay(session, now)
 
     const exerciseSessions =
       await repositories.exerciseSessions.findByWorkoutSessionId(sessionId)
@@ -185,7 +198,6 @@ export class CompleteWorkoutSessionUseCase {
       }
     }
 
-    const now = new Date()
     const processedExerciseSessionIds = new Set<string>()
     const exerciseSessionIdsWithLogs = new Set(
       exerciseSessions
@@ -239,6 +251,7 @@ export class CompleteWorkoutSessionUseCase {
       sessionId,
       completedAt: now,
       hasActivity: anyExerciseCompleted,
+      ...getSessionBusinessDay(session),
     })
 
     return {
@@ -246,6 +259,7 @@ export class CompleteWorkoutSessionUseCase {
       anyExerciseCompleted,
       logDate: now,
       isRetry: false,
+      creditDay: getSessionBusinessDay(session),
     }
   }
 
@@ -262,6 +276,7 @@ export class CompleteWorkoutSessionUseCase {
         userId: request.userId,
         logDate: result.logDate,
         recoverOriginalCompletion: result.isRetry,
+        ...(result.creditDay ? { creditDay: result.creditDay } : {}),
       })
     }
 

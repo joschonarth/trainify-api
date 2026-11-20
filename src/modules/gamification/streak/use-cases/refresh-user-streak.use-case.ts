@@ -1,5 +1,9 @@
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 import type { StreakUnitOfWork } from '../repositories/streak-unit-of-work'
+import {
+  activityBusinessDate,
+  activityDate,
+} from '../utils/activity-business-day'
 import { rebuildStreak } from '../utils/rebuild-streak'
 
 interface RefreshUserStreakUseCaseRequest {
@@ -28,17 +32,23 @@ export class RefreshUserStreakUseCase {
         const streak = await streaks.findByUserId(userId)
         const activity = await logs.findAllByUser(userId)
         const response = rebuildStreak(
-          activity.map((log) => log.date),
+          activity.map((log) => activityDate(log, user.timezone)),
           user.timezone,
           new Date(),
           streak?.bestStreak ?? 0
         )
+        const lastBusinessDate =
+          activity
+            .map((log) => activityBusinessDate(log, user.timezone))
+            .sort()
+            .at(-1) ?? null
         if (streak) {
-          await streaks.update(streak.id, response)
+          await streaks.update(streak.id, { ...response, lastBusinessDate })
         } else {
           await streaks.create({
             user: { connect: { id: userId } },
             ...response,
+            lastBusinessDate,
           })
         }
         return response
