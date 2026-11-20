@@ -1,5 +1,6 @@
 import type { WeightGoal } from 'generated/prisma'
 
+import { NotAllowedError } from '@/shared/errors/not-allowed.error'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
 import { WeightGoalNotAchievedError } from '../errors/weight-goal-not-achieved.error'
@@ -29,12 +30,38 @@ export class AchieveWeightGoalUseCase {
         throw new ResourceNotFoundError('Weight goal not found')
       }
 
-      const latestLog = await repositories.logs.findLatestByUserId(userId)
-      if (!latestLog) {
-        throw new ResourceNotFoundError('No weight logs found for user')
+      if (goal.achievedAt) {
+        return {
+          weightGoal: { ...goal, progress: 100 },
+          progress: 100,
+        }
       }
 
-      const progress = calculateWeightGoalProgress(goal, latestLog.weight)
+      if (!goal.isActive) {
+        throw new NotAllowedError('Cannot achieve an inactive weight goal.')
+      }
+
+      const logs = await repositories.logs.findByGoalId(goal.id)
+      const minimumLogCount = goal.goalType === 'MAINTAIN' ? 2 : 1
+
+      if (logs.length < minimumLogCount) {
+        throw new WeightGoalNotAchievedError(
+          'Not enough weight logs to achieve this goal.'
+        )
+      }
+
+      const latestLog = await repositories.logs.findLatestByGoalId(goal.id)
+      if (!latestLog) {
+        throw new WeightGoalNotAchievedError(
+          'Not enough weight logs to achieve this goal.'
+        )
+      }
+
+      const progress = calculateWeightGoalProgress(
+        goal,
+        latestLog.weight,
+        goal.goalType === 'MAINTAIN' ? logs : []
+      )
 
       if (progress < 100) {
         throw new WeightGoalNotAchievedError('Weight goal not yet achieved.')
