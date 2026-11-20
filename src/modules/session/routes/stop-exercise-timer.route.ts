@@ -3,7 +3,7 @@ import { z } from 'zod'
 
 import { verifyJwt } from '@/shared/middlewares/verify-jwt'
 import { stopExerciseTimerController } from '../controllers/stop-exercise-timer.controller'
-import { exerciseTimerSessionSchema } from '../schemas/session.schema'
+import { exerciseTimerSessionSchema } from '../schemas/exercise-session.schema'
 import { stopExerciseTimerParamsSchema } from '../schemas/stop-exercise-timer.schema'
 
 export function stopExerciseTimerRoute(app: FastifyInstance) {

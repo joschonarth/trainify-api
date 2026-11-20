@@ -3,8 +3,8 @@ import { z } from 'zod'
 
 import { verifyJwt } from '@/shared/middlewares/verify-jwt'
 import { startWorkoutSessionController } from '../controllers/start-workout-session.controller'
-import { baseSessionSchema } from '../schemas/session.schema'
 import { startWorkoutSessionParamsSchema } from '../schemas/start-workout-session.schema'
+import { baseSessionSchema } from '../schemas/workout-session.schema'
 
 export function startWorkoutSessionRoute(app: FastifyInstance) {
   app.post(

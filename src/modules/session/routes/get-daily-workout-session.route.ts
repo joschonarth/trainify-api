@@ -3,7 +3,7 @@ import { z } from 'zod'
 
 import { verifyJwt } from '@/shared/middlewares/verify-jwt'
 import { getDailyWorkoutSessionController } from '../controllers/get-daily-workout-session.controller'
-import { sessionWithWorkoutSchema } from '../schemas/session.schema'
+import { sessionWithWorkoutSchema } from '../schemas/workout-session.schema'
 
 export function getDailyWorkoutSessionRoute(app: FastifyInstance) {
   app.get(

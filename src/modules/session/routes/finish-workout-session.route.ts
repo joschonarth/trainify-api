@@ -4,7 +4,7 @@ import { z } from 'zod'
 import { verifyJwt } from '@/shared/middlewares/verify-jwt'
 import { finishWorkoutSessionController } from '../controllers/finish-workout-session.controller'
 import { finishWorkoutSessionParamsSchema } from '../schemas/finish-workout-session.schema'
-import { baseSessionSchema } from '../schemas/session.schema'
+import { baseSessionSchema } from '../schemas/workout-session.schema'
 
 export function finishWorkoutSessionRoute(app: FastifyInstance) {
   app.post(

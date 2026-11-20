@@ -7,7 +7,7 @@ import { compareWorkoutsQuerySchema } from '../schemas/compare-workouts.schema'
 import {
   periodDifferencesSchema,
   periodSummarySchema,
-} from '../schemas/session.schema'
+} from '../schemas/session-comparison.schema'
 
 export function compareWorkoutsRoute(app: FastifyInstance) {
   app.get(

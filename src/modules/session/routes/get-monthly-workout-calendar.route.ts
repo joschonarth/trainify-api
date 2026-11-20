@@ -4,7 +4,7 @@ import { z } from 'zod'
 import { verifyJwt } from '@/shared/middlewares/verify-jwt'
 import { getMonthlyWorkoutCalendarController } from '../controllers/get-monthly-workout-calendar.controller'
 import { getMonthlyWorkoutCalendarQuerySchema } from '../schemas/get-monthly-workout-calendar.schema'
-import { calendarDaySchema } from '../schemas/session.schema'
+import { calendarDaySchema } from '../schemas/session-calendar.schema'
 
 export function getMonthlyWorkoutCalendarRoute(app: FastifyInstance) {
   app.get(
