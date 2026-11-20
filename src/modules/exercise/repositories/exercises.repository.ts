@@ -24,6 +24,7 @@ export interface ExercisesRepository {
     page: number
   }): Promise<Exercise[]>
   findGlobalByName(name: string, excludeId?: string): Promise<Exercise | null>
+  setGlobalArchived(exerciseId: string, archived: boolean): Promise<boolean>
   findByNameAndUser(
     name: string,
     userId: string,

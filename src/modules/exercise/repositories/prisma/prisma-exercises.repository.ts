@@ -102,6 +102,27 @@ export class PrismaExercisesRepository implements ExercisesRepository {
     })
   }
 
+  async setGlobalArchived(
+    exerciseId: string,
+    archived: boolean
+  ): Promise<boolean> {
+    return await prisma.$transaction(async (transaction) => {
+      const rows = await transaction.$queryRaw<Array<{ id: string }>>`
+        SELECT id FROM exercises
+        WHERE id = ${exerciseId} AND user_id IS NULL AND is_custom = false
+        FOR UPDATE
+      `
+      if (rows.length === 0) {
+        return false
+      }
+      await transaction.exercise.update({
+        where: { id: exerciseId },
+        data: { archivedAt: archived ? new Date() : null },
+      })
+      return true
+    })
+  }
+
   async findByNameAndUser(
     name: string,
     userId: string,
