@@ -19,6 +19,7 @@ model User {
   exerciseLog ExerciseLog[]
   workout     Workout[]
   sessions    WorkoutSession[]
+  dailySessions DailyWorkoutSession[]
 
   streak UserStreak?
 

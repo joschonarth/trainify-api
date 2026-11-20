@@ -60,7 +60,20 @@ export interface WorkoutSessionWithWorkout extends WorkoutSession {
   }[]
 }
 
+export interface DailySessionRequest {
+  userId: string
+  businessDate: string
+  timezone: string
+  start: Date
+  end: Date
+}
+
 export interface WorkoutSessionsRepository {
+  resolveDailySession(
+    request: DailySessionRequest,
+    create?: Prisma.WorkoutSessionUncheckedCreateInput
+  ): Promise<WorkoutSessionWithWorkout | null>
+
   findById(id: string): Promise<WorkoutSession | null>
 
   findByUserAndDate(

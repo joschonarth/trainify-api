@@ -8,6 +8,7 @@ import type {
 import type { UsersRepository } from '@/modules/user/repositories/users.repository'
 import type { WorkoutSchedulesRepository } from '@/modules/workout/repositories/workout-schedules.repository'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
+import { getZonedDayRange } from '@/shared/utils/date-timezone'
 
 dayjs.extend(utc)
 dayjs.extend(timezonePlugin)
@@ -22,8 +23,14 @@ interface GetDailyWorkoutSessionResponse {
 
 export class GetDailyWorkoutSessionUseCase {
   constructor(
-    private readonly workoutSessionsRepository: WorkoutSessionsRepository,
-    private readonly workoutSchedulesRepository: WorkoutSchedulesRepository,
+    private readonly workoutSessionsRepository: Pick<
+      WorkoutSessionsRepository,
+      'resolveDailySession'
+    >,
+    private readonly workoutSchedulesRepository: Pick<
+      WorkoutSchedulesRepository,
+      'findByUserAndDay'
+    >,
     private readonly usersRepository: Pick<UsersRepository, 'findById'>
   ) {}
 
@@ -38,24 +45,16 @@ export class GetDailyWorkoutSessionUseCase {
     const today = new Date()
     const userToday = dayjs(today).tz(user.timezone)
 
+    const dailyRequest = {
+      userId,
+      businessDate: userToday.format('YYYY-MM-DD'),
+      timezone: user.timezone,
+      ...getZonedDayRange(today, user.timezone),
+    }
     const existingSession =
-      await this.workoutSessionsRepository.findByUserAndDate(
-        userId,
-        today,
-        user.timezone
-      )
-
+      await this.workoutSessionsRepository.resolveDailySession(dailyRequest)
     if (existingSession) {
-      const detailedSession =
-        await this.workoutSessionsRepository.findByIdWithWorkout(
-          existingSession.id
-        )
-
-      if (!detailedSession) {
-        throw new ResourceNotFoundError('Workout session not found.')
-      }
-
-      return { session: detailedSession }
+      return { session: existingSession }
     }
 
     const schedule = await this.workoutSchedulesRepository.findByUserAndDay(
@@ -78,24 +77,22 @@ export class GetDailyWorkoutSessionUseCase {
       )
     }
 
-    const newSession = await this.workoutSessionsRepository.create({
-      userId,
-      workoutId: workout.id,
-      date: today,
-      status: 'PENDING',
-      exerciseSessions: {
-        create: activeExercises.map((we) => ({
-          exerciseId: we.exercise.id,
-          position: we.position,
-          plannedSets: we.defaultSets,
-          plannedReps: we.defaultReps,
-          plannedWeight: we.defaultWeight,
-        })),
-      },
-    })
-
     const detailedSession =
-      await this.workoutSessionsRepository.findByIdWithWorkout(newSession.id)
+      await this.workoutSessionsRepository.resolveDailySession(dailyRequest, {
+        userId,
+        workoutId: workout.id,
+        date: today,
+        status: 'PENDING',
+        exerciseSessions: {
+          create: activeExercises.map((we) => ({
+            exerciseId: we.exercise.id,
+            position: we.position,
+            plannedSets: we.defaultSets,
+            plannedReps: we.defaultReps,
+            plannedWeight: we.defaultWeight,
+          })),
+        },
+      })
 
     if (!detailedSession) {
       throw new ResourceNotFoundError('Workout session not found.')
