@@ -1,5 +1,6 @@
 import type { WorkoutSessionsRepository } from '@/modules/session/repositories/workout-sessions.repository'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
+import { getLogVolume } from '@/shared/utils/calculate-volume'
 
 import type { WorkoutsRepository } from '../repositories/workouts.repository'
 
@@ -33,7 +34,10 @@ export class GetWorkoutStatsUseCase {
 
     const sessionsStats = completedSessions.map((session) => {
       const totalVolume = session.exerciseSessions.reduce((sum, ex) => {
-        const exerciseVolume = ex.logs.reduce((acc, log) => acc + log.volume, 0)
+        const exerciseVolume = ex.logs.reduce(
+          (acc, log) => acc + getLogVolume(log, ex.exercise.measurement),
+          0
+        )
         return sum + exerciseVolume
       }, 0)
 

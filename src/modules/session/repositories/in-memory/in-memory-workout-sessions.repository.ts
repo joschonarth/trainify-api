@@ -31,6 +31,26 @@ export class InMemoryWorkoutSessionsRepository
     return result
   }
 
+  findManyByWorkoutAndUser(userId: string, workoutId: string) {
+    return Promise.resolve(
+      [...this.details.values()].filter(
+        (session) =>
+          session.userId === userId && session.workoutId === workoutId
+      )
+    )
+  }
+
+  findDetailedByUserAndDateRange(userId: string, start: Date, end: Date) {
+    return Promise.resolve(
+      [...this.details.values()].filter(
+        (session) =>
+          session.userId === userId &&
+          session.date >= start &&
+          session.date <= end
+      )
+    )
+  }
+
   private resolveDaily(
     request: DailySessionRequest,
     create?: Prisma.WorkoutSessionUncheckedCreateInput

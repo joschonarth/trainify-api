@@ -1,5 +1,5 @@
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
-import { calculateVolume } from '@/shared/utils/calculate-volume'
+import { getLogVolume } from '@/shared/utils/calculate-volume'
 import type {
   WorkoutSessionsRepository,
   WorkoutSessionWithWorkout,
@@ -54,7 +54,10 @@ interface MetricsResult {
 
 export class CompareWorkoutSessionsUseCase {
   constructor(
-    private readonly workoutSessionRepository: WorkoutSessionsRepository
+    private readonly workoutSessionRepository: Pick<
+      WorkoutSessionsRepository,
+      'findManyByWorkoutAndUser'
+    >
   ) {}
 
   async execute({
@@ -90,7 +93,7 @@ export class CompareWorkoutSessionsUseCase {
             sets: log.sets,
             reps: log.reps,
             weight: log.weight ?? 0,
-            volume: log.volume,
+            volume: getLogVolume(log, exerciseSession.exercise.measurement),
           }))
       )
 
@@ -114,9 +117,7 @@ export class CompareWorkoutSessionsUseCase {
         totalSets += exercise.sets
         totalReps += exercise.reps
         totalWeight += exercise.weight
-        totalVolume +=
-          exercise.volume ||
-          calculateVolume(exercise.sets, exercise.reps, exercise.weight)
+        totalVolume += exercise.volume
       }
 
       return { totalSets, totalReps, totalWeight, totalVolume }

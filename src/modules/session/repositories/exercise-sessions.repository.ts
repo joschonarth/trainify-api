@@ -6,6 +6,7 @@ export type ExerciseSessionWithLogs = ExerciseSession & {
     name: string
     category: string | null
     type: string | null
+    measurement: 'REPS' | 'DURATION'
   }
   logs: {
     id: string

@@ -71,6 +71,7 @@ describe('GetExerciseProgressUseCase', () => {
         name: 'Bench Press',
         category: null,
         type: null,
+        measurement: 'REPS' as const,
       },
       logs,
     }
@@ -300,5 +301,32 @@ describe('GetExerciseProgressUseCase', () => {
     expect(
       exerciseSessionsRepository.findManyByUserAndExercise
     ).toHaveBeenNthCalledWith(3, 'user-id', 'exercise-id', undefined)
+  })
+  it('should report zero volume for legacy duration logs without replacing payload seconds with timer duration', async () => {
+    const date = new Date('2026-01-01T12:00:00Z')
+    const { sut, getExerciseDetailsUseCase } = makeSut([
+      makeSession('duration', date, 999, [
+        {
+          id: 'duration-log',
+          sets: 2,
+          reps: 30,
+          weight: 60,
+          volume: 3600,
+          date,
+          description: null,
+        },
+      ]),
+    ])
+    vi.mocked(getExerciseDetailsUseCase.execute).mockResolvedValue({
+      exercise: { ...exercise, measurement: Measurement.DURATION },
+    })
+    const result = await sut.execute({
+      userId: 'user-id',
+      exerciseId: 'exercise-id',
+    })
+    expect(result.totalVolume).toBe(0)
+    expect(result.maxVolume).toBe(0)
+    expect(result.progress[0]?.logs[0]).toMatchObject({ reps: 30, volume: 0 })
+    expect(result.totalDuration).toBe(999)
   })
 })

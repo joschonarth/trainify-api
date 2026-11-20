@@ -7,7 +7,14 @@ export const addExerciseToWorkoutParamsSchema = z.object({
 export const addExerciseToWorkoutBodySchema = z.object({
   exerciseId: z.string(),
   defaultSets: z.number().int().positive().nullable(),
-  defaultReps: z.number().int().positive().nullable(),
+  defaultReps: z
+    .number()
+    .int()
+    .positive()
+    .nullable()
+    .describe(
+      'Planned repetitions per set for REPS; positive integer seconds per set for DURATION.'
+    ),
   defaultWeight: z.number().finite().nonnegative().nullable(),
 })
 

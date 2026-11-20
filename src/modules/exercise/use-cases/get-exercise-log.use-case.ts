@@ -1,6 +1,6 @@
 import type { ExerciseCategory, ExerciseLog } from 'generated/prisma'
-
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
+import { getLogVolume } from '@/shared/utils/calculate-volume'
 
 import type { ExerciseLogsRepository } from '../repositories/exercise-logs.repository'
 
@@ -33,6 +33,8 @@ export class GetExerciseLogUseCase {
       throw new ResourceNotFoundError('Exercise log not found.')
     }
 
-    return { log }
+    return {
+      log: { ...log, volume: getLogVolume(log, log.exercise.measurement) },
+    }
   }
 }

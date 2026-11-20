@@ -12,6 +12,7 @@ export interface ExerciseLogsRepository {
         name: string
         category: Exercise['category'] | null
         type: Exercise['type'] | null
+        measurement: Exercise['measurement']
       }
     })[]
   >
@@ -30,6 +31,7 @@ export interface ExerciseLogsRepository {
           name: string
           category: Exercise['category'] | null
           type: Exercise['type'] | null
+          measurement: Exercise['measurement']
         }
       })
     | null
@@ -47,6 +49,7 @@ export interface ExerciseLogsRepository {
         name: string
         category: Exercise['category'] | null
         type: Exercise['type'] | null
+        measurement: Exercise['measurement']
       }
     })[]
   >

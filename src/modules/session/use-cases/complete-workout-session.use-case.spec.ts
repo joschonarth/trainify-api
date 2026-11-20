@@ -57,6 +57,7 @@ function makeExerciseSession(
       name: 'Bench Press',
       category: null,
       type: null,
+      measurement: 'REPS' as const,
     },
     logs: [],
     ...overrides,
@@ -448,5 +449,29 @@ describe('CompleteWorkoutSessionUseCase', () => {
         ],
       }).success
     ).toBe(false)
+  })
+  it('should store payload seconds and zero load volume for duration exercises', async () => {
+    const exercise = getFirstExerciseSession()
+    exercise.exercise.measurement = 'DURATION'
+    exercise.startedAt = new Date('2026-01-01T00:00:00Z')
+    exercise.endedAt = new Date('2026-01-01T00:10:00Z')
+    exercise.duration = 600
+    await sut.execute({
+      userId,
+      sessionId,
+      exercises: [
+        {
+          exerciseSessionId: exercise.id,
+          sets: 2,
+          reps: 30,
+          weight: 60,
+          completed: true,
+        },
+      ],
+    })
+    expect(exerciseLogsRepository.create).toHaveBeenCalledWith(
+      expect.objectContaining({ sets: 2, reps: 30, weight: 60, volume: 0 })
+    )
+    expect(updateUserStreakUseCase.execute).toHaveBeenCalledTimes(1)
   })
 })

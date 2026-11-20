@@ -18,7 +18,11 @@ export const sessionExerciseItemSchema = z.object({
 export const sessionExerciseLogSchema = z.object({
   id: z.string().describe('Log ID.'),
   sets: z.number().describe('Number of sets logged.'),
-  reps: z.number().describe('Number of reps logged.'),
+  reps: z
+    .number()
+    .describe(
+      'Repetitions per set for REPS; positive integer seconds per set for DURATION. Reported execution comes from the payload, not the timer.'
+    ),
   weight: z.number().nullable().describe('Weight logged in kilograms.'),
   date: z.date().describe('Log date.'),
   description: z.string().nullable().describe('Log notes.'),
@@ -36,7 +40,7 @@ export const exerciseSessionSchema = z.object({
     .number()
     .nullable()
     .describe(
-      'Reps captured at session creation; later workout edits do not change them.'
+      'Repetitions per set for REPS or seconds per set for DURATION, captured at creation; later workout edits do not change them.'
     ),
   plannedWeight: z
     .number()
@@ -89,7 +93,7 @@ export const exerciseTimerSessionSchema = z.object({
     .number()
     .nullable()
     .describe(
-      'Reps captured at session creation; later workout edits do not change them.'
+      'Repetitions per set for REPS or seconds per set for DURATION, captured at creation; later workout edits do not change them.'
     ),
   plannedWeight: z
     .number()
@@ -123,7 +127,7 @@ export const exerciseSessionDetailsSchema = z.object({
     .number()
     .nullable()
     .describe(
-      'Reps captured at session creation; later workout edits do not change them.'
+      'Repetitions per set for REPS or seconds per set for DURATION, captured at creation; later workout edits do not change them.'
     ),
   plannedWeight: z
     .number()

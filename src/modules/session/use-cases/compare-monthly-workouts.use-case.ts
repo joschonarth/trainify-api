@@ -1,6 +1,6 @@
 import type { UsersRepository } from '@/modules/user/repositories/users.repository'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
-import { calculateVolume } from '@/shared/utils/calculate-volume'
+import { getLogVolume } from '@/shared/utils/calculate-volume'
 import { getZonedMonthRangeForDate } from '@/shared/utils/date-timezone'
 import type {
   WorkoutSessionsRepository,
@@ -39,8 +39,11 @@ interface MonthlyComparisonResult {
 
 export class CompareMonthlyWorkoutsUseCase {
   constructor(
-    private readonly workoutSessionsRepository: WorkoutSessionsRepository,
-    private readonly usersRepository: UsersRepository
+    private readonly workoutSessionsRepository: Pick<
+      WorkoutSessionsRepository,
+      'findDetailedByUserAndDateRange'
+    >,
+    private readonly usersRepository: Pick<UsersRepository, 'findById'>
   ) {}
 
   async execute({
@@ -106,7 +109,10 @@ export class CompareMonthlyWorkoutsUseCase {
             totalSets += sets
             totalReps += reps
             totalWeight += weight
-            totalVolume += log.volume || calculateVolume(sets, reps, weight)
+            totalVolume += getLogVolume(
+              log,
+              exerciseSession.exercise.measurement
+            )
           }
         }
       }

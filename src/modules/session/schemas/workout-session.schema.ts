@@ -38,7 +38,9 @@ export const sessionWithWorkoutSchema = baseSessionSchema.extend({
           defaultReps: z
             .number()
             .nullable()
-            .describe('Default number of reps.'),
+            .describe(
+              'Default repetitions per set for REPS; seconds per set for DURATION.'
+            ),
           defaultWeight: z
             .number()
             .nullable()
