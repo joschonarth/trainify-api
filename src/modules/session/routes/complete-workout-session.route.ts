@@ -18,7 +18,7 @@ export function completeWorkoutSessionRoute(app: FastifyInstance) {
         tags: ['Sessions'],
         summary: 'Complete workout session',
         description:
-          'Records completed exercise performance and skip reasons before closing the session.',
+          'Records completed exercise performance and skip reasons before closing the session. Uses the exercises captured when the session was created, even if the workout was later edited or archived.',
         params: completeWorkoutSessionParamsSchema,
         body: completeWorkoutSessionBodySchema,
         response: {

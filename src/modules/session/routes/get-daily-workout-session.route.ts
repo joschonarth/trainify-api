@@ -14,7 +14,7 @@ export function getDailyWorkoutSessionRoute(app: FastifyInstance) {
         tags: ['Sessions'],
         summary: 'Get daily workout session',
         description:
-          "Returns the authenticated user's daily workout session using their IANA timezone. This GET creates a session and its exercise snapshot when none exists. Concurrent requests return the same session. Daily identities retain their original business date and timezone when the user changes timezone.",
+          "Returns the authenticated user's daily workout session using their IANA timezone. This GET creates a session and its exercise snapshot when none exists. Concurrent requests return the same session. Existing sessions preserve exercise membership, stored order and planned defaults even while PENDING. New sessions reflect the current active workout configuration. Exercise names and measurement modes remain live catalog values. Archived workouts do not create new sessions; existing history remains accessible and can be completed. Daily identities retain their original business date and timezone when the user changes timezone.",
         response: {
           200: z
             .object({

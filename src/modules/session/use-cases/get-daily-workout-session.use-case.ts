@@ -53,6 +53,8 @@ export class GetDailyWorkoutSessionUseCase {
     }
     const existingSession =
       await this.workoutSessionsRepository.resolveDailySession(dailyRequest)
+    // Membership, order and planned defaults remain unchanged, including in PENDING.
+    // Exercise catalog metadata is read live; it is not part of this snapshot.
     if (existingSession) {
       return { session: existingSession }
     }

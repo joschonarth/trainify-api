@@ -20,26 +20,11 @@ type PrismaSession = Prisma.WorkoutSessionGetPayload<{
 export function mapWorkoutSession(
   session: PrismaSession
 ): WorkoutSessionWithWorkout {
-  const legacyPositionValues = session.exerciseSessions.every(
-    (exerciseSession) => exerciseSession.position === 0
-  )
-
   return {
     ...session,
     exerciseSessions: [...session.exerciseSessions]
-      .sort((a, b) => {
-        if (!legacyPositionValues) {
-          return a.position - b.position
-        }
-
-        const aPosition = session.workout.exercises.findIndex(
-          (item) => item.exerciseId === a.exerciseId
-        )
-        const bPosition = session.workout.exercises.findIndex(
-          (item) => item.exerciseId === b.exerciseId
-        )
-        return aPosition - bPosition
-      })
+      // Stored positions are authoritative, including legacy rows with equal positions.
+      .sort((a, b) => a.position - b.position || a.id.localeCompare(b.id))
       .map((ex) => ({
         id: ex.id,
         plannedSets: ex.plannedSets,
