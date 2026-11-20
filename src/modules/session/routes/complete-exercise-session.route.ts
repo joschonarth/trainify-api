@@ -16,9 +16,12 @@ export function completeExerciseSessionRoute(app: FastifyInstance) {
         summary: 'Complete exercise session',
         deprecated: true,
         description:
-          'Deprecated. Complete exercises through POST /sessions/:sessionId/complete.',
+          'Deprecated. Complete exercises through POST /sessions/:sessionId/complete. New execution is allowed only on the session business day in its captured timezone; expired or future sessions return 409. Earlier sessions without a daily identity use their date in America/Sao_Paulo.',
         params: completeExerciseSessionParamsSchema,
         response: {
+          409: z
+            .object({ message: z.string() })
+            .describe('Session is outside its business day.'),
           200: z
             .object({
               exerciseSession: exerciseTimerSessionSchema,

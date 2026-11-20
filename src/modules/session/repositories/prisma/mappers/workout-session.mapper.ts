@@ -5,6 +5,7 @@ import type { WorkoutSessionWithWorkout } from '../../workout-sessions.repositor
 
 type PrismaSession = Prisma.WorkoutSessionGetPayload<{
   include: {
+    dailyIdentity: true
     workout: {
       include: {
         exercises: {

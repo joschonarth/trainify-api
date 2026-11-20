@@ -24,6 +24,7 @@ export class InMemoryUserStreaksRepository implements UserStreaksRepository {
       userId: data.user.connect?.id ?? '',
       currentStreak: data.currentStreak ?? 0,
       bestStreak: data.bestStreak ?? 0,
+      lastBusinessDate: data.lastBusinessDate ?? null,
       lastWorkout: data.lastWorkout ? new Date(data.lastWorkout) : null,
       createdAt: data.createdAt ? new Date(data.createdAt) : new Date(),
       updatedAt: data.updatedAt ? new Date(data.updatedAt) : new Date(),
@@ -38,6 +39,7 @@ export class InMemoryUserStreaksRepository implements UserStreaksRepository {
     }
     item.currentStreak = unwrap(data.currentStreak, item.currentStreak)
     item.bestStreak = unwrap(data.bestStreak, item.bestStreak)
+    item.lastBusinessDate = unwrap(data.lastBusinessDate, item.lastBusinessDate)
     const date = unwrap<Date | string | null>(
       data.lastWorkout,
       item.lastWorkout

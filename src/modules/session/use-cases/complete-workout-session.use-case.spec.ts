@@ -74,7 +74,7 @@ function makeExerciseLog(): ExerciseLog {
     weight: 20,
     volume: 600,
     description: null,
-    date: new Date('2026-01-01T00:00:00.000Z'),
+    date: new Date('2026-01-01T12:00:00.000Z'),
     exerciseSessionId: 'exercise-session-id',
     userId,
     exerciseId: 'exercise-id',
@@ -91,11 +91,13 @@ function getFirstExerciseSession(): ExerciseSessionWithLogs {
 
 describe('CompleteWorkoutSessionUseCase', () => {
   beforeEach(() => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-01-01T12:00:00Z'))
     exerciseSessions = [makeExerciseSession()]
 
     workoutSession = {
       id: sessionId,
-      date: new Date('2026-01-01T00:00:00.000Z'),
+      date: new Date('2026-01-01T12:00:00.000Z'),
       status: WorkoutSessionStatus.IN_PROGRESS,
       startedAt: null,
       endedAt: null,
@@ -557,6 +559,7 @@ describe('CompleteWorkoutSessionUseCase', () => {
   it('should retry rewards without rewriting completed execution or granting a second activity day', async () => {
     vi.useFakeTimers()
     vi.setSystemTime(new Date('2026-06-10T12:00:00Z'))
+    workoutSession.date = new Date('2026-06-10T12:00:00Z')
     const request = {
       userId,
       sessionId,
@@ -600,6 +603,7 @@ describe('CompleteWorkoutSessionUseCase', () => {
       userId,
       logDate: new Date('2026-06-10T12:00:00Z'),
       recoverOriginalCompletion: true,
+      creditDay: { businessDate: '2026-06-10', timezone: 'America/Sao_Paulo' },
     })
   })
 
@@ -639,8 +643,9 @@ describe('CompleteWorkoutSessionUseCase', () => {
   it('should preserve timer measurements but record the actual completion instant for reward recovery', async () => {
     vi.useFakeTimers()
     vi.setSystemTime(new Date('2026-06-12T12:00:00Z'))
-    workoutSession.startedAt = new Date('2026-06-10T12:00:00Z')
-    workoutSession.endedAt = new Date('2026-06-10T13:00:00Z')
+    workoutSession.date = new Date('2026-06-12T12:00:00Z')
+    workoutSession.startedAt = new Date('2026-06-12T10:00:00Z')
+    workoutSession.endedAt = new Date('2026-06-12T11:00:00Z')
     workoutSession.duration = 3600
     const request = {
       userId,
@@ -657,7 +662,7 @@ describe('CompleteWorkoutSessionUseCase', () => {
     await sut.execute(request)
     vi.setSystemTime(new Date('2026-06-13T12:00:00Z'))
     await sut.execute(request)
-    expect(workoutSession.endedAt).toEqual(new Date('2026-06-10T13:00:00Z'))
+    expect(workoutSession.endedAt).toEqual(new Date('2026-06-12T11:00:00Z'))
     expect(workoutSession.duration).toBe(3600)
     expect(completions.items[0]?.completedAt).toEqual(
       new Date('2026-06-12T12:00:00Z')
@@ -666,6 +671,7 @@ describe('CompleteWorkoutSessionUseCase', () => {
       userId,
       logDate: new Date('2026-06-12T12:00:00Z'),
       recoverOriginalCompletion: true,
+      creditDay: { businessDate: '2026-06-12', timezone: 'America/Sao_Paulo' },
     })
   })
 
@@ -743,5 +749,135 @@ describe('CompleteWorkoutSessionUseCase', () => {
     expect((await sut.execute(request)).session?.status).toBe(
       WorkoutSessionStatus.COMPLETED
     )
+  })
+  it.each([
+    '2025-12-31',
+    '2026-01-02',
+  ])('rejects execution for another business day %s without writes or rewards', async (businessDate) => {
+    workoutSession.dailyIdentity = {
+      businessDate,
+      timezone: 'America/Sao_Paulo',
+    }
+    await expect(
+      sut.execute({
+        userId,
+        sessionId,
+        exercises: [
+          {
+            exerciseSessionId: 'exercise-session-id',
+            sets: 3,
+            reps: 10,
+            completed: true,
+          },
+        ],
+      })
+    ).rejects.toMatchObject({ statusCode: 409 })
+    expect(exerciseLogsRepository.create).not.toHaveBeenCalled()
+    expect(workoutSessionsRepository.update).not.toHaveBeenCalled()
+    expect(updateUserStreakUseCase.execute).not.toHaveBeenCalled()
+    expect(unlockAllBadgesUseCase.execute).not.toHaveBeenCalled()
+    expect(completions.items).toHaveLength(0)
+  })
+
+  it('accepts the last local instant and recovers after midnight with its persisted credit day', async () => {
+    workoutSession.dailyIdentity = {
+      businessDate: '2026-01-01',
+      timezone: 'America/Sao_Paulo',
+    }
+    vi.setSystemTime(new Date('2026-01-02T02:59:59.999Z'))
+    const request = {
+      userId,
+      sessionId,
+      exercises: [
+        {
+          exerciseSessionId: 'exercise-session-id',
+          sets: 3,
+          reps: 10,
+          completed: true,
+        },
+      ],
+    }
+    await sut.execute(request)
+    vi.setSystemTime(new Date('2026-01-03T12:00:00Z'))
+    await sut.execute(request)
+    expect(exerciseLogsRepository.create).toHaveBeenCalledTimes(1)
+    expect(updateUserStreakUseCase.execute).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        creditDay: {
+          businessDate: '2026-01-01',
+          timezone: 'America/Sao_Paulo',
+        },
+        recoverOriginalCompletion: true,
+      })
+    )
+  })
+
+  it('blocks an in-progress session at exactly local midnight', async () => {
+    workoutSession.dailyIdentity = {
+      businessDate: '2026-01-01',
+      timezone: 'America/Sao_Paulo',
+    }
+    workoutSession.startedAt = new Date('2026-01-02T02:40:00Z')
+    vi.setSystemTime(new Date('2026-01-02T03:00:00Z'))
+    await expect(
+      sut.execute({
+        userId,
+        sessionId,
+        exercises: [
+          {
+            exerciseSessionId: 'exercise-session-id',
+            sets: 3,
+            reps: 10,
+            completed: true,
+          },
+        ],
+      })
+    ).rejects.toMatchObject({ statusCode: 409 })
+    expect(workoutSession.status).toBe(WorkoutSessionStatus.IN_PROGRESS)
+    expect(completions.items).toHaveLength(0)
+  })
+  it('uses the captured identity rather than UTC or the session timestamp', async () => {
+    workoutSession.dailyIdentity = {
+      businessDate: '2026-01-02',
+      timezone: 'Pacific/Kiritimati',
+    }
+    vi.setSystemTime(new Date('2026-01-01T12:00:00Z'))
+    await sut.execute({
+      userId,
+      sessionId,
+      exercises: [
+        {
+          exerciseSessionId: 'exercise-session-id',
+          sets: 3,
+          reps: 10,
+          completed: true,
+        },
+      ],
+    })
+    expect(completions.items[0]).toMatchObject({
+      businessDate: '2026-01-02',
+      timezone: 'Pacific/Kiritimati',
+    })
+  })
+
+  it('honors the last instant of a DST-shortened local day', async () => {
+    workoutSession.dailyIdentity = {
+      businessDate: '2026-03-08',
+      timezone: 'America/New_York',
+    }
+    vi.setSystemTime(new Date('2026-03-09T03:59:59.999Z'))
+    await sut.execute({
+      userId,
+      sessionId,
+      exercises: [
+        {
+          exerciseSessionId: 'exercise-session-id',
+          sets: 3,
+          reps: 10,
+          completed: true,
+        },
+      ],
+    })
+    expect(completions.items[0]?.businessDate).toBe('2026-03-08')
   })
 })

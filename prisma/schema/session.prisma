@@ -32,6 +32,8 @@ model WorkoutSessionCompletion {
   sessionId   String   @id
   completedAt DateTime
   hasActivity Boolean
+  businessDate String? @db.VarChar(10)
+  timezone String?
 
   session WorkoutSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 

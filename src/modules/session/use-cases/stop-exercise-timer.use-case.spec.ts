@@ -124,4 +124,20 @@ describe('StopExerciseTimerUseCase', () => {
     )
     expect(exercises.writes).toBe(0)
   })
+  it('rejects an expired daily session without modifying execution', async () => {
+    const parent = workouts.items[0]
+    if (!parent) {
+      throw new Error('Missing fixture')
+    }
+    workouts.dailyIdentities.push({
+      userId: parent.userId,
+      sessionId: parent.id,
+      businessDate: '2000-01-01',
+      timezone: 'America/Sao_Paulo',
+    })
+    await expect(sut.execute(request)).rejects.toMatchObject({
+      statusCode: 409,
+    })
+    expect(exercises.writes).toBe(0)
+  })
 })

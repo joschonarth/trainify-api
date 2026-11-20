@@ -5,6 +5,7 @@ import type { UsersRepository } from '@/modules/user/repositories/users.reposito
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 import { getZonedMonthRange } from '@/shared/utils/date-timezone'
 import type { UserStreakLogsRepository } from '../repositories/user-streak-logs.repository'
+import { activityBusinessDate } from '../utils/activity-business-day'
 
 dayjs.extend(utc)
 dayjs.extend(timezonePlugin)
@@ -50,11 +51,15 @@ export class GetUserStreakCalendarUseCase {
       user.timezone
     )
 
-    const logs = await this.userStreakLogsRepository.findByUserAndDateRange(
-      userId,
-      start,
-      end
-    )
+    const [legacy, canonical] = await Promise.all([
+      this.userStreakLogsRepository.findByUserAndDateRange(userId, start, end),
+      this.userStreakLogsRepository.findByBusinessDateRange(
+        userId,
+        startDay.format('YYYY-MM-DD'),
+        endDay.format('YYYY-MM-DD')
+      ),
+    ])
+    const logs = [...legacy.filter((log) => !log.businessDate), ...canonical]
 
     const totalDays = endDay.date()
     const daysArray = Array.from({ length: totalDays }, (_, i) =>
@@ -62,7 +67,7 @@ export class GetUserStreakCalendarUseCase {
     )
 
     const completedDates = new Set(
-      logs.map((log) => dayjs(log.date).tz(user.timezone).format('YYYY-MM-DD'))
+      logs.map((log) => activityBusinessDate(log, user.timezone))
     )
     const days: CalendarDayStatus[] = daysArray.map((date) => {
       const calendarDate = date.format('YYYY-MM-DD')

@@ -1,3 +1,4 @@
+import dayjs from 'dayjs'
 import type { Prisma, PrismaClient, UserStreakLog } from 'generated/prisma'
 
 import { prisma } from '@/lib/prisma'
@@ -18,14 +19,15 @@ export class PrismaUserStreakLogsRepository
     timezone: string
   ): Promise<UserStreakLog | null> {
     const { start, end } = getZonedDayRange(date, timezone)
+    const businessDate = dayjs(date).tz(timezone).format('YYYY-MM-DD')
 
     return await this.client.userStreakLog.findFirst({
       where: {
         userId,
-        date: {
-          gte: start,
-          lte: end,
-        },
+        OR: [
+          { businessDate },
+          { businessDate: null, date: { gte: start, lte: end } },
+        ],
       },
     })
   }
@@ -47,6 +49,18 @@ export class PrismaUserStreakLogsRepository
     })
   }
 
+  async findByBusinessDateRange(userId: string, start: string, end: string) {
+    return await this.client.userStreakLog.findMany({
+      where: { userId, businessDate: { gte: start, lte: end } },
+    })
+  }
+  async assignBusinessDate(id: string, businessDate: string) {
+    return await this.client.userStreakLog.update({
+      where: { id },
+      data: { businessDate },
+    })
+  }
+
   async findAllByUser(userId: string): Promise<UserStreakLog[]> {
     return await this.client.userStreakLog.findMany({
       where: { userId },
@@ -54,7 +68,11 @@ export class PrismaUserStreakLogsRepository
     })
   }
 
-  async create(data: { userId: string; date: Date }): Promise<UserStreakLog> {
+  async create(data: {
+    userId: string
+    date: Date
+    businessDate?: string
+  }): Promise<UserStreakLog> {
     return await this.client.userStreakLog.create({
       data,
     })

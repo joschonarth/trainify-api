@@ -1,9 +1,9 @@
 import { NotAllowedError } from '@/shared/errors/not-allowed.error'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
-
 import { AnotherExerciseTimerRunningError } from '../errors/another-exercise-timer-running.error'
 import { ExerciseTimerAlreadyRunningError } from '../errors/exercise-timer-already-running.error'
 import type { ExerciseTimerUnitOfWork } from '../repositories/exercise-timer-unit-of-work'
+import { assertSessionBusinessDay } from '../utils/session-business-day'
 
 interface StartExerciseTimerRequest {
   userId: string
@@ -35,6 +35,8 @@ export class StartExerciseTimerUseCase {
         if (workoutSession.status !== 'IN_PROGRESS' || workoutSession.endedAt) {
           throw new NotAllowedError('Session must be in progress.')
         }
+
+        assertSessionBusinessDay(workoutSession)
 
         if (exerciseSession.completed) {
           throw new NotAllowedError('Exercise session is already completed.')

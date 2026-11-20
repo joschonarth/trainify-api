@@ -18,10 +18,13 @@ export function createExerciseLogSessionRoute(app: FastifyInstance) {
         summary: 'Create exercise log session',
         deprecated: true,
         description:
-          'Deprecated. Use POST /sessions/:sessionId/complete to record exercise performance.',
+          'Deprecated. Use POST /sessions/:sessionId/complete to record exercise performance. New execution is allowed only on the session business day in its captured timezone; expired or future sessions return 409. Earlier sessions without a daily identity use their date in America/Sao_Paulo.',
         params: createExerciseLogSessionParamsSchema,
         body: createExerciseLogSessionBodySchema,
         response: {
+          409: z
+            .object({ message: z.string() })
+            .describe('Session is outside its business day.'),
           201: z
             .object({
               exerciseLog: exerciseLogSchema,

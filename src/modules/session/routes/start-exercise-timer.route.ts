@@ -15,7 +15,7 @@ export function startExerciseTimerRoute(app: FastifyInstance) {
         tags: ['Sessions'],
         summary: 'Start exercise timer',
         description:
-          'Starts a timer on an unfinished exercise in an active workout session. Only one timer can run per session. Restarting a stopped timer clears its previous duration.',
+          'Starts a timer on an unfinished exercise in an active workout session. Only one timer can run per session. Restarting a stopped timer clears its previous duration. New execution is allowed only on the session business day in its captured timezone; expired or future sessions return 409. Earlier sessions without a daily identity use their date in America/Sao_Paulo.',
         params: startExerciseTimerParamsSchema,
         response: {
           200: z

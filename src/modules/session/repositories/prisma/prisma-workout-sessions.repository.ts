@@ -75,9 +75,10 @@ export class PrismaWorkoutSessionsRepository
     })
   }
 
-  async findById(id: string): Promise<WorkoutSession | null> {
+  async findById(id: string) {
     return await this.client.workoutSession.findUnique({
       where: { id },
+      include: { dailyIdentity: true },
     })
   }
 

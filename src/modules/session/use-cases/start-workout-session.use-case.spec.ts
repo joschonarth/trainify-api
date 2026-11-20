@@ -77,4 +77,11 @@ describe('StartWorkoutSessionUseCase', () => {
     )
     expect(repository.update).not.toHaveBeenCalled()
   })
+  it('rejects an expired session without writing', async () => {
+    session.date = new Date('2000-01-01T12:00:00Z')
+    await expect(sut.execute({ userId, sessionId })).rejects.toMatchObject({
+      statusCode: 409,
+    })
+    expect(repository.update).not.toHaveBeenCalled()
+  })
 })

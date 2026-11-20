@@ -7,10 +7,12 @@ import type {
   WorkoutSession,
   WorkoutSessionStatus,
 } from 'generated/prisma'
-
 import type { ExerciseSessionState } from '../utils/exercise-session-state'
+import type { SessionBusinessDay } from '../utils/session-business-day'
 
-export interface WorkoutSessionWithWorkout extends WorkoutSession {
+export interface WorkoutSessionWithWorkout
+  extends WorkoutSession,
+    SessionBusinessDay {
   workout: {
     id: string
     name: string
@@ -74,7 +76,7 @@ export interface WorkoutSessionsRepository {
     create?: Prisma.WorkoutSessionUncheckedCreateInput
   ): Promise<WorkoutSessionWithWorkout | null>
 
-  findById(id: string): Promise<WorkoutSession | null>
+  findById(id: string): Promise<(WorkoutSession & SessionBusinessDay) | null>
 
   findByUserAndDate(
     userId: string,

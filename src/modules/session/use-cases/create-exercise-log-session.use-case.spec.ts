@@ -1,5 +1,5 @@
 import { WorkoutSessionStatus } from 'generated/prisma'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { ExerciseLogsRepository } from '@/modules/exercise/repositories/exercise-logs.repository'
 import type { WorkoutSessionsRepository } from '@/modules/session/repositories/workout-sessions.repository'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
@@ -17,7 +17,10 @@ describe('CreateExerciseLogSessionUseCase', () => {
   >
   let sut: CreateExerciseLogSessionUseCase
 
+  afterEach(() => vi.useRealTimers())
   beforeEach(() => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-02-03T12:00:00Z'))
     measurement = 'REPS'
     sessionStatus = WorkoutSessionStatus.IN_PROGRESS
     const createLog: ExerciseLogsRepository['create'] = async (data) => ({
@@ -39,7 +42,7 @@ describe('CreateExerciseLogSessionUseCase', () => {
     workoutSessionsRepository = {
       findByIdWithWorkout: vi.fn(async () => ({
         id: 'session-id',
-        date: new Date('2026-01-01T00:00:00.000Z'),
+        date: new Date('2026-02-03T10:00:00.000Z'),
         status: sessionStatus,
         startedAt: null,
         endedAt: null,
@@ -193,6 +196,19 @@ describe('CreateExerciseLogSessionUseCase', () => {
         reps: 10,
       })
     ).rejects.toThrow('Exercise not part of this workout.')
+    expect(exerciseLogsRepository.create).not.toHaveBeenCalled()
+  })
+  it('rejects a log timestamp outside the session day', async () => {
+    await expect(
+      sut.execute({
+        userId: 'user-id',
+        sessionId: 'session-id',
+        exerciseId: 'exercise-id',
+        sets: 3,
+        reps: 10,
+        date: new Date('2026-02-02T12:00:00Z'),
+      })
+    ).rejects.toMatchObject({ statusCode: 409 })
     expect(exerciseLogsRepository.create).not.toHaveBeenCalled()
   })
 })

@@ -6,6 +6,7 @@ import { InMemoryStreakUnitOfWork } from '../repositories/in-memory/in-memory-st
 import { InMemoryUserStreakLogsRepository } from '../repositories/in-memory/in-memory-user-streak-logs.repository'
 import { InMemoryUserStreaksRepository } from '../repositories/in-memory/in-memory-user-streaks.repository'
 import { GetUserStreakUseCase } from './get-user-streak.use-case'
+import { RefreshUserStreakUseCase } from './refresh-user-streak.use-case'
 import { UpdateUserStreakUseCase } from './update-user-streak.use-case'
 
 let users: InMemoryUsersRepository
@@ -226,5 +227,68 @@ describe('Update user streak', () => {
     expect(streaks.items).toHaveLength(0)
     expect(logs.items).toHaveLength(0)
     expect(await sut.execute(request)).toMatchObject({ currentStreak: 1 })
+  })
+  it('rebuilds out-of-order fixed-day credits once and preserves the newest day', async () => {
+    vi.setSystemTime(new Date('2026-06-12T12:00:00Z'))
+    for (const businessDate of [
+      '2026-06-10',
+      '2026-06-12',
+      '2026-06-11',
+      '2026-06-11',
+    ]) {
+      await sut.execute({
+        userId: 'user',
+        logDate: new Date(),
+        creditDay: { businessDate, timezone: 'America/Sao_Paulo' },
+      })
+    }
+    expect(logs.items).toHaveLength(3)
+    expect(streaks.items[0]).toMatchObject({
+      currentStreak: 3,
+      bestStreak: 3,
+      lastBusinessDate: '2026-06-12',
+    })
+  })
+
+  it('retains a fixed credit day through profile timezone changes and concurrent retries', async () => {
+    vi.setSystemTime(new Date('2026-06-12T12:00:00Z'))
+    const request = {
+      userId: 'user',
+      logDate: new Date('2026-06-12T00:00:00Z'),
+      creditDay: { businessDate: '2026-06-12', timezone: 'Pacific/Kiritimati' },
+    }
+    await sut.execute(request)
+    await users.update('user', { timezone: 'America/Los_Angeles' })
+    await Promise.all(Array.from({ length: 12 }, () => sut.execute(request)))
+    expect(logs.items).toHaveLength(1)
+    expect(logs.items[0]?.businessDate).toBe('2026-06-12')
+    expect(streaks.items[0]).toMatchObject({
+      bestStreak: 1,
+      lastBusinessDate: '2026-06-12',
+    })
+  })
+  it('adopts an existing legacy day and preserves calendar credit on read and refresh after a timezone change', async () => {
+    vi.setSystemTime(new Date('2026-06-12T12:00:00Z'))
+    await logs.create({
+      userId: 'user',
+      date: new Date('2026-06-12T03:00:00Z'),
+    })
+    await sut.execute({
+      userId: 'user',
+      logDate: new Date(),
+      creditDay: { businessDate: '2026-06-12', timezone: 'America/Sao_Paulo' },
+    })
+    expect(logs.items).toHaveLength(1)
+    expect(logs.items[0]?.businessDate).toBe('2026-06-12')
+    await users.update('user', { timezone: 'Pacific/Kiritimati' })
+    const before = structuredClone({ logs: logs.items, streaks: streaks.items })
+    const read = new GetUserStreakUseCase(streaks, users)
+    expect((await read.execute('user')).currentStreak).toBe(1)
+    expect({ logs: logs.items, streaks: streaks.items }).toEqual(before)
+    const refresh = new RefreshUserStreakUseCase(
+      new InMemoryStreakUnitOfWork({ users, streaks, logs })
+    )
+    expect((await refresh.execute({ userId: 'user' })).currentStreak).toBe(1)
+    expect(logs.items).toEqual(before.logs)
   })
 })

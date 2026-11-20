@@ -3,8 +3,15 @@ import timezonePlugin from 'dayjs/plugin/timezone'
 import utc from 'dayjs/plugin/utc'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 import { getZonedDayDifference } from '@/shared/utils/date-timezone'
-import type { StreakUnitOfWork } from '../repositories/streak-unit-of-work'
+import type {
+  StreakRepositories,
+  StreakUnitOfWork,
+} from '../repositories/streak-unit-of-work'
 import type { UserStreaksRepository } from '../repositories/user-streaks.repository'
+import {
+  activityBusinessDate,
+  activityDate,
+} from '../utils/activity-business-day'
 import { getEffectiveStreak } from '../utils/get-effective-streak'
 import { rebuildStreak } from '../utils/rebuild-streak'
 
@@ -15,6 +22,7 @@ interface UpdateUserStreakUseCaseRequest {
   userId: string
   logDate: Date
   recoverOriginalCompletion?: boolean
+  creditDay?: { businessDate: string; timezone: string }
 }
 
 interface UpdateUserStreakUseCaseResponse {
@@ -38,10 +46,77 @@ function toResponse(
 export class UpdateUserStreakUseCase {
   constructor(private readonly unitOfWork: StreakUnitOfWork) {}
 
+  private resolveEventDay(
+    creditDay: UpdateUserStreakUseCaseRequest['creditDay'],
+    streak: Awaited<ReturnType<UserStreaksRepository['findByUserId']>>,
+    logDate: Date,
+    timezone: string
+  ) {
+    if (creditDay) {
+      return creditDay
+    }
+    if (!streak?.lastBusinessDate) {
+      return undefined
+    }
+    return {
+      businessDate: dayjs(logDate).tz(timezone).format('YYYY-MM-DD'),
+      timezone,
+    }
+  }
+
+  private async creditBusinessDay(
+    {
+      userId,
+      eventDay,
+      timezone,
+      streak,
+    }: {
+      userId: string
+      eventDay: { businessDate: string; timezone: string }
+      timezone: string
+      streak: Awaited<ReturnType<UserStreaksRepository['findByUserId']>>
+    },
+    { logs, streaks }: Pick<StreakRepositories, 'logs' | 'streaks'>
+  ) {
+    const activity = await logs.findAllByUser(userId)
+    const existing = activity.find(
+      (log) =>
+        activityBusinessDate(log, eventDay.timezone) === eventDay.businessDate
+    )
+    if (!existing) {
+      const created = await logs.create({
+        userId,
+        date: dayjs.utc(eventDay.businessDate).toDate(),
+        businessDate: eventDay.businessDate,
+      })
+      activity.push(created)
+    } else if (!existing.businessDate) {
+      await logs.assignBusinessDate(existing.id, eventDay.businessDate)
+      existing.businessDate = eventDay.businessDate
+    }
+    const rebuilt = rebuildStreak(
+      activity.map((log) => activityDate(log, timezone)),
+      timezone,
+      new Date(),
+      streak?.bestStreak ?? 0
+    )
+    const keys = activity
+      .map((log) => activityBusinessDate(log, timezone))
+      .sort()
+    const data = { ...rebuilt, lastBusinessDate: keys.at(-1) ?? null }
+    if (streak) {
+      await streaks.update(streak.id, data)
+    } else {
+      await streaks.create({ user: { connect: { id: userId } }, ...data })
+    }
+    return rebuilt
+  }
+
   async execute({
     userId,
     logDate,
     recoverOriginalCompletion = false,
+    creditDay,
   }: UpdateUserStreakUseCaseRequest): Promise<UpdateUserStreakUseCaseResponse> {
     return await this.unitOfWork.execute(
       userId,
@@ -51,13 +126,26 @@ export class UpdateUserStreakUseCase {
           throw new ResourceNotFoundError('User not found.')
         }
 
+        const initialStreak = await streaks.findByUserId(userId)
+        const eventDay = this.resolveEventDay(
+          creditDay,
+          initialStreak,
+          logDate,
+          user.timezone
+        )
+        const streak = initialStreak
+        if (eventDay) {
+          return await this.creditBusinessDay(
+            { userId, eventDay, timezone: user.timezone, streak },
+            { logs, streaks }
+          )
+        }
+
         const timezone = user.timezone
         const normalizedDate = dayjs(logDate)
           .tz(timezone)
           .startOf('day')
           .toDate()
-
-        const streak = await streaks.findByUserId(userId)
 
         const existingLog = await logs.findByUserAndDate(
           userId,
@@ -65,11 +153,12 @@ export class UpdateUserStreakUseCase {
           timezone
         )
         if (existingLog) {
+          const summary = toResponse(streak)
           return {
-            ...toResponse(streak),
+            ...summary,
             currentStreak: getEffectiveStreak(
-              streak?.currentStreak ?? 0,
-              streak?.lastWorkout ?? null,
+              summary.currentStreak,
+              summary.lastWorkout,
               normalizedDate,
               timezone
             ),
@@ -103,7 +192,7 @@ export class UpdateUserStreakUseCase {
         if (recoverOriginalCompletion && diffInDays < 0) {
           const activity = await logs.findAllByUser(userId)
           const rebuilt = rebuildStreak(
-            activity.map((log) => log.date),
+            activity.map((log) => activityDate(log, timezone)),
             timezone,
             new Date(),
             streak.bestStreak
