@@ -32,11 +32,27 @@ export class PrismaWeightLogsRepository implements WeightLogsRepository {
     })
   }
 
-  async findByUserId(userId: string): Promise<WeightLog[]> {
-    return await this.client.weightLog.findMany({
-      where: { userId },
-      orderBy: [{ date: 'desc' }, { id: 'desc' }],
-    })
+  async findPageByUserId({
+    userId,
+    page,
+    pageSize,
+  }: {
+    userId: string
+    page: number
+    pageSize: number
+  }): Promise<{ weightLogs: WeightLog[]; total: number }> {
+    const where: Prisma.WeightLogWhereInput = { userId }
+    const [weightLogs, total] = await Promise.all([
+      this.client.weightLog.findMany({
+        where,
+        orderBy: [{ date: 'desc' }, { id: 'desc' }],
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+      }),
+      this.client.weightLog.count({ where }),
+    ])
+
+    return { weightLogs, total }
   }
 
   async findManyByUserId(
@@ -88,13 +104,6 @@ export class PrismaWeightLogsRepository implements WeightLogsRepository {
   async findFirstByUserId(userId: string): Promise<WeightLog | null> {
     return await this.client.weightLog.findFirst({
       where: { userId },
-      orderBy: [{ date: 'asc' }, { id: 'asc' }],
-    })
-  }
-
-  async findFirstByGoalId(goalId: string): Promise<WeightLog | null> {
-    return await this.client.weightLog.findFirst({
-      where: { goalId },
       orderBy: [{ date: 'asc' }, { id: 'asc' }],
     })
   }
