@@ -14,7 +14,7 @@ export function deactivateWeightGoalRoute(app: FastifyInstance) {
         tags: ['Weight'],
         summary: 'Deactivate weight goal',
         description:
-          'Deactivates a specific weight goal for the authenticated user.',
+          'Deactivates an owned weight goal under the same per-user transaction lock as weight logs and other goal mutations. Repeating deactivation of an inactive goal returns 204 without another write. Missing and foreign goals return the same 404.',
         params: deactivateWeightGoalParamsSchema,
         response: {
           204: z.null().describe('Weight goal deactivated successfully.'),

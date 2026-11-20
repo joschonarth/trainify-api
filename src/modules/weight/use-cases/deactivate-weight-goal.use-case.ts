@@ -1,6 +1,6 @@
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
-import type { WeightGoalsRepository } from '../repositories/weight-goals.repository'
+import type { WeightUnitOfWork } from '../repositories/weight-unit-of-work'
 
 interface DeactivateWeightGoalRequest {
   goalId: string
@@ -8,22 +8,24 @@ interface DeactivateWeightGoalRequest {
 }
 
 export class DeactivateWeightGoalUseCase {
-  constructor(private readonly weightGoalsRepository: WeightGoalsRepository) {}
+  constructor(private readonly weightUnitOfWork: WeightUnitOfWork) {}
 
   async execute({
     goalId,
     userId,
   }: DeactivateWeightGoalRequest): Promise<void> {
-    const goal = await this.weightGoalsRepository.findById(goalId)
+    await this.weightUnitOfWork.execute(userId, async ({ goals }) => {
+      const goal = await goals.findById(goalId)
 
-    if (!goal || goal.userId !== userId) {
-      throw new ResourceNotFoundError('Weight goal not found')
-    }
+      if (!goal || goal.userId !== userId) {
+        throw new ResourceNotFoundError('Weight goal not found')
+      }
 
-    if (!goal.isActive) {
-      return
-    }
+      if (!goal.isActive) {
+        return
+      }
 
-    await this.weightGoalsRepository.deactivateGoal(goalId)
+      await goals.deactivateGoal(goalId)
+    })
   }
 }
