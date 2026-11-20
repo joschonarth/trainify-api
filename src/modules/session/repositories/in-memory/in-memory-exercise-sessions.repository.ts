@@ -1,4 +1,5 @@
 import type { ExerciseSession, Prisma } from 'generated/prisma'
+import type { ExerciseSessionWithLogs } from '../exercise-sessions.repository'
 import type { ExerciseTimerRepositories } from '../exercise-timer-unit-of-work'
 
 export class InMemoryExerciseSessionsRepository
@@ -9,7 +10,26 @@ export class InMemoryExerciseSessionsRepository
     >
 {
   items: ExerciseSession[] = []
+  details = new Map<string, ExerciseSessionWithLogs>()
   writes = 0
+  async findByIdWithLogs(id: string) {
+    const item = await this.findById(id)
+    if (!item) {
+      return null
+    }
+    const detail = this.details.get(id)
+    return {
+      ...item,
+      exercise: detail?.exercise ?? {
+        id: item.exerciseId,
+        name: 'Exercise',
+        category: null,
+        type: null,
+        measurement: 'REPS' as const,
+      },
+      logs: detail?.logs ?? [],
+    }
+  }
   findById(id: string) {
     return Promise.resolve(this.items.find((item) => item.id === id) ?? null)
   }
@@ -44,6 +64,9 @@ export class InMemoryExerciseSessionsRepository
       ) {
         Object.assign(item, { [key]: value })
       }
+    }
+    if (typeof data.completed === 'boolean') {
+      item.completed = data.completed
     }
     this.writes += 1
     return item

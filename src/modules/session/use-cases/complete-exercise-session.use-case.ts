@@ -11,8 +11,14 @@ interface CompleteExerciseSessionUseCaseRequest {
 
 export class CompleteExerciseSessionUseCase {
   constructor(
-    private readonly exerciseSessionsRepository: ExerciseSessionsRepository,
-    private readonly workoutSessionsRepository: WorkoutSessionsRepository
+    private readonly exerciseSessionsRepository: Pick<
+      ExerciseSessionsRepository,
+      'findByIdWithLogs' | 'update'
+    >,
+    private readonly workoutSessionsRepository: Pick<
+      WorkoutSessionsRepository,
+      'findById'
+    >
   ) {}
 
   async execute({

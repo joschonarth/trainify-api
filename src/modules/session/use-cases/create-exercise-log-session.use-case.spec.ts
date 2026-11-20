@@ -1,8 +1,8 @@
 import { WorkoutSessionStatus } from 'generated/prisma'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-
 import type { ExerciseLogsRepository } from '@/modules/exercise/repositories/exercise-logs.repository'
 import type { WorkoutSessionsRepository } from '@/modules/session/repositories/workout-sessions.repository'
+import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 
 import { createExerciseLogSessionBodySchema } from '../schemas/create-exercise-log-session.schema'
 import { CreateExerciseLogSessionUseCase } from './create-exercise-log-session.use-case'
@@ -165,5 +165,34 @@ describe('CreateExerciseLogSessionUseCase', () => {
       weight: 10,
     })
     expect(result.exerciseLog).toMatchObject({ sets: 2, reps: 45, volume: 0 })
+  })
+  it('should reject foreign or missing sessions without persisting logs', async () => {
+    const request = {
+      userId: 'other',
+      sessionId: 'session-id',
+      exerciseId: 'exercise-id',
+      sets: 2,
+      reps: 10,
+    }
+    await expect(sut.execute(request)).rejects.toBeInstanceOf(
+      ResourceNotFoundError
+    )
+    workoutSessionsRepository.findByIdWithWorkout = () => Promise.resolve(null)
+    await expect(
+      sut.execute({ ...request, userId: 'user-id' })
+    ).rejects.toBeInstanceOf(ResourceNotFoundError)
+    expect(exerciseLogsRepository.create).not.toHaveBeenCalled()
+  })
+  it('should reject an exercise outside the session snapshot', async () => {
+    await expect(
+      sut.execute({
+        userId: 'user-id',
+        sessionId: 'session-id',
+        exerciseId: 'foreign-exercise',
+        sets: 2,
+        reps: 10,
+      })
+    ).rejects.toThrow('Exercise not part of this workout.')
+    expect(exerciseLogsRepository.create).not.toHaveBeenCalled()
   })
 })

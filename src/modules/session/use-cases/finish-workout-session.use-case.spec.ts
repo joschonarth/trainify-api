@@ -1,5 +1,6 @@
 import { type WorkoutSession, WorkoutSessionStatus } from 'generated/prisma'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 import { WorkoutSessionAlreadyCompletedError } from '../errors/workout-session-already-completed.error'
 import { WorkoutSessionNotStartedError } from '../errors/workout-session-not-started.error'
 import type { WorkoutSessionsRepository } from '../repositories/workout-sessions.repository'
@@ -69,6 +70,16 @@ describe('FinishWorkoutSessionUseCase', () => {
 
     await expect(sut.execute({ userId, sessionId })).rejects.toBeInstanceOf(
       WorkoutSessionAlreadyCompletedError
+    )
+    expect(repository.update).not.toHaveBeenCalled()
+  })
+  it('should reject foreign and missing sessions without changing them', async () => {
+    await expect(
+      sut.execute({ userId: 'other', sessionId })
+    ).rejects.toBeInstanceOf(ResourceNotFoundError)
+    repository.findById = () => Promise.resolve(null)
+    await expect(sut.execute({ userId, sessionId })).rejects.toBeInstanceOf(
+      ResourceNotFoundError
     )
     expect(repository.update).not.toHaveBeenCalled()
   })

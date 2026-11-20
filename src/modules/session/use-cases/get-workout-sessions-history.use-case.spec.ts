@@ -1,7 +1,11 @@
 import { WorkoutSessionStatus } from 'generated/prisma'
-import { describe, expect, it } from 'vitest'
-
+import { beforeEach, describe, expect, it } from 'vitest'
+import { InMemoryExercisesRepository } from '@/modules/exercise/repositories/in-memory/in-memory-exercises.repository'
+import { makeExercise } from '@/modules/exercise/tests/factories/make-exercise'
+import { InMemoryWorkoutsRepository } from '@/modules/workout/repositories/in-memory/in-memory-workouts.repository'
+import { InMemoryWorkoutSessionsRepository } from '../repositories/in-memory/in-memory-workout-sessions.repository'
 import type { WorkoutSessionWithWorkout } from '../repositories/workout-sessions.repository'
+import { makeWorkoutHistorySession } from '../tests/factories/make-workout-history-session'
 import { GetWorkoutSessionsHistoryUseCase } from './get-workout-sessions-history.use-case'
 
 function makeSession(
@@ -194,5 +198,66 @@ describe('GetWorkoutSessionsHistoryUseCase', () => {
       state: 'PENDING',
       loggedReps: null,
     })
+  })
+})
+
+describe('GetWorkoutSessionsHistoryUseCase pagination and filtering', () => {
+  let sessions: InMemoryWorkoutSessionsRepository
+  let sut: GetWorkoutSessionsHistoryUseCase
+  beforeEach(async () => {
+    sessions = new InMemoryWorkoutSessionsRepository()
+    const workout = await new InMemoryWorkoutsRepository().create({
+      id: 'workout',
+      name: 'Workout',
+      user: { connect: { id: 'user' } },
+    })
+    const exercise = await makeExercise(new InMemoryExercisesRepository())
+    for (let day = 1; day <= 3; day += 1) {
+      sessions.historyItems.push({
+        ...makeWorkoutHistorySession(workout, exercise),
+        id: String(day),
+        date: new Date(2026, 0, day, 12),
+        status: day === 2 ? 'INCOMPLETE' : 'COMPLETED',
+      })
+    }
+    sessions.historyItems.push({
+      ...makeWorkoutHistorySession(workout, exercise),
+      userId: 'other',
+    })
+    sut = new GetWorkoutSessionsHistoryUseCase(sessions)
+  })
+  it('should paginate newest-first without leaking another user history', async () => {
+    const result = await sut.execute({ userId: 'user', page: 2, pageSize: 2 })
+    expect(result).toMatchObject({
+      page: 2,
+      pageSize: 2,
+      total: 3,
+      totalPages: 2,
+    })
+    expect(result.sessions.map((session) => session.id)).toEqual(['1'])
+  })
+  it('should combine status, date range and workout filters', async () => {
+    const result = await sut.execute({
+      userId: 'user',
+      page: 1,
+      pageSize: 10,
+      workoutId: 'workout',
+      status: 'INCOMPLETE',
+      from: new Date(2026, 0, 2),
+      to: new Date(2026, 0, 3),
+    })
+    expect(result.total).toBe(1)
+    expect(result.sessions[0]?.id).toBe('2')
+  })
+  it('should return an empty result and zero pages for unmatched filters', async () => {
+    const result = await sut.execute({
+      userId: 'user',
+      page: 1,
+      pageSize: 10,
+      workoutId: 'missing',
+    })
+    expect(result.total).toBe(0)
+    expect(result.totalPages).toBe(0)
+    expect(result.sessions).toEqual([])
   })
 })

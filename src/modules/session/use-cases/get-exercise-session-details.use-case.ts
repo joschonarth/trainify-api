@@ -37,8 +37,14 @@ interface GetExerciseSessionDetailsResponse {
 
 export class GetExerciseSessionDetailsUseCase {
   constructor(
-    private readonly exerciseSessionsRepository: ExerciseSessionsRepository,
-    private readonly workoutSessionsRepository: WorkoutSessionsRepository
+    private readonly exerciseSessionsRepository: Pick<
+      ExerciseSessionsRepository,
+      'findByIdWithLogs'
+    >,
+    private readonly workoutSessionsRepository: Pick<
+      WorkoutSessionsRepository,
+      'findById'
+    >
   ) {}
 
   async execute({

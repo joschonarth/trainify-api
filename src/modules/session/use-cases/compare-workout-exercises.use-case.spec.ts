@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { InMemoryUsersRepository } from '@/modules/user/repositories/in-memory/in-memory-users.repository'
 import { makeUser } from '@/modules/user/tests/factories/make-user'
+import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 import { InMemoryWorkoutSessionsRepository } from '../repositories/in-memory/in-memory-workout-sessions.repository'
 import { makeMeasuredSession } from '../tests/factories/make-measured-session'
 import { CompareWorkoutExercisesUseCase } from './compare-workout-exercises.use-case'
@@ -46,5 +47,67 @@ describe('CompareWorkoutExercisesUseCase duration volume', () => {
       result.progress[0]?.sessions.map((session) => session.volume)
     ).toEqual([expected, expected])
     expect(result.progress[0]?.progress.volumeDiff).toBe(0)
+  })
+  it('should reject insufficient comparable history', async () => {
+    await expect(
+      sut.execute({ userId: 'user', workoutId: 'workout' })
+    ).rejects.toBeInstanceOf(ResourceNotFoundError)
+    sessions.details.set(
+      'only',
+      makeMeasuredSession('only', new Date(), 'REPS')
+    )
+    await expect(
+      sut.execute({ userId: 'user', workoutId: 'workout' })
+    ).rejects.toBeInstanceOf(ResourceNotFoundError)
+  })
+  it('should exclude another user and skipped sessions without logs from comparison', async () => {
+    sessions.details.set(
+      'current',
+      makeMeasuredSession('current', new Date(), 'REPS')
+    )
+    sessions.details.set('other', {
+      ...makeMeasuredSession('other', new Date('2026-05-17T12:00:00Z'), 'REPS'),
+      userId: 'other',
+    })
+    sessions.details.set('skipped', {
+      ...makeMeasuredSession(
+        'skipped',
+        new Date('2026-05-17T12:00:00Z'),
+        'REPS'
+      ),
+      status: 'SKIPPED',
+      exerciseSessions: [],
+    })
+    await expect(
+      sut.execute({ userId: 'user', workoutId: 'workout' })
+    ).rejects.toBeInstanceOf(ResourceNotFoundError)
+  })
+  it('should compute growth from different executed performances', async () => {
+    const current = makeMeasuredSession('current', new Date(), 'REPS', 8400)
+    const exercise = current.exerciseSessions[0]
+    const log = exercise?.logs[0]
+    if (!log) {
+      throw new Error('Missing fixture')
+    }
+    log.sets = 3
+    log.reps = 40
+    log.weight = 70
+    sessions.details.set('current', current)
+    sessions.details.set(
+      'previous',
+      makeMeasuredSession(
+        'previous',
+        new Date('2026-06-10T12:00:00Z'),
+        'REPS',
+        3600
+      )
+    )
+    const result = await sut.execute({ userId: 'user', workoutId: 'workout' })
+    expect(result.progress[0]?.progress).toEqual({
+      setsDiff: 1,
+      repsDiff: 10,
+      weightDiff: 10,
+      volumeDiff: 4800,
+    })
   })
 })
