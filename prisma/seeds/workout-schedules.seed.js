@@ -1,8 +1,4 @@
-import { PrismaClient } from 'generated/prisma'
-
-const prisma = new PrismaClient()
-
-export async function seedWorkoutSchedule(userId, workouts) {
+export async function seedWorkoutSchedule(prisma, userId, workouts) {
   console.log('📅 Seeding workout schedule...')
 
   if (!userId) {

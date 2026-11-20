@@ -6,6 +6,7 @@ enum BadgeType {
 
 model Badge {
   id          String    @id @default(cuid())
+  code        String?   @unique
   name        String    @unique
   description String
   type        BadgeType

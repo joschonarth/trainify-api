@@ -4,6 +4,7 @@ import type { Badge } from 'generated/prisma'
 export function makeBadge(overrides: Partial<Badge> = {}): Badge {
   return {
     id: randomUUID(),
+    code: randomUUID(),
     name: 'First workout',
     description: 'Complete a workout.',
     type: 'WORKOUT',

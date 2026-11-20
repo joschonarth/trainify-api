@@ -1,34 +1,37 @@
-import { BadgeType, PrismaClient } from 'generated/prisma'
-
-const prisma = new PrismaClient()
+import { BadgeType } from '../../generated/prisma/index.js'
 
 // 🏋️‍♂️ Badges baseadas em treinos completados
 const workoutBadges = [
   {
+    code: 'WORKOUT_1',
     name: 'Primeiro Passo',
     description: 'Completar o 1º treino',
     type: BadgeType.WORKOUT,
     milestone: 1,
   },
   {
+    code: 'WORKOUT_10',
     name: 'Aquecimento',
     description: 'Completar 10 treinos',
     type: BadgeType.WORKOUT,
     milestone: 10,
   },
   {
+    code: 'WORKOUT_25',
     name: 'Ritmo Constante',
     description: 'Completar 25 treinos',
     type: BadgeType.WORKOUT,
     milestone: 25,
   },
   {
+    code: 'WORKOUT_50',
     name: 'Persistente',
     description: 'Completar 50 treinos',
     type: BadgeType.WORKOUT,
     milestone: 50,
   },
   {
+    code: 'WORKOUT_100',
     name: 'Veterano',
     description: 'Completar 100 treinos',
     type: BadgeType.WORKOUT,
@@ -39,30 +42,35 @@ const workoutBadges = [
 // 💪 Badges baseadas em exercícios concluídos
 const exerciseBadges = [
   {
+    code: 'EXERCISE_10',
     name: 'Força Inicial',
     description: 'Completar 10 exercícios',
     type: BadgeType.EXERCISE,
     milestone: 10,
   },
   {
+    code: 'EXERCISE_25',
     name: 'Constância',
     description: 'Completar 25 exercícios',
     type: BadgeType.EXERCISE,
     milestone: 25,
   },
   {
+    code: 'EXERCISE_50',
     name: 'Explosão de Energia',
     description: 'Completar 50 exercícios',
     type: BadgeType.EXERCISE,
     milestone: 50,
   },
   {
+    code: 'EXERCISE_100',
     name: 'Máquina de Treinar',
     description: 'Completar 100 exercícios',
     type: BadgeType.EXERCISE,
     milestone: 100,
   },
   {
+    code: 'EXERCISE_500',
     name: 'Lenda do Treino',
     description: 'Completar 500 exercícios',
     type: BadgeType.EXERCISE,
@@ -73,30 +81,35 @@ const exerciseBadges = [
 // 🔥 Badges baseadas em streaks (dias consecutivos)
 const streakBadges = [
   {
+    code: 'STREAK_3',
     name: 'Começo da Jornada',
     description: 'Treinar 3 dias seguidos',
     type: BadgeType.STREAK,
     milestone: 3,
   },
   {
+    code: 'STREAK_7',
     name: 'Consistente',
     description: 'Treinar 7 dias seguidos',
     type: BadgeType.STREAK,
     milestone: 7,
   },
   {
+    code: 'STREAK_14',
     name: 'Foco Total',
     description: 'Treinar 14 dias seguidos',
     type: BadgeType.STREAK,
     milestone: 14,
   },
   {
+    code: 'STREAK_30',
     name: 'Imparável',
     description: 'Treinar 30 dias seguidos',
     type: BadgeType.STREAK,
     milestone: 30,
   },
   {
+    code: 'STREAK_100',
     name: 'Lenda da Disciplina',
     description: 'Treinar 100 dias seguidos',
     type: BadgeType.STREAK,
@@ -104,89 +117,48 @@ const streakBadges = [
   },
 ]
 
-export async function seedBadges() {
+export async function seedBadges(prisma) {
   console.log('🏅 Starting badges seed...')
 
   const staticBadges = [...workoutBadges, ...exerciseBadges, ...streakBadges]
 
   for (const badge of staticBadges) {
-    await prisma.badge.upsert({
-      where: { name: badge.name },
-      update: {},
-      create: badge,
+    const existing = await prisma.badge.findUnique({
+      where: { code: badge.code },
     })
+    // Adopt pre-code catalog rows once, retaining IDs and user awards.
+    const legacy = existing
+      ? null
+      : await prisma.badge.findUnique({ where: { name: badge.name } })
+    if (legacy?.code && legacy.code !== badge.code) {
+      throw new Error(
+        `Badge name already belongs to another code: ${badge.code}`
+      )
+    }
+    const current = existing ?? legacy
+    if (
+      current &&
+      (current.type !== badge.type || current.milestone !== badge.milestone)
+    ) {
+      throw new Error(
+        `Badge rule change rejected for ${badge.code}. Create a new badge code or apply an explicit data migration with an award policy.`
+      )
+    }
+    if (current) {
+      await prisma.badge.update({
+        where: { id: current.id },
+        data: {
+          code: badge.code,
+          name: badge.name,
+          description: badge.description,
+        },
+      })
+    } else {
+      await prisma.badge.create({ data: badge })
+    }
   }
 
   const allBadges = await prisma.badge.findMany()
 
   console.log(`✅ Successfully inserted ${allBadges.length} badges!`)
-
-  const user = await prisma.user.findUnique({
-    where: { email: 'joao@example.com' },
-  })
-
-  if (!user) {
-    throw new Error('User not found!')
-  }
-
-  const totalWorkouts = await prisma.workoutSession.count({
-    where: { userId: user.id, status: 'COMPLETED' },
-  })
-
-  const totalExercises = await prisma.exerciseSession.count({
-    where: { completed: true, workoutSession: { userId: user.id } },
-  })
-
-  const streak = await prisma.userStreak.findUnique({
-    where: { userId: user.id },
-  })
-
-  const bestStreak = streak?.bestStreak ?? 0
-
-  console.log({
-    totalWorkouts,
-    totalExercises,
-    bestStreak,
-  })
-
-  const badgesToUnlock = allBadges.filter((badge) => {
-    if (badge.type === 'WORKOUT') {
-      return totalWorkouts >= badge.milestone
-    }
-    if (badge.type === 'EXERCISE') {
-      return totalExercises >= badge.milestone
-    }
-    if (badge.type === 'STREAK') {
-      return bestStreak >= badge.milestone
-    }
-    return false
-  })
-
-  const firstSession = await prisma.workoutSession.findFirst({
-    where: { userId: user.id },
-    orderBy: { date: 'asc' },
-  })
-  const baseDate = firstSession?.date ?? new Date()
-
-  for (const badge of badgesToUnlock) {
-    const unlockedAt = new Date(baseDate)
-    unlockedAt.setDate(unlockedAt.getDate() + badge.milestone)
-
-    await prisma.userBadge.upsert({
-      where: {
-        userId_badgeId: {
-          userId: user.id,
-          badgeId: badge.id,
-        },
-      },
-      update: {},
-      create: {
-        userId: user.id,
-        badgeId: badge.id,
-        unlockedAt,
-      },
-    })
-  }
-
-  console.log(`🎉 Unlocked initial badges for user ${user.name}`)
 }

@@ -1,8 +1,4 @@
-import { PrismaClient } from 'generated/prisma'
-
-export const prisma = new PrismaClient()
-
-export async function seedUser() {
+export async function seedUser(prisma) {
   console.log('👤 Seeding user...')
 
   const user = await prisma.user.upsert({
@@ -10,6 +6,7 @@ export async function seedUser() {
     update: {},
     create: {
       name: 'João Teste',
+      timezone: 'America/Sao_Paulo',
       email: 'joao@example.com',
       password: '$2b$06$z1egRKOP6/a/uQh/yPewO.k0LbZbIiqYLuFlc6Z52HrRUC60dPDyS',
       birthdate: new Date('2004-04-19'),

@@ -1,8 +1,4 @@
-import { PrismaClient } from 'generated/prisma'
-
-export const prisma = new PrismaClient()
-
-export async function seedWorkouts(userId) {
+export async function seedWorkouts(prisma, userId) {
   console.log('🏋️ Seeding workouts...')
 
   const workouts = [

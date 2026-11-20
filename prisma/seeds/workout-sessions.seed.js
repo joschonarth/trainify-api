@@ -1,28 +1,20 @@
-import { PrismaClient } from 'generated/prisma'
+import { dayjs } from './dates.js'
 
-const prisma = new PrismaClient()
-
-async function seedWorkoutSessionsForSchedule(schedule, user) {
+async function seedWorkoutSessionsForSchedule(prisma, schedule, user) {
   const workout = schedule.workout
-  const today = new Date()
+  const today = dayjs.utc(
+    dayjs(user.createdAt).tz(user.timezone).format('YYYY-MM-DD')
+  )
+  const daysAgo = (today.day() - schedule.dayOfWeek + 7) % 7 || 7
+  const targetDate = today.subtract(daysAgo, 'day')
 
   for (let week = 1; week <= 8; week++) {
-    const sessionDate = new Date(today)
-    const targetDate = new Date(today)
-    const dayDiff = schedule.dayOfWeek - today.getDay()
-    targetDate.setDate(today.getDate() + dayDiff)
+    const localDate = targetDate
+      .subtract((8 - week) * 7, 'day')
+      .format('YYYY-MM-DD')
+    const sessionDate = dayjs.tz(localDate, user.timezone).toDate()
 
-    if (targetDate > today) {
-      targetDate.setDate(targetDate.getDate() - 7)
-    }
-
-    sessionDate.setDate(targetDate.getDate() - (8 - week) * 7)
-
-    const startHour = 18
-    const startMin = Math.floor(Math.random() * 30)
-
-    const startedAt = new Date(sessionDate)
-    startedAt.setHours(startHour, startMin, 0)
+    const startedAt = dayjs.tz(`${localDate} 18:15`, user.timezone).toDate()
 
     const endedAt = new Date(startedAt)
     endedAt.setMinutes(endedAt.getMinutes() + 40)
@@ -33,6 +25,13 @@ async function seedWorkoutSessionsForSchedule(schedule, user) {
     console.log(
       `📌 Creating COMPLETED session for workout "${workout.name}" on ${sessionDate.toDateString()}`
     )
+
+    const existingSession = await prisma.workoutSession.findFirst({
+      where: { userId: user.id, workoutId: workout.id, date: sessionDate },
+    })
+    if (existingSession) {
+      continue
+    }
 
     await prisma.workoutSession.create({
       data: {
@@ -45,62 +44,73 @@ async function seedWorkoutSessionsForSchedule(schedule, user) {
         duration,
 
         exerciseSessions: {
-          create: workout.exercises.map((we, index) => {
-            const setsProgression = we.defaultSets
-              ? we.defaultSets + Math.floor(week / 3)
-              : 3
-            const repsProgression = we.defaultReps ? we.defaultReps + week : 12
-            const weightProgression = we.defaultWeight
-              ? we.defaultWeight + week * 2
-              : 0
+          create: [...workout.exercises]
+            .sort(
+              (left, right) =>
+                left.position - right.position ||
+                left.id.localeCompare(right.id)
+            )
+            .map((we, index) => {
+              const setsProgression = we.defaultSets
+                ? we.defaultSets + Math.floor(week / 3)
+                : 3
+              const repsProgression = we.defaultReps
+                ? we.defaultReps + week
+                : 12
+              const weightProgression = we.defaultWeight
+                ? we.defaultWeight + week * 2
+                : 0
 
-            const plannedSets = setsProgression + Math.floor(Math.random() * 2)
-            const plannedReps = repsProgression + Math.floor(Math.random() * 3)
-            const plannedWeight =
-              weightProgression + Math.floor(Math.random() * 3)
+              const plannedSets = setsProgression
+              const plannedReps = repsProgression
+              const plannedWeight = weightProgression
 
-            const exStart = new Date(startedAt)
-            exStart.setMinutes(exStart.getMinutes() + index * 7)
-            const exEnd = new Date(exStart)
-            exEnd.setMinutes(exEnd.getMinutes() + 5)
+              const exStart = new Date(startedAt)
+              exStart.setMinutes(exStart.getMinutes() + index * 7)
+              const exEnd = new Date(exStart)
+              exEnd.setMinutes(exEnd.getMinutes() + 5)
 
-            const volume = plannedSets * plannedReps * (plannedWeight || 1)
+              const volume =
+                we.exercise.measurement === 'DURATION'
+                  ? 0
+                  : plannedSets * plannedReps * (plannedWeight ?? 0)
 
-            return {
-              exerciseId: we.exerciseId,
-              completed: true,
-              plannedSets,
-              plannedReps,
-              plannedWeight,
-              startedAt: exStart,
-              endedAt: exEnd,
-              duration: Math.floor(
-                (exEnd.getTime() - exStart.getTime()) / 1000
-              ),
-              logs: {
-                create: {
-                  sets: plannedSets,
-                  reps: plannedReps,
-                  weight: plannedWeight,
-                  volume,
-                  description: 'A última repetição foi desafiadora.',
-                  userId: user.id,
-                  exerciseId: we.exerciseId,
-                  date: exEnd,
+              return {
+                exerciseId: we.exerciseId,
+                completed: true,
+                position: we.position,
+                plannedSets,
+                plannedReps,
+                plannedWeight,
+                startedAt: exStart,
+                endedAt: exEnd,
+                duration: Math.floor(
+                  (exEnd.getTime() - exStart.getTime()) / 1000
+                ),
+                logs: {
+                  create: {
+                    sets: plannedSets,
+                    reps: plannedReps,
+                    weight: plannedWeight,
+                    volume,
+                    description: 'A última repetição foi desafiadora.',
+                    userId: user.id,
+                    exerciseId: we.exerciseId,
+                    date: exEnd,
+                  },
                 },
-              },
-            }
-          }),
+              }
+            }),
         },
       },
     })
   }
 }
 
-async function seedUserStreaks(userId) {
+async function seedUserStreaks(prisma, userId, timezone) {
   const completedSessions = await prisma.workoutSession.findMany({
     where: { userId, status: 'COMPLETED' },
-    orderBy: { date: 'asc' },
+    orderBy: { endedAt: 'asc' },
   })
 
   if (completedSessions.length === 0) {
@@ -113,14 +123,21 @@ async function seedUserStreaks(userId) {
   let lastDate = null
 
   for (const session of completedSessions) {
-    const sessionDate = new Date(session.date)
-    sessionDate.setHours(0, 0, 0, 0)
+    const key = dayjs(session.endedAt).tz(timezone).format('YYYY-MM-DD')
+    const sessionDate = dayjs.tz(key, timezone).toDate()
+    if (lastDate && sessionDate.getTime() === lastDate.getTime()) {
+      continue
+    }
 
     if (lastDate) {
-      const diffDays =
-        (sessionDate.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24)
+      const diffDays = dayjs
+        .utc(key)
+        .diff(
+          dayjs.utc(dayjs(lastDate).tz(timezone).format('YYYY-MM-DD')),
+          'day'
+        )
 
-      if (diffDays <= 1) {
+      if (diffDays === 1) {
         currentStreak++
       } else {
         currentStreak = 1
@@ -145,7 +162,17 @@ async function seedUserStreaks(userId) {
     })
   }
 
-  const lastWorkout = completedSessions.at(-1)?.date
+  const lastWorkout = completedSessions.at(-1)?.endedAt
+  if (
+    dayjs
+      .utc(dayjs().tz(timezone).format('YYYY-MM-DD'))
+      .diff(
+        dayjs.utc(dayjs(lastWorkout).tz(timezone).format('YYYY-MM-DD')),
+        'day'
+      ) > 1
+  ) {
+    currentStreak = 0
+  }
 
   await prisma.userStreak.upsert({
     where: { userId },
@@ -167,10 +194,10 @@ async function seedUserStreaks(userId) {
   )
 }
 
-export async function seedWorkoutSessions() {
+export async function seedWorkoutSessions(prisma, userId) {
   console.log('🔥 Seeding completed workout sessions with progression...')
 
-  const user = await prisma.user.findFirst()
+  const user = await prisma.user.findUnique({ where: { id: userId } })
   if (!user) {
     console.error('❌ User not found.')
     return
@@ -190,11 +217,11 @@ export async function seedWorkoutSessions() {
   })
 
   for (const schedule of schedules) {
-    await seedWorkoutSessionsForSchedule(schedule, user)
+    await seedWorkoutSessionsForSchedule(prisma, schedule, user)
   }
 
   console.log('✅ Completed workout sessions seeded with progression!')
 
   console.log('🔥 Seeding user streaks...')
-  await seedUserStreaks(user.id)
+  await seedUserStreaks(prisma, user.id, user.timezone)
 }

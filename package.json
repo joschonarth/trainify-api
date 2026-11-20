@@ -20,7 +20,8 @@
     "seed:reset": "node prisma/seeds/reset-and-seed.js",
     "check": "ultracite check",
     "fix": "ultracite fix",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "seed:catalog": "node prisma/seeds/catalog.js"
   },
   "keywords": [],
   "author": "João Otávio Schonarth",

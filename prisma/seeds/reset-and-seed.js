@@ -1,6 +1,10 @@
+import 'dotenv/config'
 import { execSync } from 'node:child_process'
 
 try {
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('Demo reset is disabled in production.')
+  }
   console.log('🌱 Resetando o banco de dados...')
   execSync('npx prisma migrate reset --force', { stdio: 'inherit' })
 
