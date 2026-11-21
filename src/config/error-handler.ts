@@ -18,7 +18,7 @@ export function errorHandler(
     isResponseSerializationError(error)
   ) {
     request.log.error(
-      { requestId: request.id, code: error.code },
+      { err: error, requestId: request.id, code: error.code },
       'Response serialization failed'
     )
 
@@ -77,7 +77,7 @@ export function errorHandler(
     })
   }
 
-  request.log.error({ requestId: request.id }, 'Unhandled error')
+  request.log.error({ err: error, requestId: request.id }, 'Unhandled error')
 
   return reply.status(500).send({
     message: 'Internal server error.',
