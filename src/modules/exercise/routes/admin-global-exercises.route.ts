@@ -1,8 +1,8 @@
-import type { FastifyInstance } from 'fastify'
+import type { FastifyInstance, FastifyRequest } from 'fastify'
 import { ExerciseCategory, ExerciseType, Measurement } from 'generated/prisma'
 import { z } from 'zod'
 
-import { requireRole } from '@/shared/middlewares/require-role'
+import { requirePermission } from '@/shared/middlewares/require-permission'
 import { verifyJwt } from '@/shared/middlewares/verify-jwt'
 
 import { PrismaExercisesRepository } from '../repositories/prisma/prisma-exercises.repository'
@@ -41,15 +41,45 @@ const patch = z
   .refine((value) => Object.keys(value).length > 0)
 const security = [{ bearerAuth: [] }, { cookieAuth: [] }]
 const commonErrors = {
+  400: z.object({ message: z.string() }),
   401: z.object({ message: z.string() }),
   403: z.object({ message: z.string() }),
 }
 
 export function adminGlobalExercisesRoute(app: FastifyInstance) {
+  const createdTargets = new WeakMap<FastifyRequest, string>()
+  app.addHook('onResponse', (request, reply, done) => {
+    if (request.method !== 'POST' && request.method !== 'PATCH') {
+      return done()
+    }
+    const route = request.routeOptions.url
+    let action = request.method === 'PATCH' ? 'update' : 'create'
+    if (route?.endsWith('/archive')) {
+      action = 'archive'
+    } else if (route?.endsWith('/restore')) {
+      action = 'restore'
+    }
+    request.log.info(
+      {
+        event: 'admin.global-exercises.mutation',
+        actorId: request.user?.sub ?? null,
+        targetId:
+          createdTargets.get(request) ??
+          (request.params as { exerciseId?: string })?.exerciseId ??
+          null,
+        action,
+        result: reply.statusCode < 400 ? 'success' : 'failure',
+        statusCode: reply.statusCode,
+        requestId: request.id,
+      },
+      'Administrative global exercise mutation'
+    )
+    done()
+  })
   app.get(
     '/admin/exercises',
     {
-      onRequest: [verifyJwt, requireRole('ADMIN')],
+      onRequest: [verifyJwt, requirePermission('global-exercises:read')],
       schema: {
         security,
         tags: ['Admin Exercises'],
@@ -82,7 +112,7 @@ export function adminGlobalExercisesRoute(app: FastifyInstance) {
   app.get(
     '/admin/exercises/:exerciseId',
     {
-      onRequest: [verifyJwt, requireRole('ADMIN')],
+      onRequest: [verifyJwt, requirePermission('global-exercises:read')],
       schema: {
         security,
         tags: ['Admin Exercises'],
@@ -103,7 +133,7 @@ export function adminGlobalExercisesRoute(app: FastifyInstance) {
   app.post(
     '/admin/exercises',
     {
-      onRequest: [verifyJwt, requireRole('ADMIN')],
+      onRequest: [verifyJwt, requirePermission('global-exercises:write')],
       schema: {
         security,
         tags: ['Admin Exercises'],
@@ -116,16 +146,19 @@ export function adminGlobalExercisesRoute(app: FastifyInstance) {
         },
       },
     },
-    async (request, reply) =>
-      reply
-        .code(201)
-        .send(await makeUseCase().create(request.body as z.infer<typeof body>))
+    async (request, reply) => {
+      const result = await makeUseCase().create(
+        request.body as z.infer<typeof body>
+      )
+      createdTargets.set(request, result.exercise.id)
+      return reply.code(201).send(result)
+    }
   )
 
   app.patch(
     '/admin/exercises/:exerciseId',
     {
-      onRequest: [verifyJwt, requireRole('ADMIN')],
+      onRequest: [verifyJwt, requirePermission('global-exercises:write')],
       schema: {
         security,
         tags: ['Admin Exercises'],
@@ -155,7 +188,7 @@ export function adminGlobalExercisesRoute(app: FastifyInstance) {
     app.post(
       `/admin/exercises/:exerciseId/${action}`,
       {
-        onRequest: [verifyJwt, requireRole('ADMIN')],
+        onRequest: [verifyJwt, requirePermission('global-exercises:write')],
         schema: {
           security,
           tags: ['Admin Exercises'],
