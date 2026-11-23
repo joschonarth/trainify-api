@@ -1,0 +1,48 @@
+enum SessionEventPublicationStatus {
+  PENDING
+  PUBLISHED
+}
+
+enum SessionEventProcessingStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+model SessionEventOutbox {
+  eventId       String                        @id @db.Uuid
+  type          String
+  sessionId     String
+  envelope      Json
+  createdAt     DateTime                      @default(now())
+  status        SessionEventPublicationStatus @default(PENDING)
+  attempts      Int                           @default(0)
+  nextAttemptAt DateTime                      @default(now())
+  leaseToken    String?                       @db.Uuid
+  leaseUntil    DateTime?
+  lastError     String?
+  publishedAt   DateTime?
+
+  @@unique([type, sessionId])
+  @@index([status, nextAttemptAt, leaseUntil])
+  @@map("session_event_outbox")
+}
+
+model SessionEventProcessing {
+  eventId        String                       @id @db.Uuid
+  sessionId      String
+  userId         String
+  status         SessionEventProcessingStatus @default(PENDING)
+  attempts       Int                          @default(0)
+  leaseToken     String?                      @db.Uuid
+  leaseUntil     DateTime?
+  lastError      String?
+  createdAt      DateTime                     @default(now())
+  updatedAt      DateTime                     @updatedAt
+  completedAt    DateTime?
+  unlockedBadges Json?
+
+  @@index([status, leaseUntil])
+  @@map("session_event_processings")
+}

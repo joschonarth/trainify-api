@@ -33,6 +33,23 @@ export class PrismaSessionCompletionUnitOfWork
         exerciseSessions,
         exerciseLogs,
         completions,
+        outbox: {
+          async create(event) {
+            await transaction.sessionEventOutbox.create({
+              data: {
+                eventId: event.eventId,
+                type: event.type,
+                sessionId: event.data.sessionId,
+                envelope: event,
+              },
+            })
+          },
+        },
+        processings: {
+          async createPending(identity) {
+            await transaction.sessionEventProcessing.create({ data: identity })
+          },
+        },
       })
     })
   }
