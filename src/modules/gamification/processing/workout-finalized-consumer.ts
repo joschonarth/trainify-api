@@ -1,8 +1,15 @@
 import { setTimeout as sleep } from 'node:timers/promises'
 import type { ConfirmChannel, ConsumeMessage } from 'amqplib'
 import type { FastifyBaseLogger } from 'fastify'
-import type { RabbitSessionEventPublisher } from '@/modules/session/events/publisher/rabbit-session-event-publisher'
-import { workoutFinalizedV1Schema } from '@/modules/session/events/workout-finalized-v1'
+import type { RabbitMqClient } from '@/infra/rabbitmq/rabbitmq-client'
+import {
+  WORKOUT_FINALIZED_DLQ,
+  WORKOUT_FINALIZED_QUEUE,
+} from '@/infra/rabbitmq/workout-finalized-topology'
+import {
+  type WorkoutFinalizedV1,
+  workoutFinalizedV1Schema,
+} from '@/modules/session/events/workout-finalized-v1'
 import type { ProcessWorkoutFinalized } from './process-workout-finalized'
 
 function decode(message: ConsumeMessage): unknown {
@@ -18,8 +25,8 @@ export class WorkoutFinalizedConsumer {
 
   constructor(
     private readonly broker: Pick<
-      RabbitSessionEventPublisher,
-      'ready' | 'open' | 'close' | 'consume' | 'publishDeadLetter'
+      RabbitMqClient,
+      'ready' | 'open' | 'close' | 'consume' | 'publish'
     >,
     private readonly handler: Pick<ProcessWorkoutFinalized, 'execute'>,
     private readonly log: Pick<FastifyBaseLogger, 'warn' | 'error'>,
@@ -41,6 +48,7 @@ export class WorkoutFinalizedConsumer {
           return
         }
         const { channel, consumerTag } = await this.broker.consume(
+          WORKOUT_FINALIZED_QUEUE,
           this.config.prefetch,
           (deliveryChannel, message) => {
             if (!message) {
@@ -111,7 +119,7 @@ export class WorkoutFinalizedConsumer {
       if (outcome === 'retry_scheduled') {
         this.log.warn(fields, 'Workout event processing will retry')
       } else if (outcome !== 'waiting') {
-        const sent = await this.broker.publishDeadLetter(
+        const sent = await this.publishDeadLetter(
           outcome,
           outcome === 'invalid_event' ? undefined : event
         )
@@ -131,5 +139,20 @@ export class WorkoutFinalizedConsumer {
       // Keep the original unsettled during retry and until a DLQ publication is confirmed.
       await this.wait(signal)
     }
+  }
+
+  private publishDeadLetter(reason: string, event?: WorkoutFinalizedV1) {
+    return this.broker.publish(
+      '',
+      WORKOUT_FINALIZED_DLQ,
+      { reason, event },
+      event
+        ? {
+            messageId: event.eventId,
+            correlationId: event.correlationId,
+            type: event.type,
+          }
+        : {}
+    )
   }
 }

@@ -1,6 +1,7 @@
 import type { ConfirmChannel, ConsumeMessage } from 'amqplib'
 import { describe, expect, it, vi } from 'vitest'
-import type { RabbitSessionEventPublisher } from '@/modules/session/events/publisher/rabbit-session-event-publisher'
+import type { RabbitMqClient } from '@/infra/rabbitmq/rabbitmq-client'
+import { WORKOUT_FINALIZED_DLQ } from '@/infra/rabbitmq/workout-finalized-topology'
 import { WorkoutFinalizedConsumer } from './workout-finalized-consumer'
 
 describe('WorkoutFinalizedConsumer', () => {
@@ -23,13 +24,14 @@ describe('WorkoutFinalizedConsumer', () => {
       open: vi.fn().mockResolvedValue(undefined),
       close: vi.fn().mockResolvedValue(undefined),
       consume: (
+        _queue: string,
         _prefetch: number,
-        handle: Parameters<RabbitSessionEventPublisher['consume']>[1]
+        handle: Parameters<RabbitMqClient['consume']>[2]
       ) => {
         handle(channel, incoming)
         return Promise.resolve({ channel, consumerTag: 'test' })
       },
-      publishDeadLetter: deadLetter,
+      publish: deadLetter,
     }
     const handler = { execute: vi.fn() }
     const consumer = new WorkoutFinalizedConsumer(
@@ -42,7 +44,12 @@ describe('WorkoutFinalizedConsumer', () => {
     const running = consumer.run(stop.signal)
     try {
       await vi.waitFor(() => expect(deadLetter).toHaveBeenCalledTimes(2))
-      expect(deadLetter).toHaveBeenCalledWith('invalid_event', undefined)
+      expect(deadLetter).toHaveBeenCalledWith(
+        '',
+        WORKOUT_FINALIZED_DLQ,
+        { reason: 'invalid_event', event: undefined },
+        {}
+      )
       expect(handler.execute).not.toHaveBeenCalled()
       expect(channel.ack).not.toHaveBeenCalled()
       pendingConfirm.resolve('confirmed')
