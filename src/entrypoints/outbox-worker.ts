@@ -52,10 +52,7 @@ async function startOutboxWorker() {
   })
 
   async function makeConsumer() {
-    if (
-      process.env.NODE_ENV !== 'test' ||
-      process.env.GAMIFICATION_CONSUMER_ENABLED !== 'true'
-    ) {
+    if (process.env.GAMIFICATION_CONSUMER_ENABLED !== 'true') {
       return
     }
     const settings = consumerConfigSchema.parse(process.env)

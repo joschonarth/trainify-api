@@ -1,12 +1,11 @@
 import { randomUUID } from 'node:crypto'
-import { type Badge, WorkoutSessionStatus } from 'generated/prisma'
-import type { UnlockAllBadgesUseCase } from '@/modules/gamification/badge/use-cases/unlock-all-badges.use-case'
-import type { UpdateUserStreakUseCase } from '@/modules/gamification/streak/use-cases/update-user-streak.use-case'
+import { WorkoutSessionStatus } from 'generated/prisma'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 import { calculateVolume } from '@/shared/utils/calculate-volume'
 import { DuplicateExerciseCompletionError } from '../errors/duplicate-exercise-completion.error'
 import { WorkoutSessionAlreadyCompletedError } from '../errors/workout-session-already-completed.error'
 import {
+  type SessionGamification,
   WORKOUT_FINALIZED_V1,
   type WorkoutFinalizedV1,
 } from '../events/workout-finalized-v1'
@@ -37,7 +36,7 @@ interface CompleteWorkoutSessionRequest {
 
 interface CompleteWorkoutSessionResponse {
   session: Awaited<ReturnType<WorkoutSessionsRepository['findByIdWithWorkout']>>
-  unlockedBadges: Badge[]
+  gamification: SessionGamification
 }
 
 type CompletionExercise = CompleteWorkoutSessionRequest['exercises'][number]
@@ -46,17 +45,7 @@ type ExerciseSessionRecord = Awaited<
 >[number]
 
 export class CompleteWorkoutSessionUseCase {
-  constructor(
-    private readonly unitOfWork: SessionCompletionUnitOfWork,
-    private readonly updateUserStreakUseCase: Pick<
-      UpdateUserStreakUseCase,
-      'execute'
-    >,
-    private readonly unlockAllBadgesUseCase: Pick<
-      UnlockAllBadgesUseCase,
-      'execute'
-    >
-  ) {}
+  constructor(private readonly unitOfWork: SessionCompletionUnitOfWork) {}
 
   private deriveSessionStatus(
     exercises: { completed: boolean }[]
@@ -148,7 +137,7 @@ export class CompleteWorkoutSessionUseCase {
   private async completeInTransaction(
     { userId, sessionId, exercises }: CompleteWorkoutSessionRequest,
     repositories: SessionCompletionRepositories
-  ) {
+  ): Promise<CompleteWorkoutSessionResponse> {
     const session =
       await repositories.workoutSessions.findByIdWithWorkout(sessionId)
 
@@ -160,18 +149,14 @@ export class CompleteWorkoutSessionUseCase {
 
     const completion = await repositories.completions.findBySessionId(sessionId)
     if (completion) {
-      return {
-        session,
-        anyExerciseCompleted: completion.hasActivity,
-        logDate: completion.completedAt,
-        creditDay:
-          completion.businessDate && completion.timezone
-            ? {
-                businessDate: completion.businessDate,
-                timezone: completion.timezone,
-              }
-            : undefined,
+      const gamification = await repositories.processings.findBySessionId(
+        sessionId,
+        userId
+      )
+      if (!gamification) {
+        throw new WorkoutSessionAlreadyCompletedError()
       }
+      return { session, gamification }
     }
 
     this.assertSessionCanBeCompleted(session)
@@ -275,37 +260,23 @@ export class CompleteWorkoutSessionUseCase {
         ...creditDay,
       },
     })
-    await repositories.processings.createPending({ eventId, sessionId, userId })
+    const gamification = await repositories.processings.createPending({
+      eventId,
+      sessionId,
+      userId,
+    })
 
     return {
       session: updatedSession,
-      anyExerciseCompleted,
-      logDate: now,
-      creditDay,
+      gamification,
     }
   }
 
   async execute(
     request: CompleteWorkoutSessionRequest
   ): Promise<CompleteWorkoutSessionResponse> {
-    const result = await this.unitOfWork.execute(
-      request.sessionId,
-      (repositories) => this.completeInTransaction(request, repositories)
+    return await this.unitOfWork.execute(request.sessionId, (repositories) =>
+      this.completeInTransaction(request, repositories)
     )
-
-    if (result.anyExerciseCompleted) {
-      await this.updateUserStreakUseCase.execute({
-        userId: request.userId,
-        logDate: result.logDate,
-        ...(result.creditDay ? { creditDay: result.creditDay } : {}),
-      })
-    }
-
-    // Rewards are recoverable post-commit work; failures do not roll back completion.
-    const { badges } = await this.unlockAllBadgesUseCase.execute({
-      userId: request.userId,
-    })
-
-    return { session: result.session, unlockedBadges: badges }
   }
 }

@@ -24,10 +24,21 @@ export interface SessionEventOutboxRepository {
   create(event: WorkoutFinalizedV1): Promise<void>
 }
 
+export const sessionGamificationSchema = z.object({
+  processingId: z.uuid(),
+  status: z.enum(['PENDING', 'PROCESSING', 'COMPLETED', 'FAILED']),
+})
+
+export type SessionGamification = z.infer<typeof sessionGamificationSchema>
+
 export interface SessionEventProcessingRepository {
   createPending(identity: {
     eventId: string
     sessionId: string
     userId: string
-  }): Promise<void>
+  }): Promise<SessionGamification>
+  findBySessionId(
+    sessionId: string,
+    userId: string
+  ): Promise<SessionGamification | null>
 }

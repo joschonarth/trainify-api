@@ -1,9 +1,6 @@
 import { type ExerciseLog, WorkoutSessionStatus } from 'generated/prisma'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { ExerciseLogsRepository } from '@/modules/exercise/repositories/exercise-logs.repository'
-import { makeBadge } from '@/modules/gamification/badge/tests/factories/make-badge'
-import type { UnlockAllBadgesUseCase } from '@/modules/gamification/badge/use-cases/unlock-all-badges.use-case'
-import type { UpdateUserStreakUseCase } from '@/modules/gamification/streak/use-cases/update-user-streak.use-case'
 import type {
   ExerciseSessionsRepository,
   ExerciseSessionWithLogs,
@@ -16,6 +13,7 @@ import { DuplicateExerciseCompletionError } from '../errors/duplicate-exercise-c
 import { WorkoutSessionAlreadyCompletedError } from '../errors/workout-session-already-completed.error'
 import {
   type SessionEventProcessingRepository,
+  type SessionGamification,
   type WorkoutFinalizedV1,
   workoutFinalizedV1Schema,
 } from '../events/workout-finalized-v1'
@@ -38,14 +36,12 @@ let exerciseSessionsRepository: Pick<
   'findByWorkoutSessionId' | 'update'
 >
 let exerciseLogsRepository: Pick<ExerciseLogsRepository, 'create'>
-let updateUserStreakUseCase: Pick<UpdateUserStreakUseCase, 'execute'>
-let unlockAllBadgesUseCase: Pick<UnlockAllBadgesUseCase, 'execute'>
 let sut: CompleteWorkoutSessionUseCase
 let completions: InMemoryWorkoutSessionCompletionsRepository
 let events: WorkoutFinalizedV1[]
-let processings: Parameters<
+let processings: (Parameters<
   SessionEventProcessingRepository['createPending']
->[0][]
+>[0] & { status: SessionGamification['status'] })[]
 let createPending: SessionEventProcessingRepository['createPending']
 let logs: ExerciseLog[]
 
@@ -108,10 +104,15 @@ describe('CompleteWorkoutSessionUseCase', () => {
     events = []
     processings = []
     logs = []
-    createPending = vi.fn((identity) => {
-      processings.push(identity)
-      return Promise.resolve()
-    })
+    createPending = vi.fn<SessionEventProcessingRepository['createPending']>(
+      (identity) => {
+        processings.push({ ...identity, status: 'PENDING' })
+        return Promise.resolve({
+          processingId: identity.eventId,
+          status: 'PENDING',
+        })
+      }
+    )
 
     workoutSession = {
       id: sessionId,
@@ -186,28 +187,6 @@ describe('CompleteWorkoutSessionUseCase', () => {
       create: vi.fn(createExerciseLog),
     }
 
-    const updateStreak: UpdateUserStreakUseCase['execute'] = async () => ({
-      currentStreak: 1,
-      bestStreak: 1,
-      lastWorkout: null,
-      lastBusinessDate: null,
-      days: [],
-      enabled: true,
-      unit: 'scheduled_training_days',
-      timezone: 'America/Sao_Paulo',
-      activationDate: '2026-01-01',
-    })
-    updateUserStreakUseCase = {
-      execute: vi.fn(updateStreak),
-    }
-
-    const unlockBadges: UnlockAllBadgesUseCase['execute'] = async () => ({
-      badges: [],
-    })
-    unlockAllBadgesUseCase = {
-      execute: vi.fn(unlockBadges),
-    }
-
     completions = new InMemoryWorkoutSessionCompletionsRepository()
     let queue: Promise<unknown> = Promise.resolve()
     const unitOfWork: SessionCompletionUnitOfWork = {
@@ -233,7 +212,22 @@ describe('CompleteWorkoutSessionUseCase', () => {
                   return Promise.resolve()
                 },
               },
-              processings: { createPending },
+              processings: {
+                createPending,
+                findBySessionId(id, ownerId) {
+                  const processing = processings.find(
+                    (item) => item.sessionId === id && item.userId === ownerId
+                  )
+                  return Promise.resolve(
+                    processing
+                      ? {
+                          processingId: processing.eventId,
+                          status: processing.status,
+                        }
+                      : null
+                  )
+                },
+              },
             })
           } catch (error) {
             workoutSession = before.workoutSession
@@ -250,11 +244,7 @@ describe('CompleteWorkoutSessionUseCase', () => {
       },
     }
 
-    sut = new CompleteWorkoutSessionUseCase(
-      unitOfWork,
-      updateUserStreakUseCase,
-      unlockAllBadgesUseCase
-    )
+    sut = new CompleteWorkoutSessionUseCase(unitOfWork)
   })
 
   it('does not create exercise logs for exercises that were not completed', async () => {
@@ -474,8 +464,10 @@ describe('CompleteWorkoutSessionUseCase', () => {
 
     const response = await sut.execute(request)
     expect(response.session?.status).toBe(WorkoutSessionStatus.SKIPPED)
-    expect(response.unlockedBadges).toEqual([])
-    expect(updateUserStreakUseCase.execute).not.toHaveBeenCalled()
+    expect(response.gamification).toEqual({
+      processingId: events[0]?.eventId,
+      status: 'PENDING',
+    })
     expect(exerciseLogsRepository.create).not.toHaveBeenCalled()
     expect(workoutSessionsRepository.update).toHaveBeenCalledTimes(1)
   })
@@ -543,15 +535,10 @@ describe('CompleteWorkoutSessionUseCase', () => {
     expect(exerciseLogsRepository.create).toHaveBeenCalledWith(
       expect.objectContaining({ sets: 2, reps: 30, weight: 60, volume: 0 })
     )
-    expect(updateUserStreakUseCase.execute).toHaveBeenCalledTimes(1)
   })
   afterEach(() => vi.useRealTimers())
 
-  it('should return newly unlocked badges together with the completed session', async () => {
-    const badge = makeBadge()
-    vi.mocked(unlockAllBadgesUseCase.execute).mockResolvedValueOnce({
-      badges: [badge],
-    })
+  it('returns the pending processing identity together with the completed session', async () => {
     const result = await sut.execute({
       userId,
       sessionId,
@@ -564,7 +551,10 @@ describe('CompleteWorkoutSessionUseCase', () => {
         },
       ],
     })
-    expect(result.unlockedBadges).toEqual([badge])
+    expect(result.gamification).toEqual({
+      processingId: events[0]?.eventId,
+      status: 'PENDING',
+    })
     expect(result.session?.status).toBe(WorkoutSessionStatus.COMPLETED)
     expect(completions.items).toHaveLength(1)
     expect(completions.items[0]?.hasActivity).toBe(true)
@@ -597,14 +587,13 @@ describe('CompleteWorkoutSessionUseCase', () => {
       hasActivity: true,
     })
     expect(completions.items[0]?.hasActivity).toBe(true)
-    expect(updateUserStreakUseCase.execute).toHaveBeenCalledTimes(1)
     expect(exerciseLogsRepository.create).not.toHaveBeenCalled()
     await sut.execute(request)
     expect(workoutSessionsRepository.update).toHaveBeenCalledTimes(1)
     expect(exerciseSessionsRepository.update).toHaveBeenCalledTimes(1)
   })
 
-  it('should retry rewards without rewriting completed execution or granting a second activity day', async () => {
+  it('returns the latest persisted processing state without rewriting completed execution', async () => {
     vi.useFakeTimers()
     vi.setSystemTime(new Date('2026-06-10T12:00:00Z'))
     workoutSession.date = new Date('2026-06-10T12:00:00Z')
@@ -620,7 +609,12 @@ describe('CompleteWorkoutSessionUseCase', () => {
         },
       ],
     }
-    await sut.execute(request)
+    const original = await sut.execute(request)
+    const processing = processings[0]
+    if (!processing) {
+      throw new Error('Test processing is missing.')
+    }
+    processing.status = 'COMPLETED'
     const before = structuredClone({
       workoutSession,
       exerciseSessions,
@@ -638,7 +632,10 @@ describe('CompleteWorkoutSessionUseCase', () => {
         },
       ],
     })
-    expect(result.unlockedBadges).toEqual([])
+    expect(result.gamification).toEqual({
+      processingId: original.gamification.processingId,
+      status: 'COMPLETED',
+    })
     expect({
       workoutSession,
       exerciseSessions,
@@ -647,44 +644,7 @@ describe('CompleteWorkoutSessionUseCase', () => {
     expect(exerciseLogsRepository.create).toHaveBeenCalledTimes(1)
     expect(exerciseSessionsRepository.update).toHaveBeenCalledTimes(1)
     expect(workoutSessionsRepository.update).toHaveBeenCalledTimes(1)
-    expect(updateUserStreakUseCase.execute).toHaveBeenLastCalledWith({
-      userId,
-      logDate: new Date('2026-06-10T12:00:00Z'),
-      creditDay: { businessDate: '2026-06-10', timezone: 'America/Sao_Paulo' },
-    })
-  })
-
-  it.each([
-    'streak',
-    'badges',
-  ] as const)('should preserve completion after a post-commit %s failure and recover on retry', async (stage) => {
-    const dependency =
-      stage === 'streak' ? updateUserStreakUseCase : unlockAllBadgesUseCase
-    vi.mocked(dependency.execute).mockRejectedValueOnce(
-      new Error('Reward failed.')
-    )
-    const request = {
-      userId,
-      sessionId,
-      exercises: [
-        {
-          exerciseSessionId: 'exercise-session-id',
-          sets: 3,
-          reps: 10,
-          completed: true,
-        },
-      ],
-    }
-    await expect(sut.execute(request)).rejects.toThrow('Reward failed.')
-    expect(workoutSession.status).toBe(WorkoutSessionStatus.COMPLETED)
-    expect(completions.items).toHaveLength(1)
-    const badge = makeBadge()
-    vi.mocked(unlockAllBadgesUseCase.execute).mockResolvedValueOnce({
-      badges: [badge],
-    })
-    expect((await sut.execute(request)).unlockedBadges).toEqual([badge])
-    expect(exerciseLogsRepository.create).toHaveBeenCalledTimes(1)
-    expect(workoutSessionsRepository.update).toHaveBeenCalledTimes(1)
+    expect(events).toHaveLength(1)
   })
 
   it('should preserve timer measurements but record the actual completion instant for reward recovery', async () => {
@@ -714,11 +674,29 @@ describe('CompleteWorkoutSessionUseCase', () => {
     expect(completions.items[0]?.completedAt).toEqual(
       new Date('2026-06-12T12:00:00Z')
     )
-    expect(updateUserStreakUseCase.execute).toHaveBeenLastCalledWith({
-      userId,
-      logDate: new Date('2026-06-12T12:00:00Z'),
-      creditDay: { businessDate: '2026-06-12', timezone: 'America/Sao_Paulo' },
+    expect(events[0]?.data).toMatchObject({
+      completedAt: '2026-06-12T12:00:00.000Z',
+      businessDate: '2026-06-12',
+      timezone: 'America/Sao_Paulo',
     })
+  })
+
+  it('rejects a recorded completion without a processing identity', async () => {
+    workoutSession.status = WorkoutSessionStatus.COMPLETED
+    await completions.create({
+      sessionId,
+      completedAt: new Date('2025-12-31T12:00:00Z'),
+      hasActivity: true,
+    })
+
+    await expect(
+      sut.execute({ userId, sessionId, exercises: [] })
+    ).rejects.toMatchObject({
+      statusCode: 409,
+    })
+    expect(workoutSessionsRepository.update).not.toHaveBeenCalled()
+    expect(events).toHaveLength(0)
+    expect(processings).toHaveLength(0)
   })
 
   it('should serialize concurrent completions without duplicate performance writes', async () => {
@@ -756,7 +734,7 @@ describe('CompleteWorkoutSessionUseCase', () => {
       timezone: 'America/Sao_Paulo',
     })
     expect(processings).toEqual([
-      { eventId: events[0]?.eventId, sessionId, userId },
+      { eventId: events[0]?.eventId, sessionId, userId, status: 'PENDING' },
     ])
   })
 
@@ -786,17 +764,15 @@ describe('CompleteWorkoutSessionUseCase', () => {
     expect(completions.items).toHaveLength(0)
     expect(events).toHaveLength(0)
     expect(processings).toHaveLength(0)
-    expect(updateUserStreakUseCase.execute).not.toHaveBeenCalled()
-    expect(unlockAllBadgesUseCase.execute).not.toHaveBeenCalled()
 
     await expect(sut.execute(request)).resolves.toMatchObject({
-      unlockedBadges: [],
+      gamification: { status: 'PENDING' },
     })
     expect(events).toHaveLength(1)
     expect(processings).toHaveLength(1)
   })
 
-  it('should reject another user retry before reward processing', async () => {
+  it('rejects a retry from a different owner', async () => {
     const request = {
       userId,
       sessionId,
@@ -810,13 +786,9 @@ describe('CompleteWorkoutSessionUseCase', () => {
       ],
     }
     await sut.execute(request)
-    vi.mocked(updateUserStreakUseCase.execute).mockClear()
-    vi.mocked(unlockAllBadgesUseCase.execute).mockClear()
     await expect(
       sut.execute({ ...request, userId: 'other' })
     ).rejects.toMatchObject({ statusCode: 404 })
-    expect(updateUserStreakUseCase.execute).not.toHaveBeenCalled()
-    expect(unlockAllBadgesUseCase.execute).not.toHaveBeenCalled()
   })
 
   it('should roll back execution when recording completion metadata fails', async () => {
@@ -839,8 +811,6 @@ describe('CompleteWorkoutSessionUseCase', () => {
     await expect(sut.execute(request)).rejects.toThrow('Persistence failed.')
     expect({ workoutSession, exerciseSessions }).toEqual(before)
     expect(completions.items).toHaveLength(0)
-    expect(updateUserStreakUseCase.execute).not.toHaveBeenCalled()
-    expect(unlockAllBadgesUseCase.execute).not.toHaveBeenCalled()
     expect((await sut.execute(request)).session?.status).toBe(
       WorkoutSessionStatus.COMPLETED
     )
@@ -848,7 +818,7 @@ describe('CompleteWorkoutSessionUseCase', () => {
   it.each([
     '2025-12-31',
     '2026-01-02',
-  ])('rejects execution for another business day %s without writes or rewards', async (businessDate) => {
+  ])('rejects execution for another business day %s without writing an event', async (businessDate) => {
     workoutSession.dailyIdentity = {
       businessDate,
       timezone: 'America/Sao_Paulo',
@@ -869,8 +839,6 @@ describe('CompleteWorkoutSessionUseCase', () => {
     ).rejects.toMatchObject({ statusCode: 409 })
     expect(exerciseLogsRepository.create).not.toHaveBeenCalled()
     expect(workoutSessionsRepository.update).not.toHaveBeenCalled()
-    expect(updateUserStreakUseCase.execute).not.toHaveBeenCalled()
-    expect(unlockAllBadgesUseCase.execute).not.toHaveBeenCalled()
     expect(completions.items).toHaveLength(0)
   })
 
@@ -892,18 +860,13 @@ describe('CompleteWorkoutSessionUseCase', () => {
         },
       ],
     }
-    await sut.execute(request)
+    const original = await sut.execute(request)
     vi.setSystemTime(new Date('2026-01-03T12:00:00Z'))
-    await sut.execute(request)
-    expect(exerciseLogsRepository.create).toHaveBeenCalledTimes(1)
-    expect(updateUserStreakUseCase.execute).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        creditDay: {
-          businessDate: '2026-01-01',
-          timezone: 'America/Sao_Paulo',
-        },
-      })
+    expect((await sut.execute(request)).gamification).toEqual(
+      original.gamification
     )
+    expect(exerciseLogsRepository.create).toHaveBeenCalledTimes(1)
+    expect(events[0]?.data.businessDate).toBe('2026-01-01')
   })
 
   it('blocks an in-progress session at exactly local midnight', async () => {

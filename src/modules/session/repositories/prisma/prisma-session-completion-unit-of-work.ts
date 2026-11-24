@@ -1,6 +1,7 @@
 import type { PrismaClient } from 'generated/prisma'
 import { prisma } from '@/lib/prisma'
 import { PrismaExerciseLogsRepository } from '@/modules/exercise/repositories/prisma/prisma-exercise-logs.repository'
+import { WORKOUT_FINALIZED_V1 } from '../../events/workout-finalized-v1'
 
 import type {
   SessionCompletionRepositories,
@@ -47,7 +48,34 @@ export class PrismaSessionCompletionUnitOfWork
         },
         processings: {
           async createPending(identity) {
-            await transaction.sessionEventProcessing.create({ data: identity })
+            const { eventId, status } =
+              await transaction.sessionEventProcessing.create({
+                data: identity,
+                select: { eventId: true, status: true },
+              })
+            return { processingId: eventId, status }
+          },
+          async findBySessionId(sessionId, userId) {
+            const event = await transaction.sessionEventOutbox.findUnique({
+              where: {
+                type_sessionId: { type: WORKOUT_FINALIZED_V1, sessionId },
+              },
+              select: { eventId: true },
+            })
+            if (!event) {
+              return null
+            }
+            const processing =
+              await transaction.sessionEventProcessing.findUnique({
+                where: { eventId: event.eventId, sessionId, userId },
+                select: { eventId: true, status: true },
+              })
+            return (
+              processing && {
+                processingId: processing.eventId,
+                status: processing.status,
+              }
+            )
           },
         },
       })
