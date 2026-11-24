@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "start": "node build/server.cjs",
+    "start:outbox": "node build/outbox-worker.cjs",
     "build": "tsup",
     "generate": "npx prisma generate",
     "migrate": "npx prisma migrate dev",
@@ -52,6 +53,7 @@
     "@prisma/adapter-pg": "7.10.1",
     "@prisma/client": "7.10.1",
     "@scalar/fastify-api-reference": "1.78.1",
+    "amqplib": "2.4.1",
     "bcrypt": "6.0.0",
     "dayjs": "1.11.23",
     "dotenv": "17.4.2",

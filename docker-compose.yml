@@ -25,5 +25,50 @@ services:
       - PORT=3333
       - DATABASE_URL=postgresql://docker:docker@trainify-pg:5432/trainify?schema=public
 
+  trainify-rabbitmq:
+    image: rabbitmq:4.4.1
+    hostname: trainify-rabbitmq
+    profiles: [outbox]
+    ports:
+      - "127.0.0.1:5672:5672"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_LOCAL_USER:-trainify_local}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_LOCAL_PASSWORD:-trainify_local}
+      RABBITMQ_DEFAULT_VHOST: trainify
+    volumes:
+      - trainify-rabbitmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  trainify-outbox:
+    profiles: [outbox]
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["node", "build/outbox-worker.cjs"]
+    depends_on:
+      - trainify-pg
+      - trainify-rabbitmq
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      OUTBOX_PUBLISHER_ENABLED: ${OUTBOX_PUBLISHER_ENABLED:-false}
+      OUTBOX_HEALTH_PORT: ${OUTBOX_HEALTH_PORT:-3334}
+      DATABASE_URL: ${OUTBOX_DATABASE_URL:-postgresql://docker:docker@trainify-pg:5432/trainify_outbox_validation?schema=public}
+      RABBITMQ_URL: ${OUTBOX_RABBITMQ_URL:-amqp://trainify_local:trainify_local@trainify-rabbitmq:5672/trainify}
+    ports:
+      - "127.0.0.1:${OUTBOX_HEALTH_PORT:-3334}:${OUTBOX_HEALTH_PORT:-3334}"
+    stop_grace_period: 20s
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:'+(process.env.OUTBOX_HEALTH_PORT||3334)+'/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
 volumes:
   trainify-pg-data:
+  trainify-rabbitmq-data:
