@@ -4,7 +4,10 @@ import { setTimeout as sleep } from 'node:timers/promises'
 import { PrismaPg } from '@prisma/adapter-pg'
 import fastify from 'fastify'
 import { PrismaClient } from 'generated/prisma'
-import { outboxWorkerConfigSchema } from '@/modules/session/events/publisher/outbox-worker-config'
+import {
+  consumerConfigSchema,
+  outboxWorkerConfigSchema,
+} from '@/modules/session/events/publisher/outbox-worker-config'
 import { RabbitSessionEventPublisher } from '@/modules/session/events/publisher/rabbit-session-event-publisher'
 import { SessionOutboxPublications } from '@/modules/session/events/publisher/session-outbox-publications'
 import { workoutFinalizedV1Schema } from '@/modules/session/events/workout-finalized-v1'
@@ -25,16 +28,54 @@ async function startOutboxWorker() {
   )
   const app = fastify({ logger: true })
   const stop = new AbortController()
+  const consumer = await makeConsumer()
+  let consuming: Promise<void> | undefined
   let databaseReady = false
   let lastBacklogCheck = 0
   let shuttingDown: NodeJS.Timeout | undefined
 
   app.get('/health', (_request, reply) => {
-    const ready = !stop.signal.aborted && databaseReady && broker.ready
+    const ready =
+      !stop.signal.aborted &&
+      databaseReady &&
+      broker.ready &&
+      (consumer?.ready ?? true)
     return reply
       .code(ready ? 200 : 503)
       .send({ status: ready ? 'ok' : 'unavailable' })
   })
+
+  async function makeConsumer() {
+    if (
+      process.env.NODE_ENV !== 'test' ||
+      process.env.GAMIFICATION_CONSUMER_ENABLED !== 'true'
+    ) {
+      return
+    }
+    const settings = consumerConfigSchema.parse(process.env)
+    const { ProcessWorkoutFinalized } = await import(
+      '@/modules/gamification/processing/process-workout-finalized'
+    )
+    const { WorkoutFinalizedConsumer } = await import(
+      '@/modules/gamification/processing/workout-finalized-consumer'
+    )
+    return new WorkoutFinalizedConsumer(
+      new RabbitSessionEventPublisher(
+        config.RABBITMQ_URL,
+        config.OUTBOX_CONFIRM_TIMEOUT_MS
+      ),
+      new ProcessWorkoutFinalized(db, {
+        leaseMs: settings.GAMIFICATION_CONSUMER_LEASE_MS,
+        retryMs: settings.GAMIFICATION_CONSUMER_RETRY_MS,
+        maxAttempts: settings.GAMIFICATION_CONSUMER_MAX_ATTEMPTS,
+      }),
+      app.log,
+      {
+        prefetch: settings.GAMIFICATION_CONSUMER_PREFETCH,
+        pollMs: config.OUTBOX_POLL_MS,
+      }
+    )
+  }
 
   async function reportBacklog() {
     if (Date.now() - lastBacklogCheck < 60_000) {
@@ -119,6 +160,7 @@ async function startOutboxWorker() {
   process.once('SIGTERM', shutdown)
   try {
     await app.listen({ host: '0.0.0.0', port: config.OUTBOX_HEALTH_PORT })
+    consuming = consumer?.run(stop.signal)
     while (!stop.signal.aborted) {
       try {
         await reportBacklog()
@@ -149,9 +191,11 @@ async function startOutboxWorker() {
       }
     }
   } finally {
+    stop.abort()
     try {
-      await Promise.all([app.close(), broker.close(), db.$disconnect()])
+      await Promise.all([app.close(), broker.close(), consuming])
     } finally {
+      await db.$disconnect()
       clearTimeout(shuttingDown)
       process.removeListener('SIGINT', shutdown)
       process.removeListener('SIGTERM', shutdown)

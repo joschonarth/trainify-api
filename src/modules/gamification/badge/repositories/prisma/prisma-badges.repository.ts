@@ -1,37 +1,39 @@
-import type { BadgeType } from 'generated/prisma'
+import type { BadgeType, Prisma } from 'generated/prisma'
 import { prisma } from '@/lib/prisma'
 import type { BadgesRepository } from '../badges.repository'
 
 export class PrismaBadgesRepository implements BadgesRepository {
+  constructor(private readonly client: Prisma.TransactionClient = prisma) {}
+
   async findAll() {
-    return await prisma.badge.findMany()
+    return await this.client.badge.findMany()
   }
 
   async findById(badgeId: string) {
-    return await prisma.badge.findUnique({
+    return await this.client.badge.findUnique({
       where: { id: badgeId },
     })
   }
 
   async findByUser(userId: string) {
-    return await prisma.userBadge.findMany({
+    return await this.client.userBadge.findMany({
       where: { userId },
       include: { badge: true },
     })
   }
 
   async findByName(name: string) {
-    return await prisma.badge.findUnique({ where: { name } })
+    return await this.client.badge.findUnique({ where: { name } })
   }
 
   async findAllByType(type: BadgeType) {
-    return await prisma.badge.findMany({
+    return await this.client.badge.findMany({
       where: { type },
     })
   }
 
   async unlockForUser(userId: string, badgeId: string) {
-    const result = await prisma.userBadge.createMany({
+    const result = await this.client.userBadge.createMany({
       skipDuplicates: true,
       data: {
         userId,

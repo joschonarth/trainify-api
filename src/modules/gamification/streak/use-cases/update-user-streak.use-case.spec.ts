@@ -76,6 +76,24 @@ describe('credit scheduled training days', () => {
     })
     expect(result.lastBusinessDate).toBe('2026-11-19')
   })
+  it('restores a historical record after the current streak has ended', async () => {
+    await context.users.update('user', { timezone: 'Asia/Tokyo' })
+    const plan = context.plans.items.get('user')
+    if (!plan) {
+      throw new Error('Missing plan fixture')
+    }
+    plan.versions.push({ effectiveDate: '2026-11-20', workouts: {} })
+    vi.setSystemTime(new Date('2026-11-23T15:00:00Z'))
+
+    await context.credit('2026-11-19')
+    await context.credit('2026-11-17')
+    expect(await context.credit('2026-11-16')).toMatchObject({
+      currentStreak: 0,
+      bestStreak: 3,
+      lastBusinessDate: '2026-11-19',
+    })
+    expect(context.logs.items).toHaveLength(3)
+  })
   it('does not reuse preactivation activity after a new plan starts', async () => {
     const plan = context.plans.items.get('user')
     if (!plan?.versions[0]) {
