@@ -43,13 +43,6 @@ export const outboxWorkerConfigSchema = z
       .min(1)
       .max(100)
       .default(10),
-    BADGE_NOTIFICATIONS_RETRY_MS: milliseconds(5000),
-    BADGE_NOTIFICATIONS_MAX_ATTEMPTS: z.coerce
-      .number()
-      .int()
-      .min(1)
-      .max(100)
-      .default(5),
     OUTBOX_POLL_MS: milliseconds(1000),
     OUTBOX_CONFIRM_TIMEOUT_MS: milliseconds(5000),
     OUTBOX_LEASE_MS: milliseconds(30_000),

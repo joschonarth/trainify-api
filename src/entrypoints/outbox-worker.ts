@@ -89,10 +89,7 @@ async function startOutboxWorker() {
         config.OUTBOX_CONFIRM_TIMEOUT_MS,
         declareBadgeUnlockedTopology
       ),
-      new ProcessBadgeUnlocked(db, {
-        retryMs: config.BADGE_NOTIFICATIONS_RETRY_MS,
-        maxAttempts: config.BADGE_NOTIFICATIONS_MAX_ATTEMPTS,
-      }),
+      new ProcessBadgeUnlocked(db),
       app.log,
       {
         prefetch: config.BADGE_NOTIFICATIONS_PREFETCH,
