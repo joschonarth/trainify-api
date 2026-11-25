@@ -3,6 +3,23 @@ import { z } from 'zod'
 const milliseconds = (fallback: number) =>
   z.coerce.number().int().min(1).max(2_147_483_647).default(fallback)
 
+export const consumerConfigSchema = z.object({
+  GAMIFICATION_CONSUMER_PREFETCH: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .max(100)
+    .default(10),
+  GAMIFICATION_CONSUMER_LEASE_MS: milliseconds(30_000),
+  GAMIFICATION_CONSUMER_RETRY_MS: milliseconds(5000),
+  GAMIFICATION_CONSUMER_MAX_ATTEMPTS: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .max(100)
+    .default(5),
+})
+
 export const outboxWorkerConfigSchema = z
   .object({
     DATABASE_URL: z.url({ protocol: /^postgres(?:ql)?$/ }),

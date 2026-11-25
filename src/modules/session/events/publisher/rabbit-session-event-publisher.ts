@@ -1,5 +1,12 @@
+import { randomUUID } from 'node:crypto'
 import { setTimeout as sleep } from 'node:timers/promises'
-import { type ChannelModel, type ConfirmChannel, connect } from 'amqplib'
+import {
+  type ChannelModel,
+  type ConfirmChannel,
+  type ConsumeMessage,
+  connect,
+  type Options,
+} from 'amqplib'
 import {
   WORKOUT_FINALIZED_V1,
   type WorkoutFinalizedV1,
@@ -8,6 +15,7 @@ import {
 export const SESSION_EVENTS_EXCHANGE = 'trainify.events'
 export const WORKOUT_FINALIZED_QUEUE =
   'trainify.gamification.workout-finalized.v1'
+export const WORKOUT_FINALIZED_DLQ = `${WORKOUT_FINALIZED_QUEUE}.dlq`
 
 type PublicationFailure =
   | 'broker_disconnected'
@@ -87,8 +95,9 @@ export class RabbitSessionEventPublisher {
       channel.on('close', forgetChannel)
       const returns = new Set<string>()
       channel.on('return', (message) => {
-        if (message.properties.messageId) {
-          returns.add(message.properties.messageId)
+        const confirmId = message.properties.headers?.['x-trainify-confirm-id']
+        if (typeof confirmId === 'string') {
+          returns.add(confirmId)
         }
       })
       await channel.assertExchange(SESSION_EVENTS_EXCHANGE, 'topic', {
@@ -96,7 +105,7 @@ export class RabbitSessionEventPublisher {
       })
       await channel.assertQueue(WORKOUT_FINALIZED_QUEUE, {
         durable: true,
-        arguments: { 'x-queue-type': 'quorum' },
+        arguments: { 'x-queue-type': 'quorum', 'x-delivery-limit': -1 },
       })
       await channel.bindQueue(
         WORKOUT_FINALIZED_QUEUE,
@@ -138,16 +147,80 @@ export class RabbitSessionEventPublisher {
     }
   }
 
-  async publish(event: WorkoutFinalizedV1): Promise<PublicationResult> {
+  publish(event: WorkoutFinalizedV1) {
+    return this.send(SESSION_EVENTS_EXCHANGE, event.type, event, {
+      messageId: event.eventId,
+      correlationId: event.correlationId,
+      type: event.type,
+    })
+  }
+
+  publishDeadLetter(reason: string, event?: WorkoutFinalizedV1) {
+    return this.send(
+      '',
+      WORKOUT_FINALIZED_DLQ,
+      { reason, event },
+      event
+        ? {
+            messageId: event.eventId,
+            correlationId: event.correlationId,
+            type: event.type,
+          }
+        : {}
+    )
+  }
+
+  async consume(
+    prefetch: number,
+    handle: (channel: ConfirmChannel, message: ConsumeMessage | null) => void
+  ) {
+    const broker = this.broker
+    if (!broker) {
+      throw new Error('Broker unavailable')
+    }
+    const { channel } = broker
+    await channel.assertQueue(WORKOUT_FINALIZED_DLQ, {
+      durable: true,
+      arguments: { 'x-queue-type': 'quorum' },
+    })
+    await channel.prefetch(prefetch)
+    const { consumerTag } = await channel.consume(
+      WORKOUT_FINALIZED_QUEUE,
+      (message) => handle(channel, message),
+      { noAck: false }
+    )
+    return { channel, consumerTag }
+  }
+
+  private async send(
+    exchange: string,
+    routingKey: string,
+    body: unknown,
+    properties: Options.Publish
+  ): Promise<PublicationResult> {
     const broker = this.broker
     if (!broker) {
       return 'broker_disconnected'
     }
 
     const controller = new AbortController()
+    const confirmId = randomUUID()
     try {
       return await Promise.race([
-        this.confirm(broker, event),
+        this.confirm(
+          broker,
+          exchange,
+          routingKey,
+          Buffer.from(JSON.stringify(body)),
+          {
+            ...properties,
+            persistent: true,
+            mandatory: true,
+            contentType: 'application/json',
+            headers: { 'x-trainify-confirm-id': confirmId },
+          },
+          confirmId
+        ),
         sleep(this.timeoutMs, undefined, { signal: controller.signal }).then(
           () => {
             if (this.broker === broker) {
@@ -159,38 +232,32 @@ export class RabbitSessionEventPublisher {
       ])
     } finally {
       controller.abort()
-      broker.returns.delete(event.eventId)
+      broker.returns.delete(confirmId)
     }
   }
 
-  private confirm(broker: BrokerChannel, event: WorkoutFinalizedV1) {
+  private confirm(
+    broker: BrokerChannel,
+    exchange: string,
+    routingKey: string,
+    body: Buffer,
+    options: Options.Publish,
+    confirmId: string
+  ) {
     return new Promise<PublicationResult>((resolve) => {
       try {
-        broker.channel.publish(
-          SESSION_EVENTS_EXCHANGE,
-          event.type,
-          Buffer.from(JSON.stringify(event)),
-          {
-            persistent: true,
-            mandatory: true,
-            messageId: event.eventId,
-            correlationId: event.correlationId,
-            contentType: 'application/json',
-            type: event.type,
-          },
-          (error) => {
-            // RabbitMQ sends basic.return before the confirm for an unroutable message.
-            if (broker.returns.has(event.eventId)) {
-              resolve('unroutable')
-            } else if (error) {
-              resolve(
-                this.broker === broker ? 'broker_nack' : 'broker_disconnected'
-              )
-            } else {
-              resolve('confirmed')
-            }
+        broker.channel.publish(exchange, routingKey, body, options, (error) => {
+          // RabbitMQ sends basic.return before the confirm for an unroutable message.
+          if (broker.returns.has(confirmId)) {
+            resolve('unroutable')
+          } else if (error) {
+            resolve(
+              this.broker === broker ? 'broker_nack' : 'broker_disconnected'
+            )
+          } else {
+            resolve('confirmed')
           }
-        )
+        })
       } catch {
         if (this.broker === broker) {
           this.reset()
