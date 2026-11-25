@@ -16,12 +16,11 @@ export async function completeWorkoutSessionController(
 
   const completeWorkoutSessionUseCase = makeCompleteWorkoutSessionUseCase()
 
-  const { session, unlockedBadges } =
-    await completeWorkoutSessionUseCase.execute({
-      userId,
-      sessionId,
-      exercises,
-    })
+  const result = await completeWorkoutSessionUseCase.execute({
+    userId,
+    sessionId,
+    exercises,
+  })
 
-  return reply.status(200).send({ session, unlockedBadges })
+  return reply.status(200).send(result)
 }

@@ -1,14 +1,12 @@
 import { z } from 'zod'
-import { badgeSchema } from '@/modules/gamification/badge/schemas/badge.schema'
+import { sessionGamificationSchema } from '../events/workout-finalized-v1'
 import { sessionWithWorkoutSchema } from './workout-session.schema'
 
 export const completeWorkoutSessionResponseSchema = z.object({
   session: sessionWithWorkoutSchema.nullable(),
-  unlockedBadges: z
-    .array(badgeSchema.omit({ unlocked: true, unlockedAt: true }))
-    .describe(
-      'Badges newly persisted by this request. Empty when no new badges were unlocked; previously delivered awards are not replayed.'
-    ),
+  gamification: sessionGamificationSchema.describe(
+    'Durable processing identity and current status. Fetch rewards through GET /gamification/processings/{processingId}.'
+  ),
 })
 
 export type CompleteWorkoutSessionResponse = z.infer<

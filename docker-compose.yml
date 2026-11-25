@@ -57,6 +57,7 @@ services:
     environment:
       NODE_ENV: production
       OUTBOX_PUBLISHER_ENABLED: ${OUTBOX_PUBLISHER_ENABLED:-false}
+      GAMIFICATION_CONSUMER_ENABLED: ${GAMIFICATION_CONSUMER_ENABLED:-false}
       OUTBOX_HEALTH_PORT: ${OUTBOX_HEALTH_PORT:-3334}
       DATABASE_URL: ${OUTBOX_DATABASE_URL:-postgresql://docker:docker@trainify-pg:5432/trainify_outbox_validation?schema=public}
       RABBITMQ_URL: ${OUTBOX_RABBITMQ_URL:-amqp://trainify_local:trainify_local@trainify-rabbitmq:5672/trainify}
