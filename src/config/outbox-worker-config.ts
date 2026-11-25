@@ -31,6 +31,25 @@ export const outboxWorkerConfigSchema = z
       .max(65_535)
       .default(3334),
     OUTBOX_BATCH_SIZE: z.coerce.number().int().min(1).max(100).default(20),
+    BADGE_OUTBOX_BATCH_SIZE: z.coerce
+      .number()
+      .int()
+      .min(1)
+      .max(100)
+      .default(20),
+    BADGE_NOTIFICATIONS_PREFETCH: z.coerce
+      .number()
+      .int()
+      .min(1)
+      .max(100)
+      .default(10),
+    BADGE_NOTIFICATIONS_RETRY_MS: milliseconds(5000),
+    BADGE_NOTIFICATIONS_MAX_ATTEMPTS: z.coerce
+      .number()
+      .int()
+      .min(1)
+      .max(100)
+      .default(5),
     OUTBOX_POLL_MS: milliseconds(1000),
     OUTBOX_CONFIRM_TIMEOUT_MS: milliseconds(5000),
     OUTBOX_LEASE_MS: milliseconds(30_000),

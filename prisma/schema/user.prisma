@@ -29,6 +29,7 @@ model User {
   UserBadge        UserBadge[]
   UserStreakLog    UserStreakLog[]
   workoutSchedules WorkoutSchedule[]
+  notifications    Notification[]
 
   @@map("users")
 }
