@@ -3,6 +3,7 @@ import { isDeepStrictEqual } from 'node:util'
 import type { PrismaClient } from 'generated/prisma'
 import type { WorkoutFinalizedV1 } from '@/modules/session/events/workout-finalized-v1'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
+import { enqueueBadgeUnlockedEvents } from '../badge/events/enqueue-badge-unlocked-events'
 import { makeUnlockAllBadgesUseCase } from '../badge/use-cases/factories/make-unlock-all-badges-use-case'
 import { PrismaStreakUnitOfWork } from '../streak/repositories/prisma/prisma-streak-unit-of-work'
 import { UpdateUserStreakUseCase } from '../streak/use-cases/update-user-streak.use-case'
@@ -113,7 +114,7 @@ export class ProcessWorkoutFinalized {
   }
 
   private async complete(
-    { eventId, data }: WorkoutFinalizedV1,
+    { eventId, data, correlationId }: WorkoutFinalizedV1,
     leaseToken: string
   ): Promise<ProcessingOutcome> {
     return await this.db.$transaction(async (transaction) => {
@@ -136,6 +137,12 @@ export class ProcessWorkoutFinalized {
       const { badges } = await makeUnlockAllBadgesUseCase(transaction).execute({
         userId: data.userId,
       })
+      await enqueueBadgeUnlockedEvents(
+        transaction,
+        data.userId,
+        correlationId,
+        badges
+      )
       const snapshot = badges.map(
         ({ id, name, description, type, milestone, createdAt }) => ({
           id,

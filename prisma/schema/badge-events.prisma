@@ -1,0 +1,18 @@
+model BadgeEventOutbox {
+  eventId       String                        @id @db.Uuid
+  type          String
+  userBadgeId   String
+  envelope      Json
+  createdAt     DateTime                      @default(now())
+  status        SessionEventPublicationStatus @default(PENDING)
+  attempts      Int                           @default(0)
+  nextAttemptAt DateTime                      @default(now())
+  leaseToken    String?                       @db.Uuid
+  leaseUntil    DateTime?
+  lastError     String?
+  publishedAt   DateTime?
+
+  @@unique([type, userBadgeId])
+  @@index([status, nextAttemptAt, leaseUntil])
+  @@map("badge_event_outbox")
+}
