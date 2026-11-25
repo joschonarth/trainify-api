@@ -17,24 +17,3 @@ model Notification {
   @@index([recipientId, readAt, createdAt(sort: Desc), id(sort: Desc)])
   @@map("notifications")
 }
-
-model BadgeNotificationDelivery {
-  eventId       String   @id @db.Uuid
-  attempts      Int
-  attemptToken  String   @db.Uuid
-  nextAttemptAt DateTime
-  failure       String?
-
-  @@map("badge_notification_deliveries")
-}
-
-model BadgeNotificationReplay {
-  id        String   @id @default(uuid()) @db.Uuid
-  eventId   String   @db.Uuid
-  operator  String
-  reason    String
-  createdAt DateTime @default(now())
-
-  @@index([eventId, createdAt])
-  @@map("badge_notification_replays")
-}

@@ -43,21 +43,7 @@ model SessionEventProcessing {
   completedAt    DateTime?
   unlockedBadges Json?
   nextAttemptAt  DateTime?
-  replays        SessionEventProcessingReplay[]
 
   @@index([status, leaseUntil])
   @@map("session_event_processings")
-}
-
-model SessionEventProcessingReplay {
-  id        String   @id @default(uuid()) @db.Uuid
-  eventId   String   @db.Uuid
-  operator  String
-  reason    String
-  createdAt DateTime @default(now())
-
-  processing SessionEventProcessing @relation(fields: [eventId], references: [eventId])
-
-  @@index([eventId, createdAt])
-  @@map("session_event_processing_replays")
 }
