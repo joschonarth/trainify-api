@@ -14,6 +14,11 @@ import type {
 } from '@/modules/session/repositories/workout-sessions.repository'
 import { DuplicateExerciseCompletionError } from '../errors/duplicate-exercise-completion.error'
 import { WorkoutSessionAlreadyCompletedError } from '../errors/workout-session-already-completed.error'
+import {
+  type SessionEventProcessingRepository,
+  type WorkoutFinalizedV1,
+  workoutFinalizedV1Schema,
+} from '../events/workout-finalized-v1'
 import { InMemoryWorkoutSessionCompletionsRepository } from '../repositories/in-memory/in-memory-workout-session-completions.repository'
 import type { SessionCompletionUnitOfWork } from '../repositories/session-completion-unit-of-work'
 import { completeWorkoutSessionBodySchema } from '../schemas/complete-workout-session.schema'
@@ -37,6 +42,12 @@ let updateUserStreakUseCase: Pick<UpdateUserStreakUseCase, 'execute'>
 let unlockAllBadgesUseCase: Pick<UnlockAllBadgesUseCase, 'execute'>
 let sut: CompleteWorkoutSessionUseCase
 let completions: InMemoryWorkoutSessionCompletionsRepository
+let events: WorkoutFinalizedV1[]
+let processings: Parameters<
+  SessionEventProcessingRepository['createPending']
+>[0][]
+let createPending: SessionEventProcessingRepository['createPending']
+let logs: ExerciseLog[]
 
 function makeExerciseSession(
   overrides: Partial<ExerciseSessionWithLogs> = {}
@@ -94,6 +105,13 @@ describe('CompleteWorkoutSessionUseCase', () => {
     vi.useFakeTimers()
     vi.setSystemTime(new Date('2026-01-01T12:00:00Z'))
     exerciseSessions = [makeExerciseSession()]
+    events = []
+    processings = []
+    logs = []
+    createPending = vi.fn((identity) => {
+      processings.push(identity)
+      return Promise.resolve()
+    })
 
     workoutSession = {
       id: sessionId,
@@ -159,8 +177,11 @@ describe('CompleteWorkoutSessionUseCase', () => {
       update: vi.fn(updateExerciseSession),
     }
 
-    const createExerciseLog: ExerciseLogsRepository['create'] = async () =>
-      makeExerciseLog()
+    const createExerciseLog: ExerciseLogsRepository['create'] = () => {
+      const log = makeExerciseLog()
+      logs.push(log)
+      return Promise.resolve(log)
+    }
     exerciseLogsRepository = {
       create: vi.fn(createExerciseLog),
     }
@@ -196,6 +217,9 @@ describe('CompleteWorkoutSessionUseCase', () => {
             workoutSession,
             exerciseSessions,
             completions: completions.items,
+            events,
+            processings,
+            logs,
           })
           try {
             return await operation({
@@ -203,11 +227,21 @@ describe('CompleteWorkoutSessionUseCase', () => {
               exerciseSessions: exerciseSessionsRepository,
               exerciseLogs: exerciseLogsRepository,
               completions,
+              outbox: {
+                create(event) {
+                  events.push(workoutFinalizedV1Schema.parse(event))
+                  return Promise.resolve()
+                },
+              },
+              processings: { createPending },
             })
           } catch (error) {
             workoutSession = before.workoutSession
             exerciseSessions = before.exerciseSessions
             completions.items = before.completions
+            events = before.events
+            processings = before.processings
+            logs = before.logs
             throw error
           }
         })
@@ -239,6 +273,10 @@ describe('CompleteWorkoutSessionUseCase', () => {
     })
 
     expect(exerciseLogsRepository.create).not.toHaveBeenCalled()
+    expect(events[0]?.data).toMatchObject({
+      status: 'SKIPPED',
+      hasActivity: false,
+    })
     expect(exerciseSessionsRepository.update).toHaveBeenCalledWith(
       'exercise-session-id',
       { completed: false, skipReason: null }
@@ -554,6 +592,10 @@ describe('CompleteWorkoutSessionUseCase', () => {
     }
     const result = await sut.execute(request)
     expect(result.session?.status).toBe(WorkoutSessionStatus.INCOMPLETE)
+    expect(events[0]?.data).toMatchObject({
+      status: 'INCOMPLETE',
+      hasActivity: true,
+    })
     expect(completions.items[0]?.hasActivity).toBe(true)
     expect(updateUserStreakUseCase.execute).toHaveBeenCalledTimes(1)
     expect(exerciseLogsRepository.create).not.toHaveBeenCalled()
@@ -703,6 +745,55 @@ describe('CompleteWorkoutSessionUseCase', () => {
     expect(exerciseLogsRepository.create).toHaveBeenCalledTimes(1)
     expect(workoutSessionsRepository.update).toHaveBeenCalledTimes(1)
     expect(completions.items).toHaveLength(1)
+    expect(events).toHaveLength(1)
+    expect(events[0]?.data).toEqual({
+      sessionId,
+      userId,
+      status: 'COMPLETED',
+      hasActivity: true,
+      completedAt: '2026-01-01T12:00:00.000Z',
+      businessDate: '2026-01-01',
+      timezone: 'America/Sao_Paulo',
+    })
+    expect(processings).toEqual([
+      { eventId: events[0]?.eventId, sessionId, userId },
+    ])
+  })
+
+  it('rolls back completion and outbox when pending processing cannot be created', async () => {
+    vi.mocked(createPending).mockRejectedValueOnce(
+      new Error('Processing write failed')
+    )
+    const request = {
+      userId,
+      sessionId,
+      exercises: [
+        {
+          exerciseSessionId: 'exercise-session-id',
+          sets: 3,
+          reps: 10,
+          completed: true,
+        },
+      ],
+    }
+
+    await expect(sut.execute(request)).rejects.toThrow(
+      'Processing write failed'
+    )
+    expect(workoutSession.status).toBe(WorkoutSessionStatus.IN_PROGRESS)
+    expect(getFirstExerciseSession().completed).toBe(false)
+    expect(logs).toHaveLength(0)
+    expect(completions.items).toHaveLength(0)
+    expect(events).toHaveLength(0)
+    expect(processings).toHaveLength(0)
+    expect(updateUserStreakUseCase.execute).not.toHaveBeenCalled()
+    expect(unlockAllBadgesUseCase.execute).not.toHaveBeenCalled()
+
+    await expect(sut.execute(request)).resolves.toMatchObject({
+      unlockedBadges: [],
+    })
+    expect(events).toHaveLength(1)
+    expect(processings).toHaveLength(1)
   })
 
   it('should reject another user retry before reward processing', async () => {

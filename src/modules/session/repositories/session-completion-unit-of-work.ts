@@ -1,4 +1,8 @@
 import type { ExerciseLogsRepository } from '@/modules/exercise/repositories/exercise-logs.repository'
+import type {
+  SessionEventOutboxRepository,
+  SessionEventProcessingRepository,
+} from '../events/workout-finalized-v1'
 
 import type { ExerciseSessionsRepository } from './exercise-sessions.repository'
 import type { WorkoutSessionCompletionsRepository } from './workout-session-completions.repository'
@@ -15,6 +19,8 @@ export interface SessionCompletionRepositories {
   >
   exerciseLogs: Pick<ExerciseLogsRepository, 'create'>
   completions: WorkoutSessionCompletionsRepository
+  outbox: SessionEventOutboxRepository
+  processings: SessionEventProcessingRepository
 }
 
 export interface SessionCompletionUnitOfWork {

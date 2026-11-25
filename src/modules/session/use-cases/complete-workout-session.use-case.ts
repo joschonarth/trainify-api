@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto'
 import { type Badge, WorkoutSessionStatus } from 'generated/prisma'
 import type { UnlockAllBadgesUseCase } from '@/modules/gamification/badge/use-cases/unlock-all-badges.use-case'
 import type { UpdateUserStreakUseCase } from '@/modules/gamification/streak/use-cases/update-user-streak.use-case'
@@ -5,6 +6,10 @@ import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 import { calculateVolume } from '@/shared/utils/calculate-volume'
 import { DuplicateExerciseCompletionError } from '../errors/duplicate-exercise-completion.error'
 import { WorkoutSessionAlreadyCompletedError } from '../errors/workout-session-already-completed.error'
+import {
+  WORKOUT_FINALIZED_V1,
+  type WorkoutFinalizedV1,
+} from '../events/workout-finalized-v1'
 import type { ExerciseSessionsRepository } from '../repositories/exercise-sessions.repository'
 import type {
   SessionCompletionRepositories,
@@ -55,7 +60,7 @@ export class CompleteWorkoutSessionUseCase {
 
   private deriveSessionStatus(
     exercises: { completed: boolean }[]
-  ): WorkoutSessionStatus {
+  ): WorkoutFinalizedV1['data']['status'] {
     const total = exercises.length
     const completedCount = exercises.filter((ex) => ex.completed).length
 
@@ -246,18 +251,37 @@ export class CompleteWorkoutSessionUseCase {
     const anyExerciseCompleted = updatedExerciseSessions.some(
       (exercise) => exercise.completed
     )
+    const creditDay = getSessionBusinessDay(session)
     await repositories.completions.create({
       sessionId,
       completedAt: now,
       hasActivity: anyExerciseCompleted,
-      ...getSessionBusinessDay(session),
+      ...creditDay,
     })
+
+    const eventId = randomUUID()
+    const occurredAt = now.toISOString()
+    await repositories.outbox.create({
+      eventId,
+      type: WORKOUT_FINALIZED_V1,
+      occurredAt,
+      correlationId: eventId,
+      data: {
+        sessionId,
+        userId,
+        status: newStatus,
+        hasActivity: anyExerciseCompleted,
+        completedAt: occurredAt,
+        ...creditDay,
+      },
+    })
+    await repositories.processings.createPending({ eventId, sessionId, userId })
 
     return {
       session: updatedSession,
       anyExerciseCompleted,
       logDate: now,
-      creditDay: getSessionBusinessDay(session),
+      creditDay,
     }
   }
 
