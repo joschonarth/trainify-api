@@ -8,6 +8,7 @@
     "start": "node build/server.cjs",
     "start:outbox": "node build/outbox-worker.cjs",
     "replay:processing": "node build/replay-processing.cjs",
+    "replay:badge-notification": "node build/replay-badge-notification.cjs",
     "build": "tsup",
     "generate": "npx prisma generate",
     "migrate": "npx prisma migrate dev",

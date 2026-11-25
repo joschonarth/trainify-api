@@ -5,6 +5,7 @@ export default defineConfig({
     server: 'src/server.ts',
     'outbox-worker': 'src/entrypoints/outbox-worker.ts',
     'replay-processing': 'src/entrypoints/replay-processing.ts',
+    'replay-badge-notification': 'src/entrypoints/replay-badge-notification.ts',
   },
   outDir: 'build',
   format: ['cjs'],
