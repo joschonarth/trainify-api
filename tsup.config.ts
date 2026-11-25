@@ -1,7 +1,11 @@
 import { defineConfig } from 'tsup'
 
 export default defineConfig({
-  entry: ['src/server.ts', 'src/outbox-worker.ts', 'src/replay-processing.ts'],
+  entry: {
+    server: 'src/server.ts',
+    'outbox-worker': 'src/entrypoints/outbox-worker.ts',
+    'replay-processing': 'src/entrypoints/replay-processing.ts',
+  },
   outDir: 'build',
   format: ['cjs'],
   clean: true,

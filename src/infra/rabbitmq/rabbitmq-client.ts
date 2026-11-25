@@ -7,15 +7,6 @@ import {
   connect,
   type Options,
 } from 'amqplib'
-import {
-  WORKOUT_FINALIZED_V1,
-  type WorkoutFinalizedV1,
-} from '../workout-finalized-v1'
-
-export const SESSION_EVENTS_EXCHANGE = 'trainify.events'
-export const WORKOUT_FINALIZED_QUEUE =
-  'trainify.gamification.workout-finalized.v1'
-export const WORKOUT_FINALIZED_DLQ = `${WORKOUT_FINALIZED_QUEUE}.dlq`
 
 type PublicationFailure =
   | 'broker_disconnected'
@@ -30,13 +21,14 @@ interface BrokerChannel {
   returns: Set<string>
 }
 
-export class RabbitSessionEventPublisher {
+export class RabbitMqClient {
   private broker: BrokerChannel | undefined
   private readonly closing = new Map<ChannelModel, Promise<void>>()
 
   constructor(
     private readonly url: string,
-    private readonly timeoutMs: number
+    private readonly timeoutMs: number,
+    private readonly declareTopology: (channel: ConfirmChannel) => Promise<void>
   ) {}
 
   get ready() {
@@ -100,18 +92,7 @@ export class RabbitSessionEventPublisher {
           returns.add(confirmId)
         }
       })
-      await channel.assertExchange(SESSION_EVENTS_EXCHANGE, 'topic', {
-        durable: true,
-      })
-      await channel.assertQueue(WORKOUT_FINALIZED_QUEUE, {
-        durable: true,
-        arguments: { 'x-queue-type': 'quorum', 'x-delivery-limit': -1 },
-      })
-      await channel.bindQueue(
-        WORKOUT_FINALIZED_QUEUE,
-        SESSION_EVENTS_EXCHANGE,
-        WORKOUT_FINALIZED_V1
-      )
+      await this.declareTopology(channel)
       signal.throwIfAborted()
       return { model, channel, returns }
     } catch (error) {
@@ -147,30 +128,8 @@ export class RabbitSessionEventPublisher {
     }
   }
 
-  publish(event: WorkoutFinalizedV1) {
-    return this.send(SESSION_EVENTS_EXCHANGE, event.type, event, {
-      messageId: event.eventId,
-      correlationId: event.correlationId,
-      type: event.type,
-    })
-  }
-
-  publishDeadLetter(reason: string, event?: WorkoutFinalizedV1) {
-    return this.send(
-      '',
-      WORKOUT_FINALIZED_DLQ,
-      { reason, event },
-      event
-        ? {
-            messageId: event.eventId,
-            correlationId: event.correlationId,
-            type: event.type,
-          }
-        : {}
-    )
-  }
-
   async consume(
+    queue: string,
     prefetch: number,
     handle: (channel: ConfirmChannel, message: ConsumeMessage | null) => void
   ) {
@@ -179,24 +138,23 @@ export class RabbitSessionEventPublisher {
       throw new Error('Broker unavailable')
     }
     const { channel } = broker
-    await channel.assertQueue(WORKOUT_FINALIZED_DLQ, {
-      durable: true,
-      arguments: { 'x-queue-type': 'quorum' },
-    })
     await channel.prefetch(prefetch)
     const { consumerTag } = await channel.consume(
-      WORKOUT_FINALIZED_QUEUE,
+      queue,
       (message) => handle(channel, message),
       { noAck: false }
     )
     return { channel, consumerTag }
   }
 
-  private async send(
+  async publish(
     exchange: string,
     routingKey: string,
     body: unknown,
-    properties: Options.Publish
+    properties: Pick<
+      Options.Publish,
+      'messageId' | 'correlationId' | 'type'
+    > = {}
   ): Promise<PublicationResult> {
     const broker = this.broker
     if (!broker) {

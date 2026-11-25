@@ -7,8 +7,13 @@ import { PrismaClient } from 'generated/prisma'
 import {
   consumerConfigSchema,
   outboxWorkerConfigSchema,
-} from '@/modules/session/events/publisher/outbox-worker-config'
-import { RabbitSessionEventPublisher } from '@/modules/session/events/publisher/rabbit-session-event-publisher'
+} from '@/config/outbox-worker-config'
+import { RabbitMqClient } from '@/infra/rabbitmq/rabbitmq-client'
+import {
+  declareWorkoutFinalizedConsumerTopology,
+  declareWorkoutFinalizedTopology,
+  SESSION_EVENTS_EXCHANGE,
+} from '@/infra/rabbitmq/workout-finalized-topology'
 import { SessionOutboxPublications } from '@/modules/session/events/publisher/session-outbox-publications'
 import { workoutFinalizedV1Schema } from '@/modules/session/events/workout-finalized-v1'
 
@@ -22,9 +27,10 @@ async function startOutboxWorker() {
     }),
   })
   const outbox = new SessionOutboxPublications(db)
-  const broker = new RabbitSessionEventPublisher(
+  const broker = new RabbitMqClient(
     config.RABBITMQ_URL,
-    config.OUTBOX_CONFIRM_TIMEOUT_MS
+    config.OUTBOX_CONFIRM_TIMEOUT_MS,
+    declareWorkoutFinalizedTopology
   )
   const app = fastify({ logger: true })
   const stop = new AbortController()
@@ -60,9 +66,10 @@ async function startOutboxWorker() {
       '@/modules/gamification/processing/workout-finalized-consumer'
     )
     return new WorkoutFinalizedConsumer(
-      new RabbitSessionEventPublisher(
+      new RabbitMqClient(
         config.RABBITMQ_URL,
-        config.OUTBOX_CONFIRM_TIMEOUT_MS
+        config.OUTBOX_CONFIRM_TIMEOUT_MS,
+        declareWorkoutFinalizedConsumerTopology
       ),
       new ProcessWorkoutFinalized(db, {
         leaseMs: settings.GAMIFICATION_CONSUMER_LEASE_MS,
@@ -107,7 +114,16 @@ async function startOutboxWorker() {
           parsed.data.eventId === event.eventId &&
           parsed.data.data.sessionId === event.sessionId
         const result = valid
-          ? await broker.publish(parsed.data)
+          ? await broker.publish(
+              SESSION_EVENTS_EXCHANGE,
+              parsed.data.type,
+              parsed.data,
+              {
+                messageId: parsed.data.eventId,
+                correlationId: parsed.data.correlationId,
+                type: parsed.data.type,
+              }
+            )
           : 'invalid_envelope'
         const fields = {
           eventId: event.eventId,
