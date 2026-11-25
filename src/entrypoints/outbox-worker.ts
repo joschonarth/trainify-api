@@ -22,7 +22,7 @@ import {
   SESSION_EVENTS_EXCHANGE,
 } from '@/infra/rabbitmq/workout-finalized-topology'
 import { badgeUnlockedV1Schema } from '@/modules/gamification/badge/events/badge-unlocked-v1'
-import { ProcessBadgeUnlocked } from '@/modules/notification/process-badge-unlocked'
+import { ProcessBadgeUnlocked } from '@/modules/notification/processing/process-badge-unlocked'
 import { workoutFinalizedV1Schema } from '@/modules/session/events/workout-finalized-v1'
 
 async function startOutboxWorker() {

@@ -3,6 +3,7 @@ import z from 'zod'
 import { exercisesRoutes } from '@/modules/exercise/routes'
 import { gamificationRoutes } from '@/modules/gamification/routes'
 import { metricsRoutes } from '@/modules/metric/routes'
+import { notificationsRoutes } from '@/modules/notification/routes'
 import { sessionsRoutes } from '@/modules/session/routes'
 import { usersRoutes } from '@/modules/user/routes'
 import { weightRoutes } from '@/modules/weight/routes'
@@ -41,6 +42,7 @@ export function appRoutes(app: FastifyInstance) {
   app.register(workoutsRoutes)
   app.register(sessionsRoutes)
   app.register(gamificationRoutes)
+  app.register(notificationsRoutes)
   app.register(weightRoutes)
   app.register(metricsRoutes)
 }

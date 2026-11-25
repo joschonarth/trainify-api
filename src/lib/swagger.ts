@@ -25,6 +25,7 @@ export async function registerSwagger(app: FastifyInstance) {
           description: 'Workout session tracking and analytics.',
         },
         { name: 'Gamification', description: 'Streaks and badges.' },
+        { name: 'Notifications', description: 'In-app notifications.' },
         { name: 'Weight', description: 'Weight logs and goals.' },
         { name: 'Metrics', description: 'Overall user fitness metrics.' },
       ],
