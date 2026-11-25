@@ -3,7 +3,7 @@ import 'dotenv/config'
 import { PrismaPg } from '@prisma/adapter-pg'
 import { PrismaClient } from 'generated/prisma'
 import { z } from 'zod'
-import { replayBadgeNotification } from '@/modules/notification/replay-badge-notification'
+import { replayBadgeNotification } from '@/modules/notification/processing/replay-badge-notification'
 
 const argumentsSchema = z.tuple([
   z.uuid(),
