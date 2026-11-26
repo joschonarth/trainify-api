@@ -6,6 +6,7 @@ import type { ExerciseLogsRepository } from '../repositories/exercise-logs.repos
 
 interface GetExerciseLogUseCaseRequest {
   logId: string
+  userId: string
 }
 
 interface GetExerciseLogUseCaseResponse {
@@ -26,10 +27,11 @@ export class GetExerciseLogUseCase {
 
   async execute({
     logId,
+    userId,
   }: GetExerciseLogUseCaseRequest): Promise<GetExerciseLogUseCaseResponse> {
     const log = await this.exerciseLogsRepository.findById(logId)
 
-    if (!log) {
+    if (!log || log.userId !== userId) {
       throw new ResourceNotFoundError('Exercise log not found.')
     }
 
