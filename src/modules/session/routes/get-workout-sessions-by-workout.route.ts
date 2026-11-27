@@ -16,7 +16,7 @@ export function getWorkoutSessionsByWorkoutRoute(app: FastifyInstance) {
         tags: ['Sessions'],
         summary: 'Get workout sessions by workout',
         description:
-          'Returns sessions for an owned workout, including archived workouts. A workout without history returns an empty list and totalSessions 0. The weight field is the latest log weight, rather than a sum of weights; ties use log ID descending. Missing or unweighted logs return 0.',
+          'All logs contribute to sets, reps and volume. Reps sums per-log values, not sets times reps; weight is the latest log weight by date and ID. DURATION has zero load volume. Returns sessions for an owned workout, including archived workouts. A workout without history returns an empty list and totalSessions 0. The weight field is the latest log weight, rather than a sum of weights; ties use log ID descending. Missing or unweighted logs return 0.',
         params: getWorkoutSessionsByWorkoutParamsSchema,
         response: {
           401: z

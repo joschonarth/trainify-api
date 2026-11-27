@@ -7,7 +7,7 @@ import type { WeightGoalsRepository } from '../repositories/weight-goals.reposit
 export class GetActiveWeightGoalUseCase {
   constructor(private readonly weightGoalsRepository: WeightGoalsRepository) {}
 
-  async execute(userId: string): Promise<WeightGoal | null> {
+  async execute(userId: string): Promise<WeightGoal> {
     const activeGoal =
       await this.weightGoalsRepository.findActiveGoalByUserId(userId)
 

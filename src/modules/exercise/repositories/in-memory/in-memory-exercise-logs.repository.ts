@@ -127,7 +127,11 @@ export class InMemoryExerciseLogsRepository implements ExerciseLogsRepository {
     return await this.withExercise(
       this.items
         .filter((item) => item.userId === userId)
-        .sort((left, right) => right.date.getTime() - left.date.getTime())
+        .sort(
+          (left, right) =>
+            right.date.getTime() - left.date.getTime() ||
+            right.id.localeCompare(left.id)
+        )
     )
   }
 
@@ -174,7 +178,11 @@ export class InMemoryExerciseLogsRepository implements ExerciseLogsRepository {
         .filter(
           (item) => item.userId === userId && item.exerciseId === exerciseId
         )
-        .sort((left, right) => left.date.getTime() - right.date.getTime())
+        .sort(
+          (left, right) =>
+            left.date.getTime() - right.date.getTime() ||
+            left.id.localeCompare(right.id)
+        )
     )
   }
 

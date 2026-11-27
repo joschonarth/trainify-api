@@ -52,7 +52,7 @@ export function getWorkoutSessionsHistoryRoute(app: FastifyInstance) {
         tags: ['Sessions'],
         summary: 'Get workout sessions history',
         description:
-          'Returns a paginated workout session history with optional date, status and workout filters.',
+          'Logged performance describes the latest log by execution date, then ID, not totals. Returns a paginated workout session history with optional date, status and workout filters.',
         querystring: getWorkoutSessionsHistoryQuerySchema,
         response: {
           401: z

@@ -19,7 +19,7 @@ export function createExerciseLogSessionRoute(app: FastifyInstance) {
         summary: 'Create exercise log session',
         deprecated: true,
         description:
-          'Deprecated. Use POST /sessions/:sessionId/complete to record exercise performance. New execution is allowed only on the session business day in its captured timezone; expired or future sessions return 409. Earlier sessions without a daily identity use their date in America/Sao_Paulo.',
+          'Each request appends a contributing log; repeated values do not replace previous logs. Deprecated. Use POST /sessions/:sessionId/complete to record exercise performance. New execution is allowed only on the session business day in its captured timezone; expired or future sessions return 409. Earlier sessions without a daily identity use their date in America/Sao_Paulo.',
         params: createExerciseLogSessionParamsSchema,
         body: createExerciseLogSessionBodySchema,
         response: {

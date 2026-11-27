@@ -78,7 +78,7 @@ const exerciseBadges = [
   },
 ]
 
-// 🔥 Badges baseadas em streaks (dias consecutivos)
+// 🔥 Badges baseadas em streaks (dias de treino planejados)
 const streakBadges = [
   {
     code: 'STREAK_3',

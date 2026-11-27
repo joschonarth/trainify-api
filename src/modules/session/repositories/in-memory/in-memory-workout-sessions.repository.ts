@@ -42,7 +42,10 @@ export class InMemoryWorkoutSessionsRepository
           (!query.from || session.date >= query.from) &&
           (!query.to || session.date <= query.to)
       )
-      .sort((a, b) => b.date.getTime() - a.date.getTime())
+      .sort(
+        (a, b) =>
+          b.date.getTime() - a.date.getTime() || b.id.localeCompare(a.id)
+      )
     return Promise.resolve({
       total: matches.length,
       sessions: matches
@@ -50,6 +53,16 @@ export class InMemoryWorkoutSessionsRepository
         .map((session) => ({
           ...session,
           workout: { ...session.workout, exercises: [] },
+          exerciseSessions: session.exerciseSessions.map((exercise) => ({
+            ...exercise,
+            logs: [...exercise.logs]
+              .sort(
+                (a, b) =>
+                  b.date.getTime() - a.date.getTime() ||
+                  b.id.localeCompare(a.id)
+              )
+              .slice(0, 1),
+          })),
         })),
     })
   }
@@ -80,6 +93,14 @@ export class InMemoryWorkoutSessionsRepository
       item
         ? {
             ...item,
+            exerciseSessions: item.exerciseSessions.map((exercise) => ({
+              ...exercise,
+              logs: [...exercise.logs].sort(
+                (a, b) =>
+                  a.date.getTime() - b.date.getTime() ||
+                  a.id.localeCompare(b.id)
+              ),
+            })),
             dailyIdentity:
               this.dailyIdentities.find((day) => day.sessionId === id) ?? null,
           }

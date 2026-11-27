@@ -1,6 +1,5 @@
 import { Measurement } from 'generated/prisma'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-
 import type { ExerciseSessionsRepository } from '@/modules/session/repositories/exercise-sessions.repository'
 import { calculateVolume } from '@/shared/utils/calculate-volume'
 

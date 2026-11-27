@@ -49,7 +49,10 @@ export class InMemoryExerciseSessionsRepository
         type: null,
         measurement: 'REPS' as const,
       },
-      logs: detail?.logs ?? [],
+      logs: [...(detail?.logs ?? [])].sort(
+        (a, b) =>
+          a.date.getTime() - b.date.getTime() || a.id.localeCompare(b.id)
+      ),
     }
   }
   findById(id: string) {

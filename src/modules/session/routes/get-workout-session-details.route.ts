@@ -43,7 +43,7 @@ export function getWorkoutSessionDetailsRoute(app: FastifyInstance) {
         tags: ['Sessions'],
         summary: 'Get workout session details',
         description:
-          'Returns the details of a specific workout session, including exercise performance data.',
+          'Logged performance and repsComparison describe the latest log by execution date, then ID, not totals. Returns the details of a specific workout session, including exercise performance data.',
         params: getWorkoutSessionDetailsParamsSchema,
         response: {
           401: z

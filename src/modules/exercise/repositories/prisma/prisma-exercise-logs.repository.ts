@@ -50,7 +50,7 @@ export class PrismaExerciseLogsRepository implements ExerciseLogsRepository {
           },
         },
       },
-      orderBy: { date: 'desc' },
+      orderBy: [{ date: 'desc' }, { id: 'desc' }],
     })
   }
 
@@ -132,7 +132,7 @@ export class PrismaExerciseLogsRepository implements ExerciseLogsRepository {
           },
         },
       },
-      orderBy: { date: 'asc' },
+      orderBy: [{ date: 'asc' }, { id: 'asc' }],
     })
   }
 
