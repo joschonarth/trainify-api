@@ -36,9 +36,7 @@ describe('GetExerciseLogUseCase', () => {
   it('should reject missing logs', async () => {
     await expect(
       sut.execute({ logId: 'missing', userId: 'user' })
-    ).rejects.toBeInstanceOf(
-      ResourceNotFoundError
-    )
+    ).rejects.toBeInstanceOf(ResourceNotFoundError)
   })
 
   it('should reject logs owned by another user', async () => {
