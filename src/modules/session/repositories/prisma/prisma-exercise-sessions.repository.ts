@@ -61,11 +61,17 @@ export class PrismaExerciseSessionsRepository
         logs: {
           some: {
             userId,
+            ...(fromDate && { date: { gte: fromDate } }),
           },
         },
-        ...(fromDate && { startedAt: { gte: fromDate } }),
       },
-      include: exerciseSessionWithLogsInclude,
+      include: {
+        ...exerciseSessionWithLogsInclude,
+        logs: {
+          ...exerciseSessionWithLogsInclude.logs,
+          where: { userId, ...(fromDate && { date: { gte: fromDate } }) },
+        },
+      },
     })
   }
 

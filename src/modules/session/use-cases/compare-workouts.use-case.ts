@@ -1,19 +1,15 @@
-import dayjs from 'dayjs'
-import isoWeek from 'dayjs/plugin/isoWeek'
-import timezonePlugin from 'dayjs/plugin/timezone'
-import utc from 'dayjs/plugin/utc'
 import type { UsersRepository } from '@/modules/user/repositories/users.repository'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 import { getLogVolume } from '@/shared/utils/calculate-volume'
+import {
+  getZonedMonthRangeForDate,
+  getZonedWeekRange,
+} from '@/shared/utils/date-timezone'
 import type {
   WorkoutSessionsRepository,
   WorkoutSessionWithWorkout,
 } from '../repositories/workout-sessions.repository'
 import { isSessionComparable } from '../utils/is-session-comparable'
-
-dayjs.extend(isoWeek)
-dayjs.extend(utc)
-dayjs.extend(timezonePlugin)
 
 type Period = 'week' | 'month'
 
@@ -60,33 +56,20 @@ export class CompareWorkoutsUseCase {
     userId,
     period = 'week',
   }: CompareWorkoutsRequest): Promise<CompareWorkoutsResult> {
-    let startDate: Date
-    let endDate: Date
-    let prevStart: Date
-    let prevEnd: Date
-
     const user = await this.usersRepository.findById(userId)
     if (!user) {
       throw new ResourceNotFoundError('User not found.')
     }
 
-    const today = dayjs().tz(user.timezone)
-
-    if (period === 'week') {
-      const currentWeek = today.startOf('isoWeek')
-      const previousWeek = currentWeek.subtract(1, 'week')
-      startDate = currentWeek.toDate()
-      endDate = currentWeek.endOf('isoWeek').toDate()
-      prevStart = previousWeek.toDate()
-      prevEnd = previousWeek.endOf('isoWeek').toDate()
-    } else {
-      const currentMonth = today.startOf('month')
-      const previousMonth = currentMonth.subtract(1, 'month')
-      startDate = currentMonth.toDate()
-      endDate = currentMonth.endOf('month').toDate()
-      prevStart = previousMonth.toDate()
-      prevEnd = previousMonth.endOf('month').toDate()
-    }
+    const getRange =
+      period === 'week' ? getZonedWeekRange : getZonedMonthRangeForDate
+    const currentRange = getRange(new Date(), user.timezone)
+    const previousRange = getRange(
+      new Date(currentRange.start.getTime() - 1),
+      user.timezone
+    )
+    const { start: startDate, end: endDate } = currentRange
+    const { start: prevStart, end: prevEnd } = previousRange
 
     const currentSessions =
       await this.workoutSessionsRepository.findDetailedByUserAndDateRange(
@@ -165,14 +148,14 @@ export class CompareWorkoutsUseCase {
     return {
       userId,
       currentPeriod: {
-        start: dayjs(startDate).toISOString(),
-        end: dayjs(endDate).toISOString(),
+        start: startDate.toISOString(),
+        end: endDate.toISOString(),
         totalWorkouts: comparableCurrentSessions.length,
         ...current,
       },
       previousPeriod: {
-        start: dayjs(prevStart).toISOString(),
-        end: dayjs(prevEnd).toISOString(),
+        start: prevStart.toISOString(),
+        end: prevEnd.toISOString(),
         totalWorkouts: comparablePreviousSessions.length,
         ...previous,
       },

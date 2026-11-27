@@ -61,7 +61,7 @@ describe('GetExerciseProgressUseCase', () => {
       plannedWeight: null,
       position: 0,
       skipReason: null,
-      startedAt,
+      startedAt: startedAt as Date | null,
       endedAt: new Date(startedAt.getTime() + duration * 1000),
       duration,
       workoutSessionId: `workout-${id}`,
@@ -83,7 +83,14 @@ describe('GetExerciseProgressUseCase', () => {
       'findManyByUserAndExercise'
     > = {
       findManyByUserAndExercise: vi.fn(async (_userId, _exerciseId, fromDate) =>
-        sessions.filter((session) => !fromDate || session.startedAt >= fromDate)
+        sessions
+          .map((session) => ({
+            ...session,
+            logs: session.logs.filter(
+              (log) => !fromDate || log.date >= fromDate
+            ),
+          }))
+          .filter((session) => session.logs.length > 0)
       ),
     }
     const getExerciseDetailsUseCase: Pick<
@@ -99,6 +106,41 @@ describe('GetExerciseProgressUseCase', () => {
 
     return { sut, exerciseSessionsRepository, getExerciseDetailsUseCase }
   }
+
+  it.each([
+    'WEEK',
+    'MONTH',
+  ] as const)('includes logs at the %s boundary without a timer', async (period) => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-11-11T12:00:00Z'))
+    const days = period === 'WEEK' ? 7 : 30
+    const boundary = new Date(Date.now() - days * 86_400_000)
+    const log = {
+      id: 'included',
+      sets: 1,
+      reps: 10,
+      weight: 10,
+      volume: 100,
+      date: boundary,
+      description: null,
+    }
+    const session = makeSession('without-timer', new Date(0), 0, [
+      { ...log, id: 'excluded', date: new Date(boundary.getTime() - 1) },
+      log,
+    ])
+    session.startedAt = null
+    const { sut } = makeSut([session])
+
+    const result = await sut.execute({
+      userId: 'user-id',
+      exerciseId: 'exercise-id',
+      period,
+    })
+
+    expect(result.totalLogs).toBe(1)
+    expect(result.totalVolume).toBe(100)
+    expect(result.progress[0]?.date).toEqual(boundary)
+  })
 
   it('returns zero metrics and empty progress when the exercise has no logs', async () => {
     const { sut, exerciseSessionsRepository, getExerciseDetailsUseCase } =
