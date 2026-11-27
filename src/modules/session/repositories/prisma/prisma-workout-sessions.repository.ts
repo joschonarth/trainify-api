@@ -317,10 +317,26 @@ export class PrismaWorkoutSessionsRepository
   async findDetailedByUserAndDateRange(
     userId: string,
     startDate: Date,
-    endDate: Date
+    endDate: Date,
+    timezone = 'UTC'
   ): Promise<WorkoutSessionWithWorkout[]> {
-    const sessions = await prisma.workoutSession.findMany({
-      where: { userId, date: { gte: startDate, lte: endDate } },
+    const sessions = await this.client.workoutSession.findMany({
+      where: {
+        userId,
+        OR: [
+          {
+            dailyIdentity: {
+              is: {
+                businessDate: {
+                  gte: dayjs(startDate).tz(timezone).format('YYYY-MM-DD'),
+                  lte: dayjs(endDate).tz(timezone).format('YYYY-MM-DD'),
+                },
+              },
+            },
+          },
+          { dailyIdentity: null, date: { gte: startDate, lte: endDate } },
+        ],
+      },
       include: workoutSessionInclude,
       orderBy: { date: 'asc' },
     })

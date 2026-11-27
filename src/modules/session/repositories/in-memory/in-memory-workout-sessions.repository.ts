@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto'
+import dayjs from 'dayjs'
 import type {
   DailyWorkoutSession,
   Prisma,
@@ -117,14 +118,27 @@ export class InMemoryWorkoutSessionsRepository
     )
   }
 
-  findDetailedByUserAndDateRange(userId: string, start: Date, end: Date) {
+  findDetailedByUserAndDateRange(
+    userId: string,
+    start: Date,
+    end: Date,
+    timezone = 'UTC'
+  ) {
+    const startDay = dayjs(start).tz(timezone).format('YYYY-MM-DD')
+    const endDay = dayjs(end).tz(timezone).format('YYYY-MM-DD')
     return Promise.resolve(
-      [...this.details.values()].filter(
-        (session) =>
+      [...this.details.values()].filter((session) => {
+        const identity = this.dailyIdentities.find(
+          (day) => day.sessionId === session.id
+        )
+        return (
           session.userId === userId &&
-          session.date >= start &&
-          session.date <= end
-      )
+          (identity
+            ? identity.businessDate >= startDay &&
+              identity.businessDate <= endDay
+            : session.date >= start && session.date <= end)
+        )
+      })
     )
   }
 
