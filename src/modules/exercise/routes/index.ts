@@ -1,5 +1,6 @@
 import type { FastifyInstance } from 'fastify'
 import { addExerciseFromCatalogRoute } from './add-exercise-from-catalog.route'
+import { adminGlobalExercisesRoute } from './admin-global-exercises.route'
 import { createExerciseRoute } from './create-exercise.route'
 import { fetchExerciseLogsRoute } from './fetch-exercise-logs.route'
 import { fetchExercisesCatalogRoute } from './fetch-exercises-catalog.route'
@@ -12,6 +13,7 @@ import { setExerciseFavoriteRoute } from './set-exercise-favorite.route'
 import { updateExerciseRoute } from './update-exercise.route'
 
 export function exercisesRoutes(app: FastifyInstance) {
+  app.register(adminGlobalExercisesRoute)
   app.register(getExerciseDetailsRoute)
   app.register(setExerciseFavoriteRoute)
   app.register(fetchMyExercisesRoute)
