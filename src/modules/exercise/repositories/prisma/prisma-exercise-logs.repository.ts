@@ -20,7 +20,7 @@ export class PrismaExerciseLogsRepository implements ExerciseLogsRepository {
     id: string,
     data: Prisma.ExerciseLogUpdateInput
   ): Promise<ExerciseLog> {
-    return await prisma.exerciseLog.update({
+    return await this.client.exerciseLog.update({
       where: { id },
       data,
     })
@@ -37,7 +37,7 @@ export class PrismaExerciseLogsRepository implements ExerciseLogsRepository {
       }
     })[]
   > {
-    return await prisma.exerciseLog.findMany({
+    return await this.client.exerciseLog.findMany({
       where: { userId },
       include: {
         exercise: {
@@ -60,7 +60,7 @@ export class PrismaExerciseLogsRepository implements ExerciseLogsRepository {
     start: Date,
     end: Date
   ): Promise<ExerciseLog | null> {
-    return await prisma.exerciseLog.findFirst({
+    return await this.client.exerciseLog.findFirst({
       where: {
         userId,
         exerciseId,
@@ -81,7 +81,7 @@ export class PrismaExerciseLogsRepository implements ExerciseLogsRepository {
       })
     | null
   > {
-    return await prisma.exerciseLog.findUnique({
+    return await this.client.exerciseLog.findUnique({
       where: { id },
       include: {
         exercise: {
@@ -100,7 +100,7 @@ export class PrismaExerciseLogsRepository implements ExerciseLogsRepository {
   async findByExerciseSession(
     exerciseSessionId: string
   ): Promise<ExerciseLog | null> {
-    return await prisma.exerciseLog.findFirst({
+    return await this.client.exerciseLog.findFirst({
       where: { exerciseSessionId },
     })
   }
@@ -119,7 +119,7 @@ export class PrismaExerciseLogsRepository implements ExerciseLogsRepository {
       }
     })[]
   > {
-    return await prisma.exerciseLog.findMany({
+    return await this.client.exerciseLog.findMany({
       where: { userId, exerciseId },
       include: {
         exercise: {
@@ -140,7 +140,7 @@ export class PrismaExerciseLogsRepository implements ExerciseLogsRepository {
     userId: string,
     exerciseId: string
   ): Promise<{ maxVolume: number; date: Date } | null> {
-    const result = await prisma.exerciseLog.findFirst({
+    const result = await this.client.exerciseLog.findFirst({
       where: { userId, exerciseId },
       orderBy: { volume: 'desc' },
       select: {
