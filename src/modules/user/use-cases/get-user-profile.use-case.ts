@@ -7,7 +7,7 @@ interface GetUserProfileUseCaseRequest {
   userId: string
 }
 
-export type PublicUserDTO = Omit<User, 'password' | 'tokenVersion'>
+export type PublicUserDTO = Omit<User, 'password' | 'tokenVersion' | 'role'>
 
 interface GetUserProfileUseCaseResponse {
   user: PublicUserDTO
@@ -28,6 +28,7 @@ export class GetUserProfileUseCase {
     const {
       password: _password,
       tokenVersion: _tokenVersion,
+      role: _role,
       ...publicUser
     } = user
 
