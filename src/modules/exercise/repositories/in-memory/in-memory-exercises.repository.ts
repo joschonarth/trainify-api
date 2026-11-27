@@ -138,6 +138,25 @@ export class InMemoryExercisesRepository implements ExercisesRepository {
     return Promise.resolve(exercise ? copyExercise(exercise) : null)
   }
 
+  setGlobalArchived(exerciseId: string, archived: boolean): Promise<boolean> {
+    const index = this.items.findIndex(
+      (item) => item.id === exerciseId && item.userId === null && !item.isCustom
+    )
+    if (index < 0) {
+      return Promise.resolve(false)
+    }
+    const exercise = this.items[index]
+    if (!exercise) {
+      return Promise.resolve(false)
+    }
+    this.items[index] = {
+      ...exercise,
+      archivedAt: archived ? (exercise.archivedAt ?? new Date()) : null,
+      updatedAt: new Date(),
+    }
+    return Promise.resolve(true)
+  }
+
   findByNameAndUser(
     name: string,
     userId: string,
