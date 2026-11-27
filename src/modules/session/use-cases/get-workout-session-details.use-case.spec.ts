@@ -88,18 +88,22 @@ describe('GetWorkoutSessionDetailsUseCase ownership and execution', () => {
     ).rejects.toEqual(new ResourceNotFoundError('Workout session not found.'))
   })
   it('should return stored plans and the latest logged execution', async () => {
-    const session = makeMeasuredSession('session', new Date(), 'DURATION')
+    const session = makeMeasuredSession(
+      'session',
+      new Date('2026-01-01T12:00:00Z'),
+      'DURATION'
+    )
     const exercise = session.exerciseSessions[0]
     if (!exercise) {
       throw new Error('Missing fixture')
     }
     exercise.logs.push({
-      id: 'latest',
+      id: 'z-latest',
       sets: 3,
       reps: 45,
       weight: null,
       volume: 0,
-      date: new Date(),
+      date: new Date('2026-01-01T12:00:00Z'),
       description: 'Latest',
     })
     sessions.details.set(session.id, session)

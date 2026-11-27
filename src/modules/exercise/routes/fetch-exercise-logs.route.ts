@@ -14,7 +14,8 @@ export function fetchExerciseLogsRoute(app: FastifyInstance) {
         security: [{ bearerAuth: [] }, { cookieAuth: [] }],
         tags: ['Exercise Logs'],
         summary: 'Fetch exercise logs',
-        description: 'Returns all exercise logs from the authenticated user.',
+        description:
+          'Returns all exercise logs from the authenticated user, ordered by execution date descending, then ID descending for stable ties.',
         response: {
           401: z
             .object({ message: z.string() })

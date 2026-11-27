@@ -15,14 +15,14 @@ export function getActiveWeightGoalRoute(app: FastifyInstance) {
         tags: ['Weight'],
         summary: 'Get active weight goal',
         description:
-          'Returns the currently active weight goal for the authenticated user.',
+          'Returns the active weight goal for the authenticated user; 404 when no active goal exists.',
         response: {
           401: z
             .object({ message: z.string() })
             .describe('Missing or invalid authentication token.'),
           200: z
             .object({
-              activeGoal: weightGoalSchema.nullable(),
+              activeGoal: weightGoalSchema,
             })
             .describe('Active weight goal fetched successfully.'),
           404: z

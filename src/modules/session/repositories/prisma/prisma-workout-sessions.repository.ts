@@ -207,7 +207,7 @@ export class PrismaWorkoutSessionsRepository
               exercise: { select: { name: true } },
               logs: {
                 take: 1,
-                orderBy: { date: 'desc' },
+                orderBy: [{ date: 'desc' }, { id: 'desc' }],
                 select: {
                   sets: true,
                   reps: true,

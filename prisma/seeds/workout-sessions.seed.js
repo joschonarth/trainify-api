@@ -1,4 +1,5 @@
 import { dayjs } from './dates.js'
+import { seedUserStreaks } from './user-streaks.seed.js'
 
 async function seedWorkoutSessionsForSchedule(prisma, schedule, user) {
   const workout = schedule.workout
@@ -105,93 +106,6 @@ async function seedWorkoutSessionsForSchedule(prisma, schedule, user) {
       },
     })
   }
-}
-
-async function seedUserStreaks(prisma, userId, timezone) {
-  const completedSessions = await prisma.workoutSession.findMany({
-    where: { userId, status: 'COMPLETED' },
-    orderBy: { endedAt: 'asc' },
-  })
-
-  if (completedSessions.length === 0) {
-    console.log('⚠️ No completed sessions found, skipping streaks seed.')
-    return
-  }
-
-  let currentStreak = 0
-  let bestStreak = 0
-  let lastDate = null
-
-  for (const session of completedSessions) {
-    const key = dayjs(session.endedAt).tz(timezone).format('YYYY-MM-DD')
-    const sessionDate = dayjs.tz(key, timezone).toDate()
-    if (lastDate && sessionDate.getTime() === lastDate.getTime()) {
-      continue
-    }
-
-    if (lastDate) {
-      const diffDays = dayjs
-        .utc(key)
-        .diff(
-          dayjs.utc(dayjs(lastDate).tz(timezone).format('YYYY-MM-DD')),
-          'day'
-        )
-
-      if (diffDays === 1) {
-        currentStreak++
-      } else {
-        currentStreak = 1
-      }
-    } else {
-      currentStreak = 1
-    }
-
-    if (currentStreak > bestStreak) {
-      bestStreak = currentStreak
-    }
-
-    lastDate = sessionDate
-
-    await prisma.userStreakLog.upsert({
-      where: { userId_date: { userId, date: sessionDate } },
-      update: {},
-      create: {
-        userId,
-        date: sessionDate,
-      },
-    })
-  }
-
-  const lastWorkout = completedSessions.at(-1)?.endedAt
-  if (
-    dayjs
-      .utc(dayjs().tz(timezone).format('YYYY-MM-DD'))
-      .diff(
-        dayjs.utc(dayjs(lastWorkout).tz(timezone).format('YYYY-MM-DD')),
-        'day'
-      ) > 1
-  ) {
-    currentStreak = 0
-  }
-
-  await prisma.userStreak.upsert({
-    where: { userId },
-    update: {
-      currentStreak,
-      bestStreak,
-      lastWorkout,
-    },
-    create: {
-      userId,
-      currentStreak,
-      bestStreak,
-      lastWorkout,
-    },
-  })
-
-  console.log(
-    `✅ User streaks seeded! Current: ${currentStreak}, Best: ${bestStreak}`
-  )
 }
 
 export async function seedWorkoutSessions(prisma, userId) {

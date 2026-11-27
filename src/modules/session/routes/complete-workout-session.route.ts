@@ -19,7 +19,7 @@ export function completeWorkoutSessionRoute(app: FastifyInstance) {
         tags: ['Sessions'],
         summary: 'Complete workout session',
         description:
-          'Records exercise performance and closes the session on its captured business day. The response includes the persisted gamification processing ID and status. Poll GET /gamification/processings/{processingId} for the result. A retry returns the original processing and ignores replacement exercise data.',
+          'Existing logs are preserved; performance creates a log only when none exists. Retries do not duplicate execution. Records exercise performance and closes the session on its captured business day. The response includes the persisted gamification processing ID and status. Poll GET /gamification/processings/{processingId} for the result. A retry returns the original processing and ignores replacement exercise data.',
         params: completeWorkoutSessionParamsSchema,
         body: completeWorkoutSessionBodySchema,
         response: {

@@ -18,7 +18,7 @@ export function getExerciseProgressRoute(app: FastifyInstance) {
         tags: ['Exercises'],
         summary: 'Get exercise progress',
         description:
-          'Returns progress metrics and logs grouped by session for an exercise. Supports filtering by period.',
+          'All logs contribute to existing aggregates, including repeated values; reps sums per-log values. Logs are chronological by date and ID. DURATION has zero load volume. Returns progress metrics and logs grouped by session for an exercise. Supports filtering by period.',
         params: getExerciseProgressParamsSchema,
         querystring: getExerciseProgressQuerySchema,
         response: {

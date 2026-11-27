@@ -15,7 +15,8 @@ export function getExerciseSessionDetailsRoute(app: FastifyInstance) {
         security: [{ bearerAuth: [] }, { cookieAuth: [] }],
         tags: ['Sessions'],
         summary: 'Get exercise session details',
-        description: 'Returns the details of a specific exercise session.',
+        description:
+          'Logged performance and repsComparison describe the latest log by execution date, then ID, not totals. Returns the details of a specific exercise session.',
         params: getExerciseSessionDetailsParamsSchema,
         response: {
           401: z
