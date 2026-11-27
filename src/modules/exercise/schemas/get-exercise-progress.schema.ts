@@ -5,7 +5,13 @@ export const getExerciseProgressParamsSchema = z.object({
 })
 
 export const getExerciseProgressQuerySchema = z.object({
-  period: z.enum(['WEEK', 'MONTH', 'ALL']).optional().default('ALL'),
+  period: z
+    .enum(['WEEK', 'MONTH', 'ALL'])
+    .optional()
+    .default('ALL')
+    .describe(
+      'Rolling windows: WEEK = last 168 hours, MONTH = last 720 hours; ALL = full history. Dates are based on exercise logs.'
+    ),
 })
 
 export type GetExerciseProgressParams = z.infer<

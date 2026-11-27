@@ -1,4 +1,3 @@
-import dayjs from 'dayjs'
 import type { ExerciseSessionsRepository } from '@/modules/session/repositories/exercise-sessions.repository'
 import { ResourceNotFoundError } from '@/shared/errors/resource-not-found.error'
 import { getLogVolume } from '@/shared/utils/calculate-volume'
@@ -40,10 +39,9 @@ export class GetExerciseProgressUseCase {
     }
 
     let fromDate: Date | undefined
-    if (period === 'WEEK') {
-      fromDate = dayjs().subtract(7, 'day').toDate()
-    } else if (period === 'MONTH') {
-      fromDate = dayjs().subtract(30, 'day').toDate()
+    if (period !== 'ALL') {
+      const days = period === 'WEEK' ? 7 : 30
+      fromDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000)
     }
 
     const sessions =
@@ -68,7 +66,11 @@ export class GetExerciseProgressUseCase {
 
         return {
           sessionId: session.id,
-          date: session.startedAt ?? session.endedAt ?? null,
+          date:
+            session.logs[0]?.date ??
+            session.startedAt ??
+            session.endedAt ??
+            null,
           duration: session.duration ?? 0,
           startedAt: session.startedAt,
           endedAt: session.endedAt,
