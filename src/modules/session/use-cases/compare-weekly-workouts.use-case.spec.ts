@@ -19,6 +19,27 @@ describe('CompareWeeklyWorkoutsUseCase duration volume', () => {
     sut = new CompareWeeklyWorkoutsUseCase(sessions, users)
   })
   afterEach(() => vi.useRealTimers())
+  it('should use the persisted business day instead of the session timestamp', async () => {
+    sessions.details.set(
+      'current',
+      makeMeasuredSession('current', new Date('2026-06-14T23:30:00Z'), 'REPS')
+    )
+    sessions.dailyIdentities.push({
+      userId: 'user',
+      businessDate: '2026-06-15',
+      timezone: 'UTC',
+      sessionId: 'current',
+    })
+    sessions.details.set(
+      'legacy',
+      makeMeasuredSession('legacy', new Date('2026-06-10T12:00:00Z'), 'REPS')
+    )
+
+    const result = await sut.execute({ userId: 'user' })
+
+    expect(result.currentWeek.totalWorkouts).toBe(1)
+    expect(result.previousWeek.totalWorkouts).toBe(1)
+  })
   it.each([
     ['DURATION', 0],
     ['REPS', 3600],

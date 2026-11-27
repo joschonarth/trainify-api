@@ -171,7 +171,8 @@ export interface WorkoutSessionsRepository {
   findDetailedByUserAndDateRange(
     userId: string,
     startDate: Date,
-    endDate: Date
+    endDate: Date,
+    timezone?: string
   ): Promise<WorkoutSessionWithWorkout[]>
 
   create(

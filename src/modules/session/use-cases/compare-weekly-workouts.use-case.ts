@@ -66,13 +66,15 @@ export class CompareWeeklyWorkoutsUseCase {
       await this.workoutSessionsRepository.findDetailedByUserAndDateRange(
         userId,
         startDate,
-        endDate
+        endDate,
+        user.timezone
       )
     const previousWeekSessions =
       await this.workoutSessionsRepository.findDetailedByUserAndDateRange(
         userId,
         prevStart,
-        prevEnd
+        prevEnd,
+        user.timezone
       )
 
     const comparableCurrentWeekSessions = currentWeekSessions.filter(
