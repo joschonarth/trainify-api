@@ -9,7 +9,10 @@ export async function getExerciseLogController(
   const { id } = request.params as GetExerciseLogParams
 
   const getExerciseLogUseCase = makeGetExerciseLogUseCase()
-  const { log } = await getExerciseLogUseCase.execute({ logId: id })
+  const { log } = await getExerciseLogUseCase.execute({
+    logId: id,
+    userId: request.user.sub,
+  })
 
   return reply.status(200).send({ log })
 }

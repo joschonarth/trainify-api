@@ -28,14 +28,31 @@ describe('GetExerciseLogUseCase', () => {
       exercise: { connect: { id: exercise.id } },
       exerciseSession: { connect: { id: 'exercise-session' } },
     })
-    const result = await sut.execute({ logId: log.id })
+    const result = await sut.execute({ logId: log.id, userId: 'user' })
     expect(result.log.volume).toBe(expected)
     expect(result.log.reps).toBe(30)
     expect(logs.items[0]?.volume).toBe(3600)
   })
   it('should reject missing logs', async () => {
-    await expect(sut.execute({ logId: 'missing' })).rejects.toBeInstanceOf(
-      ResourceNotFoundError
-    )
+    await expect(
+      sut.execute({ logId: 'missing', userId: 'user' })
+    ).rejects.toBeInstanceOf(ResourceNotFoundError)
+  })
+
+  it('should reject logs owned by another user', async () => {
+    const exercise = await makeExercise(exercises)
+    const log = await logs.create({
+      sets: 3,
+      reps: 10,
+      weight: 20,
+      volume: 600,
+      user: { connect: { id: 'owner' } },
+      exercise: { connect: { id: exercise.id } },
+      exerciseSession: { connect: { id: 'exercise-session' } },
+    })
+
+    await expect(
+      sut.execute({ logId: log.id, userId: 'another-user' })
+    ).rejects.toBeInstanceOf(ResourceNotFoundError)
   })
 })
